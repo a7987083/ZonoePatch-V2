@@ -541,7 +541,18 @@ static UIImage *ZNSymbol(NSString *name, CGFloat size, UIImageSymbolWeight weigh
 }
 
 - (void)attach:(UIWindow *)window { if (!window||!self.uiReady) return; [self.floatButton removeFromSuperview]; [self.panel removeFromSuperview]; [window addSubview:self.floatButton]; [window addSubview:self.panel]; self.hostWindow=window; [self layoutForWindow:window initial:NO]; [self applyTheme]; }
-- (void)tick:(NSTimer *)timer { (void)timer; UIWindow *w=[self currentWindow]; if(!w)return; if(!self.uiReady){[self makeUI:w];return;} if(self.hostWindow!=w||self.panel.superview!=w||self.floatButton.superview!=w)[self attach:w]; if(!CGRectEqualToRect(self.lastBounds,w.bounds)||!UIEdgeInsetsEqualToEdgeInsets(self.lastInsets,w.safeAreaInsets))[self layoutForWindow:w initial:NO]; if(self.themeMode==ZNThemeModeSystem&&[self interfaceStyle]!=self.lastStyle)[self applyTheme]; [w bringSubviewToFront:self.panel]; [w bringSubviewToFront:self.floatButton]; }
+- (void)tick:(NSTimer *)timer {
+    (void)timer;
+    if(UIApplication.sharedApplication.applicationState!=UIApplicationStateActive)return;
+    if(self.uiReady && self.panel.hidden && self.floatButton.hidden)return;
+    UIWindow *w=[self currentWindow];if(!w)return;
+    if(!self.uiReady){[self makeUI:w];return;}
+    if(self.hostWindow!=w||self.panel.superview!=w||self.floatButton.superview!=w)[self attach:w];
+    if(!CGRectEqualToRect(self.lastBounds,w.bounds)||!UIEdgeInsetsEqualToEdgeInsets(self.lastInsets,w.safeAreaInsets))[self layoutForWindow:w initial:NO];
+    if(self.themeMode==ZNThemeModeSystem&&[self interfaceStyle]!=self.lastStyle)[self applyTheme];
+    if(!self.panel.hidden && w.subviews.count>1 && w.subviews[w.subviews.count-2]!=self.panel)[w bringSubviewToFront:self.panel];
+    if(!self.floatButton.hidden && w.subviews.lastObject!=self.floatButton)[w bringSubviewToFront:self.floatButton];
+}
 - (void)start { if(!self.timer){[self tick:nil]; self.timer=[NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(tick:) userInfo:nil repeats:YES];} self.floatButton.hidden=NO; }
 - (void)show { if(!self.uiReady)[self tick:nil]; if(!self.uiReady)return; self.floatButton.hidden=NO; self.panel.hidden=NO; }
 - (void)hide { self.panel.hidden=YES; }
