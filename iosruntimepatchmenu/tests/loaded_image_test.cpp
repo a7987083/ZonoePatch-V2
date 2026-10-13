@@ -24,5 +24,6 @@ int main(){
  znimage::ReadWindow window(*second);uint32_t word=0;assert(window.copy(m.base,&word,4));reads=m.reads;assert(window.copy(m.base+4,&word,4)&&m.reads==reads);++m.epoch;assert(!window.copy(m.base,&word,4));
  m=fixture();m.bytes.resize(131072);put(m,64,uint64_t(m.bytes.size()));put(m,80,uint64_t(m.bytes.size()));auto large=znimage::Snapshot::capture(m.base,r);assert(large);znimage::ReadWindow largeWindow(*large);std::vector<uint8_t> destination(65537,0);assert(largeWindow.copy(m.base,destination.data(),destination.size()));assert(memcmp(destination.data(),m.bytes.data(),destination.size())==0);assert(!largeWindow.copy(m.base,nullptr,4));assert(!largeWindow.copy(m.base,destination.data(),0));++m.epoch;assert(!largeWindow.copy(m.base,destination.data(),destination.size()));
  m=fixture();put(m,4,0x1000007u);++m.epoch;znimage::Cache architectureCache(r);assert(architectureCache.get(m.base,nullptr,false));assert(!architectureCache.get(m.base,nullptr,true)); // A permissive host snapshot cannot satisfy the strict ARM64 policy.
+ m=fixture();m.epoch=0;assert(!znimage::Snapshot::capture(m.base,r));
  std::cout<<"owned header/file-vs-mapping/VM read/unload/reload ABA/generation/overflow PASS\n";
 }

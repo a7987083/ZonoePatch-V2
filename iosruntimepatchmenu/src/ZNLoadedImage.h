@@ -17,7 +17,7 @@ public:
  static std::shared_ptr<const Snapshot> capture(uint64_t address,Reader reader,const char **error=nullptr,bool arm64=true,std::shared_ptr<void> readerOwner={}){
   auto fail=[&](const char *why)->std::shared_ptr<const Snapshot>{if(error)*error=why;return {};};
   if(!address||!reader.copy||!reader.generation)return fail("invalid image reader");
-  uint64_t epoch=reader.generation(reader.context);uint8_t header[32];
+  uint64_t epoch=reader.generation(reader.context);if(!epoch)return fail("image identity revoked");uint8_t header[32];
   if(!reader.copy(reader.context,address,header,32))return fail("header unreadable");
   uint64_t size=32+uint64_t(znmacho::read<uint32_t>(header,20)),end;
   if(size>16*1024*1024||znmacho::read<uint32_t>(header,16)>4096||!ZNCheckedAdd64(address,size,&end))return fail("header capacity/address overflow");
