@@ -24,6 +24,26 @@
       "before": "- (BOOL)applyText:(NSString *)text info:(NSDictionary *)info error:(NSString **)error{NSArray<ZNStaticPatchRecord *> *records=",
       "after": "- (BOOL)applyText:(NSString *)text info:(NSDictionary *)info error:(NSString **)error{std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());NSArray<ZNStaticPatchRecord *> *records=",
       "reason": "Unify the Static/M56 lock order before acquiring image and runtime state locks."
+    },
+    {
+      "before": "static uintptr_t ZNM56ValueCellAddress(ZNStaticPatchRecord *record,ZNValueType *resolvedType,NSString **error){\n    auto lease=record?ZNLeaseForHeader(record.imageBase,record.imageIncarnation):nullptr;\n    if(!lease){if(error)*error=@\"value-cell image unloaded or incarnation changed\";return 0;}\n    return ZNStaticValueCellAddressForRecord(record,*lease,resolvedType,error);\n}\n\n",
+      "after": "",
+      "reason": "One caller-held image lease owns address resolution and write; avoid a second loader retain under the operation gate."
+    },
+    {
+      "before": "static BOOL ZNM56ScanSigned(NSString *text,long long *out){NSScanner *s=[NSScanner scannerWithString:text?:@\"\"];long long v=0;if(![s scanLongLong:&v]||!s.isAtEnd)return NO;if(out)*out=v;return YES;}\nstatic BOOL ZNM56ScanUnsigned(NSString *text,unsigned long long *out){NSString *t=[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];if(!t.length||[t hasPrefix:@\"-\"])return NO;NSScanner *s=[NSScanner scannerWithString:t];unsigned long long v=0;if(![s scanUnsignedLongLong:&v]||!s.isAtEnd)return NO;if(out)*out=v;return YES;}\n\nstatic BOOL ZNM56WriteTextToCell(NSString *text,ZNValueType type,uintptr_t cell,NSString **error){\n    if(type==ZNValueTypeI32){long long v=0;if(!ZNM56ScanSigned(text,&v)||v<INT32_MIN||v>INT32_MAX){if(error)*error=@\"不是有效 I32\";return NO;}uint32_t raw=(uint32_t)(int32_t)v;__atomic_store_n((uint32_t *)cell,raw,__ATOMIC_RELEASE);return YES;}\n    if(type==ZNValueTypeU32){unsigned long long v=0;if(!ZNM56ScanUnsigned(text,&v)||v>UINT32_MAX){if(error)*error=@\"不是有效 U32\";return NO;}__atomic_store_n((uint32_t *)cell,(uint32_t)v,__ATOMIC_RELEASE);return YES;}\n    if(type==ZNValueTypeI64){long long v=0;if(!ZNM56ScanSigned(text,&v)){if(error)*error=@\"不是有效 I64\";return NO;}__atomic_store_n((uint64_t *)cell,(uint64_t)v,__ATOMIC_RELEASE);return YES;}\n    if(type==ZNValueTypeU64){unsigned long long v=0;if(!ZNM56ScanUnsigned(text,&v)){if(error)*error=@\"不是有效 U64\";return NO;}__atomic_store_n((uint64_t *)cell,(uint64_t)v,__ATOMIC_RELEASE);return YES;}\n    if(type==ZNValueTypeF32){NSScanner *s=[NSScanner scannerWithString:text?:@\"\"];double d=0;if(![s scanDouble:&d]||!s.isAtEnd||!isfinite(d)){if(error)*error=@\"不是有效 F32\";return NO;}float f=(float)d;uint32_t raw=0;memcpy(&raw,&f,4);__atomic_store_n((uint32_t *)cell,raw,__ATOMIC_RELEASE);return YES;}\n    if(type==ZNValueTypeF64){NSScanner *s=[NSScanner scannerWithString:text?:@\"\"];double d=0;if(![s scanDouble:&d]||!s.isAtEnd||!isfinite(d)){if(error)*error=@\"不是有效 F64\";return NO;}uint64_t raw=0;memcpy(&raw,&d,8);__atomic_store_n((uint64_t *)cell,raw,__ATOMIC_RELEASE);return YES;}\n    if(error)*error=@\"Value Cell 不支持 Auto/未知类型\";return NO;\n}\n\n",
+      "after": "#include \"ZNStaticValueCellWriter.h\"\n\n",
+      "reason": "Move the exact production scalar writer to a host-testable owner; all stores require a live image lease, reject F32 cast overflow."
+    },
+    {
+      "before": "ZNM56ValueCellAddress(r,&resolved,&local)",
+      "after": "ZNStaticValueCellAddressForRecord(r,*writeLease,&resolved,&local)",
+      "reason": "Resolve cell under the same write lease."
+    },
+    {
+      "before": "ZNM56WriteTextToCell(text,resolved,cell,&local)",
+      "after": "ZNM56WriteTextToCell(text,resolved,cell,*writeLease,&local)",
+      "reason": "Validate protection/incarnation at the actual write."
     }
   ]
 }
