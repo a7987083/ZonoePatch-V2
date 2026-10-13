@@ -38,3 +38,9 @@ for version in baseline current; do
 done
 cmp "$work/runtime-baseline/output/fixture.dylib" "$work/runtime-current/output/fixture.dylib"
 echo 'extracted production runtime-only target generation baseline/current complete-byte equivalence PASS'
+
+python3 scripts/extract-builder-combinations.py "$work/combinations.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
+"$work/combinations-test" "$work/combinations"
+mkdir -p dist
+cp "$work/combinations.json" dist/production-builder-extraction.json
