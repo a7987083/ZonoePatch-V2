@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import <Foundation/Foundation.h>
 
 @interface ZNM56StaticValueCellBinder : NSObject
@@ -39,7 +40,7 @@ static BOOL ZNM56RecordMatches(ZNStaticPatchRecord *record,NSDictionary *info){u
 static uintptr_t ZNM56ValueCellAddress(ZNStaticPatchRecord *record,ZNValueType *resolvedType,NSString **error){
     if(!record||!record.imageBase||!record.entry){if(error)*error=@"Static value-cell record metadata unavailable";return 0;}
     if(!(record.entry->flags&ZN44_STATIC_ENTRY_FLAG_VALUE_CELL_V1)){if(error)*error=@"当前生成物没有 RW Value Cell；请用 M5.6 重新生成 UnityFramework";return 0;}
-    const struct mach_header_64 *mh=(const struct mach_header_64 *)record.imageBase;if(mh->magic!=MH_MAGIC_64){if(error)*error=@"value-cell runtime Mach-O 无效";return 0;}
+    auto headerOwner=ZNCaptureLoadedImage(record.imageBase);if(!headerOwner){if(error)*error=@"value-cell image invalidated";return 0;}const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();if(mh->magic!=MH_MAGIC_64){if(error)*error=@"value-cell runtime Mach-O 无效";return 0;}
     const uint8_t *cursor=(const uint8_t *)(mh+1),*limit=cursor+mh->sizeofcmds;uint64_t imageVMBase=UINT64_MAX;const struct segment_command_64 *znData=NULL;const struct section_64 *znDataSec=NULL;
     for(uint32_t i=0;i<mh->ncmds;i++){if(cursor+sizeof(struct load_command)>limit)break;const struct load_command *lc=(const struct load_command *)cursor;if(lc->cmdsize<sizeof(*lc)||cursor+lc->cmdsize>limit)break;if(lc->cmd==LC_SEGMENT_64&&lc->cmdsize>=sizeof(struct segment_command_64)){const struct segment_command_64 *seg=(const struct segment_command_64 *)cursor;if(strncmp(seg->segname,"__TEXT",16)==0)imageVMBase=seg->vmaddr;if(strncmp(seg->segname,"__ZNDATA",16)==0){znData=seg;uint64_t secBytes=(uint64_t)seg->nsects*sizeof(struct section_64);if(lc->cmdsize>=sizeof(*seg)+secBytes){const struct section_64 *secs=(const struct section_64 *)(seg+1);for(uint32_t j=0;j<seg->nsects;j++)if(strncmp(secs[j].sectname,"__zndata",16)==0){znDataSec=&secs[j];break;}}}}cursor+=lc->cmdsize;}
     if(imageVMBase==UINT64_MAX||!znData||!znDataSec){if(error)*error=@"value-cell runtime 缺少 __ZNDATA";return 0;}

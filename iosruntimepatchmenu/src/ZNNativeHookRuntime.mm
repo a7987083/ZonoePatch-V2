@@ -711,8 +711,9 @@ static BOOL ZNNativePreparedTargetForAction(ZNNativeHookAction *action,
                                options:NSCaseInsensitiveSearch].location!=NSNotFound;
         if(!unity)continue;
 
-        const struct mach_header_64 *mh=(const struct mach_header_64 *)raw;
-        NSString *uuid=ZNNativePreparedUUIDForHeader(mh);
+        auto headerOwner=ZNCaptureLoadedImage((uintptr_t)raw);if(!headerOwner)return NO;
+        const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
+        NSString *uuid=ZNNativePreparedUUIDForHeader((const struct mach_header_64 *)raw);
         if(!uuid.length||[uuid caseInsensitiveCompare:action.preparedUUID]!=NSOrderedSame){
             if(error)*error=[NSString stringWithFormat:
                 @"Native Hook UnityFramework UUID 不匹配：prepared=%@ runtime=%@",
@@ -779,7 +780,8 @@ static BOOL ZNNativeRuntimeAddressHasProtection(uintptr_t imageBase,
                                                   uintptr_t address,
                                                   vm_prot_t required) {
     if(!imageBase||!address)return NO;
-    const struct mach_header_64 *mh=(const struct mach_header_64 *)imageBase;
+    auto headerOwner=ZNCaptureLoadedImage(imageBase);if(!headerOwner)return NO;
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     if(mh->magic!=MH_MAGIC_64)return NO;
     const uint8_t *cursor=(const uint8_t *)(mh+1),*limit=cursor+mh->sizeofcmds;
     uint64_t textVM=UINT64_MAX;
@@ -950,8 +952,8 @@ static NSDictionary *ZNNativeDecodeDict(NSString *json){
 
 static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNativeHookAction *> *out,NSMutableSet *dedupe){
     const struct mach_header *raw=_dyld_get_image_header(imageIndex);
-    if(!raw||raw->magic!=MH_MAGIC_64)return;
-    const struct mach_header_64 *mh=(const struct mach_header_64 *)raw;
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)raw);if(!headerOwner)return;
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     intptr_t slide=_dyld_get_image_vmaddr_slide(imageIndex);
     const uint8_t *cursor=(const uint8_t *)(mh+1),*limit=cursor+mh->sizeofcmds;
     const struct section_64 *zndata=NULL;

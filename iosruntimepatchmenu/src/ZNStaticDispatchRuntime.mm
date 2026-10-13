@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNImageGeneration.h"
 #import "ZNStaticDispatchRuntime.h"
 #import "ZNStaticPatchFormat.h"
@@ -317,7 +318,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         if (!probePath.length || ![probePath hasPrefix:bundleRoot]) continue;
 
         const struct mach_header_64 *probeMH = (const struct mach_header_64 *)_dyld_get_image_header(probeImageIndex);
-        if (!probeMH || probeMH->magic != MH_MAGIC_64) continue;
+        auto probeOwner=ZNCaptureLoadedImage((uintptr_t)probeMH);if(!probeOwner)continue;
+        probeMH=(const struct mach_header_64 *)probeOwner->bytes();
         const uint8_t *probeLCBase = (const uint8_t *)(probeMH + 1);
         const uint8_t *probeLCEnd = probeLCBase + probeMH->sizeofcmds;
         const struct load_command *probeLC = (const struct load_command *)probeLCBase;
@@ -357,8 +359,9 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         bundleImages++;
 
         const struct mach_header_64 *mh = (const struct mach_header_64 *)_dyld_get_image_header(imageIndex);
-        if (!mh || mh->magic != MH_MAGIC_64) continue;
-        uintptr_t runtimeHeader = (uintptr_t)mh;
+        auto headerOwner=ZNCaptureLoadedImage((uintptr_t)mh);if(!headerOwner)continue;
+        uintptr_t runtimeHeader=headerOwner->runtimeBase();
+        mh=(const struct mach_header_64 *)headerOwner->bytes();
         const uint8_t *lcBase = (const uint8_t *)(mh + 1);
         const uint8_t *lcEnd = lcBase + mh->sizeofcmds;
         const struct load_command *lc = (const struct load_command *)lcBase;

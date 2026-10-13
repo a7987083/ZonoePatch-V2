@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNSharedSiteExecutionProbeV3.h"
 #import "ZNPatchCore.h"
 #import <objc/runtime.h>
@@ -17,6 +18,7 @@ typedef struct {
     IMP original;
     unsigned stage;
     char image[256];
+    std::shared_ptr<const znimage::Snapshot> owner;
     uintptr_t rva;
 } ZNSSP3DynamicApplyHook;
 
@@ -25,6 +27,7 @@ typedef struct {
     SEL sel;
     IMP original;
     char image[256];
+    std::shared_ptr<const znimage::Snapshot> owner;
     uintptr_t rva;
 } ZNSSP3NativeHookAPI;
 
@@ -36,6 +39,7 @@ typedef struct {
     uintptr_t textEnd;
     char path[1024];
     char image[256];
+    std::shared_ptr<const znimage::Snapshot> owner;
 } ZNSSP3ImageInfo;
 
 static ZNSSP3DynamicApplyHook gApplyHooks[64];
@@ -395,8 +399,8 @@ static BOOL ZNSSP3ImageForName(const char *image, ZNSSP3ImageInfo *outInfo) {
     uint32_t count=_dyld_image_count();
     for (uint32_t i=0;i<count;i++) {
         const char *path=_dyld_get_image_name(i); const struct mach_header *mh=_dyld_get_image_header(i);
-        if (!path||!mh||strcmp(ZNSSP3Base(path),image)!=0||mh->magic!=MH_MAGIC_64) continue;
-        ZNSSP3ImageInfo info={0}; info.header=(const struct mach_header_64 *)mh; info.slide=_dyld_get_image_vmaddr_slide(i); info.base=(uintptr_t)mh;
+        if (!path||!mh||strcmp(ZNSSP3Base(path),image)!=0) continue;
+        ZNSSP3ImageInfo info={}; info.owner=ZNCaptureLoadedImage((uintptr_t)mh);if(!info.owner)continue;info.header=(const struct mach_header_64 *)info.owner->bytes(); info.slide=_dyld_get_image_vmaddr_slide(i); info.base=(uintptr_t)mh;
         strlcpy(info.path,path,sizeof(info.path)); snprintf(info.image,sizeof(info.image),"%s",image);
         const uint8_t *cursor=(const uint8_t *)(info.header+1);
         for (uint32_t c=0;c<info.header->ncmds;c++) {
@@ -418,7 +422,7 @@ static BOOL ZNSSP3ImageForName(const char *image, ZNSSP3ImageInfo *outInfo) {
 }
 
 static unsigned ZNSSP3RecoverStaticNativeHooks(const char *image) {
-    ZNSSP3ImageInfo info={0};
+    ZNSSP3ImageInfo info={};
     if (!ZNSSP3ImageForName(image,&info)) {
         ZNSSP3Log([NSString stringWithFormat:@"[SSP3-STATIC-NATIVE-SCAN] image=%s status=NO_TEXT",image]);
         return 0;

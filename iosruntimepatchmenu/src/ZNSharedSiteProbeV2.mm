@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNSharedSiteProbe.h"
 #import "ZNPatchCore.h"
 #import <objc/runtime.h>
@@ -29,6 +30,7 @@ typedef struct {
     uint64_t linkFile;
     const struct linkedit_data_command *functionStarts;
     char path[1024];
+    std::shared_ptr<const znimage::Snapshot> owner;
 } ZNSSPImageInfo;
 
 @interface ZNSharedSiteProbe ()
@@ -208,12 +210,13 @@ static BOOL ZNSSPImageInfoForPathFragment(NSString *fragment, ZNSSPImageInfo *ou
     for (uint32_t i=0;i<count;i++) {
         const char *name=_dyld_get_image_name(i);
         const struct mach_header *mh=_dyld_get_image_header(i);
-        if (!name || !mh || mh->magic != MH_MAGIC_64) continue;
+        if (!name || !mh) continue;
         NSString *path=[NSString stringWithUTF8String:name] ?: @"";
         if ([path rangeOfString:fragment options:NSCaseInsensitiveSearch].location == NSNotFound) continue;
 
-        ZNSSPImageInfo info={0};
-        info.header=(const struct mach_header_64 *)mh;
+        ZNSSPImageInfo info={};
+        info.owner=ZNCaptureLoadedImage((uintptr_t)mh);if(!info.owner)continue;
+        info.header=(const struct mach_header_64 *)info.owner->bytes();
         info.slide=_dyld_get_image_vmaddr_slide(i);
         strlcpy(info.path,name,sizeof(info.path));
 
@@ -246,9 +249,11 @@ static BOOL ZNSSPImageInfoForPathFragment(NSString *fragment, ZNSSPImageInfo *ou
 
 static uintptr_t ZNSSPFindReference(const ZNSSPImageInfo *info, uintptr_t target, NSString **modeOut) {
     if (!info || !target || !info->textStart || info->textEnd <= info->textStart) return 0;
+    if(!info->owner)return 0;
+    znimage::ReadWindow window(*info->owner);
     for (uintptr_t pc=info->textStart; pc+4<=info->textEnd; pc+=4) {
         uint32_t word=0;
-        memcpy(&word,(const void *)pc,sizeof(word));
+        if(!window.copy(pc,&word,sizeof(word)))return 0;
         uintptr_t adr=ZNSSPADRTarget(pc,word);
         if (adr == target) {
             if (modeOut) *modeOut=@"ADR";
@@ -259,7 +264,7 @@ static uintptr_t ZNSSPFindReference(const ZNSSPImageInfo *info, uintptr_t target
         if (!page) continue;
         for (uintptr_t q=pc+4; q<pc+16 && q+4<=info->textEnd; q+=4) {
             uint32_t addWord=0;
-            memcpy(&addWord,(const void *)q,sizeof(addWord));
+            if(!window.copy(q,&addWord,sizeof(addWord)))return 0;
             uintptr_t add=0;
             if (!ZNSSPADDImmSame(addWord,reg,&add)) continue;
             if (page + add == target) {
@@ -276,9 +281,11 @@ static BOOL ZNSSPFunctionRange(const ZNSSPImageInfo *info,
                                uintptr_t *startOut,
                                uintptr_t *endOut) {
     if (!info || !address || !info->functionStarts || !info->linkVM || !info->textStart) return NO;
-    uintptr_t linkBase=(uintptr_t)((intptr_t)info->slide + (intptr_t)info->linkVM - (intptr_t)info->linkFile);
-    const uint8_t *p=(const uint8_t *)(linkBase + info->functionStarts->dataoff);
-    const uint8_t *end=p + info->functionStarts->datasize;
+    if(!info->owner)return NO;uint64_t start=0;
+    if(!info->owner->fileAddress(info->functionStarts->dataoff,info->functionStarts->datasize,&start))return NO;
+    std::vector<uint8_t> data(info->functionStarts->datasize);
+    if(!info->owner->read(start,data.data(),data.size()))return NO;
+    const uint8_t *p=data.data(),*end=p+data.size();
     uintptr_t previous=0;
     uint64_t cumulative=0;
 
@@ -371,7 +378,7 @@ static NSString *ZNSSPHexAt(uintptr_t address, NSUInteger length) {
     NSString *imageName=ZNSSPIMPImage(activeMethod);
     if (!imageName.length) imageName=@"EarntoDieRogue";
 
-    ZNSSPImageInfo info={0};
+    ZNSSPImageInfo info={};
     if (!ZNSSPImageInfoForPathFragment(imageName,&info) &&
         !ZNSSPImageInfoForPathFragment(@"EarntoDieRogue",&info)) {
         self.bootstrapStatus=@"NO_IMAGE";

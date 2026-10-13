@@ -11,5 +11,6 @@ inline bool ZNImageVMCopy(void *,uint64_t address,void *out,size_t length){
 }
 inline uint64_t ZNImageReadGeneration(void *){return ZNCurrentImageGeneration();}
 inline std::shared_ptr<const znimage::Snapshot> ZNCaptureLoadedImage(uintptr_t address,const char **error=nullptr){
- return znimage::Snapshot::capture(address,{nullptr,ZNImageVMCopy,ZNImageReadGeneration},error);
+ static znimage::Cache cache({nullptr,ZNImageVMCopy,ZNImageReadGeneration});
+ return cache.get(address,error);
 }

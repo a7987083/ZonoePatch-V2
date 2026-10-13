@@ -1,6 +1,8 @@
 #pragma once
 #include "ZNMachOFile.h"
 #include <memory>
+#include <mutex>
+#include <map>
 namespace znimage {
 struct Reader {
  void *context=nullptr;
@@ -70,4 +72,33 @@ public:
   }return false;
  }
 };
+class Cache {
+ Reader reader;std::mutex lock;uint64_t epoch=0;std::map<uint64_t,std::shared_ptr<const Snapshot>> entries;
+public:
+ explicit Cache(Reader r):reader(r){}
+ std::shared_ptr<const Snapshot> get(uint64_t address,const char **error=nullptr,bool arm64=true){
+  std::lock_guard<std::mutex> guard(lock);
+  uint64_t current=reader.generation(reader.context);
+  if(current!=epoch){entries.clear();epoch=current;}
+  auto found=entries.find(address);if(found!=entries.end()&&found->second->valid())return found->second;
+  auto snapshot=Snapshot::capture(address,reader,error,arm64);
+  if(snapshot){if(entries.size()>=256)entries.clear();entries[address]=snapshot;}
+  return snapshot;
+ }
+};
+class ReadWindow {
+ const Snapshot &image;uint64_t start=0;std::vector<uint8_t> bytes;
+public:
+ explicit ReadWindow(const Snapshot &s):image(s){}
+ bool copy(uint64_t address,void *out,size_t length){
+  if(!image.valid())return false;
+  if(address>=start&&ZNCheckedRange64(bytes.size(),address-start,length)){memcpy(out,bytes.data()+address-start,length);return true;}
+  for(const auto &seg:image.segments())if((seg.protection&1)&&address>=seg.start&&ZNCheckedRange64(seg.size,address-seg.start,length)){
+   start=address;size_t size=(size_t)std::min<uint64_t>(65536,seg.size-(address-seg.start));bytes.resize(size);
+   if(!image.read(start,bytes.data(),size)){bytes.clear();return false;}
+   memcpy(out,bytes.data(),length);return true;
+  }return false;
+ }
+};
+
 }

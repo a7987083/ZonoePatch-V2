@@ -18,5 +18,8 @@ int main(){
  m=fixture();put(m,96,UINT32_MAX);assert(!znimage::Snapshot::capture(m.base,r));
  m=fixture();put(m,64,UINT64_MAX);assert(!znimage::Snapshot::capture(m.base,r));
  m=fixture();put(m,20,UINT32_MAX);assert(!znimage::Snapshot::capture(m.base,r));
+ m=fixture();znimage::Cache cache(r);auto first=cache.get(m.base);assert(first);unsigned reads=m.reads;assert(cache.get(m.base)==first&&m.reads==reads);
+ ++m.epoch;auto second=cache.get(m.base);assert(second&&second!=first&&!first->valid());
+ znimage::ReadWindow window(*second);uint32_t word=0;assert(window.copy(m.base,&word,4));reads=m.reads;assert(window.copy(m.base+4,&word,4)&&m.reads==reads);++m.epoch;assert(!window.copy(m.base,&word,4));
  std::cout<<"owned header/file-vs-mapping/VM read/unload/reload ABA/generation/overflow PASS\n";
 }

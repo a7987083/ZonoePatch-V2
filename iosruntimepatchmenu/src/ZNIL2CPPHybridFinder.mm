@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNIL2CPPHybridFinder.h"
 #import "ZNIL2CPPResolver.h"
 
@@ -175,7 +176,9 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
         if (!match) continue;
 
         const struct mach_header_64 *mh = (const struct mach_header_64 *)_dyld_get_image_header(i);
-        if (!mh || mh->magic != MH_MAGIC_64) return NO;
+        auto headerOwner=ZNCaptureLoadedImage((uintptr_t)mh);
+        if(!headerOwner)return NO;
+        mh=(const struct mach_header_64 *)headerOwner->bytes();
         const uint8_t *cursor = (const uint8_t *)(mh + 1);
         const uint8_t *end = cursor + mh->sizeofcmds;
         for (uint32_t c = 0; c < mh->ncmds; c++) {
@@ -185,7 +188,7 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
             if (lc->cmd == LC_SEGMENT_64 && lc->cmdsize >= sizeof(struct segment_command_64)) {
                 const struct segment_command_64 *seg = (const struct segment_command_64 *)cursor;
                 if (strncmp(seg->segname, SEG_TEXT, 16) == 0) {
-                    if (runtimeBase) *runtimeBase = (uintptr_t)mh;
+                    if (runtimeBase) *runtimeBase = headerOwner->runtimeBase();
                     if (preferredBase) *preferredBase = seg->vmaddr;
                     return YES;
                 }
@@ -201,7 +204,8 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
     uintptr_t runtimeBase = 0;
     uint64_t preferredBase = 0;
     if (![self unityLayoutRuntimeBase:&runtimeBase preferredBase:&preferredBase] || !address) return NO;
-    const struct mach_header_64 *mh = (const struct mach_header_64 *)runtimeBase;
+    auto headerOwner=ZNCaptureLoadedImage(runtimeBase);if(!headerOwner)return NO;
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     const uint8_t *cursor = (const uint8_t *)(mh + 1);
     const uint8_t *end = cursor + mh->sizeofcmds;
     for (uint32_t i = 0; i < mh->ncmds; i++) {
