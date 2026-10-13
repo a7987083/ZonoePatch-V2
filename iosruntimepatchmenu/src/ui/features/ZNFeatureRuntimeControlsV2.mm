@@ -30,11 +30,7 @@ static const NSInteger kZN65NumberExecuteTagBase = 472000;
 @end
 
 static NSString *ZN65Trim(NSString *value) { return [value ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]; }
-static NSDictionary<NSString *, id> *ZN65DisplayMetadata(ZNStaticPatchRecord *record) {
-    NSDictionary *embedded = ZNFeatureMetadataDecodeEntry(record.entry); if (embedded) return embedded;
-    NSString *title=ZN65Trim(record.title),*group=ZN65Trim(record.group); if(!title.length||[title hasPrefix:@"Patch #"])title=[NSString stringWithFormat:@"功能 #%u",record.patchID]; if(!group.length)group=@"Imported";
-    return @{@"featureID":@0,@"title":title,@"group":group,@"explicitGroup":@([group caseInsensitiveCompare:@"Imported"]!=NSOrderedSame),@"controlType":@(ZNFeatureControlTypeSwitch),@"valueType":@(ZNValueTypeAuto)};
-}
+// L02: removed unused file-local display wrapper; active features use ZNFeatureSnapshotProvider.
 static NSArray<NSDictionary *> *ZN65FeatureGroups(void) {
     return [[ZNFeatureSnapshotProvider sharedProvider] currentFeatures];
 }

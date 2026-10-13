@@ -38,6 +38,14 @@
       "removedBodySHA256": "3a3e53960f0d4de429f48a92a4729532c49b877a04fc5a9b5f06cc6f016944ac",
       "proof": "Pure trailing-whitespace/end-of-string predicate, not allocation/lifetime management. No calls/address-of/registration/export/used attributes. Signed/unsigned/float adapters already exclusively use tested ZNScalarParser.",
       "reviewBase": "59ff521b94378b8e008c93e1580116f908e73a7e"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureRuntimeControlsV2.mm",
+      "symbol": "ZN65DisplayMetadata",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "661118ed82913ec7fe4eb6c8fe1d29a29dbb833c24e124c142088344955c35bd",
+      "proof": "Strict independent compilation detected unused helper. Entire source inventory has one definition, no call/address-of/registration/export attributes; active feature path delegates to ZNFeatureSnapshotProvider."
     }
   ],
   "retained": [

@@ -46,6 +46,12 @@
       "before": "static mach_timebase_info_data_t tb = {0};",
       "after": "static mach_timebase_info_data_t tb = {};",
       "reason": "Equivalent full zero initialization; strict independent module warning is fixed, not suppressed."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureRuntimeControlsV2.mm",
+      "before": "static NSDictionary<NSString *, id> *ZN65DisplayMetadata(ZNStaticPatchRecord *record) {\n    NSDictionary *embedded = ZNFeatureMetadataDecodeEntry(record.entry); if (embedded) return embedded;\n    NSString *title=ZN65Trim(record.title),*group=ZN65Trim(record.group); if(!title.length||[title hasPrefix:@\"Patch #\"])title=[NSString stringWithFormat:@\"功能 #%u\",record.patchID]; if(!group.length)group=@\"Imported\";\n    return @{@\"featureID\":@0,@\"title\":title,@\"group\":group,@\"explicitGroup\":@([group caseInsensitiveCompare:@\"Imported\"]!=NSOrderedSame),@\"controlType\":@(ZNFeatureControlTypeSwitch),@\"valueType\":@(ZNValueTypeAuto)};\n}\n",
+      "after": "// L02: removed unused file-local display wrapper; active features use ZNFeatureSnapshotProvider.\n",
+      "reason": "Proven unused static wrapper, not Selector/API; exact body recorded and restored only for historical equivalence audit."
     }
   ]
 }
