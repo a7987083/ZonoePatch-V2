@@ -8,6 +8,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #include "ZNPerformance.h"
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
 #import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #import "ZNMenuUIKeys.h" // UI_MODULE_IMPORT
 #import "ZNMenuUIHelpers.h" // UI_MODULE_IMPORT

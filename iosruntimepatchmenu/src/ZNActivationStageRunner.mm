@@ -1,3 +1,5 @@
+#define ZN_UI_TRACE_IMPLEMENTATION
+#import "ZNUIInstallationTrace.h"
 #import "ZNActivationStageRunner.h"
 #import <objc/runtime.h>
 void ZNRunActivationStage(NSString *name, void (^block)(void)) {
@@ -22,6 +24,8 @@ void ZNRunActivationStage(NSString *name, void (^block)(void)) {
     NSString *required=predecessors[name];
     if(required && ![completed containsObject:required])
         [NSException raise:NSInternalInconsistencyException format:@"Activation %@ requires %@",name,required];
-    block();
+    ZNUITraceEnable([NSUserDefaults.standardUserDefaults boolForKey:@"zonoe.diagnostics.ui-install.enabled"]);
+    NSString *priorStage=ZNUITraceStage(name);
+    @try{block();}@finally{ZNUITraceStage(priorStage);}
     [completed addObject:name];
 }

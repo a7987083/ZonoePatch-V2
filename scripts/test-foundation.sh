@@ -8,7 +8,7 @@ clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatch
 /tmp/scheduler-test
 clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-test
 /tmp/output-test
-clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
 /tmp/activation-test
 clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -o /tmp/build-session-test
 /tmp/build-session-test
@@ -43,3 +43,6 @@ clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundati
 rm -rf "$work_image"
 clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuUIKeys.mm iosruntimepatchmenu/src/ZNMenuSearchPolicy.mm iosruntimepatchmenu/tests/ui_key_consumer_test.mm iosruntimepatchmenu/tests/ui_shared_owner_test.mm -o /tmp/ui-owner-test
 /tmp/ui-owner-test
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/ui_install_trace_test.mm -o /tmp/ui-trace-test
+/tmp/ui-trace-test

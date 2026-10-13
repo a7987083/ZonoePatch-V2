@@ -1,3 +1,4 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
 #import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNPublicCompactUI.mm
 #line 1 "ZNPublicCompactUI.mm"

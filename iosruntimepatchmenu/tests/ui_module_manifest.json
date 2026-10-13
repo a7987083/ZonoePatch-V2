@@ -17,7 +17,7 @@
     {
       "path": "ui/shell/ZNRuntimeMenuModalShell.mm",
       "historical_section": "ZNRuntimeMenuModalShell.mm",
-      "sha256": "e334c4c24c29d5a2cde28196e560e3553537d1cf2bf80e4854434bd836829f84",
+      "sha256": "15855472a0283fc9d221ec3b8cac1fc1789d6010a158e08731a0af619227b9a5",
       "category_count": 1,
       "compilation": "independent"
     },
@@ -36,7 +36,7 @@
     {
       "path": "ui/shell/ZNPublicCompactUI.mm",
       "historical_section": "ZNPublicCompactUI.mm",
-      "sha256": "4dd13e8eddff164b0fd19ac007c17bc5b2346d5faa3f6f4aba93ff8607110125",
+      "sha256": "4b699fcfb58c84e7e596fcdb100e0b2582194664dab9eaf689e7f062fb9bb088",
       "category_count": 1,
       "compilation": "independent"
     },
@@ -49,7 +49,7 @@
     {
       "path": "ui/features/ZNFeatureBuilderControlsV2.mm",
       "historical_section": "ZNFeatureBuilderControlsV2.mm",
-      "sha256": "9e980c85dba53212d7e406c1d0c7971022c870f133f9cb9b74ef06b3a55a56e6",
+      "sha256": "dfa74e25c818e808706f297692693db2cb850b98ccd940fbcc9414d95cbe9275",
       "category_count": 1,
       "compilation": "independent"
     },
