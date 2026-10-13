@@ -629,6 +629,7 @@ done:
         return nil;
     }
 
+    if(!znExecution.retain(methodPointer)){if(error)*error=@"Finder method execution owner invalidated";return nil;}
     NSString *canonical = candidate[@"canonical"] ?: parsed[@"raw"] ?: @"";
     NSString *rvaText = [NSString stringWithFormat:@"0x%llX", (unsigned long long)resolvedRVA];
     self.lastError = @"";
@@ -645,6 +646,7 @@ done:
         @"methodPreferredVA": candidate[@"methodPreferredVA"] ?: @0,
         @"methodRuntimeVA": candidate[@"methodRuntimeVA"] ?: @0,
         @"methodPointer": @(methodPointer),
+        @"runtimeImageIncarnation": @(znExecution.identity(methodPointer)),
         @"methodInfo": candidate[@"methodInfo"] ?: @0,
         @"canonical": canonical,
         @"pointerSource": candidate[@"pointerSource"] ?: @"unavailable",

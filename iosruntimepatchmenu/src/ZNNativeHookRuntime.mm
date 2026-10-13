@@ -372,6 +372,7 @@ static NSDictionary *ZNNativeResolveSecureLongCodec(NSString *assembly,
 static const NSUInteger kZNReturnBoolMaxSlots = 8;
 typedef struct {
     std::atomic<uintptr_t> target;
+    std::atomic<uint64_t> incarnation;
     std::atomic<uintptr_t> original;
     std::atomic<uint32_t> forcedValue;
     std::atomic<uint32_t> enabled;
@@ -412,11 +413,13 @@ static uint8_t ZNReturnBoolHandle(NSUInteger index,
     ZNRuntimeExecutionScope execution;
     if(index>=kZNReturnBoolMaxSlots)return 0;
     ZNReturnBoolSlot *slot=&gZNReturnBoolSlots[index];
-    if(!slot->target.load(std::memory_order_acquire))return 0;
+    uintptr_t target=slot->target.load(std::memory_order_acquire);
+    uint64_t incarnation=slot->incarnation.load(std::memory_order_acquire);
+    if(!target||!incarnation||!execution.retain(target,incarnation))return 0;
     slot->hits.fetch_add(1,std::memory_order_relaxed);
     if(!slot->enabled.load(std::memory_order_relaxed)){
         uintptr_t original=slot->original.load(std::memory_order_acquire);
-        if(!original||!execution.retain(slot->target.load(std::memory_order_acquire)))return 0;
+        if(!original)return 0;
         Dl_info originalImage={};if(dladdr((void *)original,&originalImage)&&!execution.retain(original))return 0;
         uint8_t value=((ZNReturnBoolOriginalFn)original)(x0,x1,x2,x3,x4,x5,x6,x7);
         slot->lastOriginal.store(value?1u:0u,std::memory_order_relaxed);
@@ -475,6 +478,7 @@ static BOOL ZNManagedPrepareInvokeBridge(NSString **error) {
 
 typedef struct {
     std::atomic<uintptr_t> target;
+    std::atomic<uint64_t> incarnation;
     std::atomic<uintptr_t> original;
     std::atomic<uint32_t> callbackRegister;
     std::atomic<uint32_t> callbackValue;
@@ -537,11 +541,13 @@ static uintptr_t ZNManagedCallbackHandle(NSUInteger index,
     ZNRuntimeExecutionScope execution;
     if(index>=kZNManagedCallbackMaxSlots)return 0;
     ZNManagedCallbackSlot *slot=&gZNManagedCallbackSlots[index];
-    if(!slot->target.load(std::memory_order_acquire))return 0;
+    uintptr_t target=slot->target.load(std::memory_order_acquire);
+    uint64_t incarnation=slot->incarnation.load(std::memory_order_acquire);
+    if(!target||!incarnation||!execution.retain(target,incarnation))return 0;
     slot->hits.fetch_add(1,std::memory_order_relaxed);
     if(!slot->enabled.load(std::memory_order_relaxed)){
         uintptr_t original=slot->original.load(std::memory_order_acquire);
-        if(!original||!execution.retain(slot->target.load(std::memory_order_acquire)))return 0;
+        if(!original)return 0;
         Dl_info originalImage={};if(dladdr((void *)original,&originalImage)&&!execution.retain(original))return 0;
         return ((ZNManagedCallbackOriginalFn)original)(x0,x1,x2,x3,x4,x5,x6,x7);
     }
@@ -592,6 +598,7 @@ static NSDictionary *ZNNativeResolveDescriptor(NSString *assembly,
                                                 NSUInteger argumentCount,
                                                 NSDictionary *candidate,
                                                 NSString **error) {
+    ZNRuntimeExecutionScope execution;
     uintptr_t candidateMethodInfo=[candidate[@"methodInfo"] unsignedLongLongValue];
     uintptr_t candidatePointer=[candidate[@"methodPointer"] unsignedLongLongValue];
     uintptr_t methodInfo=candidateMethodInfo;
@@ -627,6 +634,7 @@ static NSDictionary *ZNNativeResolveDescriptor(NSString *assembly,
         return nil;
     }
 
+    if(!execution.retain(pointer)){if(error)*error=@"Native target execution owner unavailable";return nil;}
     ZNNativeMethodGetFlagsFn getFlags=(ZNNativeMethodGetFlagsFn)ZNIL2CPPResolveSymbol(resolver.unityPath,"il2cpp_method_get_flags");
     if(!getFlags){
         if(error)*error=@"Native Hook 无法读取 il2cpp_method_get_flags";
@@ -636,7 +644,7 @@ static NSDictionary *ZNNativeResolveDescriptor(NSString *assembly,
     uint32_t flags=getFlags((const void *)methodInfo,&implFlags);
     BOOL isStatic=(flags&kZNNativeMethodAttributeStatic)!=0;
     return @{@"methodInfo":@(methodInfo),@"methodPointer":@(pointer),@"static":@(isStatic),@"methodFlags":@(flags),
-             @"pointerSource":pointerSource?:@"unknown",@"candidateMethodPointer":@(candidatePointer)};
+             @"pointerSource":pointerSource?:@"unknown",@"candidateMethodPointer":@(candidatePointer),@"runtimeImageIncarnation":@(execution.identity(pointer))};
 }
 
 static NSString *ZNNativePreparedUUIDForHeader(const struct mach_header_64 *mh) {
@@ -1281,6 +1289,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                   multiplier:(NSInteger)multiplier
                     actionID:(uint32_t)actionID
                        error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     if(multiplier<1||multiplier>1000){if(error)*error=@"测试倍率必须在 1~1000";return NO;}
@@ -1358,6 +1367,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                                      argumentIndex:(NSUInteger)argumentIndex
                                         multiplier:(NSInteger)multiplier
                                              error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     NSArray *supported=[self supportedInt32ArgumentIndicesForCandidate:candidate reason:error];
@@ -1437,6 +1447,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                                                setterMethod:(NSString *)setterMethod
                                                 multiplier:(NSInteger)multiplier
                                                      error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     if(multiplier<1||multiplier>1000){if(error)*error=@"StructFieldTransform 倍率必须在 1~1000";return NO;}
@@ -1589,6 +1600,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 - (BOOL)installTemporaryReturnBoolOverrideForCandidate:(NSDictionary<NSString *,id> *)candidate
                                                   value:(BOOL)value
                                                   error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     NSString *reason=nil;
@@ -1604,12 +1616,14 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     NSDictionary *resolved=ZNNativeResolveDescriptor(assembly,ns,cls,method,argc,candidate,error);
     if(!resolved)return NO;
     uintptr_t target=[resolved[@"methodPointer"] unsignedLongLongValue];
+    if(!execution.retain(target,[resolved[@"runtimeImageIncarnation"] unsignedLongLongValue])){if(error)*error=@"Native target changed before install";return NO;}
     if(ZNNativeSlotForTarget(target)||ZNManagedCallbackSlotForTarget(target)){
         if(error)*error=@"同一 target 已安装其他 Native Hook，请先恢复原方法";
         return NO;
     }
     ZNReturnBoolSlot *existing=ZNReturnBoolSlotForTarget(target);
     if(existing){
+        if(existing->incarnation.load(std::memory_order_acquire)!=execution.identity(target)){if(error)*error=@"Retired Native slot cannot be rebound to a new image incarnation";return NO;}
         if(existing->actionID.load(std::memory_order_acquire)){
             if(error)*error=@"目标已由 Permanent Hook Scheduler 管理；临时 ReturnBool 测试不可覆盖";
             return NO;
@@ -1631,6 +1645,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     slot->lastOverride.store(value?1u:0u,std::memory_order_relaxed);
     slot->actionID.store(0,std::memory_order_relaxed);
     slot->original.store(0,std::memory_order_relaxed);
+    slot->incarnation.store(execution.identity(target),std::memory_order_relaxed);
     slot->target.store(target,std::memory_order_release);
 
     void *original=NULL;NSString *hookError=nil;
@@ -1661,6 +1676,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                                                    argumentIndex:(NSUInteger)argumentIndex
                                                    callbackValue:(BOOL)callbackValue
                                                            error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     NSArray<NSNumber *> *supported=[self supportedManagedBoolCallbackArgumentIndicesForCandidate:candidate reason:error];
@@ -1673,6 +1689,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     NSDictionary *resolved=ZNNativeResolveDescriptor(assembly,ns,cls,method,argc,candidate,error);
     if(!resolved)return NO;
     uintptr_t target=[resolved[@"methodPointer"] unsignedLongLongValue];
+    if(!execution.retain(target,[resolved[@"runtimeImageIncarnation"] unsignedLongLongValue])){if(error)*error=@"Native target changed before install";return NO;}
     if(ZNNativeSlotForTarget(target)||ZNReturnBoolSlotForTarget(target)){
         if(error)*error=@"同一 target 已安装其他 Native Hook，请先恢复原方法";
         return NO;
@@ -1684,6 +1701,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     }
     ZNManagedCallbackSlot *existing=ZNManagedCallbackSlotForTarget(target);
     if(existing){
+        if(existing->incarnation.load(std::memory_order_acquire)!=execution.identity(target)){if(error)*error=@"Retired Native slot cannot be rebound to a new image incarnation";return NO;}
         if(existing->actionID.load(std::memory_order_acquire)){
             if(error)*error=@"目标已由 Permanent Hook Scheduler 管理；临时 Callback 测试不可覆盖";
             return NO;
@@ -1716,6 +1734,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     slot->isStatic.store([resolved[@"static"] boolValue]?1u:0u,std::memory_order_relaxed);
     slot->actionID.store(0,std::memory_order_relaxed);
     slot->original.store(0,std::memory_order_relaxed);
+    slot->incarnation.store(execution.identity(target),std::memory_order_relaxed);
     slot->target.store(target,std::memory_order_release);
 
     void *original=NULL;
@@ -1988,6 +2007,8 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                                             target:(uintptr_t)target
                                              value:(NSInteger)value
                                              error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
+    if(!execution.retain(target,action.runtimeImageIncarnation)){if(error)*error=@"Prepared Native target identity changed";return NO;}
     if(!ZNNativeHookRegistryPreflight(action.actionID,target)){
         if(error)*error=@"Native Hook target ownership conflict or registry capacity exhausted";
         return NO;
@@ -1998,6 +2019,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     }
     ZNReturnBoolSlot *existing=ZNReturnBoolSlotForTarget(target);
     if(existing){
+        if(existing->incarnation.load(std::memory_order_acquire)!=action.runtimeImageIncarnation){if(error)*error=@"Retired Native slot cannot be rebound to a new image incarnation";return NO;}
         uint32_t owner=existing->actionID.load(std::memory_order_acquire);
         if(owner&&owner!=action.actionID){if(error)*error=@"target 已由其他 ReturnBool Action 占用";return NO;}
         existing->actionID.store(action.actionID,std::memory_order_release);
@@ -2020,6 +2042,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     slot->lastOverride.store(action.returnBoolValue?1u:0u,std::memory_order_relaxed);
     slot->actionID.store(action.actionID,std::memory_order_relaxed);
     slot->original.store(0,std::memory_order_relaxed);
+    slot->incarnation.store(action.runtimeImageIncarnation,std::memory_order_relaxed);
     slot->target.store(target,std::memory_order_release);
 
     uintptr_t original=0;NSString *hookError=nil;
@@ -2042,6 +2065,8 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
                                            target:(uintptr_t)target
                                             value:(NSInteger)value
                                             error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
+    if(!execution.retain(target,action.runtimeImageIncarnation)){if(error)*error=@"Prepared Native target identity changed";return NO;}
     if(!ZNNativeHookRegistryPreflight(action.actionID,target)){
         if(error)*error=@"Native Hook target ownership conflict or registry capacity exhausted";
         return NO;
@@ -2061,6 +2086,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 
     ZNManagedCallbackSlot *existing=ZNManagedCallbackSlotForTarget(target);
     if(existing){
+        if(existing->incarnation.load(std::memory_order_acquire)!=action.runtimeImageIncarnation){if(error)*error=@"Retired Native slot cannot be rebound to a new image incarnation";return NO;}
         uint32_t owner=existing->actionID.load(std::memory_order_acquire);
         if(owner&&owner!=action.actionID){if(error)*error=@"target 已由其他 ManagedCallback Action 占用";return NO;}
         if(existing->callbackRegister.load(std::memory_order_relaxed)!=reg){
@@ -2090,6 +2116,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     slot->isStatic.store(action.preparedIsStatic?1u:0u,std::memory_order_relaxed);
     slot->actionID.store(action.actionID,std::memory_order_relaxed);
     slot->original.store(0,std::memory_order_relaxed);
+    slot->incarnation.store(action.runtimeImageIncarnation,std::memory_order_relaxed);
     slot->target.store(target,std::memory_order_release);
 
     uintptr_t original=0;NSString *hookError=nil;
@@ -2252,6 +2279,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 }
 
 - (BOOL)installAction:(ZNNativeHookAction *)action value:(NSInteger)value error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     if(!action){if(error)*error=@"Native Hook Action 为空";return NO;}

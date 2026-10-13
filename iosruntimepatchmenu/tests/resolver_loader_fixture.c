@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stddef.h>
 static int domain,image,klass,method;
 int FixtureRun(void){return 42;}
@@ -17,3 +18,5 @@ static unsigned callbackValue;
 void *il2cpp_object_get_class(void *object){(void)object;return &klass;}
 void *il2cpp_runtime_invoke(const void *m,void *object,void **params,void **exception){(void)m;(void)object;*exception=NULL;callbackValue=*(unsigned char *)params[0];return NULL;}
 unsigned FixtureCallbackValue(void){return callbackValue;}
+
+unsigned char FixtureBoolOriginal(uintptr_t a,uintptr_t b,uintptr_t c,uintptr_t d,uintptr_t e,uintptr_t f,uintptr_t g,uintptr_t h){(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h;return a?1:0;}
