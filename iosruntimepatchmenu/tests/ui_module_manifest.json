@@ -35,7 +35,7 @@
     {
       "path": "ui/shell/ZNPublicCompactUI.inc",
       "historical_section": "ZNPublicCompactUI.mm",
-      "sha256": "38137730a679ea9b37242d073d145a2bdfd122a3d61d28eeb165c8ec2d1af886",
+      "sha256": "40beef2a3f1bb8d8933184434fa6f3b523ad48ba99463954a50e7655ff5227b3",
       "category_count": 1
     },
     {
@@ -327,5 +327,11 @@
       "category_count": 1
     }
   ],
-  "pre_performance_expanded_sha256": "d5f06854e9fd5e6f2bf2c5eafd771217423a0ed65cc9c8e478766d3cb8ab0a90"
+  "pre_performance_expanded_sha256": "d5f06854e9fd5e6f2bf2c5eafd771217423a0ed65cc9c8e478766d3cb8ab0a90",
+  "external_owner_files": [
+    "ZNMenuPresentationDefaults.mm"
+  ],
+  "external_owner_hashes": {
+    "ZNMenuPresentationDefaults.mm": "31141170cad2e4c93bd7ea1e060da889c4a18c38fd0a45f61c378282894acdaf"
+  }
 }

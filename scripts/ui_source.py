@@ -13,7 +13,12 @@ def expanded_ui(root=ROOT):
         return path.read_text()
     text=text.replace('// UI_INCLUDE_DIAGNOSTICS_BEGIN\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wnullability-completeness"\n','')
     text=text.replace('// UI_INCLUDE_DIAGNOSTICS_END\n#pragma clang diagnostic pop\n','')
-    return INCLUDE.sub(replace,text)
+    text=INCLUDE.sub(replace,text)
+    def relocated(m):
+        path=source/m[1]
+        content=path.read_text();start='// UI_RELOCATED_BEGIN '+m[2]+'\n';end='// UI_RELOCATED_END '+m[2]+'\n'
+        return content.split(start,1)[1].split(end,1)[0]
+    return re.sub(r'^// UI_RELOCATED: (ZNMenuPresentationDefaults\.mm):(constants|policy)\n',relocated,text,flags=re.M)
 def verify():
     manifest=json.loads((ROOT/'iosruntimepatchmenu/tests/ui_module_manifest.json').read_text())
     text=(SRC/'ZNUnifiedUI.mm').read_text()
@@ -24,6 +29,8 @@ def verify():
     for m in manifest['modules']:
         assert hashlib.sha256((SRC/m['path']).read_bytes()).hexdigest()==m['sha256'],m['path']
     assert hashlib.sha256(expanded_ui().encode()).hexdigest()==manifest['expanded_sha256'],'UI expanded bytes changed'
+    for path,digest in manifest.get('external_owner_hashes',{}).items():
+        assert hashlib.sha256((SRC/path).read_bytes()).hexdigest()==digest,'external UI owner changed: '+path
     previous=expanded_ui().replace('#include "ZNPerformance.h"\n','').replace(' znperf::Scope znPageMeasure(znperf::PageRefresh);','')
     previous=re.sub(r'^.*// ZN_PERF_ONLY\n','',previous,flags=re.M)
     assert hashlib.sha256(previous.encode()).hexdigest()==manifest.get('pre_performance_expanded_sha256',manifest['expanded_sha256']), 'non-metric UI change'

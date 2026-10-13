@@ -29,3 +29,9 @@ fi
 
 clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNPerformanceReport.mm iosruntimepatchmenu/tests/performance_report_test.mm -o /tmp/performance-report-test
 /tmp/performance-report-test
+for class_mode in present absent; do
+  flag=""
+  if [ "$class_mode" = absent ]; then flag=-DTEST_NO_MENU_CLASS; fi
+  clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror $flag -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuPresentationDefaults.mm iosruntimepatchmenu/tests/menu_presentation_defaults_test.mm -o /tmp/menu-defaults-test
+  /tmp/menu-defaults-test
+done
