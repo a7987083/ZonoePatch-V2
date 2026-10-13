@@ -1,8 +1,9 @@
 static NSData *fixtureImage(){
- std::vector<uint8_t> bytes(0x8000,0);auto p=bytes.data();mach_header_64 h={};h.magic=MH_MAGIC_64;h.cputype=CPU_TYPE_ARM64;h.filetype=MH_DYLIB;h.ncmds=4;h.sizeofcmds=152+72+24+16;memcpy(p,&h,sizeof(h));
+ std::vector<uint8_t> bytes(0x8000,0);auto p=bytes.data();mach_header_64 h={};h.magic=MH_MAGIC_64;h.cputype=CPU_TYPE_ARM64;h.filetype=MH_DYLIB;h.ncmds=5;h.sizeofcmds=152+72+24+16+24;memcpy(p,&h,sizeof(h));
  ZNV3OwnedSegmentCommand text={};text.segment.cmd=LC_SEGMENT_64;text.segment.cmdsize=sizeof(text);strcpy(text.segment.segname,"__TEXT");text.segment.vmaddr=0x100000000;text.segment.vmsize=text.segment.filesize=0x4000;text.segment.nsects=1;text.segment.initprot=VM_PROT_READ|VM_PROT_EXECUTE;strcpy(text.section.sectname,"__text");strcpy(text.section.segname,"__TEXT");text.section.addr=0x100001000;text.section.offset=0x1000;text.section.size=0x200;text.section.flags=S_REGULAR|S_ATTR_PURE_INSTRUCTIONS;memcpy(p+32,&text,sizeof(text));
  segment_command_64 link={};link.cmd=LC_SEGMENT_64;link.cmdsize=sizeof(link);strcpy(link.segname,"__LINKEDIT");link.vmaddr=0x100004000;link.vmsize=link.filesize=0x4000;link.fileoff=0x4000;memcpy(p+184,&link,sizeof(link));
  symtab_command sym={LC_SYMTAB,sizeof(sym),0x4000,1,0x4100,32};memcpy(p+256,&sym,sizeof(sym));linkedit_data_command sig={LC_CODE_SIGNATURE,sizeof(sig),0x7000,0x1000};memcpy(p+280,&sig,sizeof(sig));
+ build_version_command build={LC_BUILD_VERSION,sizeof(build),2,14u<<16,(18u<<16)|(5u<<8),0};memcpy(p+296,&build,sizeof(build));
  uint32_t nop=0xD503201F;for(size_t i=0x1000;i<0x1200;i+=4)memcpy(p+i,&nop,4);
  return [NSData dataWithBytes:p length:bytes.size()];
 }

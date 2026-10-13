@@ -44,3 +44,11 @@ clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchme
 "$work/combinations-test" "$work/combinations"
 mkdir -p dist
 cp "$work/combinations.json" dist/production-builder-extraction.json
+
+# Independent final-byte CodeDirectory verification applies the same strict iOS
+# ARM64/SDK/signature policy as the deliverable, not just signer idempotence.
+for generated in "$work"/combinations/mode-*/*.znpatched "$work"/combinations/capacity/*.dylib; do
+  report="dist/generated-$(basename "$(dirname "$generated")")-signature.json"
+  python3 scripts/verify-artifact.py "$generated" > "$report"
+done
+echo 'production combination outputs independent iOS ARM64 CodeDirectory page hashes PASS'
