@@ -13,3 +13,10 @@
 - 日志/崩溃/性能证据：明确功能结果、首个错误、复现条件，不仅截图“菜单可打开”。
 
 这些项目全部尚未执行。CI/native macOS fixture不能勾选这里的通过项。
+
+## 本轮新增验收（均未验证）
+
+- H05：默认值首次迁移/重复启动用户选择保留；所有旧Selector仍可调用；compact/full/页面/搜索/链执行完整交互无回归。
+- M10：真实App的thin ARM64二进制及workspace跑static/runtime-only/hook/mixed；合法输出字节/section/CodeDirectory结构复核；正常IPA整包重签与安装。
+- M10 loaded-image：映像动态加载/卸载时finder、resolver、运行表、Hook协调的指针生命周期与缓存回归。
+- M11：按 docs/PERFORMANCE_ACCEPTANCE.md采集五类span、首帧/queue等待/取消、CPU/峰值内存；留设备身份与raw结果。启用/关闭采样对照，不以host JSON推断真实性能。

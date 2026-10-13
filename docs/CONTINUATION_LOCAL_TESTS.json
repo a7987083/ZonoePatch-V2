@@ -1,0 +1,175 @@
+{
+  "environment": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "sourceAnchor": "0c2e02d5d22a875b15b363afa1016d227b891100",
+  "sanitizerLimitation": "Linux /proc LeakSanitizer unavailable; local detect_leaks=0, CI normal",
+  "results": [
+    {
+      "command": [
+        "python3",
+        "scripts/ui_source.py"
+      ],
+      "exitCode": 0,
+      "output": "54 modules; reviewed expansion/metric-only delta/ownership/order PASS\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/ui-dependencies.py"
+      ],
+      "exitCode": 0,
+      "output": "54 sections, 13 cross-section file-private/macro symbols recorded\nkZNNativeHookDeleteTagBase ui/compat/ZNRuntimeMethodCallBuilderUI.inc 1\nZonoePatchStart ui/core/ZonoeRuntimeMenu.inc 1\nZonoePatchShow ui/core/ZonoeRuntimeMenu.inc 1\nZN48TopViewController ui/core/ZonoeRuntimeMenu.inc 1\nkZNM47CaptureCandidateKey ui/execution/ZNM47ReceiverCaptureUI.inc 1\nkZN51CandidateKey ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc 1\nZNM52XTop ui/execution/ZNM52ChainExecuteButton.inc 1\nkZNM65LiveHookStatusTag ui/finder/ZNMethodFinderUnifiedUI.inc 1\nkZNM54CandidateKey ui/finder/ZNMethodFinderUnifiedUI.inc 1\nkZNM54FilterKey ui/finder/ZNMethodFinderUnifiedUI.inc 1\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-cleanup.py"
+      ],
+      "exitCode": 0,
+      "output": "four proven unreferenced file-local alignment helpers removed; cleanup contract PASS\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/audit-compatibility.py"
+      ],
+      "exitCode": 0,
+      "output": "compatibility code retained; active builder routed via executor PASS\n"
+    },
+    {
+      "command": [
+        "python3",
+        "iosruntimepatchmenu/tests/retained_hook_contract.py"
+      ],
+      "exitCode": 0,
+      "output": "public retirement retains native callbacks; legacy destructive code preserved PASS\n"
+    },
+    {
+      "command": [
+        "bash",
+        "iosruntimepatchmenu/tests/single_ui_owner_contract.sh"
+      ],
+      "exitCode": 0,
+      "output": "single UI owner + M6.8.6 Lifecycle + M6.9 Prepared + M6.10 Static Prepatch + M6.11 Instant Menu + M6.12 Capability substrate + M6.13 Plugin/Struct Codec + M6.13.1 Result Card single-owner contract: OK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "iosruntimepatchmenu/tests/znunifiedui_topology_audit.py",
+        "--report",
+        "/tmp/continuation-topology.json"
+      ],
+      "exitCode": 0,
+      "output": "{\n  \"status\": \"PASS\",\n  \"newline_count\": 19253,\n  \"implementation_count\": 83,\n  \"method_exchange_implementations_count\": 63,\n  \"method_set_implementation_count\": 8,\n  \"dispatch_once_count\": 63,\n  \"activation_stage_order\": [\n    \"RuntimeMenu\",\n    \"FeatureGroupUI\",\n    \"PublicCompactDefaults\",\n    \"IL2CPPNamedOffsetWorkspace\",\n    \"FeatureBuilderUI\",\n    \"RuntimeMethodBuilderUI\",\n    \"MethodFinderUnifiedUI\",\n    \"M630HardCutUI\",\n    \"SharedSiteExecutionProbeV3\",\n    \"PublicCompactLayout\",\n    \"RuntimeExecutorV041\",\n    \"RuntimeDiagnosticsV042\",\n    \"StaticDispatchPrepare\"\n  ],\n  \"failures\": []\n}\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Iiosruntimepatchmenu/src",
+        "iosruntimepatchmenu/tests/scalar_parser_test.cpp",
+        "-o",
+        "/tmp/continuation-scalar_parser"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/tmp/continuation-scalar_parser"
+      ],
+      "exitCode": 0,
+      "output": "production scalar parser boundaries PASS\n"
+    },
+    {
+      "command": [
+        "g++",
+        "-fsanitize=address,undefined",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Iiosruntimepatchmenu/src",
+        "iosruntimepatchmenu/tests/checked_layout_test.cpp",
+        "-o",
+        "/tmp/continuation-checked_layout"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/tmp/continuation-checked_layout"
+      ],
+      "exitCode": 0,
+      "output": "checked arithmetic/unaligned/truncated/malformed production layout PASS\n"
+    },
+    {
+      "command": [
+        "g++",
+        "-fsanitize=address,undefined",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Iiosruntimepatchmenu/src",
+        "iosruntimepatchmenu/tests/macho_file_test.cpp",
+        "-o",
+        "/tmp/continuation-macho_file"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/tmp/continuation-macho_file"
+      ],
+      "exitCode": 0,
+      "output": "Mach-O parse/transactional shift/golden/fuzz PASS (seed 0x5a4e, 20000)\n"
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-Iiosruntimepatchmenu/src",
+        "iosruntimepatchmenu/tests/performance_test.cpp",
+        "-o",
+        "/tmp/continuation-performance"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/tmp/continuation-performance"
+      ],
+      "exitCode": 0,
+      "output": "performance disabled/nesting/reset/concurrent bounded sampling PASS\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/benchmark.py",
+        "--output",
+        "/tmp/continuation-performance-host.json"
+      ],
+      "exitCode": 0,
+      "output": "{\n  \"schema\": \"zonoe.host-microbenchmark/v1\",\n  \"commit\": \"12ab684a6371179f31579732d7dce07afa808406\",\n  \"environment\": {\n    \"platform\": \"Linux-6.18.44-x86_64-with-glibc2.39\",\n    \"machine\": \"x86_64\",\n    \"compiler\": \"g++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\"\n  },\n  \"protocol\": {\n    \"warmupBatches\": 5,\n    \"measuredBatches\": 31,\n    \"iterationsPerBatch\": 1000,\n    \"fixtureBytes\": 65536,\n    \"clock\": \"steady_clock\",\n    \"build\": \"-O2\",\n    \"scope\": \"portable production parser/editor microbenchmark; not UIKit/target App\"\n  },\n  \"results\": [\n    {\n      \"scenario\": \"macho.parse.fixture\",\n      \"medianNs\": 22,\n      \"p95Ns\": 23\n    },\n    {\n      \"scenario\": \"linkedit.edit.fixture\",\n      \"medianNs\": 59,\n      \"p95Ns\": 74\n    }\n  ],\n  \"deviceScenarios\": {\n    \"menu.activation\": \"未验证\",\n    \"page.refresh\": \"未验证\",\n    \"search.sync\": \"未验证\",\n    \"hook.reconcile.execution\": \"未验证\",\n    \"binary.generation\": \"未验证\"\n  },\n  \"performanceImprovement\": \"未验证：无匹配基线/实机数据\"\n}\n"
+    }
+  ]
+}

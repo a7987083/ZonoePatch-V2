@@ -1,51 +1,69 @@
-# ZonoePatch-V2 独立交接
+# ZonoePatch-V2 独立交接：H05/M10/L02/M11 continuation
 
-## 定位与稳定基线
+## 接手入口与身份
 
 Repository: https://github.com/a7987083/ZonoePatch-V2  
-Branch: dev/technical-debt-p0-p2-20261013  
-输入 1.zip SHA256: bc905c4243dc0be99c3a6dd7df037c05c2c8684273ce681db9b0d583d1851805。
+Branch: `dev/technical-debt-p0-p2-20261013`；draft PR #1。未改写历史、未 force push。此次沿用该独立分支，不重做已关闭 P0。
 
-新仓库从空仓初始化；旧仓库和历史 Commit 未改写。输入 ZIP 不含 Git 历史，目录名 cb049821…不是本次已验证的 Git HEAD。
+本轮稳定基线：`5e7d1d4c8b487c6c3fd5a3eb5685954ede24870a`，Actions `38333900370` 成功，Artifact `11783827840`，dylib SHA256 `fc638e5a53a43ed0e793ac9cdcdfa72e1b03f27e5fade5ba61009bd51c7378ad`。这是源码/编译基线，**不是实机稳定性基线**。输入 ZIP 与初始治理记录见原始《代码库诊断与重构指南.md》和 docs/COMMIT_RECORDS.json。
 
-原始源码编译基线 ae631f4ff17658e747016d596a71b11deab5450f，Actions 38330343864，Artifact 11782621102；源码未改，测试/构建 harness 新增。基线 dylib SHA256 bfc407a1dcf913a0a5f34629025b7d21a83338d02aff3caf4ac4141900290373。不是已实机验证基线。
+源码anchor Actions `38338059240` 已成功，Artifact `11785439746`；下载archive digest已核对，dylib SHA256 `267f46b1f14377e554ce4cd690e7b01436bc253fbaaebc1f00b7d9fb48789f9e`，本地复验ARM64/iOS14/SDK18.5和双CodeDirectory pagehash通过。
 
-本轮业务源码 HEAD：3a53fbb992dad885476a14eb0c18e97b6a0c722b。后续仅文档提交的精确 checkout HEAD 以 `git rev-parse HEAD` 为准；不可把业务源码 anchor 与文档 HEAD 混称。Commit 明细见 docs/COMMIT_RECORDS.*；完整历史以 GitHub 分支为准。
+本轮业务代码及最后测试扩展 anchor：`0c2e02d5d22a875b15b363afa1016d227b891100`。后续文档提交也必须执行 CI。最终精确 HEAD、Run、Artifact ID、archive/dylib hash 以交付包 `DELIVERY_STATUS.json` 为准，不将业务 anchor 混称为最终 checkout。远端通过 GitHub API追加 Commit；本地分析镜像的 Commit ID 不作为远端身份，核对 tree/源码字节。完整历史以 GitHub 分支为准。
 
-## 调用链与已改动 owner
+## 四项状态
 
-- 启动：constructor -> main-thread menu prewarm -> ZNActivationStageRunner -> 原有 installer。新 runner 负责顺序/幂等/类可用性，历史 category 与 63 次 IMP 交换仍保留。
-- 构建：UI -> ZNBuildExecutor -> main-turn ZNBuildSession 捕获 -> row 深副本/独立 Runtime/Hook Store -> frozen Manifest provider -> prepare/base/emit -> checked output/report/signing。固定顺序锁定两个 Store，threadDictionary 只对同步会话重定向 sharedStore；异常 finally 清理。
-- Native Hook：dyld/前台 -> 生命周期 requested latch -> capability snapshot -> Scheduler。generation 撤销 timer，identity 防同 ID 错目标，v2 preference 按绑定身份命名。值命令与 reconcile/teardown 串行。显式 retire 停用槽但保留 trampoline/registry，正常 OFF 不销毁。
-- 图像缓存：ZNImageGeneration 注册 add/remove 原子代际，Registry/Coordinator/Static/Runtime/Hook 使用代际而非仅 count。
-- 格式：ZNCheckedByteView 与 GeneratedDataLayout 使用 checked arithmetic / memcpy；其余独立 Mach-O parser/writer 尚未全量迁移。
-- 参数：Direct Native 与 managed invoke 使用同一 scalar parser，拒绝负 unsigned、非有限 float；RVA 仍保留历史十六进制 fallback。
-- 日志：ZNRuntimeLogger 独立 owner，200 条 ring，保留最近记录顺序，移除每条 NSDateFormatter 分配。
+| ID | 已完成、可复验部分 | 整体状态 |
+|---|---|---|
+| H05 | 54 个有序 UI 源码模块；默认值迁移独立编译；真实策略 Foundation 测试；原始 UI 重建/Selector/安装顺序门禁；13 个跨段静态/宏引用清单 | 部分完成；历史 Category/Swizzle 链仍保留，不能全项关闭 |
+| M10 | 全部当前 mmap 文件输入路径和兼容 V1 builder 接入共同校验；两套 LINKEDIT 写入合并为预检后写；共享 owner section 定位；范围/溢出与畸形/fuzz/字节对照测试 | 文件输入治理完成本轮范围；运行中映像解析尚未全量统一，不能全项关闭 |
+| L02 | 四个已证明无引用的 static 对齐函数删除；两个重复 LINKEDIT writer/shift helper合并；职责目录/独立策略 owner；删除证据和保留合约 | 确认无引用清理已完成；历史 API命名/外部兼容路径继续保留 |
+| M11 | 五个生产入口的 opt-in、有界、同线程去重计时；JSON snapshot/reset；并发测试；固定 protocol host microbench + CI证据上传 | 基础设施完成；目标 App实际性能/改善均「未验证」 |
 
-## 构建与验证
+## 数据流与模块边界
 
-构建工具链固定 Xcode 16.4 (16F6)、iphoneos SDK 18.5、arm64/iOS 14.0，Theos/Dobby commit 见 docs/BUILD_BASELINE.md。macOS prepared dependencies 后执行 `bash scripts/build-ios.sh`；完整 CI 是 .github/workflows/ios-build.yml。不要无依据升级 SDK/依赖。
+- UI composition root：`iosruntimepatchmenu/src/ZNUnifiedUI.mm` → `src/ui/{core,shell,finder,execution,features,compat}`。渲染与动态层仍是一个编译单元；include 不等于独立 object。`ZNMenuPresentationDefaults.mm` 是真正独立编译的 Foundation UI策略 owner；实类仍由 UI持有，私有接口不重复实现类。
+- `scripts/ui_source.py` 按 include顺序拼接源码、重建迁移出去的原函数位置、核对模块及 external owner hash。移除 M11 的指定计时 token 后必须还原前一稳定 UI。原 imported digest 另存 `ui_pre_performance_digest.json`，不只放宽行数。`docs/UI_DEPENDENCIES.json` 是保守词法引用证据，**不是完整动态调用图**。
+- 文件：`ZNMachOFile.h` → 安全 command遍历/segment-section范围/已知 LINKEDIT表范围 → 业务 layout解释 → 容量预检 → 生成/后处理。它仅接受 thin little-endian Mach-O64文件，默认 ARM64；不能传入 dyld mapping然后把header长度当文件长度。
+- LINKEDIT shift：收集所有待写字段 → 校验64/32位溢出 → 一次应用；失败时不修改该编辑函数的输入字节。整个 builder仍在独占副本上生成；这不是全文件系统事务或断电耐久性承诺。
+- 所有已有 BuildSession/store隔离、manifest/retire/generation机制保持前轮修复。不得恢复公开 DobbyDestroy，未确认外部依赖的旧实现继续保留。
+- 性能：`ZNPerformance.h` 是统一有界采样 owner；默认关闭，开启方法与五个入口的准确测量范围见 docs/PERFORMANCE_ACCEPTANCE.md。`ZNPerformanceReport.mm` 输出 Foundation/JSON数据；不会自动上传或修改用户流程。
 
-测试：scripts/test-foundation.sh；脚本包含真实 Scheduler、BuildSession、output IO、activation、logger、production ABI metadata 与 codec 测试。某些后端/呈现策略有明确 stub，不能当作目标 App 集成测试。native ARM64 fixture 若 runner 为 arm64 则自动运行，它仍是 macOS ABI fixture。
+## 构建与测试复现
 
-Linux 可执行：single_ui_owner_contract.sh、znunifiedui_topology_audit.py、retained_hook_contract.py、scripts/audit-compatibility.py、scalar_parser_test.cpp、checked_layout_test.cpp。当前沙盒 LeakSanitizer 的 /proc 检查不可用；本地 ASan/UBSan 使用 ASAN_OPTIONS=detect_leaks=0，未把该限制当作源代码内存泄漏。
+从 GitHub clone并 checkout上述分支/精确交付HEAD。固定 Xcode16.4(16F6)、iphoneos SDK18.5、arm64/iOS14.0。Theos `304e0799973e8145f32e4ca2de6c747a84b758ce`，Dobby `5dfc8546954ce3b3198132ab13fddb89ee92cdd7`，其必要兼容修补和Actions pins见 `.github/workflows/ios-build.yml`。源码包包含项目完整源码；外部依赖按pins取得，Xcode/SDK不包含在源码ZIP，不能宣称离线全工具链可复现或hosted runner位级确定性。
 
-源码 anchor 3a53fbb 已由 Actions 38333258510 编译/回归成功，Artifact 11783771960，dylib SHA256 7ecc16458f9555dfc0034cb904d5f7a0496262d774fdccecb4901f5a489319e3。源码 anchor 之后的最终 Actions/Artifact 与 SHA256 在交付包 DELIVERY_STATUS.json 中核对。较早一次完整成功 Run 38333056338 对应 7cd6c1f3eecbdd5bfabc0abc42d7c2dfe99e778a；不把它当作之后新 HEAD 的成功记录。
+Linux/source检查：
 
-状态必须分开：已修改、已提交；各 CI 的编译/测试结果见事实清单；目标 App 未运行，iPhone 未验证，完整实机回归未完成。ad-hoc 局部签名不代表最终 IPA 安装成功，必须正常整包重签。
+```bash
+python3 scripts/ui_source.py
+python3 scripts/ui-dependencies.py
+python3 scripts/check-cleanup.py
+python3 scripts/audit-compatibility.py
+python3 iosruntimepatchmenu/tests/retained_hook_contract.py
+bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh
+python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report topology.json
+```
 
-## 已知风险与阻塞
+portable测试编译选项与源码见 workflow：scalar、checked_layout、macho_file及performance tests；Mach-O使用 ASan/UBSan 和seed `0x5a4e` 的20,000组突变。本地 Linux LeakSanitizer 的 /proc检查不可用，因此 `ASAN_OPTIONS=detect_leaks=0`，不据此声称已查明无泄漏；CI保留正常sanitizer配置。
 
-- H05：checked activation 已实现，18K UI 的历史 renderer/search/IMP 链未完整迁移。不能按“所有技术债已清零”交接。
-- H06：默认缺少 GC API 时拒绝缓存 raw receiver；显式兼容模式只有 30 秒 lease/逐次校验，仍无 GC 所有权保证。
-- H04/M02：停用保留方案不回收 process-lifetime slots（每模板上限 8），不同绑定不能复用同 ID。需要更多新目标时重启；旧 destructive 代码保留为私有 legacy，未添加调用。
-- M10：shared generated layout 读路径已统一，其他 Mach-O 签名/relocation/legacy scanner 边界仍需迁移与 fuzz。
-- M11/L02：tick 无效工作减少，timer 保留；完整性能测量和 UI family 拆分待真实设备。
-- 自定义 provider 必须同步使用会话输入，不得缓存全局编写 Store 绕过 BuildSession。Workspace 编辑按 UIKit 主线程契约，外部线程直接属性写入不受支持。
-- 原子 slot 停用不保证已经开始的回调立即终止；允许在途调用完成，不宣称零延迟停止。
+macOS：`bash scripts/check-module-warnings.sh`；`bash scripts/test-foundation.sh`；`bash scripts/test-macho-equivalence.sh`；`python3 scripts/benchmark.py --output performance-host.json`。准备固定依赖后 `bash scripts/build-ios.sh`。CI必须全部steps成功，读取日志第一处真实错误后修复，不能只看Artifact上传成功。
 
-阻塞：没有目标 App / Unity 版本匹配测试环境、iPhone 和 Instruments。没有伪造运行/实机结果。
+生产字节对照包含：完整 signer源码与稳定基线、V3 parse/owned-segment install的原样提取函数、runtime-only单目标生成的原样提取函数（仅ModuleManager路径提供者为stub）。同一固定合法fixture输出必须 `cmp`一致。另有实际RVA writer畸形输入拒绝/文件不变测试。**这些不代表真实所有workspace/Hook/IPA已验证**；提取fixture不是完整App集成。原始函数SHA由提取脚本生成以便审计，不以重写算法模拟生产代码。
 
-## 下一任务
+源码拆分首轮CI `38335959673` 失败于 .inc触发nullability完整性诊断；`802256df`限定diagnostic scope修复后 `38336234932`成功。原失败Commit保留，未重写。其他独立点的Run关联见 docs/CONTINUATION_VERIFICATION.json；最终HEAD的完整日志/产物在交付包。
 
-先用本轮产物完成 DEVICE_ACCEPTANCE.md。记录目标 bundle/build/Unity metadata identity、iOS/设备、dylib hash、加载方式、整包签名、各功能和崩溃日志。通过实机稳定基线后按页拆 UI，再统一剩余 Mach-O readers/writers。不要删除未证明无消费者/动态 selector 引用的兼容代码。
+## 剩余工作与具体阻塞
+
+详见 KNOWN_ISSUES.md（位置、阻塞、下一步、验收条件逐项列出）。重要边界：
+
+1. H05 的宏/私有helper跨段引用和动态Selector链使直接独立编译/合并Category不是机械搬文件。先按依赖清单做typed内部接口与旧/new IMP链测试，再在单调用族上迁移。保持原Selector可调用、installer顺序、重复安装语义；禁止先删历史入口再补适配。
+2. M10的dyld读取使用load-command内的fileoff/VM/slide，File校验不能代替LoadedImage接口；代际失效不能阻止读取中的unload。先建立owned header snapshot和读取生命周期协议，做卸载竞争/地址溢出/section生命周期测试，再迁移缓存中的指针为值或有owner引用；不能假设有iPhone便自然解决此设计问题。
+3. L02未知外部消费者和动态消息引用未被证明不存在；保留不是笼统“风险高”。对每个待删API要列消费者、导出/Selector注册、source-distribution使用边界及替代迁移测试。
+4. M11仅有host microfixture数据，无法得出iOS菜单/真实搜索/Hook/生成耗时结论。先按性能协议采集匹配设备基线与当前数据；hook队列等待、首帧、异步取消、CPU/峰值内存另用Instruments。
+
+## 实机验收与风险
+
+所有目标App/UI行为、Hook安全、加载/卸载、GC生命周期、生成IPA安装、真实性能均「未验证」。DEVICE_ACCEPTANCE.md不可用CI结果勾选。至少交付App/Unity/iOS/device与dylib身份、操作输入、失败数、日志/崩溃、产物重新解析及正常整包重签证据。无新增性能改善宣称；ad-hoc pagehash检查不证明Apple信任链/IPA可安装。
+
+交付ZIP的 `source/`、`dist/`、CI logs、commit ledger、测试/状态文档、校验hash可由独立工程师使用；先核对SHA与精确HEAD，再运行上述检查。不要从旧根文档里复制过时anchor作为新的验证结果。

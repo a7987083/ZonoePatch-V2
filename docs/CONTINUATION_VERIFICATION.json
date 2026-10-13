@@ -1,0 +1,151 @@
+{
+  "baseline": "5e7d1d4c8b487c6c3fd5a3eb5685954ede24870a",
+  "commits": [
+    {
+      "sha": "6de908d5c586bcf95ddde775fa3a1a3818074cf4",
+      "message": "refactor(H05): decompose UI into ordered byte-equivalent source modules",
+      "ci": {
+        "id": 38335959673,
+        "sha": "6de908d5c586bcf95ddde775fa3a1a3818074cf4",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38335959673"
+      },
+      "fixedBy": "802256df7fcdc33c95026b75671785a1cb851693",
+      "firstError": "inc classification enabled -Wnullability-completeness"
+    },
+    {
+      "sha": "802256df7fcdc33c95026b75671785a1cb851693",
+      "message": "fix(H05): preserve implementation diagnostic scope across UI includes",
+      "ci": {
+        "id": 38336234932,
+        "sha": "802256df7fcdc33c95026b75671785a1cb851693",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38336234932"
+      }
+    },
+    {
+      "sha": "32c839e5a86282df498876090d377a11b516ada5",
+      "message": "refactor(M10): share checked Mach-O file parsing and transactional LINKEDIT edits",
+      "ci": {
+        "id": 38336383360,
+        "sha": "32c839e5a86282df498876090d377a11b516ada5",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38336383360"
+      }
+    },
+    {
+      "sha": "582557fb60a400519a1c9d3a4f8b2acd8eaed6c2",
+      "message": "test(M10): compare production signing output against stable baseline bytes",
+      "ci": {
+        "id": 38336510866,
+        "sha": "582557fb60a400519a1c9d3a4f8b2acd8eaed6c2",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38336510866"
+      }
+    },
+    {
+      "sha": "e2ec0c74a580a1fbaca05e9598d9f2ab500025ac",
+      "message": "feat(M11): add bounded opt-in production spans and reproducible performance harness",
+      "ci": {
+        "id": 38336869093,
+        "sha": "e2ec0c74a580a1fbaca05e9598d9f2ab500025ac",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38336869093"
+      }
+    },
+    {
+      "sha": "f0f718784aeefd519d9493bb4c2014724109f27c",
+      "message": "refactor(L02): remove four proven unreferenced file-local alignment helpers",
+      "ci": {
+        "id": 38337061436,
+        "sha": "f0f718784aeefd519d9493bb4c2014724109f27c",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337061436"
+      }
+    },
+    {
+      "sha": "1ccb74267d497f701e9b2fdfabb301d6318bc615",
+      "message": "fix(M10): validate owner sections and remaining active file pipelines before writes",
+      "ci": {
+        "id": 38337273943,
+        "sha": "1ccb74267d497f701e9b2fdfabb301d6318bc615",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337273943"
+      }
+    },
+    {
+      "sha": "273966cbbe7ad313b1d7c906c7d55343e7d43110",
+      "message": "refactor(H05): isolate presentation defaults with production Foundation regressions",
+      "ci": {
+        "id": 38337561918,
+        "sha": "273966cbbe7ad313b1d7c906c7d55343e7d43110",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337561918"
+      }
+    },
+    {
+      "sha": "84d7c1c9e3ced9ce4c5b9a3018772ee75eb7910b",
+      "message": "refactor(M10): retain legacy builder while adopting shared checked file view",
+      "ci": {
+        "id": 38337639388,
+        "sha": "84d7c1c9e3ced9ce4c5b9a3018772ee75eb7910b",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337639388"
+      }
+    },
+    {
+      "sha": "2bcb98bf8dcbba29a39c871feefeb646e141a8b4",
+      "message": "test(M10): verify actual owned-segment layout against baseline and guard allocation overflow",
+      "ci": {
+        "id": 38337805011,
+        "sha": "2bcb98bf8dcbba29a39c871feefeb646e141a8b4",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337805011"
+      }
+    },
+    {
+      "sha": "770db3f7669ac054d748537bc86710d5c7a856ca",
+      "message": "docs(H05): inventory concrete cross-section and dynamic UI dependencies",
+      "ci": {
+        "id": 38337904493,
+        "sha": "770db3f7669ac054d748537bc86710d5c7a856ca",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38337904493"
+      }
+    },
+    {
+      "sha": "0c2e02d5d22a875b15b363afa1016d227b891100",
+      "message": "test(M10): compare actual runtime-only target generation bytes against baseline",
+      "ci": {
+        "id": 38338059240,
+        "sha": "0c2e02d5d22a875b15b363afa1016d227b891100",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38338059240"
+      }
+    },
+    {
+      "sha": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
+      "message": "ci(M10): retain production binary-equivalence logs in delivery artifacts",
+      "ci": {
+        "id": 38338570415,
+        "sha": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38338570415"
+      }
+    }
+  ],
+  "scope": "snapshot before final handoff; exact final CI in delivery DELIVERY_STATUS.json"
+}

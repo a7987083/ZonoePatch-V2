@@ -139,5 +139,57 @@
   {
     "sha": "d91c8d0be8d60232d738d5db0b7449688c0a9d6e",
     "message": "build: verify final Mach-O dependencies/platform and both CodeDirectory page-hash tables"
+  },
+  {
+    "sha": "6de908d5c586bcf95ddde775fa3a1a3818074cf4",
+    "message": "refactor(H05): decompose UI into ordered byte-equivalent source modules"
+  },
+  {
+    "sha": "802256df7fcdc33c95026b75671785a1cb851693",
+    "message": "fix(H05): preserve implementation diagnostic scope across UI includes"
+  },
+  {
+    "sha": "32c839e5a86282df498876090d377a11b516ada5",
+    "message": "refactor(M10): share checked Mach-O file parsing and transactional LINKEDIT edits"
+  },
+  {
+    "sha": "582557fb60a400519a1c9d3a4f8b2acd8eaed6c2",
+    "message": "test(M10): compare production signing output against stable baseline bytes"
+  },
+  {
+    "sha": "e2ec0c74a580a1fbaca05e9598d9f2ab500025ac",
+    "message": "feat(M11): add bounded opt-in production spans and reproducible performance harness"
+  },
+  {
+    "sha": "f0f718784aeefd519d9493bb4c2014724109f27c",
+    "message": "refactor(L02): remove four proven unreferenced file-local alignment helpers"
+  },
+  {
+    "sha": "1ccb74267d497f701e9b2fdfabb301d6318bc615",
+    "message": "fix(M10): validate owner sections and remaining active file pipelines before writes"
+  },
+  {
+    "sha": "273966cbbe7ad313b1d7c906c7d55343e7d43110",
+    "message": "refactor(H05): isolate presentation defaults with production Foundation regressions"
+  },
+  {
+    "sha": "84d7c1c9e3ced9ce4c5b9a3018772ee75eb7910b",
+    "message": "refactor(M10): retain legacy builder while adopting shared checked file view"
+  },
+  {
+    "sha": "2bcb98bf8dcbba29a39c871feefeb646e141a8b4",
+    "message": "test(M10): verify actual owned-segment layout against baseline and guard allocation overflow"
+  },
+  {
+    "sha": "770db3f7669ac054d748537bc86710d5c7a856ca",
+    "message": "docs(H05): inventory concrete cross-section and dynamic UI dependencies"
+  },
+  {
+    "sha": "0c2e02d5d22a875b15b363afa1016d227b891100",
+    "message": "test(M10): compare actual runtime-only target generation bytes against baseline"
+  },
+  {
+    "sha": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
+    "message": "ci(M10): retain production binary-equivalence logs in delivery artifacts"
   }
 ]
