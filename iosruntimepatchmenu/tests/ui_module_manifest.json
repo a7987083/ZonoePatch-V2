@@ -82,7 +82,7 @@
     {
       "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
       "historical_section": "ZNIL2CPPMethodFinderM2.mm",
-      "sha256": "eb1b6250901112eee73c3c3175f1fbf94d73a0ff496bf6e32baed65657b80198",
+      "sha256": "5635fe31edd981ac9de0031b412b075814a9462afa485ee154aaf39315cfb769",
       "category_count": 1
     },
     {
@@ -348,6 +348,8 @@
     "ZNMenuSearchPolicy.mm": "94ce3ff1ec8a53d1ab5b1318649cb581e7aefaa24420ed21538d8f45947452e0",
     "ZNMenuSearchPolicy.h": "36b1f1400aa61e66538f6539459023ab76f9069ce2eb09c24b834bd76d93fd93",
     "ZNUIInstallationTrace.h": "6d7c3fd81dca11f1120c72a041679f0bb2d9b35a442a117c73b423b0c8cbba81",
-    "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca"
+    "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca",
+    "ZNMethodFinderM2Engine.mm": "947dad820de698b085028509fcdaff8a3e3ea39a372c066ae5a50d523ec61f8f",
+    "ZNMethodFinderM2Engine.h": "cf278f2f175b37714689e07e2ac7a1c246fdb0880a4268f5c124a0e7d2c46449"
   }
 }

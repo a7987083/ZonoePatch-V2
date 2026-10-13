@@ -15,17 +15,22 @@ def expanded_ui(root=ROOT):
     text=text.replace('// UI_INCLUDE_DIAGNOSTICS_END\n#pragma clang diagnostic pop\n','')
     text=re.sub(r'^.*// UI_MODULE_IMPORT\n','',text,flags=re.M)
     text=INCLUDE.sub(replace,text)
-    review=root/'iosruntimepatchmenu/tests/ui_reviewed_edits.json'
-    if review.exists():
-        for edit in json.loads(review.read_text())['edits']:
-            assert text.count(edit['after'])==1,'UI reviewed edit changed: '+edit['path']
-            text=text.replace(edit['after'],edit['before'])
     def relocated(m):
         path=source/m[1]
         content=path.read_text();start='// UI_RELOCATED_BEGIN '+m[2]+'\n';end='// UI_RELOCATED_END '+m[2]+'\n'
         region=content.split(start,1)[1].split(end,1)[0]
         return region.replace('ZN_UI_LINKAGE ','static ')
-    return re.sub(r'^// UI_RELOCATED: (ZNMenu[A-Za-z]+\.(?:mm|h)):(\w+)\n',relocated,text,flags=re.M)
+    pattern=r'^// UI_RELOCATED: ((?:ZNMenu[A-Za-z]+|ZNMethodFinderM2Engine)\.(?:mm|h)):(\w+)\n'
+    for _ in range(8):
+        if not re.search(pattern,text,re.M):break
+        text=re.sub(pattern,relocated,text,flags=re.M)
+    assert not re.search(pattern,text,re.M),'relocation cycle'
+    review=root/'iosruntimepatchmenu/tests/ui_reviewed_edits.json'
+    if review.exists():
+        for edit in json.loads(review.read_text())['edits']:
+            assert text.count(edit['after'])==1,'UI reviewed edit changed: '+edit['path']
+            text=text.replace(edit['after'],edit['before'])
+    return text
 def verify():
     manifest=json.loads((ROOT/'iosruntimepatchmenu/tests/ui_module_manifest.json').read_text())
     text=(SRC/'ZNUnifiedUI.mm').read_text()
