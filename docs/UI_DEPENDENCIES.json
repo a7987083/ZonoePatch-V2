@@ -476,14 +476,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNMethodFinderM21CancelUX)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        79
+        81
       ]
     },
     {

@@ -62,7 +62,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/finder/ZNIL2CPPMethodFinderM2.mm
 
 
-#include "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc"
+// UI_COMPILED_MODULE: ui/finder/ZNIL2CPPMethodFinderM21CancelUX.mm
 
 
 #include "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc"

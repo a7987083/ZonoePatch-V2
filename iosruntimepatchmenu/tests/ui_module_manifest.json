@@ -87,10 +87,11 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.mm",
       "historical_section": "ZNIL2CPPMethodFinderM21CancelUX.mm",
-      "sha256": "9272d611549391639f02eb402c613a3b173d4ccdab495a991ff0c868840fa023",
-      "category_count": 1
+      "sha256": "ea9e1ae21950193b858ea03fb846cc898b2329644f392ebe1760d7b7382ad4ea",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc",
@@ -351,6 +352,7 @@
     "ZNUIInstallationTrace.h": "6d7c3fd81dca11f1120c72a041679f0bb2d9b35a442a117c73b423b0c8cbba81",
     "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca",
     "ZNMethodFinderM2Engine.mm": "947dad820de698b085028509fcdaff8a3e3ea39a372c066ae5a50d523ec61f8f",
-    "ZNMethodFinderM2Engine.h": "19ba68530b3e96c93c3c55125387db8ef721cbe4fd26cb4794aaa993790a14a9"
+    "ZNMethodFinderM2Engine.h": "19ba68530b3e96c93c3c55125387db8ef721cbe4fd26cb4794aaa993790a14a9",
+    "ZNMethodFinderUIInternal.h": "f53acac2b5b59dd7a473b580f8e446f9aee6ab19dea4ce9e71c6e4b6c5734f5e"
   }
 }
