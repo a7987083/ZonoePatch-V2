@@ -14,9 +14,7 @@
 #import <errno.h>
 #import <string.h>
 
-static uint64_t ZNM462Align8(uint64_t value) {
-    return (value + 7ULL) & ~7ULL;
-}
+
 
 static BOOL ZNM462StringOffsetValid(const uint8_t *table,
                                     const ZNRuntimeActionHeader *header,

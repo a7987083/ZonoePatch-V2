@@ -911,7 +911,7 @@ static BOOL ZNNativeStaticPrepatchClear(ZNNativeHookAction *action,
     return YES;
 }
 
-static uint64_t ZNNativeAlign8(uint64_t value){return (value+7ULL)&~7ULL;}
+
 
 static uint64_t ZNNativeImageFingerprint(uint32_t count){
     uint64_t h=UINT64_C(1469598103934665603);

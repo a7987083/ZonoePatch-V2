@@ -19,6 +19,7 @@ jobs:
       - name: Source contracts
         run: |
           python3 scripts/ui_source.py
+          python3 scripts/check-cleanup.py
           python3 scripts/audit-compatibility.py
           python3 iosruntimepatchmenu/tests/retained_hook_contract.py
           bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh

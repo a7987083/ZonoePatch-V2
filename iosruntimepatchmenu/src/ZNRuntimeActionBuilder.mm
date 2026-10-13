@@ -16,7 +16,7 @@
 #import <errno.h>
 #include <string.h>
 
-static uint64_t ZNRABAlign8(uint64_t value) { return (value + 7ULL) & ~7ULL; }
+
 
 static BOOL ZNRABAppendString(NSMutableData *data, NSString *value, uint32_t *offset, NSString **error) {
     NSData *utf8=[(value?:@"") dataUsingEncoding:NSUTF8StringEncoding]; if(!utf8)utf8=[NSData data];

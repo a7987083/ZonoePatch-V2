@@ -11,7 +11,7 @@
 #import <mach-o/loader.h>
 #include <string.h>
 
-static uint64_t ZNRARAlign8(uint64_t value){return(value+7ULL)&~7ULL;}
+
 static uint64_t ZNRARMixFingerprint(uint64_t h,uint64_t v){h^=v;h*=1099511628211ULL;return h;}
 static uint64_t ZNRARImageFingerprint(uint32_t imageCount){
     uint64_t h=1469598103934665603ULL;h=ZNRARMixFingerprint(h,imageCount);
