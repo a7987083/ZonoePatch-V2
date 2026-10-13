@@ -23,6 +23,7 @@ typedef void (*ZNM462GCHandleFreeFn)(ZNM462GCHandle handle);
 @property(nonatomic,assign) BOOL handleBacked;
 @property(nonatomic,assign) ZNM462GCHandle handle;
 @property(nonatomic,assign) uintptr_t fallbackAddress;
+@property(nonatomic,assign) CFAbsoluteTime fallbackSelectedAt;
 @end
 @implementation ZNM462Selection
 @end
@@ -86,7 +87,18 @@ static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
         selection = ZNM462Store()[key];
     }
     if (!selection) return 0;
-    if (!selection.handleBacked) return selection.fallbackAddress;
+    if (!selection.handleBacked) {
+        // Compatibility mode is explicit and leased; a raw address is not a GC root.
+        if(![NSUserDefaults.standardUserDefaults boolForKey:@"zonoe.compat.raw-receiver.enabled"] ||
+           CFAbsoluteTimeGetCurrent()-selection.fallbackSelectedAt>30.0) {
+            [self znm44_clearSelectedInstanceForAssembly:assembly namespace:namespaceName className:className];
+            return 0;
+        }
+        NSString *validationError=nil;
+        if(![self znm44_validateInstanceAddress:selection.fallbackAddress assembly:assembly
+                                     namespace:namespaceName className:className error:&validationError])return 0;
+        return selection.fallbackAddress;
+    }
 
     ZNM462GCHandleGetTargetFn getFn = NULL;
     if (!ZNM462GCAPI(NULL, &getFn, NULL) || !getFn) {
@@ -152,9 +164,14 @@ static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
         // Some stripped/older games do not export all three GCHandle APIs. Keep
         // the device-proven M4.4 behavior as a compatibility fallback rather
         // than disabling instance execution globally.
+        if(![NSUserDefaults.standardUserDefaults boolForKey:@"zonoe.compat.raw-receiver.enabled"]) {
+            if(error)*error=@"目标缺少 GCHandle API；默认不缓存 raw receiver。兼容模式需显式开启，且未提供 GC 生命周期保证";
+            return NO;
+        }
         selection.handleBacked = NO;
         selection.handle = 0;
         selection.fallbackAddress = address;
+        selection.fallbackSelectedAt=CFAbsoluteTimeGetCurrent();
     }
 
     NSString *key = ZNIL2CPPConservativeInstanceKey(assembly, namespaceName, className);
