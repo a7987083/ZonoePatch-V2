@@ -14,6 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Source contracts
         run: |
+          python3 iosruntimepatchmenu/tests/retained_hook_contract.py
           bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh
           python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report topology.json || echo 'BASELINE topology drift recorded; not waived for final acceptance'
       - name: Foundation baseline tests

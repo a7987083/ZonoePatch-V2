@@ -1763,6 +1763,26 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 }
 
 - (BOOL)removeTemporaryHookForCandidate:(NSDictionary<NSString *,id> *)candidate error:(NSString **)error {
+    @synchronized(self) {
+        uintptr_t target=[candidate[@"methodPointer"] unsignedLongLongValue];
+        if(!target)target=[self.liveCandidate[@"methodPointer"] unsignedLongLongValue];
+        if(!target){if(error)*error=@"No captured temporary Hook target; refusing resolver-based teardown";return NO;}
+        ZNNativeSlot *a=ZNNativeSlotForTarget(target);
+        ZNManagedCallbackSlot *b=ZNManagedCallbackSlotForTarget(target);
+        ZNReturnBoolSlot *c=ZNReturnBoolSlotForTarget(target);
+        ZNStructFieldSlot *d=ZNStructFieldSlotForTarget(target);
+        if((a&&a->actionID.load())||(b&&b->actionID.load())||(c&&c->actionID.load())||(d&&d->actionID.load())){
+            if(error)*error=@"Permanent Hook cannot be retired from temporary test path";return NO;
+        }
+        if(a)a->enabled.store(0,std::memory_order_release);
+        if(b)b->enabled.store(0,std::memory_order_release);
+        if(c)c->enabled.store(0,std::memory_order_release);
+        if(d)d->enabled.store(0,std::memory_order_release);
+        self.liveLifecycle=@"disabled-retained";self.liveError=@"";
+        return YES;
+    }
+}
+- (BOOL)zn_legacyDestroyTemporaryHookAfterExternalQuiescence:(NSDictionary<NSString *,id> *)candidate error:(NSString **)error {
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     NSString *assembly=ZNNativeString(candidate[@"assembly"]);if(!assembly.length)assembly=@"Assembly-CSharp.dll";
@@ -2319,7 +2339,27 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     }
 }
 
+// Retire semantically, never reclaim a trampoline while native callers may be in flight.
+// Historical destructive implementation is retained below but is not a public path.
 - (BOOL)removeAction:(ZNNativeHookAction *)action error:(NSString **)error {
+    if(!action||!action.actionID)return YES;
+    @synchronized(self) {
+        ZNNativeHookRegistryEntry *entry=ZNNativeHookRegistryFind(action.actionID);
+        if(!entry)return YES;
+        void *raw=(void *)entry->slot.load(std::memory_order_acquire);
+        if(!raw)return YES;
+        switch((ZNNativeHookSlotKind)entry->kind.load(std::memory_order_relaxed)) {
+            case ZNNativeHookSlotKindArgScale:((ZNNativeSlot *)raw)->enabled.store(0,std::memory_order_release);break;
+            case ZNNativeHookSlotKindStructField:((ZNStructFieldSlot *)raw)->enabled.store(0,std::memory_order_release);break;
+            case ZNNativeHookSlotKindReturnBool:((ZNReturnBoolSlot *)raw)->enabled.store(0,std::memory_order_release);break;
+            case ZNNativeHookSlotKindManagedCallback:((ZNManagedCallbackSlot *)raw)->enabled.store(0,std::memory_order_release);break;
+            default:if(error)*error=@"Unknown retained Hook slot kind";return NO;
+        }
+        [[ZNRuntimeLogger sharedLogger] log:@"[native-hook-retire] disabled; trampoline/registry retained until process exit"];
+        return YES;
+    }
+}
+- (BOOL)zn_legacyDestroyActionAfterExternalQuiescence:(ZNNativeHookAction *)action error:(NSString **)error {
     // Serialize runtime installers, state updates and teardown under one owner.
     @synchronized(self) {
     if(!action||!action.actionID)return YES;
