@@ -100,7 +100,12 @@ BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
                                   NSArray<NSString *> **outputs, NSString **report, NSString **error) {
     if(!workspace || workspace.hasAnyApplied){if(error)*error=@"生成前必须恢复所有临时 Runtime Patch";return NO;}
     ZNBuildSession *session=[ZNBuildSession captureWorkspace:workspace];
-    return [session perform:^BOOL{
-        return ZNBuildExecutorBuildSessionWorkspace(session.workspace,outputs,report,error);
+    __block NSArray<NSString *> *localOutputs=nil;
+    __block NSString *localReport=nil,*localError=nil;
+    BOOL ok=[session perform:^BOOL{
+        return ZNBuildExecutorBuildSessionWorkspace(session.workspace,&localOutputs,&localReport,&localError);
     }];
+    if(outputs)*outputs=localOutputs;if(report)*report=localReport;
+    if(error)*error=localError ?: (ok?nil:@"Nested or failed BuildSession");
+    return ok;
 }
