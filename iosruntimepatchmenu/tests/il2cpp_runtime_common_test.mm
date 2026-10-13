@@ -8,6 +8,7 @@ static void AssertEqual(NSString *actual, NSString *expected) {
 
 int main(void) {
     @autoreleasepool {
+        ZNRuntimeExecutionScope execution;
         AssertEqual(ZNIL2CPPTrim(nil), @"");
         AssertEqual(ZNIL2CPPTrim(@"  Foo.Bar  \n"), @"Foo.Bar");
 

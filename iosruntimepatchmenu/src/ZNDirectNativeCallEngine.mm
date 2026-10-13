@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #include "ZNScalarParser.h"
 #import "ZNDirectNativeCallEngine.h"
 #import "ZNIL2CPPABIMetadata.h"
@@ -50,6 +51,7 @@ typedef void *(*ZNDNCClassFromNameFn)(const void *,const char *,const char *);
 typedef int32_t (*ZNDNCClassValueSizeFn)(void *,uint32_t *);
 
 static int32_t ZNDNCObscuredIntValueSize(NSString *imagePath, NSString **error) {
+    ZNRuntimeExecutionScope znExecution;
     ZNDNCDomainGetFn domainGet=(ZNDNCDomainGetFn)ZNIL2CPPResolveSymbol(imagePath,"il2cpp_domain_get");
     ZNDNCDomainGetAssembliesFn assembliesFn=(ZNDNCDomainGetAssembliesFn)ZNIL2CPPResolveSymbol(imagePath,"il2cpp_domain_get_assemblies");
     ZNDNCAssemblyGetImageFn imageFn=(ZNDNCAssemblyGetImageFn)ZNIL2CPPResolveSymbol(imagePath,"il2cpp_assembly_get_image");
@@ -77,6 +79,7 @@ static int32_t ZNDNCObscuredIntValueSize(NSString *imagePath, NSString **error) 
 }
 
 static BOOL ZNDNCPrepareObscuredIntIndirect(NSString *text, void **outBuffer, NSString **error) {
+    ZNRuntimeExecutionScope znExecution;
     if(outBuffer)*outBuffer=NULL;
     int64_t parsed=0;
     if(!ZNDNCParseSigned(text,&parsed)||parsed<INT32_MIN||parsed>INT32_MAX){
@@ -223,6 +226,7 @@ static uintptr_t ZNDNCCall(uintptr_t target, const uintptr_t *a, NSUInteger coun
 - (NSDictionary<NSString *,id> *)executeCandidate:(NSDictionary<NSString *,id> *)candidate
                                     argumentValues:(NSArray<NSString *> *)argumentValues
                                              error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     NSString *reason=nil;
     if(![self supportsCandidate:candidate reason:&reason]){if(error)*error=reason;return nil;}
     NSDictionary *abi=ZNIL2CPPDescribeMethodABI(candidate);
@@ -273,6 +277,7 @@ static uintptr_t ZNDNCCall(uintptr_t target, const uintptr_t *a, NSUInteger coun
     uintptr_t methodInfo=[abi[@"methodInfo"] unsignedLongLongValue];
     argv[n++]=methodInfo;
     uintptr_t target=[abi[@"methodPointer"] unsignedLongLongValue];
+    if(!znExecution.retain(target,[candidate[@"runtimeImageIncarnation"] unsignedLongLongValue])){for(NSUInteger j=0;j<ownedCount;j++)free(ownedStructs[j]);if(error)*error=@"Direct Native execution identity unavailable";return nil;}
     uintptr_t rawReturn=ZNDNCCall(target,argv,n);
     for(NSUInteger j=0;j<ownedCount;j++)free(ownedStructs[j]);
 

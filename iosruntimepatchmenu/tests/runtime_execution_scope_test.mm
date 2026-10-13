@@ -1,0 +1,8 @@
+#include "ZNRuntimeExecutionScope.h"
+#include <cassert>
+#include <thread>
+#include <atomic>
+int main(int argc,char **argv){assert(argc==2);ZNCurrentImageGeneration();void *external=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(external);auto f=(int(*)(void))dlsym(external,"FixtureRun");Dl_info info={};assert(dladdr((void *)f,&info));auto state=ZNImageLifetimeForHeader((uintptr_t)info.dli_fbase);assert(state);uint64_t generation=state->incarnation;
+ {ZNRuntimeExecutionScope scope;assert(scope.retain((uintptr_t)f,generation));{ZNRuntimeExecutionScope reentry;assert(reentry.retain((uintptr_t)f,generation));assert(f()==42);}assert(state->executions.inFlight()==1);assert(dlclose(external)==0);assert(state->live&&f()==42);std::thread independent([&]{ZNRuntimeExecutionScope other;assert(other.retain((uintptr_t)f,generation));assert(f()==42);});independent.join();assert(state->executions.inFlight()==1);assert(!scope.retain((uintptr_t)f,generation+1));}
+ assert(!state->live&&state->executions.inFlight()==0);assert(state->executions.drain(std::chrono::milliseconds(1)));
+ external=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(external);auto fresh=(int(*)(void))dlsym(external,"FixtureRun");{ZNRuntimeExecutionScope scope;assert(!scope.retain((uintptr_t)fresh,generation));auto resolved=(int(*)(void))scope.resolve(argv[1],"FixtureRun");assert(resolved&&resolved()==42);}assert(dlclose(external)==0);assert(!ZNResolveExecutionSymbol(nullptr,"malloc"));puts("production execution owner/nested reentry/independent concurrency/external dlclose/drain/reload old identity rejection PASS");}

@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNRuntimeArgumentMarshaller.h"
 #import <dlfcn.h>
 #import <limits.h>
@@ -19,16 +20,8 @@ typedef void *(*ZNMARRuntimeInvokeFn)(const void *, void *, void **, void **);
 typedef void *(*ZNMARObjectUnboxFn)(void *);
 
 
-static void *ZNMARSymbol(NSString *imagePath, const char *name) {
-    void *symbol = dlsym(RTLD_DEFAULT, name);
-    if (symbol || !imagePath.length) return symbol;
-#ifdef RTLD_NOLOAD
-    void *handle = dlopen(imagePath.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *handle = dlopen(imagePath.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return handle ? dlsym(handle, name) : NULL;
-}
+static void *ZNMARSymbol(NSString *imagePath, const char *name) {return ZNResolveExecutionSymbol(imagePath.fileSystemRepresentation,name);}
+
 
 @implementation ZNRuntimeArgumentMarshaller
 
@@ -57,6 +50,7 @@ static void *ZNMARSymbol(NSString *imagePath, const char *name) {
                                                size:(NSUInteger)size
                                           imagePath:(NSString *)imagePath
                                               error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     ZNMARClassGetMethodsFn getMethods = (ZNMARClassGetMethodsFn)ZNMARSymbol(imagePath, "il2cpp_class_get_methods");
     ZNMARMethodGetNameFn getName = (ZNMARMethodGetNameFn)ZNMARSymbol(imagePath, "il2cpp_method_get_name");
     ZNMARMethodGetParamCountFn getCount = (ZNMARMethodGetParamCountFn)ZNMARSymbol(imagePath, "il2cpp_method_get_param_count");
@@ -168,6 +162,7 @@ static void *ZNMARSymbol(NSString *imagePath, const char *name) {
                                                         input:(NSString *)text
                                                     imagePath:(NSString *)imagePath
                                                         error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (!methodInfo || index > UINT32_MAX) {
         if (error) *error = @"FAILED_STRUCT_ABI：缺少 MethodInfo 或参数序号无效";
         return nil;

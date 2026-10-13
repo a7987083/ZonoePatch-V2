@@ -13,7 +13,7 @@ done
 cmp "$work/baseline/fixture.dylib" "$work/current/fixture.dylib"
 echo 'production signer baseline/current complete-byte equivalence PASS'
 
-clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticRVAProtection.mm iosruntimepatchmenu/tests/macho_writer_rejection_test.mm -o "$work/writer-test"
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticRVAProtection.mm iosruntimepatchmenu/tests/macho_writer_rejection_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work/writer-test"
 "$work/writer-test"
 # Compatibility builder is retained and gets source compilation coverage even
 # though the production Makefile routes only to V3/runtime-only.
@@ -40,7 +40,7 @@ cmp "$work/runtime-baseline/output/fixture.dylib" "$work/runtime-current/output/
 echo 'extracted production runtime-only target generation baseline/current complete-byte equivalence PASS'
 
 python3 scripts/extract-builder-combinations.py "$work/combinations.mm"
-clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work/combinations-test"
 "$work/combinations-test" "$work/combinations"
 mkdir -p dist
 cp "$work/combinations.json" dist/production-builder-extraction.json
@@ -57,10 +57,10 @@ done
 test "$verified_count" = 5
 echo 'production combination outputs independent iOS ARM64 CodeDirectory page hashes PASS'
 
-clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-fault-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work/combinations-fault-test"
 "$work/combinations-fault-test" "$work/fault-combinations"
 
 python3 scripts/extract-executor-transaction-fixture.py "$work/executor.mm"
-clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/executor.mm" iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNBuildItem.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/executor-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/executor.mm" iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNBuildItem.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work/executor-test"
 "$work/executor-test" "$work/executor"
 cp "$work/executor.json" dist/production-executor-extraction.json

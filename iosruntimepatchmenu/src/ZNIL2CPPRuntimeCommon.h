@@ -1,3 +1,5 @@
+#pragma once
+#include "ZNRuntimeExecutionScope.h"
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 
@@ -37,15 +39,7 @@ static inline NSString *ZNIL2CPPConservativeInstanceKey(NSString * _Nullable ass
 
 static inline void * _Nullable ZNIL2CPPResolveSymbol(NSString * _Nullable imagePath,
                                                       const char * _Nullable name) {
-    if (!name) return NULL;
-    void *symbol = dlsym(RTLD_DEFAULT, name);
-    if (symbol || !imagePath.length) return symbol;
-#ifdef RTLD_NOLOAD
-    void *handle = dlopen(imagePath.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *handle = dlopen(imagePath.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return handle ? dlsym(handle, name) : NULL;
+    return ZNResolveExecutionSymbol(imagePath.fileSystemRepresentation,name);
 }
 
 NS_ASSUME_NONNULL_END

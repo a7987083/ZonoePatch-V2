@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
@@ -12,16 +13,8 @@ typedef void *(*ZNM48ObjectUnboxFn)(void *obj);
 
 static NSString *gZNM48PendingReturnSummary = nil;
 
-static void *ZNM48Symbol(NSString *path, const char *name) {
-    void *p = dlsym(RTLD_DEFAULT, name);
-    if (p || !path.length) return p;
-#ifdef RTLD_NOLOAD
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return h ? dlsym(h, name) : NULL;
-}
+static void *ZNM48Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+
 
 static NSString *ZNM48PointerString(uintptr_t value) {
     return [NSString stringWithFormat:@"0x%llX", (unsigned long long)value];
@@ -30,6 +23,7 @@ static NSString *ZNM48PointerString(uintptr_t value) {
 static NSDictionary<NSString *, id> *ZNM48DecodeReturn(NSDictionary<NSString *, id> *abi,
                                                          uintptr_t rawObject,
                                                          NSString *unityPath) {
+    ZNRuntimeExecutionScope znExecution;
     NSDictionary *ret = [abi[@"return"] isKindOfClass:NSDictionary.class] ? abi[@"return"] : @{};
     NSString *typeName = [ret[@"name"] isKindOfClass:NSString.class] ? ret[@"name"] : @"?";
     ZNIL2CPPABIValueKind kind = (ZNIL2CPPABIValueKind)[ret[@"kind"] integerValue];
@@ -133,6 +127,7 @@ static NSDictionary<NSString *, id> *ZNM48DecodeReturn(NSDictionary<NSString *, 
 
 static NSDictionary<NSString *, id> *ZNM48ReturnMetadataForAction(ZNRuntimeMethodAction *action,
                                                                     NSDictionary<NSString *, id> *result) {
+    ZNRuntimeExecutionScope znExecution;
     uintptr_t methodInfo = [result[@"methodInfo"] unsignedLongLongValue];
     if (!methodInfo || !action) return @{};
 
@@ -176,6 +171,7 @@ static NSDictionary<NSString *, id> *ZNM48ReturnMetadataForAction(ZNRuntimeMetho
 @implementation ZNIL2CPPInvokeEngine (ZNM48ReturnCapture)
 
 - (NSDictionary<NSString *, id> *)znm48_executeAction:(ZNRuntimeMethodAction *)action error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     NSDictionary *base = [self znm48_executeAction:action error:error];
     if (!base) return nil;
 

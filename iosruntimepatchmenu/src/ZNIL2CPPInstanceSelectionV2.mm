@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNIL2CPPInstanceSelectionV2.h"
 #import "ZNIL2CPPInstanceResolver.h"
 #import "ZNIL2CPPResolver.h"
@@ -30,6 +31,7 @@ static void *ZNM44ResolveClass(NSString *assembly,
                                NSString *namespaceName,
                                NSString *className,
                                NSString **error) {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *resolver = [ZNIL2CPPResolver sharedResolver];
     [resolver refresh];
     if (!resolver.isAvailable) {
@@ -97,6 +99,7 @@ static void *ZNM44ResolveClass(NSString *assembly,
                             namespace:(NSString *)namespaceName
                             className:(NSString *)className
                                 error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (!address) {
         if (error) *error = @"实例地址为空";
         return NO;
@@ -130,6 +133,7 @@ static void *ZNM44ResolveClass(NSString *assembly,
                           namespace:(NSString *)namespaceName
                           className:(NSString *)className
                               error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     NSString *validationError = nil;
     if (![self znm44_validateInstanceAddress:address assembly:assembly namespace:namespaceName className:className error:&validationError]) {
         if (error) *error = validationError;
@@ -150,6 +154,7 @@ static void *ZNM44ResolveClass(NSString *assembly,
                                                className:(NSString *)className
                                              diagnostics:(NSString **)diagnostics
                                                    error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     uintptr_t selected = [self znm44_selectedInstanceForAssembly:assembly namespace:namespaceName className:className];
     if (selected) {
         NSString *validationError = nil;

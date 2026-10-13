@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
@@ -21,16 +22,8 @@ typedef void *(*ZNM47RuntimeInvokeFn)(const void *, void *, void **, void **);
 typedef uint32_t (*ZNM47MethodGetFlagsFn)(const void *, uint32_t *);
 typedef void *(*ZNM47StringNewFn)(const char *);
 
-static void *ZNM47Symbol(NSString *path, const char *name) {
-    void *p = dlsym(RTLD_DEFAULT, name);
-    if (p || !path.length) return p;
-#ifdef RTLD_NOLOAD
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return h ? dlsym(h, name) : NULL;
-}
+static void *ZNM47Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+
 
 static NSString *ZNM47Trim(NSString *s) {
     return [s ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
@@ -150,6 +143,7 @@ static void *ZNM47InstanceForAction(ZNRuntimeMethodAction *action, NSString **di
 @implementation ZNIL2CPPInvokeEngine (ZNM47MultiArgInvoke)
 
 - (NSDictionary<NSString *,id> *)znm47_executeAction:(ZNRuntimeMethodAction *)action error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (!action || action.argumentCount < 2) return [self znm47_executeAction:action error:error];
     if (action.argumentCount > ZN_RUNTIME_ACTION_MAX_ARGUMENTS) {
         if (error) *error = [NSString stringWithFormat:@"FAILED_UNSUPPORTED_ARGUMENT：M4.7 最多 %u 个参数", ZN_RUNTIME_ACTION_MAX_ARGUMENTS];

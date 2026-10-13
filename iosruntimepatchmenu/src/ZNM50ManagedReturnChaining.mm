@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
@@ -25,20 +26,13 @@ typedef void (*ZNM50GCHandleFreeFn)(ZNM50GCHandle handle);
 static ZNM50ManagedReturnState *gZNM50State = nil;
 static uint64_t gZNM50Generation = 0;
 
-static void *ZNM50Symbol(NSString *path, const char *name) {
-    void *p = dlsym(RTLD_DEFAULT, name);
-    if (p || !path.length) return p;
-#ifdef RTLD_NOLOAD
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *h = dlopen(path.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return h ? dlsym(h, name) : NULL;
-}
+static void *ZNM50Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+
 
 static BOOL ZNM50GCAPI(ZNM50GCHandleNewFn *newFn,
                        ZNM50GCHandleGetTargetFn *getFn,
                        ZNM50GCHandleFreeFn *freeFn) {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *resolver = [ZNIL2CPPResolver sharedResolver];
     [resolver refresh];
     NSString *path = resolver.unityPath ?: @"";
@@ -52,12 +46,14 @@ static BOOL ZNM50GCAPI(ZNM50GCHandleNewFn *newFn,
 }
 
 static void ZNM50ReleaseState(ZNM50ManagedReturnState *state) {
+    ZNRuntimeExecutionScope znExecution;
     if (!state || !state.handle) return;
     ZNM50GCHandleFreeFn freeFn = NULL;
     if (ZNM50GCAPI(NULL, NULL, &freeFn) && freeFn) freeFn(state.handle);
 }
 
 static uintptr_t ZNM50CurrentManagedReturn(void) {
+    ZNRuntimeExecutionScope znExecution;
     ZNM50ManagedReturnState *state = nil;
     @synchronized (ZNIL2CPPInvokeEngine.class) { state = gZNM50State; }
     if (!state) return 0;
@@ -68,6 +64,7 @@ static uintptr_t ZNM50CurrentManagedReturn(void) {
 }
 
 static void ZNM50CaptureManagedReturn(uintptr_t object, NSString *typeName) {
+    ZNRuntimeExecutionScope znExecution;
     if (!object) return;
     ZNM50ManagedReturnState *next = [ZNM50ManagedReturnState new];
     next.typeName = typeName ?: @"?";
@@ -103,6 +100,7 @@ static void ZNM50CaptureManagedReturn(uintptr_t object, NSString *typeName) {
 @implementation ZNIL2CPPInvokeEngine (ZNM50ManagedReturnChaining)
 
 - (NSDictionary<NSString *,id> *)znm50_executeAction:(ZNRuntimeMethodAction *)action error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPInstanceResolver *resolver = [ZNIL2CPPInstanceResolver sharedResolver];
     uintptr_t chain = ZNM50CurrentManagedReturn();
     uintptr_t previous = 0;

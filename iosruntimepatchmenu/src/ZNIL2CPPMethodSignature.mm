@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNIL2CPPMethodSignature.h"
 
 #import "ZNIL2CPPABIMetadata.h"
@@ -38,16 +39,8 @@ static NSString *ZNM46String(const char *raw) {
     return [NSString stringWithUTF8String:raw] ?: @"";
 }
 
-static void *ZNM46Symbol(NSString *unityPath, const char *name) {
-    void *p = dlsym(RTLD_DEFAULT, name);
-    if (p || !unityPath.length) return p;
-#ifdef RTLD_NOLOAD
-    void *handle = dlopen(unityPath.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *handle = dlopen(unityPath.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return handle ? dlsym(handle, name) : nullptr;
-}
+static void *ZNM46Symbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.fileSystemRepresentation,name);}
+
 
 static NSString *ZNM46TypeName(TypeGetNameFn typeGetName, Il2CppFreeFn il2cppFree, const void *type) {
     if (!typeGetName || !type) return @"?";
@@ -158,6 +151,7 @@ NSString *ZNIL2CPPShortSignature(NSString *methodName, NSArray<NSString *> *para
                                            method:(NSString *)methodName
                                parameterTypeNames:(NSArray<NSString *> *)parameterTypeNames
                                             error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *base = [ZNIL2CPPResolver sharedResolver];
     [base refresh];
     if (!base.isAvailable) {

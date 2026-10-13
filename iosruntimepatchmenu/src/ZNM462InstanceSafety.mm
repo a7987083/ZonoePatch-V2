@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
@@ -38,6 +39,7 @@ static NSMutableDictionary<NSString *, ZNM462Selection *> *ZNM462Store(void) {
 static BOOL ZNM462GCAPI(ZNM462GCHandleNewFn *newFn,
                         ZNM462GCHandleGetTargetFn *getFn,
                         ZNM462GCHandleFreeFn *freeFn) {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *resolver = [ZNIL2CPPResolver sharedResolver];
     [resolver refresh];
     NSString *path = resolver.unityPath ?: @"";
@@ -51,6 +53,7 @@ static BOOL ZNM462GCAPI(ZNM462GCHandleNewFn *newFn,
 }
 
 static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
+    ZNRuntimeExecutionScope znExecution;
     if (!selection || !selection.handleBacked || !selection.handle) return;
     ZNM462GCHandleFreeFn freeFn = NULL;
     if (ZNM462GCAPI(NULL, NULL, &freeFn) && freeFn) {
@@ -81,6 +84,7 @@ static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
 - (uintptr_t)znm462_selectedInstanceForAssembly:(NSString *)assembly
                                        namespace:(NSString *)namespaceName
                                        className:(NSString *)className {
+    ZNRuntimeExecutionScope znExecution;
     NSString *key = ZNIL2CPPConservativeInstanceKey(assembly, namespaceName, className);
     __block ZNM462Selection *selection = nil;
     @synchronized (ZNM462Store()) {
@@ -120,6 +124,7 @@ static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
                             namespace:(NSString *)namespaceName
                             className:(NSString *)className
                                 error:(NSString * _Nullable * _Nullable)error {
+    ZNRuntimeExecutionScope znExecution;
     NSString *validationError = nil;
     if (![self znm44_validateInstanceAddress:address
                                     assembly:assembly
@@ -193,6 +198,7 @@ static void ZNM462ReleaseSelection(ZNM462Selection *selection) {
 - (void)znm462_clearSelectedInstanceForAssembly:(NSString *)assembly
                                         namespace:(NSString *)namespaceName
                                         className:(NSString *)className {
+    ZNRuntimeExecutionScope znExecution;
     NSString *key = ZNIL2CPPConservativeInstanceKey(assembly, namespaceName, className);
     ZNM462Selection *selection = nil;
     @synchronized (ZNM462Store()) {

@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNIL2CPPInstanceResolver.h"
 #import "ZNIL2CPPResolver.h"
 #import "ZNPatchCore.h"
@@ -47,16 +48,8 @@ static NSString *ZNIRString(const char *value) {
     return s ?: @"";
 }
 
-static void *ZNIRResolveSymbol(NSString *unityPath, const char *name) {
-    void *p = dlsym(RTLD_DEFAULT, name);
-    if (p || !unityPath.length) return p;
-#ifdef RTLD_NOLOAD
-    void *handle = dlopen(unityPath.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    void *handle = dlopen(unityPath.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    return handle ? dlsym(handle, name) : NULL;
-}
+static void *ZNIRResolveSymbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.fileSystemRepresentation,name);}
+
 
 static void ZNIRCollectObjects(void **objects, int count, void *userdata) {
     if (!objects || count <= 0 || !userdata) return;
@@ -93,6 +86,7 @@ static void *ZNIRReallocate(void *ptr, size_t size, void *userdata) {
 }
 
 - (NSDictionary<NSString *,id> *)capabilities {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *resolver = [ZNIL2CPPResolver sharedResolver];
     [resolver refresh];
     NSString *path = resolver.unityPath ?: @"";
@@ -121,6 +115,7 @@ static void *ZNIRReallocate(void *ptr, size_t size, void *userdata) {
                                                  limit:(NSUInteger)limit
                                            diagnostics:(NSString **)diagnostics
                                                  error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     limit = MAX((NSUInteger)1, MIN(limit ?: 32, (NSUInteger)128));
     NSString *wantedClass = ZNIRTrim(className);
     if (!wantedClass.length) {
@@ -246,6 +241,7 @@ static void *ZNIRReallocate(void *ptr, size_t size, void *userdata) {
                                  className:(NSString *)className
                                diagnostics:(NSString **)diagnostics
                                      error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     NSString *diag = nil;
     NSString *innerError = nil;
     NSArray<NSNumber *> *items = [self candidateAddressesForAssembly:assembly

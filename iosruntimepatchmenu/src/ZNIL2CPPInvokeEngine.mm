@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #include "ZNScalarParser.h"
 #import "ZNIL2CPPInvokeEngine.h"
 #import "ZNRuntimeActionModel.h"
@@ -90,6 +91,7 @@ static NSString *ZNInvokeParameterReason(NSDictionary *param) {
 }
 
 - (NSDictionary<NSString *,id> *)capabilities {
+    ZNRuntimeExecutionScope znExecution;
     ZNIL2CPPResolver *resolver = [ZNIL2CPPResolver sharedResolver];
     [resolver refresh];
     ZNRuntimeInvokeFn runtimeInvoke = (ZNRuntimeInvokeFn)ZNIL2CPPResolveSymbol(resolver.unityPath, "il2cpp_runtime_invoke");
@@ -111,6 +113,7 @@ static NSString *ZNInvokeParameterReason(NSDictionary *param) {
 }
 
 - (NSDictionary<NSString *,id> *)executeAction:(ZNRuntimeMethodAction *)action error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (!action) {
         if (error) *error = @"Runtime Method Call action 为空";
         return nil;
@@ -127,6 +130,7 @@ static NSString *ZNInvokeParameterReason(NSDictionary *param) {
 - (NSDictionary<NSString *,id> *)executeAction:(ZNRuntimeMethodAction *)action
                                        receiver:(uintptr_t)receiver
                                           error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (!receiver) return [self executeAction:action error:error];
     uintptr_t previous = gZNExplicitReceiverOverride;
     gZNExplicitReceiverOverride = receiver;
@@ -143,6 +147,7 @@ static NSString *ZNInvokeParameterReason(NSDictionary *param) {
                                           method:(NSString *)methodName
                                    argumentCount:(NSUInteger)argumentCount
                                            error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     return [self executeAssembly:assembly
                        namespace:namespaceName
                        className:className
@@ -159,6 +164,7 @@ static NSString *ZNInvokeParameterReason(NSDictionary *param) {
                                    argumentCount:(NSUInteger)argumentCount
                                   argumentValues:(NSArray<NSString *> *)argumentValues
                                            error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
     if (argumentCount > 1) {
         if (error) *error = [NSString stringWithFormat:@"FAILED_UNSUPPORTED_ARGUMENT：M4.3 V1 支持 /0 与 /1；当前=%lu", (unsigned long)argumentCount];
         return nil;
