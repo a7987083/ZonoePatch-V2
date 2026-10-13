@@ -102,12 +102,14 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
         [finalOutputs addObject:mapped ?: path];
     }
 
+    BOOL reportFound=NO;
     for (NSString *path in finalOutputs) {
         if (![path.lastPathComponent isEqualToString:@"build_report.json"]) continue;
+        reportFound=YES;
         NSData *data = [NSData dataWithContentsOfFile:path];
-        if (!data.length) continue;
+        if (!data.length){if(error)*error=@"Missing build_report.json bytes";return NO;}
         NSMutableDictionary *object = [[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil] mutableCopy];
-        if (![object isKindOfClass:NSMutableDictionary.class]) continue;
+        if (![object isKindOfClass:NSMutableDictionary.class]){if(error)*error=@"Malformed build_report.json";return NO;}
 
         object[@"generatedBinaryPipeline"] = @{
             @"mode": @"m5.6.2-rw-value-cell",
@@ -157,6 +159,7 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
         break;
     }
 
+    if(!reportFound){if(error)*error=@"Builder returned no build_report.json";return NO;}
     if (outputs) *outputs = [finalOutputs copy];
     if (report) {
         *report = [NSString stringWithFormat:@"%@\nM5.6.2：Static Number/Slider 在构建期转换为 RW __ZNDATA Value Cell；运行时只写数据页，不修改 executable page。Value-cell=%lu。替换回 IPA 后仍需正常整包重签。",
