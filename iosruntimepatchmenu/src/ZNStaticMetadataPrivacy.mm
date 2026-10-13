@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNStaticMetadataPrivacy.h"
 #import "ZNStaticPatchFormat.h"
 #import "ZNFeatureMetadataCodec.h"
@@ -53,6 +54,9 @@ BOOL ZNScrubStaticDisplayMetadataAtPath(NSString *path,
     NSString *targetName = path.lastPathComponent.stringByDeletingPathExtension ?: @"";
 
     do {
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,size,checked,&reason)){localError=[NSString stringWithUTF8String:reason];break;}
+
         struct mach_header_64 *mh = (struct mach_header_64 *)base;
         if (mh->magic != MH_MAGIC_64) {
             localError = @"隐私 metadata 编码仅支持 thin 64-bit Mach-O";

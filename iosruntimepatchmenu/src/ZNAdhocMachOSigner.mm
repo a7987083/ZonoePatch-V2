@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNAdhocMachOSigner.h"
 #import <CommonCrypto/CommonDigest.h>
 #include <stdint.h>
@@ -74,6 +75,9 @@ static void ZNAppendBE32(NSMutableData *data, uint32_t value) {
 }
 
 static BOOL ZNParseSignLayout(uint8_t *base, uint64_t size, ZNSignLayout &layout, NSString **error) {
+    znmacho::File checked; const char *reason=nullptr;
+    if(!znmacho::parse(base,size,checked,&reason)){if(error)*error=[NSString stringWithUTF8String:reason];return NO;}
+
     if (size < sizeof(struct mach_header_64)) {
         if (error) *error = @"Mach-O 太小";
         return NO;
@@ -95,18 +99,9 @@ static BOOL ZNParseSignLayout(uint8_t *base, uint64_t size, ZNSignLayout &layout
     layout.execFileStart = UINT64_MAX;
     layout.execFlags = (mh->filetype == MH_EXECUTE) ? 1ULL : 0ULL;
 
-    uint8_t *cursor = base + sizeof(*mh);
-    uint8_t *limit = base + commandEnd;
-    for (uint32_t i = 0; i < mh->ncmds; i++) {
-        if (cursor + sizeof(struct load_command) > limit) {
-            if (error) *error = @"load command 损坏";
-            return NO;
-        }
+    for (const auto &command : checked.commands) {
+        uint8_t *cursor = base + command.offset;
         struct load_command *lc = (struct load_command *)cursor;
-        if (lc->cmdsize < sizeof(struct load_command) || cursor + lc->cmdsize > limit) {
-            if (error) *error = @"load command size 损坏";
-            return NO;
-        }
         if (lc->cmd == LC_CODE_SIGNATURE && lc->cmdsize >= sizeof(struct linkedit_data_command)) {
             struct linkedit_data_command *sig = (struct linkedit_data_command *)cursor;
             layout.codeSignatureCommandOffset = (uint64_t)(cursor - base);
@@ -123,7 +118,6 @@ static BOOL ZNParseSignLayout(uint8_t *base, uint64_t size, ZNSignLayout &layout
                 layout.execFileEnd = MAX(layout.execFileEnd, seg->fileoff + seg->filesize);
             }
         }
-        cursor += lc->cmdsize;
     }
 
     if (layout.codeSignatureCommandOffset == UINT64_MAX || !layout.signatureOffset || !layout.signatureSize) {

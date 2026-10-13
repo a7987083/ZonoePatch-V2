@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNRuntimeActionSignaturePostprocess.h"
 
 #import "ZNIL2CPPMethodSignature.h"
@@ -59,6 +60,9 @@ static BOOL ZNM46AugmentPath(NSString *path,
     NSString *localError = nil;
     NSUInteger fullCount = 0;
     do {
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,fileSize,checked,&reason)){localError=[NSString stringWithUTF8String:reason];break;}
+
         if (fileSize < sizeof(struct mach_header_64)) { localError = @"M4.6 生成物不是完整 Mach-O"; break; }
         struct mach_header_64 *mh = (struct mach_header_64 *)base;
         if (mh->magic != MH_MAGIC_64) { localError = @"M4.6 仅支持 thin 64-bit Mach-O"; break; }

@@ -29,6 +29,8 @@ jobs:
           /tmp/scalar-test
           clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/checked_layout_test.cpp -o /tmp/layout-test
           /tmp/layout-test
+          clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/macho_file_test.cpp -o /tmp/macho-test
+          /tmp/macho-test
       - name: Strict ownership module warnings
         run: bash scripts/check-module-warnings.sh
       - name: Foundation production regressions

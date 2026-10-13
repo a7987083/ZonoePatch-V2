@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNStaticRVAProtection.h"
 #import <mach-o/loader.h>
 #import <sys/mman.h>
@@ -43,6 +44,9 @@ BOOL ZN55ProtectStaticRVAsAtPath(NSString *path,
     NSUInteger total = 0;
 
     do {
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,size,checked,&reason)){localError=[NSString stringWithUTF8String:reason];break;}
+
         struct mach_header_64 *mh = (struct mach_header_64 *)base;
         if (mh->magic != MH_MAGIC_64) {
             localError = @"RVA Protection V1 仅支持 thin 64-bit Mach-O";

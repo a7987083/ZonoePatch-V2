@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNStaticValueCellV1.h"
 #import "ZNFeatureControlModel.h"
 #import "ZNIL2CPPOwningMethodResolver.h"
@@ -172,6 +173,9 @@ BOOL ZNStaticValueCellAugmentAtPath(NSString *path,NSUInteger *convertedEntries,
     size_t size=(size_t)st.st_size;uint8_t *base=(uint8_t *)mmap(NULL,size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);if(base==MAP_FAILED){close(fd);if(error)*error=@"value-cell mmap 失败";return NO;}
     BOOL ok=NO;NSString *local=nil;NSUInteger converted=0;
     do{
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,size,checked,&reason)){local=[NSString stringWithUTF8String:reason];break;}
+
         struct mach_header_64 *mh=(struct mach_header_64 *)base;if(mh->magic!=MH_MAGIC_64){local=@"value-cell 仅支持 thin arm64 Mach-O";break;}
         uint64_t commandEnd=sizeof(*mh)+(uint64_t)mh->sizeofcmds;if(commandEnd>size){local=@"value-cell load commands 越界";break;}
         uint64_t imageVMBase=UINT64_MAX;struct segment_command_64 *znText=NULL,*znData=NULL;struct section_64 *znDataSec=NULL;
