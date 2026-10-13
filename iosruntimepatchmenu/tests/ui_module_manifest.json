@@ -29,10 +29,11 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/features/ZNFeatureRuntimeControlsV2.inc",
+      "path": "ui/features/ZNFeatureRuntimeControlsV2.mm",
       "historical_section": "ZNFeatureRuntimeControlsV2.mm",
-      "sha256": "73fedaceed0327f927bde1422b2b09d49102865c8afa2a5a301a73e46ac2b04e",
-      "category_count": 1
+      "sha256": "af7474d8d8f8dd545ec1ff933f6be47e8191abc257038bc101a85d678ef1078e",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/shell/ZNPublicCompactUI.mm",

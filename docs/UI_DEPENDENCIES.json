@@ -283,14 +283,14 @@
       ]
     },
     {
-      "path": "ui/features/ZNFeatureRuntimeControlsV2.inc",
+      "path": "ui/features/ZNFeatureRuntimeControlsV2.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNFeatureRuntimeControlsV2)"
       ],
       "exchanges": 2,
       "sets": 0,
       "dynamicLookupLines": [
-        182
+        184
       ]
     },
     {

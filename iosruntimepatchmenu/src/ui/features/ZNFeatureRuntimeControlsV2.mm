@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNFeatureRuntimeControlsV2.mm
 #line 1 "ZNFeatureRuntimeControlsV2.mm"
 #import <Foundation/Foundation.h>
