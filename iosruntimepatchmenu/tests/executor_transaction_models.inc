@@ -1,6 +1,7 @@
 #import "ZNBuildOutputTransaction.h"
 #import "ZNBuildSession.h"
 #import "ZNBuildItem.h"
+#import "ZNValueTypeModel.h"
 #include "ZNPerformance.h"
 static NSString *fixtureHome;
 static NSString *FixtureHomeDirectory(){return fixtureHome;}
