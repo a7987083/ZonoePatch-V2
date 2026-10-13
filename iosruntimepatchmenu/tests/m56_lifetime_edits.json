@@ -27,7 +27,7 @@
     },
     {
       "before": "static uintptr_t ZNM56ValueCellAddress(ZNStaticPatchRecord *record,ZNValueType *resolvedType,NSString **error){\n    auto lease=record?ZNLeaseForHeader(record.imageBase,record.imageIncarnation):nullptr;\n    if(!lease){if(error)*error=@\"value-cell image unloaded or incarnation changed\";return 0;}\n    return ZNStaticValueCellAddressForRecord(record,*lease,resolvedType,error);\n}\n\n",
-      "after": "",
+      "after": "// Cell address and write share the caller-held image operation lease.\n\n",
       "reason": "One caller-held image lease owns address resolution and write; avoid a second loader retain under the operation gate."
     },
     {

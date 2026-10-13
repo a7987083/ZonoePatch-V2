@@ -39,6 +39,8 @@ static void ZNM56ShowFailure(NSString *message){dispatch_async(dispatch_get_main
 
 static BOOL ZNM56RecordMatches(ZNStaticPatchRecord *record,NSDictionary *info){uint64_t wantedID=[info[@"featureID"] unsignedLongLongValue];NSDictionary *meta=record.entry?ZNFeatureMetadataDecodeEntry(record.entry):nil;uint64_t recordID=[meta[@"featureID"] unsignedLongLongValue];if(wantedID&&recordID)return wantedID==recordID;NSString *wanted=[info[@"title"] isKindOfClass:NSString.class]?info[@"title"]:@"";NSString *recordName=[meta[@"title"] isKindOfClass:NSString.class]?meta[@"title"]:(record.group.length?record.group:record.title);return wanted.length&&[wanted caseInsensitiveCompare:recordName?:@""]==NSOrderedSame;}
 
+// Cell address and write share the caller-held image operation lease.
+
 #include "ZNStaticValueCellWriter.h"
 
 @implementation ZNM56StaticValueCellBinder
