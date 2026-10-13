@@ -859,6 +859,8 @@ static BOOL ZNV3BuildTarget(NSString *target,
                             NSString **outPath,
                             NSDictionary **metadata,
                             NSString **error) {
+    if(ZNBuildFail("target.build")){if(error)*error=@"Injected target generation failure";return NO;}
+
     NSDictionary *module = [[ZNModuleManager sharedManager] moduleNamed:target];
     if (!module) { if(error)*error=[NSString stringWithFormat:@"目标模块未加载：%@",target]; return NO; }
     NSString *inputPath = module[@"path"];

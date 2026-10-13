@@ -262,12 +262,12 @@ static BOOL ZNM610AllocateGap(std::vector<ZNM610Gap> &gaps,
 }
 
 static NSString *ZNM610FindUnityOutput(NSArray<NSString *> *builderOutputs){
-    for(NSString *path in builderOutputs?:@[]){
+    // Prefer suffixless Runtime-only output; V3 Static/Mixed is still .znpatched
+    // during provider emit, before the final postprocessor removes that suffix.
+    for(NSUInteger pass=0;pass<2;pass++)for(NSString *path in builderOutputs?:@[]){
         NSString *name=path.lastPathComponent.lowercaseString;
-        if([name containsString:@"unityframework"]&&
-           ![name hasSuffix:@".znpatched"]&&
-           [NSFileManager.defaultManager fileExistsAtPath:path])
-            return path;
+        BOOL staged=[name hasSuffix:@".znpatched"];
+        if([name containsString:@"unityframework"]&&staged==(pass==1)&&[NSFileManager.defaultManager fileExistsAtPath:path])return path;
     }
     return nil;
 }
