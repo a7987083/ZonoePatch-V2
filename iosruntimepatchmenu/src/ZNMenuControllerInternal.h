@@ -101,5 +101,7 @@
 - (void)rememberPositionChanged:(UISwitch *)sender;
 - (void)panFloat:(UIPanGestureRecognizer *)g;
 - (void)panPanel:(UIPanGestureRecognizer *)g;
+- (void)zn40_updateSubtitle;
+- (void)zn50b_renderOther;
 - (UIButton *)zn40_button:(NSString *)title selector:(SEL)selector frame:(CGRect)frame;
 @end
