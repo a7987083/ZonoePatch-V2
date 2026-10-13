@@ -194,31 +194,14 @@ typedef NS_ENUM(NSInteger, ZN50FeatureVisualState) {
 
 @end
 
-static NSString *ZN50Trim(NSString *value) {
-    return [value ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-}
+// L02: removed unused internal metadata whitespace helper.
 
 static NSString *ZN50FeaturePreferenceKey(uint64_t featureID) {
     if (!featureID) return nil;
     return [NSString stringWithFormat:@"zn.f.%016llx.enabled", featureID];
 }
 
-static NSDictionary<NSString *, id> *ZN50DisplayMetadata(ZNStaticPatchRecord *record) {
-    NSDictionary<NSString *, id> *embedded = ZNFeatureMetadataDecodeEntry(record.entry);
-    if (embedded) return embedded;
-
-    NSString *title = ZN50Trim(record.title);
-    NSString *group = ZN50Trim(record.group);
-    if (!title.length || [title hasPrefix:@"Patch #"]) title = [NSString stringWithFormat:@"功能 #%u", record.patchID];
-    if (!group.length) group = @"Imported";
-    return @{
-        @"featureID": @0,
-        @"title": title,
-        @"group": group,
-        @"explicitGroup": @([group caseInsensitiveCompare:@"Imported"] != NSOrderedSame),
-        @"source": @"legacy-entry"
-    };
-}
+// L02: removed unused internal legacy metadata wrapper.
 
 static NSArray<NSDictionary *> *ZN50FeatureGroups(NSArray<ZNStaticPatchRecord *> *records) {
     (void)records;

@@ -46,6 +46,22 @@
       "sourceOccurrencesBefore": 1,
       "removedBodySHA256": "661118ed82913ec7fe4eb6c8fe1d29a29dbb833c24e124c142088344955c35bd",
       "proof": "Strict independent compilation detected unused helper. Entire source inventory has one definition, no call/address-of/registration/export attributes; active feature path delegates to ZNFeatureSnapshotProvider."
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm",
+      "symbol": "ZN50DisplayMetadata",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "3855c5bbe709c2813c3bbed7274fa47319e988f022e58bdc3b3fc24f637a6b30",
+      "proof": "No source call/address-of/registration/export; trim has no caller after removing its sole dead wrapper. Strict compilation remains enabled."
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm",
+      "symbol": "ZN50Trim",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "68ad0a7cff7640442e27cf3b5c4741fdcb3060d89d70fb496daf65ce9063a39b",
+      "proof": "No source call/address-of/registration/export; trim has no caller after removing its sole dead wrapper. Strict compilation remains enabled."
     }
   ],
   "retained": [

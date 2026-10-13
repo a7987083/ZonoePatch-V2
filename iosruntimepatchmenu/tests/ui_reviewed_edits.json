@@ -52,6 +52,18 @@
       "before": "static NSDictionary<NSString *, id> *ZN65DisplayMetadata(ZNStaticPatchRecord *record) {\n    NSDictionary *embedded = ZNFeatureMetadataDecodeEntry(record.entry); if (embedded) return embedded;\n    NSString *title=ZN65Trim(record.title),*group=ZN65Trim(record.group); if(!title.length||[title hasPrefix:@\"Patch #\"])title=[NSString stringWithFormat:@\"功能 #%u\",record.patchID]; if(!group.length)group=@\"Imported\";\n    return @{@\"featureID\":@0,@\"title\":title,@\"group\":group,@\"explicitGroup\":@([group caseInsensitiveCompare:@\"Imported\"]!=NSOrderedSame),@\"controlType\":@(ZNFeatureControlTypeSwitch),@\"valueType\":@(ZNValueTypeAuto)};\n}\n",
       "after": "// L02: removed unused file-local display wrapper; active features use ZNFeatureSnapshotProvider.\n",
       "reason": "Proven unused static wrapper, not Selector/API; exact body recorded and restored only for historical equivalence audit."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm:ZN50DisplayMetadata",
+      "before": "static NSDictionary<NSString *, id> *ZN50DisplayMetadata(ZNStaticPatchRecord *record) {\n    NSDictionary<NSString *, id> *embedded = ZNFeatureMetadataDecodeEntry(record.entry);\n    if (embedded) return embedded;\n\n    NSString *title = ZN50Trim(record.title);\n    NSString *group = ZN50Trim(record.group);\n    if (!title.length || [title hasPrefix:@\"Patch #\"]) title = [NSString stringWithFormat:@\"功能 #%u\", record.patchID];\n    if (!group.length) group = @\"Imported\";\n    return @{\n        @\"featureID\": @0,\n        @\"title\": title,\n        @\"group\": group,\n        @\"explicitGroup\": @([group caseInsensitiveCompare:@\"Imported\"] != NSOrderedSame),\n        @\"source\": @\"legacy-entry\"\n    };\n}\n",
+      "after": "// L02: removed unused internal legacy metadata wrapper.\n",
+      "reason": "No active source references, no external linkage or registration; active provider path unchanged."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm:ZN50Trim",
+      "before": "static NSString *ZN50Trim(NSString *value) {\n    return [value ?: @\"\" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];\n}\n",
+      "after": "// L02: removed unused internal metadata whitespace helper.\n",
+      "reason": "No active source references, no external linkage or registration; active provider path unchanged."
     }
   ]
 }
