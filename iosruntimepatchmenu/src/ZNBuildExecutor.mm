@@ -1,3 +1,4 @@
+#import "ZNBuildSession.h"
 #import "ZNBuildExecutor.h"
 
 #import "ZNBuildManifest.h"
@@ -17,7 +18,7 @@ static NSArray<NSNumber *> *ZNM684StaticRowIndexes(ZNBuildManifest *manifest) {
     return [indexes copy];
 }
 
-BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
+static BOOL ZNBuildExecutorBuildSessionWorkspace(ZNBinaryPatchWorkspace *workspace,
                                    NSArray<NSString *> **outputs,
                                    NSString **report,
                                    NSString **error) {
@@ -93,4 +94,13 @@ BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
         runtimeOnlyBase?@"runtime-only":@"static",
         [manifest.activeProviderIdentifiers componentsJoinedByString:@","]]];
     return YES;
+}
+
+BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
+                                  NSArray<NSString *> **outputs, NSString **report, NSString **error) {
+    if(!workspace || workspace.hasAnyApplied){if(error)*error=@"生成前必须恢复所有临时 Runtime Patch";return NO;}
+    ZNBuildSession *session=[ZNBuildSession captureWorkspace:workspace];
+    return [session perform:^BOOL{
+        return ZNBuildExecutorBuildSessionWorkspace(session.workspace,outputs,report,error);
+    }];
 }

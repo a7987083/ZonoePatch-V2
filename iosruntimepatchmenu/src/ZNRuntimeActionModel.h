@@ -51,6 +51,7 @@ FOUNDATION_EXPORT ZNRuntimeArgumentControlType ZNRuntimeArgumentControlTypeFromK
 
 @interface ZNRuntimeActionStore : NSObject
 + (instancetype)sharedStore;
+- (instancetype)initForBuildWithActions:(NSArray<ZNRuntimeMethodAction *> *)actions;
 @property(nonatomic,copy,readonly) NSArray<ZNRuntimeMethodAction *> *actions;
 
 - (nullable ZNRuntimeMethodAction *)addMethodCandidate:(NSDictionary<NSString *, id> *)candidate

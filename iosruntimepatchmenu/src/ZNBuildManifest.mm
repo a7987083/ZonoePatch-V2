@@ -32,6 +32,7 @@
 @interface ZNBuildManifest ()
 @property(nonatomic,copy,readwrite) NSArray<ZNBuildItem *> *items;
 @property(nonatomic,copy,readwrite) NSArray<NSString *> *activeProviderIdentifiers;
+@property(nonatomic,copy) NSDictionary<NSString *,ZNBuildProviderRecord *> *providerSnapshot;
 @end
 
 static NSString *ZNM684Trim(NSString *s) {
@@ -319,6 +320,7 @@ static BOOL ZNM69EmitRuntimeActionTable(ZNBuildManifest *manifest,
             [active addObject:key];
         }
     }
+    manifest.providerSnapshot=snapshot;
     manifest.items=[items copy];
     manifest.activeProviderIdentifiers=[active copy];
     return manifest;
@@ -363,8 +365,7 @@ void ZNUnregisterBuildItemProvider(NSString *identifier) {
 BOOL ZNPrepareBuildManifestProviders(ZNBuildManifest *manifest,
                                      ZNBinaryPatchWorkspace *workspace,
                                      NSString **error) {
-    ZNBuildProviderRegistry *registry=[ZNBuildProviderRegistry shared];
-    NSDictionary *snapshot=nil; @synchronized(registry){ snapshot=[registry.providers copy]; }
+    NSDictionary *snapshot=manifest.providerSnapshot;
     for(NSString *identifier in manifest.activeProviderIdentifiers ?: @[]) {
         ZNBuildProviderRecord *provider=snapshot[identifier];
         if(provider.prepare && !provider.prepare(manifest,workspace,error))return NO;
@@ -377,8 +378,7 @@ BOOL ZNEmitBuildManifestProviders(ZNBuildManifest *manifest,
                                   BOOL runtimeOnlyBase,
                                   NSString **report,
                                   NSString **error) {
-    ZNBuildProviderRegistry *registry=[ZNBuildProviderRegistry shared];
-    NSDictionary *snapshot=nil; @synchronized(registry){ snapshot=[registry.providers copy]; }
+    NSDictionary *snapshot=manifest.providerSnapshot;
     NSMutableArray<NSString *> *parts=[NSMutableArray array];
     NSMutableSet<NSString *> *emittedGroups=[NSMutableSet set];
     for(NSString *identifier in manifest.activeProviderIdentifiers ?: @[]) {

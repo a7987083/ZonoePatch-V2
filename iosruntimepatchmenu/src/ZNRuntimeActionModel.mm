@@ -1,3 +1,4 @@
+#import "ZNBuildSession.h"
 #import "ZNRuntimeActionModel.h"
 #import "ZNRuntimeActionFormat.h"
 #import "ZNIL2CPPMethodSignature.h"
@@ -43,8 +44,19 @@ static NSArray<NSDictionary<NSString *,id> *> *ZNRMADefaultConfigs(NSUInteger co
 @property(nonatomic,strong) NSMutableArray<ZNRuntimeMethodAction *> *mutableActions;
 @end
 @implementation ZNRuntimeActionStore
-+ (instancetype)sharedStore {static ZNRuntimeActionStore *store;static dispatch_once_t once;dispatch_once(&once,^{store=[ZNRuntimeActionStore new];});return store;}
++ (instancetype)sharedStore {id scoped=NSThread.currentThread.threadDictionary[ZNBuildRuntimeStoreThreadKey];if(scoped)return scoped;static ZNRuntimeActionStore *store;static dispatch_once_t once;dispatch_once(&once,^{store=[ZNRuntimeActionStore new];});return store;}
 - (instancetype)init {self=[super init];if(!self)return nil;_mutableActions=[NSMutableArray array];return self;}
+- (instancetype)initForBuildWithActions:(NSArray<ZNRuntimeMethodAction *> *)actions {
+    self=[self init];if(!self)return nil;
+    for(ZNRuntimeMethodAction *action in actions){
+        ZNRuntimeMethodAction *copy=[action copy];
+        NSData *data=[NSJSONSerialization dataWithJSONObject:@{ @"controls":copy.argumentControlConfigs?:@[], @"chain":copy.immediateChain?:@{} } options:0 error:nil];
+        NSDictionary *frozen=data?[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
+        copy.argumentControlConfigs=frozen[@"controls"]?:@[];copy.immediateChain=frozen[@"chain"]?:@{};
+        [self.mutableActions addObject:copy];
+    }
+    return self;
+}
 - (NSArray<ZNRuntimeMethodAction *> *)actions{return [self actionsSnapshot];}
 - (ZNRuntimeMethodAction *)addMethodCandidate:(NSDictionary<NSString *,id> *)candidate title:(NSString *)title error:(NSString **)error{return [self addMethodCandidate:candidate title:title argumentValues:@[] error:error];}
 - (ZNRuntimeMethodAction *)addMethodCandidate:(NSDictionary<NSString *,id> *)candidate title:(NSString *)title argumentValues:(NSArray<NSString *> *)argumentValues error:(NSString **)error {

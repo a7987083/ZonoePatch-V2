@@ -35,6 +35,26 @@ static NSString *ZNW62FeatureName(ZNBinaryPatchRow *row) {
 
 
 @implementation ZNBinaryPatchRow
+- (id)copyWithZone:(NSZone *)zone {
+    ZNBinaryPatchRow *copy=[[[self class] allocWithZone:zone] init];
+    copy.target=self.target;
+    copy.explicitTarget=self.explicitTarget;
+    copy.offsetText=self.offsetText;
+    copy.enabledText=self.enabledText;
+    copy.originalHex=self.originalHex;
+    copy.title=self.title;
+    copy.group=self.group;
+    copy.sourcePath=self.sourcePath;
+    copy.statusText=self.statusText;
+    copy.featureDescription=self.featureDescription;
+    copy.lowConfidence=self.lowConfidence;
+    copy.conflict=self.conflict;
+    copy.featureControlType=self.featureControlType;
+    copy.featureValueType=self.featureValueType;
+    // Validators own live temporary state; snapshots must revalidate independently.
+    copy.validated=NO;copy.validator=nil;
+    return copy;
+}
 - (instancetype)init {
     self=[super init]; if(!self) return nil;
     _target=@""; _offsetText=@""; _enabledText=@""; _originalHex=@"";
@@ -102,7 +122,7 @@ static NSString *ZNW44SiteKeyForRow(ZNBinaryPatchRow *row, NSString *defaultTarg
     NSMutableArray<ZNBinaryPatchRow *> *selected=[NSMutableArray array];
     for(NSNumber *number in rowIndexes ?: @[]) {
         NSUInteger index=number.unsignedIntegerValue;
-        if(index<self.rows.count)[selected addObject:self.rows[index]];
+        if(index<self.rows.count)[selected addObject:[self.rows[index] copy]];
     }
     snapshot.rows=selected;
     snapshot.defaultTarget=self.defaultTarget ?: @"自动";

@@ -3,7 +3,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @class ZNPatchRuntimeValidator;
 
-@interface ZNBinaryPatchRow : NSObject
+@interface ZNBinaryPatchRow : NSObject <NSCopying>
 @property(nonatomic,copy) NSString *target;
 @property(nonatomic,assign) BOOL explicitTarget;
 @property(nonatomic,copy) NSString *offsetText;

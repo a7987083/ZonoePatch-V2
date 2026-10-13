@@ -69,6 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZNNativeHookStore : NSObject
 + (instancetype)sharedStore;
+- (instancetype)initForBuildWithActions:(NSArray<ZNNativeHookAction *> *)actions;
 - (nullable ZNNativeHookAction *)addArgScaleInt32Candidate:(NSDictionary<NSString *, id> *)candidate
                                                      title:(nullable NSString *)title
                                              argumentIndex:(NSUInteger)argumentIndex

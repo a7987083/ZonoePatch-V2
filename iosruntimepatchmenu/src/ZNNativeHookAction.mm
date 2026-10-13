@@ -1,3 +1,4 @@
+#import "ZNBuildSession.h"
 #import "ZNNativeHookAction.h"
 #import "ZNIL2CPPABIMetadata.h"
 #import "ZNComplexStructCodec.h"
@@ -99,11 +100,19 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
 
 @interface ZNNativeHookStore ()
 @property(nonatomic,strong) NSMutableArray<ZNNativeHookAction *> *mutableActions;
+@property(nonatomic,assign) BOOL buildScoped;
 @end
 
 @implementation ZNNativeHookStore
+- (instancetype)initForBuildWithActions:(NSArray<ZNNativeHookAction *> *)actions {
+    self=[super init];if(!self)return nil;
+    _buildScoped=YES;_mutableActions=[NSMutableArray array];
+    for(ZNNativeHookAction *action in actions)[_mutableActions addObject:[action copy]];
+    return self;
+}
 
 + (instancetype)sharedStore {
+    id scoped=NSThread.currentThread.threadDictionary[ZNBuildHookStoreThreadKey];if(scoped)return scoped;
     static ZNNativeHookStore *store;
     static dispatch_once_t once;
     dispatch_once(&once, ^{ store=[ZNNativeHookStore new]; });
@@ -256,6 +265,7 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
 }
 
 - (void)persist {
+    if(self.buildScoped)return;
     NSMutableArray *items=[NSMutableArray arrayWithCapacity:self.mutableActions.count];
     for(ZNNativeHookAction *a in self.mutableActions)[items addObject:[self dictionaryForAction:a]];
     [NSUserDefaults.standardUserDefaults setObject:items forKey:kZNNativeHookStoreKey];
