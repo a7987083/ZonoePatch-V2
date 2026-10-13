@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNBuildOutputIO.h"
 #import "ZNStaticBinaryBuilder.h"
@@ -1179,7 +1180,7 @@ static BOOL ZNV3BuildTarget(NSString *target,
                         if(length)memcpy(descEntry.text,utf8.bytes,length);
                     }
 
-                    if(msync(base,(size_t)newFileSize,MS_SYNC)!=0){localError=[NSString stringWithFormat:@"msync 失败：errno=%d",errno];break;}
+                    if(ZNBuildMSync(base,(size_t)newFileSize,MS_SYNC)!=0){localError=[NSString stringWithFormat:@"msync 失败：errno=%d",errno];break;}
 
                     success=YES;
                     NSUInteger sharedSites=0;

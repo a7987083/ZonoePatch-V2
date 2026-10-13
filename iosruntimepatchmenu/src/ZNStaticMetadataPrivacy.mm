@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNStaticMetadataPrivacy.h"
 #import "ZNStaticPatchFormat.h"
@@ -140,7 +141,7 @@ BOOL ZNScrubStaticDisplayMetadataAtPath(NSString *path,
             localError = @"未在 __ZNDATA 找到 Static Dispatch metadata";
             break;
         }
-        if (msync(base, size, MS_SYNC) != 0) {
+        if (ZNBuildMSync(base, size, MS_SYNC) != 0) {
             localError = [NSString stringWithFormat:@"隐私 metadata msync 失败：errno=%d", errno];
             break;
         }

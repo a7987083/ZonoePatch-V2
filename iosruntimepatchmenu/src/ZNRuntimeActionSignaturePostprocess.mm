@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNRuntimeActionSignaturePostprocess.h"
 
@@ -174,7 +175,7 @@ static BOOL ZNM46AugmentPath(NSString *path,
         header->totalSize = (uint32_t)newTotal;
         header->stringPoolSize = header->totalSize - header->stringPoolOffset;
         zndata->size = actionRelative + newTotal;
-        if (msync(base, fileSize, MS_SYNC) != 0) {
+        if (ZNBuildMSync(base, fileSize, MS_SYNC) != 0) {
             localError = [NSString stringWithFormat:@"M4.6 signature msync 失败 errno=%d", errno];
             break;
         }

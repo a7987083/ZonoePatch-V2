@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNStaticValueCellV1.h"
 #import "ZNFeatureControlModel.h"
@@ -374,7 +375,7 @@ BOOL ZNStaticValueCellAugmentAtPath(NSString *path,NSUInteger *convertedEntries,
             converted++;
         }
         if(local)break;if(converted)header->flags|=ZN44_STATIC_HEADER_FLAG_VALUE_CELLS_V1;
-        if(msync(base,size,MS_SYNC)!=0){local=[NSString stringWithFormat:@"value-cell msync 失败 errno=%d",errno];break;}ok=YES;
+        if(ZNBuildMSync(base,size,MS_SYNC)!=0){local=[NSString stringWithFormat:@"value-cell msync 失败 errno=%d",errno];break;}ok=YES;
     }while(0);
     munmap(base,size);close(fd);if(convertedEntries)*convertedEntries=converted;if(!ok&&error)*error=local?:@"Static value-cell 参数化失败";return ok;
 }

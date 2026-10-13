@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNStaticBinaryBuilder.h"
 #import "ZNBinaryPatchWorkspace.h"
@@ -746,7 +747,7 @@ static BOOL ZNBBuildTarget(NSString *target,
         }
         if (localError) break;
 
-        if (msync(base, fileSize, MS_SYNC) != 0) {
+        if (ZNBuildMSync(base, fileSize, MS_SYNC) != 0) {
             localError = [NSString stringWithFormat:@"msync 失败：errno=%d", errno];
             break;
         }

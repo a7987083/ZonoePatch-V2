@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNStaticRVAProtection.h"
 #import <mach-o/loader.h>
@@ -127,7 +128,7 @@ BOOL ZN55ProtectStaticRVAsAtPath(NSString *path,
             localError = @"未在 __ZNDATA 找到可保护的 Static Dispatch metadata";
             break;
         }
-        if (msync(base, size, MS_SYNC) != 0) {
+        if (ZNBuildMSync(base, size, MS_SYNC) != 0) {
             localError = [NSString stringWithFormat:@"RVA Protection msync 失败：errno=%d", errno];
             break;
         }

@@ -14,7 +14,8 @@ for name in ['ZNV3Parse','ZNV3ShiftU32','ZNV3ShiftLinkeditReferences','ZNV3FillO
   elif s[e]=='}':depth-=1
   e+=1
  code=s[a:e];parts.append(code);records.append(dict(symbol=name,sha256=hashlib.sha256(code.encode()).hexdigest()))
-headers='''#import <Foundation/Foundation.h>
+headers='''#include "ZNBuildFault.h"
+#import <Foundation/Foundation.h>
 #import <mach-o/loader.h>
 #import <mach/machine.h>
 #import <mach/vm_prot.h>

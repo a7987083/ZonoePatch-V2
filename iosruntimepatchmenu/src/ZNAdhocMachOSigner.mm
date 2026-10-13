@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNAdhocMachOSigner.h"
 #import <CommonCrypto/CommonDigest.h>
@@ -429,6 +430,8 @@ static BOOL ZNVerifyEmbeddedSignature(uint8_t *base,
 }
 
 BOOL ZNAdhocResignMachOAtPath(NSString *path, NSDictionary **metadata, NSString **error) {
+    if(ZNBuildFail("signature")){if(error)*error=@"Injected signer failure";return NO;}
+
     if (!path.length) {
         if (error) *error = @"重签路径为空";
         return NO;
@@ -541,7 +544,7 @@ BOOL ZNAdhocResignMachOAtPath(NSString *path, NSDictionary **metadata, NSString 
                 }
                 memcpy(base + codeLimit, superBlob.bytes, superBlob.length);
 
-                if (msync(base, (size_t)finalSize, MS_SYNC) != 0) {
+                if (ZNBuildMSync(base, (size_t)finalSize, MS_SYNC) != 0) {
                     localError = [NSString stringWithFormat:@"重签 msync 失败：errno=%d", errno];
                     break;
                 }
