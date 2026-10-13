@@ -59,7 +59,7 @@ static BOOL ZNM684RuntimeSignatureBridge(NSArray<NSString *> *builderOutputs,
         return ZNRuntimeActionAugmentGeneratedOutputsM46(builderOutputs,report,error);
 
     NSString *alias=[unity stringByAppendingString:@".znpatched"];
-    [NSFileManager.defaultManager removeItemAtPath:alias error:nil];
+    // Every build owns a unique staging directory; never unlink a pre-existing alias.
     NSError *linkError=nil;
     if(![NSFileManager.defaultManager linkItemAtPath:unity toPath:alias error:&linkError]) {
         if(error)*error=[NSString stringWithFormat:@"Runtime Full Signature bridge 创建失败：%@",

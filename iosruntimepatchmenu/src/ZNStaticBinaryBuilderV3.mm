@@ -1,3 +1,4 @@
+#import "ZNBuildOutputIO.h"
 #import "ZNStaticBinaryBuilder.h"
 #import "ZNStaticBinaryBuilderV3Internal.h"
 #import "ZNBinaryPatchWorkspace.h"
@@ -1328,7 +1329,7 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
 
     NSString *root=[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ZonoePatchOutput"];
     NSDateFormatter *formatter=[NSDateFormatter new];formatter.dateFormat=@"yyyyMMdd-HHmmss";
-    NSString *folder=[root stringByAppendingPathComponent:[formatter stringFromDate:[NSDate date]]];
+    NSString *folder=ZNCreateBuildOutputDirectory(root,[formatter stringFromDate:[NSDate date]],error);if(!folder)return NO;
     NSError *directoryError=nil;
     if(![NSFileManager.defaultManager createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:&directoryError]){
         if(error)*error=directoryError.localizedDescription?:@"创建输出目录失败";return NO;
@@ -1344,7 +1345,7 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
         }
         if(path.length)[paths addObject:path];if(targetMetadata)[metadata addObject:targetMetadata];
     }
-    if(failure){[NSFileManager.defaultManager removeItemAtPath:folder error:nil];if(error)*error=failure;return NO;}
+    if(failure){ZNDiscardOwnedBuildDirectory(folder);if(error)*error=failure;return NO;}
 
     NSDictionary *reportObject=@{
         @"format":@"com.zonoe.static-dispatch/v3-owned-segments-protection-v2",

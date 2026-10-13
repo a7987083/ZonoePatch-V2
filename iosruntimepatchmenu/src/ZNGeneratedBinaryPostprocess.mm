@@ -1,3 +1,4 @@
+#import "ZNBuildOutputIO.h"
 #import "ZNGeneratedBinaryPostprocess.h"
 #import "ZNStaticMetadataPrivacy.h"
 #import "ZNStaticValueCellV1.h"
@@ -69,7 +70,9 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
 
         NSString *finalName = [path.lastPathComponent stringByDeletingPathExtension];
         NSString *finalPath = [path.stringByDeletingLastPathComponent stringByAppendingPathComponent:finalName];
-        [NSFileManager.defaultManager removeItemAtPath:finalPath error:nil];
+        if([NSFileManager.defaultManager fileExistsAtPath:finalPath]) {
+            failure=@"Refusing to overwrite an existing output";break;
+        }
         NSError *renameError = nil;
         if (![NSFileManager.defaultManager moveItemAtPath:path toPath:finalPath error:&renameError]) {
             failure = [NSString stringWithFormat:@"%@：移除 .znpatched 后缀失败：%@", path.lastPathComponent, renameError.localizedDescription ?: @"未知错误"];
@@ -89,7 +92,7 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
 
     if (!failure && generatedTargets == 0) failure = @"Builder 输出中没有 Static Builder V3 目标";
     if (failure) {
-        if (folder.length) [NSFileManager.defaultManager removeItemAtPath:folder error:nil];
+        if (folder.length) ZNDiscardOwnedBuildDirectory(folder);
         if (error) *error = [NSString stringWithFormat:@"生成后二进制后处理失败：%@", failure];
         return NO;
     }
@@ -151,7 +154,7 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
         };
 
         NSData *updated = [NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:nil];
-        if (updated) [updated writeToFile:path atomically:YES];
+        if (!ZNWriteBuildReport(object,path,error))return NO;
         break;
     }
 
