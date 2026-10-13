@@ -11,6 +11,7 @@
 @property(nonatomic,strong) dispatch_queue_t queue;
 @property(nonatomic,assign) BOOL started;
 @property(nonatomic,assign) BOOL scheduled;
+@property(nonatomic,assign) BOOL reconcileRequested;
 @property(nonatomic,assign) uint32_t lastImageCount;
 @end
 
@@ -66,6 +67,7 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
 
 - (void)requestReconcile {
     @synchronized(self) {
+        self.reconcileRequested=YES;
         if(self.scheduled)return;
         self.scheduled=YES;
     }
@@ -75,6 +77,8 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
         typeof(self) self=weakSelf;
         if(!self)return;
 
+        for(;;) {
+        @synchronized(self){self.reconcileRequested=NO;}
         uint32_t before=_dyld_image_count();
         NSString *prepareError=nil;
         ZNCapabilityRegistry *registry=[ZNCapabilityRegistry sharedRegistry];
@@ -86,7 +90,7 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
 
         @synchronized(self) {
             self.lastImageCount=_dyld_image_count();
-            self.scheduled=NO;
+            // Completion must not erase an image/foreground request received in flight.
         }
 
         [[ZNRuntimeLogger sharedLogger] log:
@@ -95,7 +99,11 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
 
         // If another image arrived while the pass was running, schedule exactly
         // one additional pass; the runtime's unchanged-image path is O(1).
-        if(_dyld_image_count()!=self.lastImageCount)[self requestReconcile];
+        @synchronized(self) {
+            if(self.reconcileRequested || before!=self.lastImageCount)continue;
+            self.scheduled=NO;break;
+        }
+        }
     });
 }
 
