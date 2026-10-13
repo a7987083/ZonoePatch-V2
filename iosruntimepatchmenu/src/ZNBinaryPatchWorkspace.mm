@@ -34,34 +34,7 @@ static NSString *ZNW62FeatureName(ZNBinaryPatchRow *row) {
 }
 
 
-@implementation ZNBinaryPatchRow
-- (id)copyWithZone:(NSZone *)zone {
-    ZNBinaryPatchRow *copy=[[[self class] allocWithZone:zone] init];
-    copy.target=self.target;
-    copy.explicitTarget=self.explicitTarget;
-    copy.offsetText=self.offsetText;
-    copy.enabledText=self.enabledText;
-    copy.originalHex=self.originalHex;
-    copy.title=self.title;
-    copy.group=self.group;
-    copy.sourcePath=self.sourcePath;
-    copy.statusText=self.statusText;
-    copy.featureDescription=self.featureDescription;
-    copy.lowConfidence=self.lowConfidence;
-    copy.conflict=self.conflict;
-    copy.featureControlType=self.featureControlType;
-    copy.featureValueType=self.featureValueType;
-    // Validators own live temporary state; snapshots must revalidate independently.
-    copy.validated=NO;copy.validator=nil;
-    return copy;
-}
-- (instancetype)init {
-    self=[super init]; if(!self) return nil;
-    _target=@""; _offsetText=@""; _enabledText=@""; _originalHex=@"";
-    _title=@""; _group=@"Imported"; _sourcePath=@""; _statusText=@""; _featureDescription=@"";
-    return self;
-}
-@end
+
 
 static NSString *ZNW44Hex(NSData *data) {
     if(!data.length) return @""; const uint8_t *p=(const uint8_t *)data.bytes;
@@ -117,19 +90,6 @@ static NSString *ZNW44SiteKeyForRow(ZNBinaryPatchRow *row, NSString *defaultTarg
     [self ensureDefaultRows]; return self;
 }
 - (void)ensureDefaultRows { while(self.rows.count<10)[self.rows addObject:[ZNBinaryPatchRow new]]; }
-- (ZNBinaryPatchWorkspace *)buildSnapshotForRowIndexes:(NSArray<NSNumber *> *)rowIndexes {
-    ZNBinaryPatchWorkspace *snapshot=[ZNBinaryPatchWorkspace new];
-    NSMutableArray<ZNBinaryPatchRow *> *selected=[NSMutableArray array];
-    for(NSNumber *number in rowIndexes ?: @[]) {
-        NSUInteger index=number.unsignedIntegerValue;
-        if(index<self.rows.count)[selected addObject:[self.rows[index] copy]];
-    }
-    snapshot.rows=selected;
-    snapshot.defaultTarget=self.defaultTarget ?: @"自动";
-    snapshot.showJSONFiles=NO;
-    snapshot.lastStatus=@"BuildManifest snapshot";
-    return snapshot;
-}
 
 - (void)addEmptyRow {
     if(self.hasAnyApplied){self.lastStatus=@"请先恢复当前临时 Patch";return;}

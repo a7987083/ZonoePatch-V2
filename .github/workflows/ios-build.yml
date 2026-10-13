@@ -38,6 +38,14 @@ jobs:
           /tmp/output-test
           clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
           /tmp/activation-test
+          clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -o /tmp/build-session-test
+          /tmp/build-session-test
+          clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/tests/il2cpp_abi_classifier_test.mm -o /tmp/abi-test
+          /tmp/abi-test
+          clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildRouterShadow.mm iosruntimepatchmenu/tests/build_router_shadow_test.mm -o /tmp/router-test
+          /tmp/router-test
+          clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNFeatureMetadataCodec.mm iosruntimepatchmenu/tests/feature_metadata_codec_test.mm -o /tmp/metadata-test
+          /tmp/metadata-test
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
