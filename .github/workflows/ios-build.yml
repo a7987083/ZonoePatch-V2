@@ -22,6 +22,7 @@ jobs:
           python3 scripts/check-cleanup.py
           python3 iosruntimepatchmenu/tests/static_owned_metadata_contract.py
           python3 scripts/ui-dependencies.py
+          python3 scripts/audit-ui-compilation-dependencies.py
           python3 scripts/ui-install-graph.py
           python3 scripts/audit-compatibility.py
           python3 iosruntimepatchmenu/tests/retained_hook_contract.py

@@ -1,3 +1,15 @@
+# 当前源码治理状态（2026-10-13，e5361b7之后）
+
+本轮具体变更、验证边界与未完成项以 [FINAL_SOURCE_GOVERNANCE_20261013.md](docs/FINAL_SOURCE_GOVERNANCE_20261013.md) 和 [EXECUTION_OWNERSHIP_20261013.md](docs/EXECUTION_OWNERSHIP_20261013.md) 为准。以下保留此前历史，旧14/40和未迁移Managed API描述不再代表当前实现。
+
+- M10.1：已迁移的执行消费者、Managed incarnation缓存、短期owner及Bool/Callback Slot拒绝旧generation已实现，d54cf6a完整push/PR CI通过；汇编整次调用/返回地址、匿名trampoline、Codec期望generation及GC/Domain仍UNRESOLVED。
+- M10.2：真实Store的Prepare Descriptor批次原子验证/发布及第二项失败回归通过；多个Runtime目标身份和完整内建Provider端到端仍UNRESOLVED，不能称仅DEVICE PENDING。
+- H05.2：19个独立UI TU，35段inc。新增5个真实编译模块、窄Selector接口和coordinator显式依赖；最后2个模块及最终HEAD以交付Actions为准。全量剩余词法依赖见docs/UI_COMPILATION_DEPENDENCIES.json，未当作语义闭包证明。
+- H05.1：新增真实RuntimeControls/Polish/RuntimeMethod安装族的历史前驱、覆盖顺序、重复安装和异常初始化回归。未删除缺外部消费者证据的Selector/alias/IMP。
+- 所有iPhone/目标App项仍DEVICE PENDING；最终commit、完整CI/artifact、新增提交与独立下载后pagehash证明见交付包DELIVERY_STATUS.json / COMMITS_THIS_TASK.txt。
+
+---
+
 # 当前优先级更新（2026-10-13）
 
 本轮具体源码位置、已实现措施、失败证据和后续验收条件：docs/DEEP_REMEDIATION_20261013.md。以下剩余项均未全关闭。

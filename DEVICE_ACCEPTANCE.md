@@ -38,3 +38,14 @@
 - Native回调/BR/trampoline在途与退出/同址重载；当前统一execution owner源码尚未完成，不以CI管理路径稳定宣称动态卸载安全。
 - 生产内建provider真实discovery/prepare/emit，当前多Runtime目标路由未支持部分必须独立记录，不当作已关闭功能验收。
 - 逐族UI IMP完整trace及旧alias外部调用；overflow重采，保留兼容层直至消费者证明。
+
+## e5361b7之后：execution ownership / independent Runtime UI（全部 DEVICE PENDING）
+
+- 记录目标App加载器协议：Native hook期间由谁关闭最后image引用，回调返回地址所属映像如何存活；不把C++ helper成功当汇编entry-to-return证明。
+- Bool/Callback启用/关闭、Original路径、API缺失、主队列/跨线程重入、映像卸载/同址新incarnation、退休Slot拒绝重绑定；确认fail-closed行为与slot容量。
+- 真实IL2CPP receiver、MethodInfo和Domain/GC Handle生命周期、场景重载；synthetic callback对象后端未验这些条件。
+- Codec accessor的旧generation、Dobby匿名trampoline退休与有界资源、ArgScale/Struct桥所有参数寄存器及栈/返回路径。源码UNRESOLVED项先补自动化协议后再勾选。
+- 新19个独立UI模块的RuntimeMethod Finder Detail创建/测试、Feature full/compact按钮、M43 Assembly显示与键盘、M551历史Slider alias、M57Number/Return/Switch/Slider松手一次；确认初始化stage和旧Selector行为。
+- 多Runtime目标/Mixed的完整Provider路由目前SOURCE UNRESOLVED。后续源码完成、生产端到端CI通过后，才验真实双映像/双Hook、IPA整包签名安装与报告一致性。
+
+证据须包括设备/App/metadata与dylib hash、操作步骤、错误/崩溃日志、安装前中后IMP trace和loader生命周期。这里没有任何已通过项。

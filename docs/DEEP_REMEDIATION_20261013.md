@@ -1,3 +1,11 @@
+# e5361b7之后的执行所有权 / UI继续治理
+
+当前证据见 [FINAL_SOURCE_GOVERNANCE_20261013.md](FINAL_SOURCE_GOVERNANCE_20261013.md)、[EXECUTION_OWNERSHIP_20261013.md](EXECUTION_OWNERSHIP_20261013.md) 与 DEEP_REMEDIATION_CI.json 新增 execution_governance 字段。当前19个独立UI单元、35段inc；历史正文数字及Managed裸atomic缓存问题已由新的具体实现覆盖，其他未关闭风险继续有效。未宣称M10.1/M10.2/H05全部关闭。
+
+以下为上轮保留证据。
+
+---
+
 # 2026-10-13 深度整改：当前源码状态与验收边界
 
 本次开始真实远端 HEAD 为 `0afc080e8e264255424264b4480222275f0eca5b`，分支 `dev/technical-debt-p0-p2-20261013`，push Run `38353817406` 成功。用户参考 `afa81485978fa280ca025e4ccfdbb6aa55e70f94`之后已有整改，不从参考Commit重新开发。所有远端更新均追加parent、expected HEAD校验、force=false；没有历史改写。最终身份/Run/Artifact/digest以交付包 `DELIVERY_STATUS.json` 为准。

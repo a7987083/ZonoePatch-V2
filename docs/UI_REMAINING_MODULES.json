@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining lexical UI compilation ownership inventory, not proof these are unsafe or impossible to split",
+  "scope": "35 remaining lexical UI sections; type/Block/Selector/IMP/initialization inventory in UI_COMPILATION_DEPENDENCIES.json; semantic dependency closure and full migration remain incomplete",
   "modules": [
     {
       "path": "ui/core/ZonoeRuntimeMenu.inc",
@@ -174,26 +174,6 @@
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
     {
-      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFinderUI)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNRuntimeActionModel.h\"",
-        "\"ZNIL2CPPInvokeEngine.h\"",
-        "\"ZNTheme.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFinderUI)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
       "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
       "status": "SOURCE PENDING: not yet independently compiled",
       "implementations": [
@@ -211,26 +191,6 @@
       ],
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFeatureUI)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNRuntimeActionRuntime.h\"",
-        "\"ZNStaticDispatchRuntime.h\"",
-        "\"ZNTheme.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFeatureUI)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
@@ -302,23 +262,6 @@
       ],
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/finder/ZNMethodFinderM43Polish.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43Polish)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43Polish)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
@@ -695,43 +638,6 @@
       ],
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/features/ZNM551RuntimeSliderStability.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNM551RuntimeSliderStability)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNRuntimeActionFormat.h\"",
-        "\"ZNRuntimeActionRuntime.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNM551RuntimeSliderStability)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/features/ZNM57UnifiedRuntimeControls.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNM57UnifiedRuntimeControls)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNRuntimeActionFormat.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNM57UnifiedRuntimeControls)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },

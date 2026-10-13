@@ -56,7 +56,7 @@ int main(){@autoreleasepool{
 #else
  assert(cls==Nil);ZNInstallM551RuntimeSliderStabilityDeferred();ZNInstallM57UnifiedRuntimeControlsDeferred();ZNInstallMethodFinderM43PolishDeferred();
 #endif
- 
+
 #ifndef TEST_NO_CLASS
  const char *selectors[]={"zn60v3_renderDetailAtWidth:","zn50_renderFeatureGroupsFull","zn50_renderFeatureGroupsCompact"};
  const char *aliases[]={"znrmc_renderDetailAtWidth:","znrmc_renderFeatureGroupsFull","znrmc_renderFeatureGroupsCompact"};
