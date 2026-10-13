@@ -1,3 +1,4 @@
+#import "ZNImageGeneration.h"
 #import "ZNNativeHookLifecycleBootstrap.h"
 
 #import <mach-o/dyld.h>
@@ -46,9 +47,11 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
         self.started=YES;
     }
 
+    (void)ZNCurrentImageGeneration();
     // dyld immediately replays already-loaded images. requestReconcile coalesces
     // those callbacks, so startup performs one Hook-only discovery pass.
     _dyld_register_func_for_add_image(ZNNativeHookLifecycleImageAdded);
+    _dyld_register_func_for_remove_image(ZNNativeHookLifecycleImageAdded);
     [NSNotificationCenter.defaultCenter addObserver:self
                                            selector:@selector(zn_applicationBecameActive:)
                                                name:UIApplicationDidBecomeActiveNotification
@@ -80,6 +83,7 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
         for(;;) {
         @synchronized(self){self.reconcileRequested=NO;}
         uint32_t before=_dyld_image_count();
+        uint64_t beforeGeneration=ZNCurrentImageGeneration();
         NSString *prepareError=nil;
         ZNCapabilityRegistry *registry=[ZNCapabilityRegistry sharedRegistry];
         BOOL prepared=[registry prepareCapability:ZNCapabilityNativeHookIdentifier
@@ -100,7 +104,7 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
         // If another image arrived while the pass was running, schedule exactly
         // one additional pass; the runtime's unchanged-image path is O(1).
         @synchronized(self) {
-            if(self.reconcileRequested || before!=self.lastImageCount)continue;
+            if(self.reconcileRequested || before!=self.lastImageCount || beforeGeneration!=ZNCurrentImageGeneration())continue;
             self.scheduled=NO;break;
         }
         }

@@ -125,8 +125,8 @@ grep -q 'currentSnapshot' "$SRC/ZNFeatureSnapshotProvider.mm"
 grep -q 'snapshot.staticRecords' "$SRC/ZNFeatureSnapshotProvider.mm"
 ! grep -q 'refreshGeneratedActions' "$UI"
 ! grep -q 'auto-install' "$UI"
-grep -q 'if(self.hasScanned&&self.cachedImageCount==imageCount)return;uint64_t fingerprint' "$SRC/ZNRuntimeActionRuntime.mm"
-grep -q 'if(self.generatedScanned&&self.generatedImageCount==count)return;' "$SRC/ZNNativeHookRuntime.mm"
+grep -q 'self.cachedGeneration==imageGeneration' "$SRC/ZNRuntimeActionRuntime.mm"
+grep -q 'self.generatedImageGeneration==imageGeneration' "$SRC/ZNNativeHookRuntime.mm"
 grep -q 'snapshotStorage.imageCount==imageCount' "$SRC/ZNRuntimeCapabilityCoordinator.mm"
 
 # M6.8.6 Permanent Native Hook Lifecycle contract.

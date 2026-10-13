@@ -1,3 +1,4 @@
+#import "ZNImageGeneration.h"
 #import "ZNNativeHookRuntime.h"
 
 #import "ZNNativeHookAction.h"
@@ -1094,6 +1095,7 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 @interface ZNNativeHookRuntime ()
 @property(nonatomic,copy,readwrite) NSArray<ZNNativeHookAction *> *generatedActions;
 @property(nonatomic,assign) uint32_t generatedImageCount;
+@property(nonatomic,assign) uint64_t generatedImageGeneration;
 @property(nonatomic,assign) uint64_t generatedImageFingerprint;
 @property(nonatomic,assign) BOOL generatedScanned;
 @property(nonatomic,copy) NSDictionary<NSString *, id> *liveCandidate;
@@ -1128,13 +1130,14 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
 
 - (void)refreshGeneratedActions {
     uint32_t count=_dyld_image_count();
-    if(self.generatedScanned&&self.generatedImageCount==count)return;
+    uint64_t imageGeneration=ZNCurrentImageGeneration();
+    if(self.generatedScanned&&self.generatedImageCount==count&&self.generatedImageGeneration==imageGeneration)return;
     uint64_t fingerprint=ZNNativeImageFingerprint(count);
     NSMutableArray<ZNNativeHookAction *> *found=[NSMutableArray array];
     NSMutableSet *dedupe=[NSMutableSet set];
     for(uint32_t i=0;i<count;i++)ZNNativeParseGeneratedImage(i,found,dedupe);
     self.generatedActions=[found copy];
-    self.generatedImageCount=count;
+    self.generatedImageCount=count;self.generatedImageGeneration=imageGeneration;
     self.generatedImageFingerprint=fingerprint;
     self.generatedScanned=YES;
     [[ZNRuntimeLogger sharedLogger]log:[NSString stringWithFormat:@"[native-hook-runtime] refresh -> %lu generated actions",(unsigned long)found.count]];

@@ -1,3 +1,4 @@
+#import "ZNImageGeneration.h"
 #import "ZNRuntimeCapabilityCoordinator.h"
 
 #import <UIKit/UIKit.h>
@@ -20,6 +21,7 @@ NSNotificationName const ZNRuntimeCapabilitySnapshotDidChangeNotification =
 @property(nonatomic,copy,readwrite) NSArray<ZNNativeHookAction *> *nativeHooks;
 @property(nonatomic,assign,readwrite) uint64_t generation;
 @property(nonatomic,assign,readwrite) uint32_t imageCount;
+@property(nonatomic,assign) uint64_t imageGeneration;
 @end
 
 @implementation ZNRuntimeCapabilitySnapshot
@@ -80,9 +82,11 @@ static void ZNRuntimeCapabilityImageAdded(const struct mach_header *mh, intptr_t
         self.started=YES;
     }
 
+    (void)ZNCurrentImageGeneration();
     // Register once. dyld invokes the callback for currently loaded images too;
     // requestRefresh coalesces those callbacks into one serial discovery pass.
     _dyld_register_func_for_add_image(ZNRuntimeCapabilityImageAdded);
+    _dyld_register_func_for_remove_image(ZNRuntimeCapabilityImageAdded);
 
     [NSNotificationCenter.defaultCenter addObserver:self
                                            selector:@selector(zn_applicationBecameActive:)
@@ -104,6 +108,7 @@ static void ZNRuntimeCapabilityImageAdded(const struct mach_header *mh, intptr_t
         // so a stable count means the published immutable snapshot is current.
         if(self.snapshotStorage.generation>0 &&
            self.snapshotStorage.imageCount==imageCount &&
+           self.snapshotStorage.imageGeneration==ZNCurrentImageGeneration() &&
            !self.refreshScheduled) return;
         self.refreshRequested=YES;
         if(self.refreshScheduled)return;
@@ -121,6 +126,7 @@ static void ZNRuntimeCapabilityImageAdded(const struct mach_header *mh, intptr_t
             }
 
             uint32_t beforeCount=_dyld_image_count();
+            uint64_t beforeGeneration=ZNCurrentImageGeneration();
             double startedAt=CFAbsoluteTimeGetCurrent();
 
             ZNCapabilityRegistry *registry=[ZNCapabilityRegistry sharedRegistry];
@@ -137,7 +143,8 @@ static void ZNRuntimeCapabilityImageAdded(const struct mach_header *mh, intptr_t
             snapshot.runtimeMethods=(NSArray<ZNRuntimeMethodActionRecord *> *)[[methodAdapter snapshotItems] copy] ?: @[];
             snapshot.directNativeCalls=(NSArray<ZNRuntimeMethodActionRecord *> *)[[directAdapter snapshotItems] copy] ?: @[];
             snapshot.nativeHooks=(NSArray<ZNNativeHookAction *> *)[[hookAdapter snapshotItems] copy] ?: @[];
-            snapshot.imageCount=_dyld_image_count();
+            snapshot.imageCount=beforeCount;
+            snapshot.imageGeneration=beforeGeneration;
 
             @synchronized(self) {
                 snapshot.generation=self.nextGeneration++;
@@ -168,7 +175,7 @@ static void ZNRuntimeCapabilityImageAdded(const struct mach_header *mh, intptr_t
 
             BOOL rerun=NO;
             @synchronized(self) {
-                rerun=self.refreshRequested || (_dyld_image_count()!=beforeCount);
+                rerun=self.refreshRequested || ((_dyld_image_count()!=beforeCount || ZNCurrentImageGeneration()!=beforeGeneration));
                 if(!rerun)self.refreshScheduled=NO;
             }
             if(!rerun)break;

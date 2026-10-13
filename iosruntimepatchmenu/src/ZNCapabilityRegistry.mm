@@ -1,3 +1,4 @@
+#import "ZNImageGeneration.h"
 #import "ZNCapabilityRegistry.h"
 
 static void *kZNCapabilityRegistryQueueKey=&kZNCapabilityRegistryQueueKey;
@@ -7,6 +8,7 @@ static void *kZNCapabilityRegistryQueueKey=&kZNCapabilityRegistryQueueKey;
 @property(nonatomic,strong) NSMutableDictionary<NSString *,id<ZNRuntimeCapabilityAdapter>> *adapters;
 @property(nonatomic,strong) NSMutableDictionary<NSString *,NSNumber *> *states;
 @property(nonatomic,strong) NSMutableDictionary<NSString *,NSNumber *> *preparedImageCounts;
+@property(nonatomic,strong) NSMutableDictionary<NSString *,NSNumber *> *preparedImageGenerations;
 @property(nonatomic,strong) NSMutableDictionary<NSString *,NSString *> *errors;
 @end
 
@@ -25,6 +27,7 @@ static void *kZNCapabilityRegistryQueueKey=&kZNCapabilityRegistryQueueKey;
     _adapters=[NSMutableDictionary dictionary];
     _states=[NSMutableDictionary dictionary];
     _preparedImageCounts=[NSMutableDictionary dictionary];
+    _preparedImageGenerations=[NSMutableDictionary dictionary];
     _errors=[NSMutableDictionary dictionary];
     return self;
 }
@@ -57,8 +60,10 @@ static void *kZNCapabilityRegistryQueueKey=&kZNCapabilityRegistryQueueKey;
 }
 - (BOOL)zn_prepareAdapter:(id<ZNRuntimeCapabilityAdapter>)adapter imageCount:(uint32_t)imageCount error:(NSString **)error {
     NSString *identifier=adapter.capabilityIdentifier;
+    uint64_t imageGeneration=ZNCurrentImageGeneration();
     NSNumber *prepared=self.preparedImageCounts[identifier];
     if(prepared && prepared.unsignedIntValue==imageCount &&
+       [self.preparedImageGenerations[identifier] unsignedLongLongValue]==imageGeneration &&
        [self.states[identifier] integerValue]==ZNCapabilityLifecycleStatePrepared) return YES;
 
     self.states[identifier]=@(ZNCapabilityLifecycleStatePreparing);
@@ -66,6 +71,7 @@ static void *kZNCapabilityRegistryQueueKey=&kZNCapabilityRegistryQueueKey;
     BOOL ok=[adapter prepareForImageCount:imageCount error:&inner];
     if(ok){
         self.preparedImageCounts[identifier]=@(imageCount);
+        self.preparedImageGenerations[identifier]=@(imageGeneration);
         self.states[identifier]=@(ZNCapabilityLifecycleStatePrepared);
         [self.errors removeObjectForKey:identifier];
         return YES;
