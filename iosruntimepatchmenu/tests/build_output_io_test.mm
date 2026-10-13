@@ -1,6 +1,11 @@
 #import <Foundation/Foundation.h>
 #import "ZNBuildOutputIO.h"
+#import "ZNBuildSession.h"
 #include <cassert>
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+@implementation ZNBuildSession
++ (instancetype)currentSession{return nil;}
+@end
 int main(){@autoreleasepool{
  NSString *root=[NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];NSString *error=nil;
  NSString *a=ZNCreateBuildOutputDirectory(root,@"same",&error),*b=ZNCreateBuildOutputDirectory(root,@"same",&error);

@@ -32,6 +32,7 @@ static BOOL ZNBuildExecutorBuildSessionWorkspace(ZNBinaryPatchWorkspace *workspa
     }
 
     ZNBuildManifest *manifest=[ZNBuildManifest manifestForWorkspace:workspace];
+    if(manifest.collectionError.length){if(error)*error=manifest.collectionError;return NO;}
     if(!manifest.itemCount) {
         if(error)*error=@"没有可生成的 BuildItem";
         return NO;

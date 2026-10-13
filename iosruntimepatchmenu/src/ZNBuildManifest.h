@@ -18,6 +18,7 @@ typedef BOOL (^ZNBuildProviderEmit)(ZNBuildManifest *manifest,
                                     NSString * _Nullable * _Nullable error);
 
 @interface ZNBuildManifest : NSObject
+@property(nonatomic,copy,readonly,nullable) NSString *collectionError;
 @property(nonatomic,copy,readonly) NSArray<ZNBuildItem *> *items;
 @property(nonatomic,copy,readonly) NSArray<NSString *> *activeProviderIdentifiers;
 @property(nonatomic,readonly) BOOL hasStaticItems;

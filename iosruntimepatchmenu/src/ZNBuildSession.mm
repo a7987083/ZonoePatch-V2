@@ -3,14 +3,21 @@
 #import "ZNRuntimeActionModel.h"
 #import "ZNNativeHookAction.h"
 @interface ZNBuildSession ()
+@property(nonatomic,copy,readwrite) NSString *identifier;
+@property(nonatomic,copy,readwrite) NSDictionary<NSString *,id> *staticDefaults;
 @property(nonatomic,strong,readwrite) ZNBinaryPatchWorkspace *workspace;
 @property(nonatomic,strong,readwrite) ZNRuntimeActionStore *runtimeStore;
 @property(nonatomic,strong,readwrite) ZNNativeHookStore *hookStore;
 @end
 @implementation ZNBuildSession
++ (instancetype)currentSession {return NSThread.currentThread.threadDictionary[ZNBuildSessionThreadKey];}
 + (instancetype)captureWorkspace:(ZNBinaryPatchWorkspace *)workspace {
-    ZNBuildSession *session=[self new];
+    ZNBuildSession *session=[self new];session.identifier=NSUUID.UUID.UUIDString;
     void (^capture)(void)=^{
+        NSMutableDictionary *defaults=[NSMutableDictionary dictionary];
+        NSDictionary *all=NSUserDefaults.standardUserDefaults.dictionaryRepresentation;
+        for(NSString *key in all)if([key hasPrefix:@"zonoe.m5.8.5.static-slider-max.v1."])defaults[key]=all[key];
+        session.staticDefaults=[defaults copy];
         NSMutableArray *indexes=[NSMutableArray array];
         for(NSUInteger i=0;i<workspace.rows.count;i++)[indexes addObject:@(i)];
         session.workspace=[workspace buildSnapshotForRowIndexes:indexes];
@@ -24,9 +31,10 @@
 - (BOOL)perform:(BOOL (^)(void))body {
     NSMutableDictionary *thread=NSThread.currentThread.threadDictionary;
     if(thread[ZNBuildRuntimeStoreThreadKey]||thread[ZNBuildHookStoreThreadKey])return NO;
+    thread[ZNBuildSessionThreadKey]=self;
     thread[ZNBuildRuntimeStoreThreadKey]=self.runtimeStore;
     thread[ZNBuildHookStoreThreadKey]=self.hookStore;
     @try{return body();}
-    @finally{[thread removeObjectForKey:ZNBuildRuntimeStoreThreadKey];[thread removeObjectForKey:ZNBuildHookStoreThreadKey];}
+    @finally{[thread removeObjectForKey:ZNBuildSessionThreadKey];[thread removeObjectForKey:ZNBuildRuntimeStoreThreadKey];[thread removeObjectForKey:ZNBuildHookStoreThreadKey];}
 }
 @end

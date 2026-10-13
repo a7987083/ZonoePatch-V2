@@ -1,3 +1,4 @@
+#import "ZNBuildSession.h"
 #import "ZNBuildOutputIO.h"
 NSString *ZNCreateBuildOutputDirectory(NSString *root, NSString *label, NSString **error) {
     NSString *name=[NSString stringWithFormat:@"%@-%@",label?:@"build",NSUUID.UUID.UUIDString];
@@ -20,6 +21,10 @@ BOOL ZNDiscardOwnedBuildDirectory(NSString *path) {
     return [NSFileManager.defaultManager removeItemAtPath:path error:nil];
 }
 BOOL ZNWriteBuildReport(id object, NSString *path, NSString **error) {
+    ZNBuildSession *session=[ZNBuildSession currentSession];
+    if(session && [object isKindOfClass:NSDictionary.class]) {
+        NSMutableDictionary *tagged=[object mutableCopy];tagged[@"buildSessionID"]=session.identifier;object=tagged;
+    }
     NSError *e=nil;NSData *data=[NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:&e];
     if(!data || ![data writeToFile:path options:NSDataWritingAtomic error:&e]){
         if(error)*error=e.localizedDescription?:@"Build report write failed";return NO;

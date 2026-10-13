@@ -30,6 +30,7 @@
 @end
 
 @interface ZNBuildManifest ()
+@property(nonatomic,copy,readwrite) NSString *collectionError;
 @property(nonatomic,copy,readwrite) NSArray<ZNBuildItem *> *items;
 @property(nonatomic,copy,readwrite) NSArray<NSString *> *activeProviderIdentifiers;
 @property(nonatomic,copy) NSDictionary<NSString *,ZNBuildProviderRecord *> *providerSnapshot;
@@ -314,7 +315,7 @@ static BOOL ZNM69EmitRuntimeActionTable(ZNBuildManifest *manifest,
         ZNBuildProviderRecord *provider=snapshot[key];
         NSArray<ZNBuildItem *> *provided=@[];
         @try { provided=provider.collector ? provider.collector(workspace) : @[]; }
-        @catch(__unused NSException *e) { provided=@[]; }
+        @catch(NSException *e) { manifest.collectionError=[NSString stringWithFormat:@"Provider %@ collector failed: %@",key,e.reason?:e.name];provided=@[]; }
         if(provided.count) {
             [items addObjectsFromArray:provided];
             [active addObject:key];

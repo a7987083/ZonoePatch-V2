@@ -1,3 +1,4 @@
+#import "ZNBuildSession.h"
 #import "ZNBuildStaticPrepare.h"
 
 #import "ZNBinaryPatchWorkspace.h"
@@ -30,13 +31,14 @@ static double ZNBuildStaticSliderMaximum(NSString *featureName) {
     NSString *key=[NSString stringWithFormat:@"%@.%@",
                    kZNBuildStaticSliderMaxDefaults,
                    ZNBuildStaticTrim(featureName).lowercaseString];
-    id stored=[NSUserDefaults.standardUserDefaults objectForKey:key];
+    ZNBuildSession *session=[ZNBuildSession currentSession];
+    id stored=session?session.staticDefaults[key]:[NSUserDefaults.standardUserDefaults objectForKey:key];
     return [stored isKindOfClass:NSNumber.class] ? [stored doubleValue] : 0.0;
 }
 
 static BOOL ZNBuildStaticParseRVA(NSString *text,uint64_t *out) {
     NSString *s=ZNBuildStaticTrim(text).lowercaseString;
-    if(!s.length)return NO;
+    if(!s.length || [s hasPrefix:@"-"])return NO;
     const char *c=s.UTF8String;
     char *end=NULL;
     errno=0;
