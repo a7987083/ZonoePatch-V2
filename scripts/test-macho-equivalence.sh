@@ -48,7 +48,7 @@ cp "$work/combinations.json" dist/production-builder-extraction.json
 # Independent final-byte CodeDirectory verification applies the same strict iOS
 # ARM64/SDK/signature policy as the deliverable, not just signer idempotence.
 verified_count=0
-for generated in "$work"/combinations/mode-0/*.znpatched "$work"/combinations/mode-1/*.dylib "$work"/combinations/mode-2/*.dylib "$work"/combinations/mode-3/*.znpatched "$work"/combinations/capacity/*.dylib; do
+for generated in "$work"/combinations/mode-0/*.znpatched "$work"/combinations/mode-1/*.dylib "$work"/combinations/mode-2/UnityFramework "$work"/combinations/mode-3/UnityFramework "$work"/combinations/capacity/*.dylib; do
   report="dist/generated-$(basename "$(dirname "$generated")")-signature.json"
   test -f "$generated"
   python3 scripts/verify-artifact.py "$generated" > "$report"
