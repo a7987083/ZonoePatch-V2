@@ -24,14 +24,14 @@
   },
   "modules": [
     {
-      "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",
+      "path": "ui/compat/ZNIL2CPPABIDetailUI.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNIL2CPPABIDetailUI)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        120
+        122
       ]
     },
     {
@@ -93,14 +93,14 @@
       ]
     },
     {
-      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc",
+      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM57RuntimeOnlyBuilderGate)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        71
+        74
       ]
     },
     {

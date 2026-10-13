@@ -3,6 +3,7 @@
 NS_ASSUME_NONNULL_BEGIN
 // Narrow finder-family contract; implementations remain with their existing owners.
 @interface ZNRuntimeMenuControllerV040 (ZNMethodFinderUIInternal)
+- (nullable NSDictionary *)zn60v3_selected;
 - (void)znm442_submitSearch:(id)sender;
 - (void)znm43_startSearch:(id)sender;
 - (void)znm43_renderSearchAtWidth:(CGFloat)width;

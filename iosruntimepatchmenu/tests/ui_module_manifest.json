@@ -101,9 +101,9 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",
+      "path": "ui/compat/ZNIL2CPPABIDetailUI.mm",
       "historical_section": "ZNIL2CPPABIDetailUI.mm",
-      "sha256": "6b43daeb347e26f27735e753a05d06089c5e953e49f70dc964e696e9615dce32",
+      "sha256": "acb20e98b2b51b2f7916270fbf5a76def19a48df2529dccaa08a90051264e7e6",
       "category_count": 1
     },
     {
@@ -277,9 +277,9 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc",
+      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.mm",
       "historical_section": "ZNM57RuntimeOnlyBuilderGate.mm",
-      "sha256": "e05b1278d9494d57dcbb6e34212b7e8c9b7880b3e4f1bc2630a1d5a74f8d1ab6",
+      "sha256": "a805b316c4e7c37715f9df5bacf70f5460631c4d569b8cda603a8e467d8b8c99",
       "category_count": 1
     },
     {
@@ -354,6 +354,6 @@
     "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca",
     "ZNMethodFinderM2Engine.mm": "947dad820de698b085028509fcdaff8a3e3ea39a372c066ae5a50d523ec61f8f",
     "ZNMethodFinderM2Engine.h": "19ba68530b3e96c93c3c55125387db8ef721cbe4fd26cb4794aaa993790a14a9",
-    "ZNMethodFinderUIInternal.h": "8ed9c96727f3c5179a5d89cfd60b68e9a4fcaeb2dd713d9a7248aaafb37002c2"
+    "ZNMethodFinderUIInternal.h": "9bcf369ed2e6aca1eafbec1c3c471a8b4f93f4fd0951c22da4b4953e0666e3ef"
   }
 }

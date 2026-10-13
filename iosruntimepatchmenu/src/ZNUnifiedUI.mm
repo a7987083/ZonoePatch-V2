@@ -69,7 +69,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.mm
 
 
-#include "ui/compat/ZNIL2CPPABIDetailUI.inc"
+// UI_COMPILED_MODULE: ui/compat/ZNIL2CPPABIDetailUI.mm
 
 
 #include "ui/finder/ZNRuntimeMethodCallFinderUI.inc"
@@ -156,7 +156,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/features/ZNM562SliderIsolation.mm
 
 
-#include "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc"
+// UI_COMPILED_MODULE: ui/compat/ZNM57RuntimeOnlyBuilderGate.mm
 
 
 #include "ui/features/ZNM57UnifiedRuntimeControls.inc"

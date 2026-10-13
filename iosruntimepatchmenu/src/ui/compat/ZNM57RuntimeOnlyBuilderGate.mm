@@ -1,3 +1,6 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
+#import "ZNBuildCapabilityRegistry.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNM57RuntimeOnlyBuilderGate.mm
 #line 1 "ZNM57RuntimeOnlyBuilderGate.mm"
 #import <Foundation/Foundation.h>

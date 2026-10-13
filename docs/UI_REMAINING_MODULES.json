@@ -174,24 +174,6 @@
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
     {
-      "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNIL2CPPABIDetailUI)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNIL2CPPABIMetadata.h\"",
-        "\"ZNTheme.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNIL2CPPABIDetailUI)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
       "path": "ui/finder/ZNRuntimeMethodCallFinderUI.inc",
       "status": "SOURCE PENDING: not yet independently compiled",
       "implementations": [
@@ -732,26 +714,6 @@
       ],
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNM551RuntimeSliderStability)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNM57RuntimeOnlyBuilderGate)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNBinaryPatchWorkspace.h\"",
-        "\"ZNRuntimeActionModel.h\"",
-        "\"ZNNativeHookAction.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNM57RuntimeOnlyBuilderGate)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
