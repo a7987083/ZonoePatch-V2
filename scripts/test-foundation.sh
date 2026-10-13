@@ -69,3 +69,6 @@ clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$work_
 clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPResolver.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/resolver_loader_lease_test.mm -o "$work_resolver/resolver-test"
 "$work_resolver/resolver-test" "$work_resolver/UnityFramework"
 rm -rf "$work_resolver"
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation iosruntimepatchmenu/tests/finder_page_abi_test.mm -o /tmp/finder-page-abi-test
+/tmp/finder-page-abi-test
