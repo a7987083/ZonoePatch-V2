@@ -20,8 +20,9 @@ static uint64_t ZNRARImageFingerprint(uint32_t imageCount){
         const struct mach_header *raw=_dyld_get_image_header(i);intptr_t slide=_dyld_get_image_vmaddr_slide(i);const char *path=_dyld_get_image_name(i);
         h=ZNRARMixFingerprint(h,(uint64_t)(uintptr_t)raw);h=ZNRARMixFingerprint(h,(uint64_t)(uintptr_t)slide);
         if(path){for(const unsigned char *p=(const unsigned char *)path;*p;p++){h^=(uint64_t)*p;h*=1099511628211ULL;}}
-        if(raw&&raw->magic==MH_MAGIC_64){
-            const struct mach_header_64 *mh=(const struct mach_header_64 *)raw;
+        auto headerOwner=ZNCaptureLoadedImage((uintptr_t)raw);
+        if(headerOwner){
+            const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
             const uint8_t *cursor=(const uint8_t *)(mh+1),*limit=cursor+mh->sizeofcmds;
             if(mh->ncmds<=4096&&mh->sizeofcmds<=16*1024*1024){
                 for(uint32_t c=0;c<mh->ncmds;c++){

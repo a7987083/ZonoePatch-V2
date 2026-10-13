@@ -4,6 +4,7 @@ import argparse, collections, hashlib, json, pathlib, re, sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"scripts"))
 from ui_source import expanded_ui
+from reviewed_source import m56_before_owned_header
 SOURCE = ROOT / "iosruntimepatchmenu/src/ZNUnifiedUI.mm"
 SPLIT_MODULES = [
     ROOT / "iosruntimepatchmenu/src/ZNRangeControl.mm",
@@ -54,7 +55,10 @@ def main():
     imported=ROOT / "iosruntimepatchmenu/tests/imported_ui_digest.json"
     current=json.loads(imported.read_text())
     for rel,want in current["source_hashes"].items():
-        got=hashlib.sha256(expanded_ui().encode()).hexdigest() if rel=="iosruntimepatchmenu/src/ZNUnifiedUI.mm" else hashlib.sha256((ROOT/rel).read_bytes()).hexdigest()
+        raw=(ROOT/rel).read_bytes()
+        if rel=="iosruntimepatchmenu/src/ZNUnifiedUI.mm":raw=expanded_ui().encode()
+        elif rel=="iosruntimepatchmenu/src/ZNM56StaticValueCellBinding.mm":raw=m56_before_owned_header(raw.decode()).encode()
+        got=hashlib.sha256(raw).hexdigest()
         if got!=want:failures.append(f"UI source digest changed: {rel}")
     scalar_keys = [
         "implementation_count",

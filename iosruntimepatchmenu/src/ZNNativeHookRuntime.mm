@@ -704,7 +704,7 @@ static BOOL ZNNativePreparedTargetForAction(ZNNativeHookAction *action,
     for(uint32_t i=0;i<count;i++){
         const char *cpath=_dyld_get_image_name(i);
         const struct mach_header *raw=_dyld_get_image_header(i);
-        if(!cpath||!raw||raw->magic!=MH_MAGIC_64)continue;
+        if(!cpath||!raw)continue;
         NSString *path=[NSString stringWithUTF8String:cpath]?:@"";
         BOOL unity=[path.lastPathComponent isEqualToString:@"UnityFramework"]||
                    [path rangeOfString:@"UnityFramework.framework/UnityFramework"
@@ -977,7 +977,10 @@ static void ZNNativeParseGeneratedImage(uint32_t imageIndex,NSMutableArray<ZNNat
     if(!zndata||zndata->size<sizeof(ZN44StaticHeader))return;
     __int128 runtimeAddress=(__int128)zndata->addr+(__int128)slide;
     if(runtimeAddress<=0||runtimeAddress>UINTPTR_MAX)return;
-    const uint8_t *section=(const uint8_t *)(uintptr_t)runtimeAddress;
+    if(zndata->size>64*1024*1024)return;
+    std::vector<uint8_t> sectionBytes((size_t)zndata->size);
+    if(!headerOwner->read((uint64_t)runtimeAddress,sectionBytes.data(),sectionBytes.size()))return;
+    const uint8_t *section=sectionBytes.data();
     const ZN44StaticHeader *sh=(const ZN44StaticHeader *)section;
     if(sh->magic0!=ZN44_STATIC_MAGIC0||sh->magic1!=ZN44_STATIC_MAGIC1||sh->entrySize!=sizeof(ZN44StaticEntry)||sh->count>ZN44_STATIC_MAX_ENTRIES)return;
     uint64_t actionRelative=0;
