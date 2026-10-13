@@ -82,7 +82,7 @@ static NSString *ZN60V3CopyText(NSDictionary *candidate) {
     return value ? (ZN60V3Page)value.integerValue : ZN60V3PageSearch;
 }
 
-- (void)zn60v3_setPage:(ZN60V3Page)page {
+- (void)zn60v3_setPage:(NSInteger)page {
     objc_setAssociatedObject(self, kZN60V3PageKey, @(page), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
