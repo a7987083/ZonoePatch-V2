@@ -1,5 +1,6 @@
 #include "ZNPerformance.h"
 #import "ZNBuildSession.h"
+#import "ZNBuildOutputTransaction.h"
 #import "ZNBuildExecutor.h"
 
 #import "ZNBuildManifest.h"
@@ -105,9 +106,16 @@ BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
     ZNBuildSession *session=[ZNBuildSession captureWorkspace:workspace];
     __block NSArray<NSString *> *localOutputs=nil;
     __block NSString *localReport=nil,*localError=nil;
-    BOOL ok=[session perform:^BOOL{
-        return ZNBuildExecutorBuildSessionWorkspace(session.workspace,&localOutputs,&localReport,&localError);
-    }];
+    BOOL ok=NO;
+    @try {
+        ok=[session perform:^BOOL{
+            if(!ZNBuildExecutorBuildSessionWorkspace(session.workspace,&localOutputs,&localReport,&localError))return NO;
+            NSArray<NSString *> *published=nil;
+            if(![session.outputTransaction publishOutputs:localOutputs finalOutputs:&published error:&localError])return NO;
+            localOutputs=published;return YES;
+        }];
+    } @catch(NSException *exception){localError=[NSString stringWithFormat:@"Build transaction exception: %@",exception.reason];ok=NO;}
+    @finally {if(!ok){[session.outputTransaction rollback];localOutputs=nil;localReport=nil;}}
     if(outputs)*outputs=localOutputs;if(report)*report=localReport;
     if(error)*error=localError ?: (ok?nil:@"Nested or failed BuildSession");
     return ok;

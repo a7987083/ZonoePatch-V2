@@ -1,9 +1,11 @@
 #import "ZNBuildSession.h"
+#import "ZNBuildOutputTransaction.h"
 #import "ZNBinaryPatchWorkspace.h"
 #import "ZNRuntimeActionModel.h"
 #import "ZNNativeHookAction.h"
 @interface ZNBuildSession ()
 @property(nonatomic,copy,readwrite) NSString *identifier;
+@property(nonatomic,strong,readwrite) ZNBuildOutputTransaction *outputTransaction;
 @property(nonatomic,copy,readwrite) NSDictionary<NSString *,id> *staticDefaults;
 @property(nonatomic,strong,readwrite) ZNBinaryPatchWorkspace *workspace;
 @property(nonatomic,strong,readwrite) ZNRuntimeActionStore *runtimeStore;
@@ -12,7 +14,7 @@
 @implementation ZNBuildSession
 + (instancetype)currentSession {return NSThread.currentThread.threadDictionary[ZNBuildSessionThreadKey];}
 + (instancetype)captureWorkspace:(ZNBinaryPatchWorkspace *)workspace {
-    ZNBuildSession *session=[self new];session.identifier=NSUUID.UUID.UUIDString;
+    ZNBuildSession *session=[self new];session.identifier=NSUUID.UUID.UUIDString;session.outputTransaction=[ZNBuildOutputTransaction new];
     void (^capture)(void)=^{
         ZNRuntimeActionStore *runtime=[ZNRuntimeActionStore sharedStore];
         ZNNativeHookStore *hooks=[ZNNativeHookStore sharedStore];

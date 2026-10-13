@@ -1,6 +1,9 @@
 #import "ZNBuildSession.h"
 #import "ZNBuildOutputIO.h"
+#import "ZNBuildOutputTransaction.h"
+#include "ZNBuildFault.h"
 NSString *ZNCreateBuildOutputDirectory(NSString *root, NSString *label, NSString **error) {
+    ZNBuildSession *session=[ZNBuildSession currentSession];if(session)return [session.outputTransaction createDirectoryAtRoot:root label:label error:error];
     NSString *name=[NSString stringWithFormat:@"%@-%@",label?:@"build",NSUUID.UUID.UUIDString];
     NSString *path=[root stringByAppendingPathComponent:name];NSError *e=nil;
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&e]){
@@ -26,7 +29,7 @@ BOOL ZNWriteBuildReport(id object, NSString *path, NSString **error) {
         NSMutableDictionary *tagged=[object mutableCopy];tagged[@"buildSessionID"]=session.identifier;object=tagged;
     }
     NSError *e=nil;NSData *data=[NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:&e];
-    if(!data || ![data writeToFile:path options:NSDataWritingAtomic error:&e]){
+    if(ZNBuildFail("file.write") || !data || ![data writeToFile:path options:NSDataWritingAtomic error:&e]){
         if(error)*error=e.localizedDescription?:@"Build report write failed";return NO;
     }
     return YES;

@@ -6,11 +6,11 @@ clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src io
 /tmp/hook-test
 clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNNativeHookScheduler.mm iosruntimepatchmenu/tests/native_hook_scheduler_test.mm -o /tmp/scheduler-test
 /tmp/scheduler-test
-clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-test
 /tmp/output-test
 clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
 /tmp/activation-test
-clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -o /tmp/build-session-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -o /tmp/build-session-test
 /tmp/build-session-test
 clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/tests/il2cpp_abi_classifier_test.mm -o /tmp/abi-test
 /tmp/abi-test
@@ -55,3 +55,8 @@ clang -dynamiclib -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/static_run
 clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticDispatchRuntime.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/static_owned_metadata_test.mm -o "$work_static/static-test"
 "$work_static/static-test" "$work_static/static-runtime-fixture.dylib"
 rm -rf "$work_static"
+
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-transaction-link-test
+/tmp/output-transaction-link-test
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_transaction_test.mm iosruntimepatchmenu/tests/build_session_current_stub.mm -o /tmp/output-transaction-test
+/tmp/output-transaction-test
