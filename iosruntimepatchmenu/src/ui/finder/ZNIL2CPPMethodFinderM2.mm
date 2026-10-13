@@ -1,5 +1,5 @@
 #import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
-#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
 #import "ZNMethodFinderM2Engine.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNIL2CPPMethodFinderM2.mm
 #line 1 "ZNIL2CPPMethodFinderM2.mm"
@@ -41,22 +41,7 @@
 static const void *kZN61M2TokenKey = &kZN61M2TokenKey;
 
 @interface ZNRuntimeMenuControllerV040 (ZNMethodFinderM2UI)
-- (UIView *)cardAtY:(CGFloat)y height:(CGFloat)h width:(CGFloat)w compact:(BOOL)compact;
-- (UILabel *)label:(NSString *)text size:(CGFloat)size weight:(UIFontWeight)weight color:(UIColor *)color;
-- (UIButton *)zn40_button:(NSString *)title selector:(SEL)selector frame:(CGRect)frame;
-- (void)zn40_updateContentHeight:(CGFloat)y;
-- (void)renderPage;
-- (NSString *)zn57mf_query;
-- (void)zn57mf_setQuery:(NSString *)value;
-
-- (void)zn60v3_setCandidates:(NSArray<NSDictionary *> *)items;
-- (void)zn60v3_setSelected:(NSDictionary * _Nullable)candidate;
-- (void)zn60v3_setStatus:(NSString *)status;
-- (void)zn60v3_setPage:(NSInteger)page;
-- (NSUInteger)zn60v3_limit;
-- (void)zn60v3_startSearch:(id)sender;
-- (void)zn60v3_renderSearchAtWidth:(CGFloat)width;
-
+// UI_RELOCATED: ZNMethodFinderUIInternal.h:m2foreign
 - (void)zn61m2_startSearch:(id)sender;
 - (void)zn61m2_renderSearchAtWidth:(CGFloat)width;
 - (void)zn61m2_cancelSearch:(id)sender;

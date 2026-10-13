@@ -20,7 +20,7 @@ def expanded_ui(root=ROOT):
         content=path.read_text();start='// UI_RELOCATED_BEGIN '+m[2]+'\n';end='// UI_RELOCATED_END '+m[2]+'\n'
         region=content.split(start,1)[1].split(end,1)[0]
         return region.replace('ZN_UI_LINKAGE ','static ')
-    pattern=r'^// UI_RELOCATED: ((?:ZNMenu[A-Za-z]+|ZNMethodFinderM2Engine)\.(?:mm|h)):(\w+)\n'
+    pattern=r'^// UI_RELOCATED: ((?:ZNMenu[A-Za-z]+|ZNMethodFinderM2Engine|ZNMethodFinderUIInternal)\.(?:mm|h)):(\w+)\n'
     for _ in range(8):
         if not re.search(pattern,text,re.M):break
         text=re.sub(pattern,relocated,text,flags=re.M)
