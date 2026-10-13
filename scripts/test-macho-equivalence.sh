@@ -59,3 +59,8 @@ echo 'production combination outputs independent iOS ARM64 CodeDirectory page ha
 
 clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-fault-test"
 "$work/combinations-fault-test" "$work/fault-combinations"
+
+python3 scripts/extract-executor-transaction-fixture.py "$work/executor.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/executor.mm" iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNBuildItem.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/executor-test"
+"$work/executor-test" "$work/executor"
+cp "$work/executor.json" dist/production-executor-extraction.json
