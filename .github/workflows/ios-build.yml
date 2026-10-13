@@ -46,6 +46,8 @@ jobs:
           /tmp/router-test
           clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNFeatureMetadataCodec.mm iosruntimepatchmenu/tests/feature_metadata_codec_test.mm -o /tmp/metadata-test
           /tmp/metadata-test
+          clang++ -std=gnu++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/tests/runtime_logger_test.mm -o /tmp/logger-test
+          /tmp/logger-test
       - name: Install pinned dependencies
         run: |
           set -euo pipefail

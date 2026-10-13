@@ -88,42 +88,7 @@ NSString *ZNStringForControlType(ZNFeatureControlType type) {
 }
 @end
 
-@implementation ZNRuntimeLogger {
-    NSMutableArray<NSString *> *_lines;
-}
-+ (instancetype)sharedLogger {
-    static ZNRuntimeLogger *s;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{ s = [ZNRuntimeLogger new]; });
-    return s;
-}
-- (instancetype)init {
-    self = [super init];
-    if (!self) return nil;
-    _lines = [NSMutableArray array];
-    return self;
-}
-- (void)log:(NSString *)message {
-    if (!message.length) return;
-    NSDateFormatter *fmt = [NSDateFormatter new];
-    fmt.dateFormat = @"HH:mm:ss";
-    NSString *line = [NSString stringWithFormat:@"[%@] %@", [fmt stringFromDate:[NSDate date]], message];
-    @synchronized (self) {
-        [_lines addObject:line];
-        if (_lines.count > 200) [_lines removeObjectsInRange:NSMakeRange(0, _lines.count - 200)];
-    }
-    NSLog(@"[ZonoePatch] %@", message);
-}
-- (NSArray<NSString *> *)recentLines:(NSUInteger)limit {
-    @synchronized (self) {
-        if (limit == 0 || _lines.count <= limit) return [_lines copy];
-        return [_lines subarrayWithRange:NSMakeRange(_lines.count-limit, limit)];
-    }
-}
-- (void)clear {
-    @synchronized (self) { [_lines removeAllObjects]; }
-}
-@end
+
 
 // v0.5.6.2 dyld replay suppression + image-burst coalescing.
 // _dyld_register_func_for_add_image synchronously replays already-loaded images
