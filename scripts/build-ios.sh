@@ -2,12 +2,25 @@
 set -euo pipefail
 : "${THEOS:?THEOS must point to the pinned checkout}"
 TASK_SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+test "$TASK_SDK_VERSION" = "18.5"
 xcodebuild -version
 xcrun clang --version
 make -C iosruntimepatchmenu clean
 make -C iosruntimepatchmenu FINALPACKAGE=1 TARGET="iphone:clang:${TASK_SDK_VERSION}:14.0" 2>&1 | tee build-ios.log
 mkdir -p dist
 cp iosruntimepatchmenu/.theos/obj/ZonoePatchV03.dylib dist/ZonoePatch-V2-arm64.dylib
+{
+  git rev-parse HEAD
+  xcodebuild -version
+  xcrun --sdk iphoneos --show-sdk-version
+  xcrun clang --version
+  git -C "$THEOS" rev-parse HEAD
+  git -C "$THEOS" submodule status --recursive
+  git -C vendor/Dobby rev-parse HEAD
+  git -C vendor/Dobby diff | shasum -a 256
+  cmake --version
+  uname -a
+} > dist/toolchain.txt
 file dist/ZonoePatch-V2-arm64.dylib | tee dist/file.txt
 otool -L dist/ZonoePatch-V2-arm64.dylib | tee dist/load-commands.txt
 shasum -a 256 dist/ZonoePatch-V2-arm64.dylib > dist/SHA256.txt
