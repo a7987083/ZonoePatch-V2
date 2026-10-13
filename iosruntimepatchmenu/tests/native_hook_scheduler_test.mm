@@ -4,6 +4,8 @@
 #import "ZNNativeHookAction.h"
 #import "ZNPatchCore.h"
 #include <cassert>
+// Mock implementations intentionally implement only the consumed backend surface.
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
 static unsigned installs,removes;
 @implementation ZNNativeHookAction
 - (id)copyWithZone:(NSZone *)zone { ZNNativeHookAction *a=[ZNNativeHookAction new];a.actionID=self.actionID;a.minValue=self.minValue;a.maxValue=self.maxValue;return a; }
