@@ -868,7 +868,7 @@ static BOOL ZNV3BuildTarget(NSString *target,
     NSString *name = inputPath.lastPathComponent.length ? inputPath.lastPathComponent : target;
     NSString *outputPath = [folder stringByAppendingPathComponent:[name stringByAppendingString:@".znpatched"]];
     NSFileManager *fm = NSFileManager.defaultManager;
-    [fm removeItemAtPath:outputPath error:nil];
+    // Never overwrite a prior artifact or another target with the same basename.
     NSError *copyError = nil;
     if (![fm copyItemAtPath:inputPath toPath:outputPath error:&copyError]) {
         if(error)*error=[NSString stringWithFormat:@"复制目标失败：%@",copyError.localizedDescription?:@"未知错误"];

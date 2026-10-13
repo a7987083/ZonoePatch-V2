@@ -68,6 +68,7 @@ static BOOL ZNRBShiftLinkeditReferences(uint8_t *base, size_t size, uint64_t old
 }
 
 static BOOL ZNRBBuildTarget(NSString *target, NSString *folder, NSString **outPath, NSDictionary **metadata, NSString **error) {
+    if(ZNBuildFail("target.build")){if(error)*error=@"Injected target generation failure";return NO;}
     NSDictionary *module = [[ZNModuleManager sharedManager] moduleNamed:target];
     if (!module) { if (error) *error = [NSString stringWithFormat:@"Runtime-only Builder：目标模块未加载：%@", target ?: @""]; return NO; }
     NSString *inputPath = [module[@"path"] isKindOfClass:NSString.class] ? module[@"path"] : @"";
@@ -75,7 +76,7 @@ static BOOL ZNRBBuildTarget(NSString *target, NSString *folder, NSString **outPa
     NSString *name = inputPath.lastPathComponent.length ? inputPath.lastPathComponent : target;
     // M5.1: generated binary keeps the original Mach-O filename. No .znpatched suffix.
     NSString *outputPath = [folder stringByAppendingPathComponent:name];
-    NSFileManager *fm = NSFileManager.defaultManager; [fm removeItemAtPath:outputPath error:nil]; NSError *copyError = nil;
+    NSFileManager *fm = NSFileManager.defaultManager; NSError *copyError = nil;
     if (![fm copyItemAtPath:inputPath toPath:outputPath error:&copyError]) { if (error) *error = [NSString stringWithFormat:@"Runtime-only Builder：复制目标失败：%@", copyError.localizedDescription ?: @"未知错误"]; return NO; }
     int fd = open(outputPath.fileSystemRepresentation, O_RDWR); if (fd < 0) { [fm removeItemAtPath:outputPath error:nil]; if (error) *error = @"Runtime-only Builder：打开输出失败"; return NO; }
     struct stat st = {}; if (fstat(fd, &st) != 0 || st.st_size <= 0) { close(fd); [fm removeItemAtPath:outputPath error:nil]; if (error) *error = @"Runtime-only Builder：输出大小无效"; return NO; }

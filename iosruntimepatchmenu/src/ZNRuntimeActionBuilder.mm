@@ -1,3 +1,4 @@
+#import "ZNBuildOutputIO.h"
 #import "ZNBuildFileTransaction.h"
 #include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
@@ -203,12 +204,12 @@ static NSData *ZNRABSerialize(NSArray<ZNRuntimeMethodAction *> *actions,
 
 static BOOL ZNRABIsZeroRange(const uint8_t *p,size_t n){for(size_t i=0;i<n;i++)if(p[i]!=0)return NO;return YES;}
 
-static void ZNRABUpdateBuildReport(NSArray<NSString *> *builderOutputs,
+static BOOL ZNRABUpdateBuildReport(NSArray<NSString *> *builderOutputs,
                                   NSArray<ZNRuntimeMethodAction *> *actions,
                                   NSArray<ZNNativeHookAction *> *hooks,
-                                  NSUInteger tableBytes){
-    NSString *reportPath=nil;for(NSString *path in builderOutputs)if([path.lastPathComponent isEqualToString:@"build_report.json"]){reportPath=path;break;}if(!reportPath.length)return;
-    NSData *json=[NSData dataWithContentsOfFile:reportPath];if(!json.length)return;NSMutableDictionary *object=[[NSJSONSerialization JSONObjectWithData:json options:NSJSONReadingMutableContainers error:nil] mutableCopy];if(![object isKindOfClass:NSMutableDictionary.class])return;
+                                  NSUInteger tableBytes,NSString **error){
+    NSString *reportPath=nil;for(NSString *path in builderOutputs)if([path.lastPathComponent isEqualToString:@"build_report.json"]){reportPath=path;break;}if(!reportPath.length)return YES;
+    NSData *json=[NSData dataWithContentsOfFile:reportPath];NSMutableDictionary *object=json.length?[[NSJSONSerialization JSONObjectWithData:json options:NSJSONReadingMutableContainers error:nil] mutableCopy]:nil;if(![object isKindOfClass:NSMutableDictionary.class]){if(error)*error=@"Runtime Action build_report.json 缺失或无效";return NO;}
     NSMutableArray *items=[NSMutableArray arrayWithCapacity:actions.count];for(ZNRuntimeMethodAction *action in actions)[items addObject:@{@"actionID":@(action.actionID),@"executionKind":@(action.executionKind),@"title":action.title?:@"",@"description":action.featureDescription?:@"",@"identity":action.canonicalIdentity?:@"",@"methodRVA":[NSString stringWithFormat:@"0x%llX",(unsigned long long)action.methodRVA],@"argumentCount":@(action.argumentCount),@"argumentValues":action.argumentValues?:@[],@"argumentControls":action.argumentControlConfigs?:@[],@"immediateChain":action.immediateChain?:@{}}];
     object[@"runtimeMethodCall"]=@{@"format":@"com.zonoe.runtime-action/v1",@"version":@1,@"storage":@"__ZNDATA/__zndata after Static Dispatch table",@"staticEntryABIPreserved":@YES,@"runtimeEntrySize":@(sizeof(ZNRuntimeMethodCallEntry)),@"methodRVAEncoding":@"uint64[count] side-table via header.reserved[0]",@"typedArgumentMaxCount":@(ZN_RUNTIME_ACTION_MAX_ARGUMENTS),@"supportedArgumentRange":@"0-8",@"signatureEncoding":@"U+001F parameter types via reserved[1]",@"argumentVectorEncoding":@"UTF-8 JSON array via reserved[2]",@"argumentControlsEncoding":@"UTF-8 JSON via reserved[3]",@"immediateChainEncoding":@"UTF-8 JSON via reserved[4]",@"featureDescriptionEncoding":@"UTF-8 via reserved[5]",@"count":@(actions.count),@"bytes":@(tableBytes),@"actions":items};
     NSMutableArray *hookItems=[NSMutableArray arrayWithCapacity:hooks.count];
@@ -238,7 +239,7 @@ static void ZNRABUpdateBuildReport(NSArray<NSString *> *builderOutputs,
                                @"fallbackRVA":@(hook.fallbackRVA),@"fallbackUUID":hook.fallbackUUID?:@""}];
     }
     object[@"nativeHook"]=@{@"format":@"com.zonoe.native-hook/v1",@"engine":@"Dobby",@"count":@(hooks.count),@"actions":hookItems};
-    NSData *updated=[NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:nil];if(updated)[updated writeToFile:reportPath atomically:YES];
+    return ZNWriteBuildReport(object,reportPath,error);
 }
 
 static BOOL ZNRABEmbedTableAtPrivatePath(NSString *path,NSData *table,NSString **error){
@@ -265,7 +266,7 @@ BOOL ZNRuntimeActionEmbedIntoGeneratedOutputs(NSArray<NSString *> *builderOutput
     NSString *unityOutput=nil;for(NSString *path in builderOutputs){NSString *name=path.lastPathComponent.lowercaseString;if([name isEqualToString:@"unityframework"]||([name containsString:@"unityframework"]&&![name hasSuffix:@".json"])){unityOutput=path;break;}}
     if(!unityOutput.length){if(error)*error=@"存在 Runtime/Native Hook Action，但本次 Builder 没有 UnityFramework 二进制输出。";return NO;}
     NSString *embedError=nil;if(!ZNRABEmbedTableAtPath(unityOutput,table,&embedError)){if(error)*error=embedError?:@"Runtime Action 嵌入失败";return NO;}
-    ZNRABUpdateBuildReport(builderOutputs,actions,hooks,table.length);
+    if(!ZNRABUpdateBuildReport(builderOutputs,actions,hooks,table.length,error))return NO;
     if(report)*report=[NSString stringWithFormat:@"Runtime Action：Method=%lu Hook=%lu · %lu bytes · %@",(unsigned long)actions.count,(unsigned long)hooks.count,(unsigned long)table.length,unityOutput.lastPathComponent];
     [[ZNRuntimeLogger sharedLogger] log:[NSString stringWithFormat:@"[runtime-action] embedded method=%lu nativeHook=%lu bytes=%lu output=%@",(unsigned long)actions.count,(unsigned long)hooks.count,(unsigned long)table.length,unityOutput.lastPathComponent]];
     return YES;

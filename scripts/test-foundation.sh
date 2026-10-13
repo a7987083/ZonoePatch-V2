@@ -89,3 +89,10 @@ clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchme
 mkdir -p dist
 cp "$work_history/history.json" dist/search-history-install-extraction.json
 rm -rf "$work_history"
+
+work_runtime_report=$(mktemp -d)
+python3 scripts/extract-runtime-report-fixture.py "$work_runtime_report/report.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work_runtime_report/report.mm" iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/tests/build_session_current_stub.mm -o "$work_runtime_report/report-test"
+"$work_runtime_report/report-test"
+cp "$work_runtime_report/report.json" dist/runtime-report-extraction.json
+rm -rf "$work_runtime_report"

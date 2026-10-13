@@ -37,7 +37,7 @@ static NSDictionary *fixtureModule;
 '''
 span('ZNStaticBinaryBuilderV3.mm','static const uint64_t kZNV3Page','BOOL ZNStaticBinaryBuilderV3BuildWorkspace')
 span('ZNRuntimeOnlyBinaryBuilder.mm','static const uint64_t kZNRBPage','BOOL ZNRuntimeOnlyBinaryBuilderBuildWorkspace')
-span('ZNRuntimeActionBuilder.mm','static BOOL ZNRABAppendString','static void ZNRABUpdateBuildReport')
+span('ZNRuntimeActionBuilder.mm','static BOOL ZNRABAppendString','static BOOL ZNRABUpdateBuildReport')
 function('ZNRuntimeActionBuilder.mm','ZNRABEmbedTableAtPrivatePath')
 function('ZNRuntimeActionBuilder.mm','ZNRABEmbedTableAtPath')
 for file,name in [('ZNRuntimeActionModel.mm','ZNRuntimeMethodAction'),('ZNNativeHookAction.mm','ZNNativeHookAction')]:
