@@ -2205,10 +2205,7 @@ typedef NS_ENUM(int, ZNDeferredState) {
 
 static std::atomic<int> gZNDeferredState{ZNDeferredStateCold};
 
-static void ZNRunActivationStage(NSString *name, void (^block)(void)) {
-    (void)name;
-    block();
-}
+#import "ZNActivationStageRunner.h"
 
 extern "C" BOOL ZNDeferredBootstrapIsActivated(void) {
     int state = gZNDeferredState.load(std::memory_order_acquire);

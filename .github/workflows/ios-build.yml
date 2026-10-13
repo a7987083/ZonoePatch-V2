@@ -34,6 +34,8 @@ jobs:
           /tmp/scheduler-test
           clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-test
           /tmp/output-test
+          clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
+          /tmp/activation-test
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
