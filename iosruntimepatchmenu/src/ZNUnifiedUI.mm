@@ -98,7 +98,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/compat/ZNM441Hotfix.inc"
 
 
-#include "ui/finder/ZNM442SearchRestore.inc"
+// UI_COMPILED_MODULE: ui/finder/ZNM442SearchRestore.mm
 
 
 #include "ui/finder/ZNM45AddressOwningMethodUI.inc"
@@ -140,7 +140,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/execution/ZNM52ChainExecuteButton.inc"
 
 
-#include "ui/finder/ZNM52MethodSearchHistory.inc"
+// UI_COMPILED_MODULE: ui/finder/ZNM52MethodSearchHistory.mm
 
 
 #include "ui/features/ZNM53ControlBinding.inc"

@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNM442SearchRestore.mm
 #line 1 "ZNM442SearchRestore.mm"
 #import <Foundation/Foundation.h>

@@ -174,73 +174,6 @@
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNMethodFinderM2Engine",
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM2UI)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<CoreFoundation/CoreFoundation.h>",
-        "<objc/runtime.h>",
-        "<mach-o/dyld.h>",
-        "<mach-o/loader.h>",
-        "<mach/vm_prot.h>",
-        "<dlfcn.h>",
-        "<errno.h>",
-        "<limits.h>",
-        "<stdint.h>",
-        "<stdlib.h>",
-        "<stdio.h>",
-        "<string.h>",
-        "\"ZNIL2CPPHybridFinder.h\"",
-        "\"ZNIL2CPPMethodFinderSearchV3.h\"",
-        "\"ZNIL2CPPResolver.h\"",
-        "\"ZNPatchCore.h\"",
-        "\"ZNTheme.h\""
-      ],
-      "interfaces": [
-        "ZNMethodFinderM2Engine : NSObject",
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM2UI)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM21CancelUX)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNTheme.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM21CancelUX)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM22StableCancelUX)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>"
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM22StableCancelUX)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
       "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",
       "status": "SOURCE PENDING: not yet independently compiled",
       "implementations": [
@@ -455,25 +388,6 @@
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
         "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/finder/ZNM442SearchRestore.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNM442SearchRestore)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "<mach-o/dyld.h>",
-        "<errno.h>",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNM442SearchRestore)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },
@@ -750,24 +664,6 @@
       ],
       "interfaces": [
         "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
-      ],
-      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
-    },
-    {
-      "path": "ui/finder/ZNM52MethodSearchHistory.inc",
-      "status": "SOURCE PENDING: not yet independently compiled",
-      "implementations": [
-        "ZNRuntimeMenuControllerV040 (ZNM52MethodSearchHistory)"
-      ],
-      "sourceImports": [
-        "<Foundation/Foundation.h>",
-        "<UIKit/UIKit.h>",
-        "<objc/runtime.h>",
-        "\"ZNTheme.h\"",
-        "\"ZNPatchCore.h\""
-      ],
-      "interfaces": [
-        "ZNRuntimeMenuControllerV040 (ZNM52MethodSearchHistory)"
       ],
       "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
     },

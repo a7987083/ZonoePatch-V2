@@ -542,14 +542,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNM442SearchRestore.inc",
+      "path": "ui/finder/ZNM442SearchRestore.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM442SearchRestore)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        223
+        225
       ]
     },
     {
@@ -564,14 +564,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNM52MethodSearchHistory.inc",
+      "path": "ui/finder/ZNM52MethodSearchHistory.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM52MethodSearchHistory)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        167
+        169
       ]
     },
     {

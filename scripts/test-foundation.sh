@@ -81,3 +81,11 @@ clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchme
 mkdir -p dist
 cp "$work_footer/footer.json" dist/footer-install-extraction.json
 rm -rf "$work_footer"
+
+work_history=$(mktemp -d)
+python3 scripts/extract-search-history-install-fixture.py "$work_history/history.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work_history/history.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm -o "$work_history/history-test"
+"$work_history/history-test"
+mkdir -p dist
+cp "$work_history/history.json" dist/search-history-install-extraction.json
+rm -rf "$work_history"

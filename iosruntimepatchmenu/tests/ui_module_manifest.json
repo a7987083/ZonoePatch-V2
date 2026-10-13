@@ -161,9 +161,9 @@
       "category_count": 2
     },
     {
-      "path": "ui/finder/ZNM442SearchRestore.inc",
+      "path": "ui/finder/ZNM442SearchRestore.mm",
       "historical_section": "ZNM442SearchRestore.mm",
-      "sha256": "5e1c1ed21b8363c8da6bd5cdc8178772b7f0b77ed248a910f80ba554204e558f",
+      "sha256": "b4324b567ad3df82c16a603afa1e4257470c7fb130b5f750128b8530a87794e4",
       "category_count": 1
     },
     {
@@ -246,9 +246,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/finder/ZNM52MethodSearchHistory.inc",
+      "path": "ui/finder/ZNM52MethodSearchHistory.mm",
       "historical_section": "ZNM52MethodSearchHistory.mm",
-      "sha256": "9aedad3e00637ef18f5218c04b4d977de7e69cef1237296adf5766117b4f488c",
+      "sha256": "993e722004f7ff365ecea90379e11dd49876bbb89cc142e4ae4df902463dc91f",
       "category_count": 1
     },
     {
@@ -354,6 +354,6 @@
     "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca",
     "ZNMethodFinderM2Engine.mm": "947dad820de698b085028509fcdaff8a3e3ea39a372c066ae5a50d523ec61f8f",
     "ZNMethodFinderM2Engine.h": "19ba68530b3e96c93c3c55125387db8ef721cbe4fd26cb4794aaa993790a14a9",
-    "ZNMethodFinderUIInternal.h": "1d9a3ce05eaeb4c4ff0fd3ded147e5039e35bcb471c2fb30af694c64bda9e7a1"
+    "ZNMethodFinderUIInternal.h": "7b531a8ea55176bf78f38589e9932dfcd6dfc6ab67cf676055a6aaabc541e756"
   }
 }
