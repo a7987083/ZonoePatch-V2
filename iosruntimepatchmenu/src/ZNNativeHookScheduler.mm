@@ -158,7 +158,9 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
 - (void)reconcileActions:(NSArray<ZNNativeHookAction *> *)actions {
     NSArray<ZNNativeHookAction *> *snapshot=[actions copy]?:@[];
     __weak typeof(self) weakSelf=self;
+    auto queueTicket=znperf::ticket(znperf::HookQueueWait);
     dispatch_async(self.queue,^{
+        if(queueTicket)queueTicket->finish();
         typeof(self) self=weakSelf;
         if(!self)return;
 

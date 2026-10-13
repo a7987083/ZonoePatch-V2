@@ -46,3 +46,6 @@ clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosr
 
 clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/ui_install_trace_test.mm -o /tmp/ui-trace-test
 /tmp/ui-trace-test
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNAsyncPerformance.mm iosruntimepatchmenu/tests/async_search_metrics_test.mm -o /tmp/search-metrics-test
+/tmp/search-metrics-test

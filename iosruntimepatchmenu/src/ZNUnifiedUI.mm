@@ -8,6 +8,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #include "ZNPerformance.h"
+#import "ZNAsyncPerformance.h" // UI_MODULE_IMPORT
+#include "ZNLoadedImageApple.h" // UI_MODULE_IMPORT
+extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
 #import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #import "ZNMenuUIKeys.h" // UI_MODULE_IMPORT

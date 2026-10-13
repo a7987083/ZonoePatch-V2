@@ -11,7 +11,7 @@
     {
       "path": "ui/shell/ZNDeferredBootstrap.inc",
       "historical_section": "ZNDeferredBootstrap.mm",
-      "sha256": "68dc81fff50612acff8ca2e402c25729775e432bf4cebb33a713a8c63805edd7",
+      "sha256": "cd3e7c24082f9aae83299b6b36bf4f1e32a29dec5b1bbe82a7cd3eab12d59b31",
       "category_count": 0
     },
     {
@@ -80,7 +80,7 @@
     {
       "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
       "historical_section": "ZNIL2CPPMethodFinderM2.mm",
-      "sha256": "ed0fe2041910d2d3c6d6df2a3db6ea1d1c539e523195c7c4085721850559cd3b",
+      "sha256": "eb1b6250901112eee73c3c3175f1fbf94d73a0ff496bf6e32baed65657b80198",
       "category_count": 1
     },
     {
@@ -342,6 +342,8 @@
     "ZNMenuUIHelpers.mm": "f6715f9a20f224fd6d45190aafbcae95f64910c06b06172132e99342917012f1",
     "ZNMenuUIHelpers.h": "87353d795d1ff03f05b5f605f315686806e1fc8a869e887e6742bd34e974e848",
     "ZNMenuSearchPolicy.mm": "94ce3ff1ec8a53d1ab5b1318649cb581e7aefaa24420ed21538d8f45947452e0",
-    "ZNMenuSearchPolicy.h": "36b1f1400aa61e66538f6539459023ab76f9069ce2eb09c24b834bd76d93fd93"
+    "ZNMenuSearchPolicy.h": "36b1f1400aa61e66538f6539459023ab76f9069ce2eb09c24b834bd76d93fd93",
+    "ZNUIInstallationTrace.h": "6d7c3fd81dca11f1120c72a041679f0bb2d9b35a442a117c73b423b0c8cbba81",
+    "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca"
   }
 }

@@ -38,6 +38,8 @@ jobs:
           /tmp/performance-test
           clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/loaded_image_test.cpp -o /tmp/loaded-image-test
           /tmp/loaded-image-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/async_performance_test.cpp -o /tmp/async-performance-test
+          /tmp/async-performance-test
       - name: Reproducible host microbenchmarks
         run: python3 scripts/benchmark.py --output performance-host.json
       - name: Strict ownership module warnings

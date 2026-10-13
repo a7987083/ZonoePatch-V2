@@ -151,13 +151,17 @@ static BOOL ZN61LoadRuntime(ZN61Runtime *runtime, NSString **error) {
         }
     }
 
+    uintptr_t liveHeader=(uintptr_t)unityHeader;
+    auto headerOwner=ZNCaptureLoadedImage(liveHeader);
+    if(!headerOwner){if(error)*error=@"M2 loaded image invalidated";return NO;}
+    unityHeader=(const struct mach_header_64 *)headerOwner->bytes();
     if (!unityHeader || unityHeader->magic != MH_MAGIC_64 || !unityPath) {
         if (error) *error = @"UnityFramework 尚未加载或不是 arm64 Mach-O";
         return NO;
     }
 
-    runtime->header = unityHeader;
-    runtime->runtimeBase = (uintptr_t)unityHeader;
+    runtime->header = (const struct mach_header_64 *)liveHeader;
+    runtime->runtimeBase = liveHeader;
     snprintf(runtime->unityPath, sizeof(runtime->unityPath), "%s", unityPath);
 
     BOOL textFound = NO;
@@ -268,6 +272,9 @@ static uintptr_t ZN61MethodPointer(ZN61Runtime *runtime, const void *method) {
 }
 
 static NSString *ZN61UUIDString(const struct mach_header_64 *header) {
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)header);
+    if(!headerOwner)return @"";
+    header=(const struct mach_header_64 *)headerOwner->bytes();
     if (!header || header->magic != MH_MAGIC_64) return @"";
     const uint8_t *cursor = (const uint8_t *)(header + 1);
     const uint8_t *end = cursor + header->sizeofcmds;
@@ -598,6 +605,7 @@ static NSArray<NSDictionary *> *ZN61ResolveHits(NSArray<NSDictionary *> *hits,
 }
 
 - (void)cancel:(NSString *)token {
+    ZNPerfSearchCancelRequested(token);
     ZN61Cancel(token);
 }
 
@@ -606,10 +614,19 @@ static NSArray<NSDictionary *> *ZN61ResolveHits(NSArray<NSDictionary *> *hits,
                  progress:(ZN61ProgressBlock)progress
                completion:(ZN61CompletionBlock)completion {
     NSString *token = [NSUUID UUID].UUIDString;
+    if(znperf::state().enabled.load()){
+        ZNPerfSearchEnqueue(token);
+        ZN61CompletionBlock originalCompletion=completion;
+        completion=^(NSArray *results,NSDictionary *stats,NSString *failure){
+            ZNPerfSearchFinished(token,[stats[@"cancelled"] boolValue]||[failure isEqualToString:@"搜索已取消"]);
+            originalCompletion(results,stats,failure);
+        };
+    }
     NSString *searchQuery = ZN61Trim(query);
     NSUInteger resultLimit = MAX((NSUInteger)1, MIN(limit ?: 32, kZN61HardLimit));
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        ZNPerfSearchStarted(token);
         CFAbsoluteTime started = CFAbsoluteTimeGetCurrent();
         if (!searchQuery.length) {
             dispatch_async(dispatch_get_main_queue(), ^{ completion(nil, nil, @"请输入搜索内容"); });

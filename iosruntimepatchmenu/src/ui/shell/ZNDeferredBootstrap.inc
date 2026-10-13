@@ -142,6 +142,7 @@ static UIWindow *ZNDeferredCurrentWindow(void) {
         // Start creates/attaches the real menu floating button but does NOT show
         // the panel. Therefore the first user tap is only a show/toggle action.
         ZNRunActivationStage(@"ZonoePatchStart", ^{ ZonoePatchStart(); });
+        ZNObserveFirstDisplayTick();
 
         [[ZNRuntimeLogger sharedLogger] log:
             @"[bootstrap][m6.11] instant-menu prewarm ready; first tap is show-only"];
