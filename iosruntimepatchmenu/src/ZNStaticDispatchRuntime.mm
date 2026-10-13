@@ -218,6 +218,23 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         return NO;
     }
 
+    // Validate the complete owned table before normalizing any live slot or
+    // publishing records/owner keys. A malformed later entry must not cause
+    // an earlier canonical dispatch site to be modified as a side effect.
+    for (uint32_t e = 0; e < header->count; e++) {
+        ZN55DecodedRVAs decoded = {};
+        if (!ZN55DecodeEntryRVAs(header, &entries[e], e, &decoded)) continue;
+        uint64_t off = 0, on = 0;
+        if (!ZNCheckedAdd64(runtimeHeader, decoded.offRVA, &off) ||
+            !ZNCheckedAdd64(runtimeHeader, decoded.onRVA, &on) ||
+            !lease->image->contains(off, 4, VM_PROT_EXECUTE) ||
+            !lease->image->contains(on, 4, VM_PROT_EXECUTE)) return NO;
+        uint32_t canonical = ZN44CanonicalIndex(header, &entries[e], e);
+        uintptr_t slot = headerAddress + sizeof(*header) + (uintptr_t)canonical * sizeof(ZN44StaticEntry);
+        uint64_t current = 0;
+        if (!lease->load64(slot, &current) || !lease->image->contains(slot, 8, VM_PROT_READ | VM_PROT_WRITE)) return NO;
+    }
+
     for (uint32_t e = 0; e < header->count; e++) {
         ZN44StaticEntry *entry = &entries[e];
         ZN55DecodedRVAs entryRVAs = {};

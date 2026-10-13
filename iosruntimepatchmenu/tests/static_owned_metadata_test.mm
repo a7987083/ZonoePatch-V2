@@ -18,6 +18,12 @@ int main(int argc,char **argv){@autoreleasepool{
  std::thread writer([&]{@autoreleasepool{for(int i=0;i<100;i++){NSString *e=nil;assert([runtime setEnabled:YES forRecord:a error:&e]);assert([runtime setEnabled:NO forRecord:a error:&e]);}}});
  std::thread cellWriter([&]{@autoreleasepool{for(int i=0;i<100;i++){std::lock_guard<std::recursive_mutex> g(ZNStaticOperationGate());auto lease=ZNLeaseForHeader(base,a.imageIncarnation);assert(lease);ZNValueType t=ZNValueTypeAuto;NSString *e=nil;uintptr_t cell=ZNStaticValueCellAddressForRecord(a,*lease,&t,&e);assert(cell&&lease->store(cell,i,4));assert([runtime setEnabled:YES forRecord:b error:&e]);}}});writer.join();cellWriter.join();
  uint64_t savedOff=entries[0].offRVA,savedTarget=entries[0].selectedTarget;entries[0].offRVA=UINT64_MAX;assert(![runtime zn44_consumeHeader:header address:table regionEnd:table+64+2*128+24+2*128 runtimeHeader:base targetName:@"malformed" found:[NSMutableArray array] liveSiteKeys:[NSMutableSet set]]);assert(entries[0].selectedTarget==savedTarget);entries[0].offRVA=savedOff;
+ uint64_t savedSecondOff=entries[1].offRVA;uint32_t savedCanonical=entries[1].canonicalIndex;
+ entries[0].selectedTarget=1;entries[1].canonicalIndex=1;entries[1].offRVA=UINT64_MAX;
+ NSMutableArray *rejected=[NSMutableArray array];NSMutableSet *rejectedKeys=[NSMutableSet set];
+ assert(![runtime zn44_consumeHeader:header address:table regionEnd:table+64+2*128+24+2*128 runtimeHeader:base targetName:@"late-malformed" found:rejected liveSiteKeys:rejectedKeys]);
+ assert(entries[0].selectedTarget==1&&rejected.count==0&&rejectedKeys.count==0);
+ entries[0].selectedTarget=savedTarget;entries[1].canonicalIndex=savedCanonical;entries[1].offRVA=savedSecondOff;
  uint64_t incarnation=a.imageIncarnation;assert(dlclose(handle)==0);assert(strcmp(a.entry->title,"A")==0);assert(![runtime setEnabled:YES forRecord:a error:&error]);assert(error.length);handle=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(handle);assert(!ZNLeaseForHeader(base,incarnation));assert(![runtime setEnabled:YES forRecord:a error:&error]);assert(dlclose(handle)==0);
  puts("production Static Dispatch owned entries/shared-owner activation/scoped write/unload/reload stale-record rejection PASS");
 }}
