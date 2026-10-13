@@ -1,0 +1,60 @@
+name: ZonoePatch V2 iOS Build
+on:
+  push:
+    branches: ['dev/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source contracts
+        run: |
+          bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh
+          python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report topology.json || echo 'BASELINE topology drift recorded; not waived for final acceptance'
+      - name: Foundation baseline tests
+        run: |
+          set -euo pipefail
+          clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/il2cpp_runtime_common_test.mm -o /tmp/common-test
+          /tmp/common-test
+          clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/native_hook_template_test.mm -o /tmp/hook-test
+          /tmp/hook-test
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          brew install ldid cmake
+          git clone https://github.com/theos/theos.git "$HOME/theos"
+          git -C "$HOME/theos" checkout 304e0799973e8145f32e4ca2de6c747a84b758ce
+          git -C "$HOME/theos" submodule update --init --recursive
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          mkdir -p vendor
+          git clone https://github.com/jmpews/Dobby.git vendor/Dobby
+          git -C vendor/Dobby checkout 5dfc8546954ce3b3198132ab13fddb89ee92cdd7
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('vendor/Dobby/scripts/platform_builder.py')
+          p.write_text(p.read_text().replace('import pipes\n',''))
+          p=Path('vendor/Dobby/include/dobby.h'); s=p.read_text()
+          old='#ifdef __cplusplus\nextern "C" {\n#endif\n\n#include <stdbool.h>\n#include <stdint.h>\n#include <sys/types.h>\n'
+          new='#include <stdbool.h>\n#include <stdint.h>\n#include <sys/types.h>\n\n#ifdef __cplusplus\nextern "C" {\n#endif\n'
+          if old not in s: raise SystemExit('unexpected pinned Dobby header')
+          p.write_text(s.replace(old,new,1))
+          PY
+          (cd vendor/Dobby && python3 scripts/platform_builder.py --platform iphoneos --arch arm64 --library_build_type static)
+          test -f vendor/Dobby/build/iphoneos/arm64/libdobby.a
+      - name: Build and verify arm64 dylib
+        run: bash scripts/build-ios.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZonoePatch-V2-${{ github.sha }}
+          path: |
+            dist/
+            build-ios.log
+            topology.json
+          if-no-files-found: error

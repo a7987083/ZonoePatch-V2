@@ -1,0 +1,6 @@
+.theos/
+**/.theos/
+vendor/
+dist/
+*.log
+__pycache__/
