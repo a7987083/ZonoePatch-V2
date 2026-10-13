@@ -752,6 +752,18 @@ static BOOL ZNV3InstallOwnedSegments(uint8_t *base,
                                      uint64_t *dataFileOffset,
                                      uint64_t *dataRVA,
                                      NSString **error) {
+    uint64_t totalInserted=0,vmEnd=0;
+    if(!ZNCheckedAdd64(codeSegmentSize,dataSegmentSize,&totalInserted)||
+       !ZNCheckedAdd64(layout.linkeditVMAddr,totalInserted,&vmEnd)||
+       !ZNCheckedAdd64(vmEnd,layout.linkeditVMSize,&vmEnd)||
+       codeUsed>codeSegmentSize||dataUsed>dataSegmentSize||
+       layout.linkeditFileOffset>UINT32_MAX||codeSegmentSize>UINT32_MAX-layout.linkeditFileOffset){
+        if(error)*error=@"V3 owned segment range overflow";return NO;
+    }
+    struct mach_header_64 *checkedHeader=(struct mach_header_64 *)base;
+    if(checkedHeader->ncmds>UINT32_MAX-2||checkedHeader->sizeofcmds>UINT32_MAX-2*sizeof(ZNV3OwnedSegmentCommand)){
+        if(error)*error=@"V3 load command count/size overflow";return NO;
+    }
     if (layout.linkeditFileOffset > UINT32_MAX ||
         layout.linkeditFileOffset + codeSegmentSize > UINT32_MAX) {
         if (error) *error = @"V3 Phase 1 新 section file offset 超过 32-bit section.offset";
