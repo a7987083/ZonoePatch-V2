@@ -1,8 +1,8 @@
 from pathlib import Path
-import sys,json,hashlib
+import sys,json,hashlib,re
 root=Path(__file__).resolve().parents[1];src=root/'iosruntimepatchmenu/src';out=Path(sys.argv[1]);parts=[];records=[]
 for file,name in [('ZNNativeHookAction.mm','ZNNativeHookTemplateKey'),('ZNRuntimeActionBuilder.mm','ZNRABUpdateBuildReport')]:
- s=(src/file).read_text();pos=s.index(name+'(');a=s.rfind('\n',0,pos)+1;b=s.index('{',pos);depth=1;e=b+1
+ s=(src/file).read_text();match=re.search(r'^(?:static )?(?:NSString \*|BOOL )'+name+r'\s*\(',s,re.M);assert match,name;pos=match.start();a=pos;b=s.index('{',pos);depth=1;e=b+1
  while depth:
   if s[e]=='{':depth+=1
   elif s[e]=='}':depth-=1
