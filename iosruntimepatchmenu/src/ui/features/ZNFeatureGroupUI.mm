@@ -1,3 +1,4 @@
+#import "ZNRuntimeCapabilityCoordinator.h" // UI_MODULE_IMPORT
 #import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
 #import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNFeatureGroupUI.mm
@@ -33,7 +34,7 @@
 static const NSInteger kZN50FeatureToggleTagBase = 450000;
 
 static double ZN50PerfMilliseconds(uint64_t start, uint64_t end) {
-    static mach_timebase_info_data_t tb = {0};
+    static mach_timebase_info_data_t tb = {};
     if (!tb.denom) mach_timebase_info(&tb);
     return ((double)(end - start) * (double)tb.numer / (double)tb.denom) / 1000000.0;
 }

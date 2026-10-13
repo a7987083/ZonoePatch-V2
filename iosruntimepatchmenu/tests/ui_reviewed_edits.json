@@ -40,6 +40,12 @@
       "path": "ui/shell/ZNDeferredBootstrap.inc",
       "before": "        ZNRunActivationStage(@\"ZonoePatchStart\", ^{ ZonoePatchStart(); });",
       "after": "        ZNRunActivationStage(@\"ZonoePatchStart\", ^{ ZonoePatchStart(); });\n        ZNObserveFirstDisplayTick();"
+    },
+    {
+      "path": "ui/features/ZNFeatureGroupUI.mm:ZN50PerfMilliseconds",
+      "before": "static mach_timebase_info_data_t tb = {0};",
+      "after": "static mach_timebase_info_data_t tb = {};",
+      "reason": "Equivalent full zero initialization; strict independent module warning is fixed, not suppressed."
     }
   ]
 }
