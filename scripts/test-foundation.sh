@@ -35,3 +35,9 @@ for class_mode in present absent; do
   clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror $flag -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuPresentationDefaults.mm iosruntimepatchmenu/tests/menu_presentation_defaults_test.mm -o /tmp/menu-defaults-test
   /tmp/menu-defaults-test
 done
+work_image=$(mktemp -d)
+printf 'int ZNImageFixture(void){return 42;}\n' > "$work_image/image.c"
+clang -dynamiclib "$work_image/image.c" -o "$work_image/loaded-image-fixture.dylib"
+clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/loaded_image_apple_test.mm -o "$work_image/image-test"
+"$work_image/image-test" "$work_image/loaded-image-fixture.dylib"
+rm -rf "$work_image"

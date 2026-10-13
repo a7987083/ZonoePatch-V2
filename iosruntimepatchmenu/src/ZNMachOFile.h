@@ -13,6 +13,7 @@ struct File {
 template<class T> inline T read(const uint8_t *p, uint64_t o) { T v; memcpy(&v,p+o,sizeof(v)); return v; }
 inline uint32_t minimum(uint32_t c) {
     switch(c) {
+    case 0x1b: return 24;
     case 0x19: return 72; // segment_command_64
     case 2: return 24; case 0xb: return 80; // symtab/dysymtab
     case 0x22: case 0x80000022: return 48; // dyld_info
@@ -22,7 +23,7 @@ inline uint32_t minimum(uint32_t c) {
     default: return 8;
     }
 }
-inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nullptr,bool arm64=true) {
+inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nullptr,bool arm64=true,bool fileRanges=true) {
     File f; const char *why=nullptr;
     auto fail=[&](const char *s){ if(error)*error=s; out=File{}; return false; };
     if(!ZNByteViewSlice(p,size,0,32))return fail("truncated Mach-O header");
@@ -41,16 +42,17 @@ inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nu
         if(c==0x19) {
             uint64_t vm=read<uint64_t>(p,o+24),vs=read<uint64_t>(p,o+32);
             uint64_t fo=read<uint64_t>(p,o+40),fs=read<uint64_t>(p,o+48),end;
-            if(!ZNCheckedAdd64(vm,vs,&end)||!ZNCheckedAdd64(vm,fs,&end)||!ZNCheckedRange64(size,fo,fs))return fail("invalid segment range");
+            if(!ZNCheckedAdd64(vm,vs,&end)||!ZNCheckedAdd64(vm,fs,&end)||!ZNCheckedAdd64(fo,fs,&end)||(fileRanges&&!ZNCheckedRange64(size,fo,fs)))return fail("invalid segment range");
             uint32_t ns=read<uint32_t>(p,o+64);
             if(uint64_t(ns)>(len-72)/80)return fail("truncated section table");
             for(uint32_t j=0;j<ns;j++) {
                 uint64_t s=o+72+uint64_t(j)*80,sz=read<uint64_t>(p,s+40);
                 uint32_t type=read<uint32_t>(p,s+64)&0xff;
                 if(!ZNCheckedAdd64(read<uint64_t>(p,s+32),sz,&end))return fail("section VM overflow");
-                if(type!=1&&type!=0xc&&type!=0x12 && sz && !ZNCheckedRange64(size,read<uint32_t>(p,s+48),sz))return fail("section outside file");
+                if(fileRanges && type!=1&&type!=0xc&&type!=0x12 && sz && !ZNCheckedRange64(size,read<uint32_t>(p,s+48),sz))return fail("section outside file");
             }
         }
+        if(fileRanges){
         auto range=[&](unsigned offset,unsigned length,unsigned stride=1){
             uint64_t count=read<uint32_t>(p,o+length);
             return !count || ZNCheckedRange64(size,read<uint32_t>(p,o+offset),count*stride);
@@ -63,6 +65,7 @@ inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nu
             if(!range(8,12))return fail("LINKEDIT data outside file");
         if(c==0x16&&!range(8,12,4))return fail("hints outside file");
         if(c==0x31 && read<uint64_t>(p,o+32) && !ZNCheckedRange64(size,read<uint64_t>(p,o+24),read<uint64_t>(p,o+32)))return fail("note outside file");
+        }
         f.commands.push_back({o,c,len}); o+=len;
     }
     f.bytes=p; f.size=size; out=std::move(f); if(error)*error=why; return true;

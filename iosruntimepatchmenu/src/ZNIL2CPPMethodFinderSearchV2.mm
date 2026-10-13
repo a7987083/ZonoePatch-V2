@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
@@ -132,12 +133,15 @@ static BOOL ZN58LoadRuntime(ZN58Runtime *runtime, NSString **error) {
         }
     }
 
-    if (!unityPath.length || !unityHeader || unityHeader->magic != MH_MAGIC_64) {
+    if (!unityPath.length || !unityHeader) {
         if (error) *error = @"UnityFramework 尚未加载或不是 arm64 Mach-O";
         return NO;
     }
 
     runtime->runtimeBase = (uintptr_t)unityHeader;
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)unityHeader);
+    if(!headerOwner){if(error)*error=@"Loaded image header changed or invalid";return NO;}
+    unityHeader=(const struct mach_header_64 *)headerOwner->bytes();
 
     const uint8_t *cursor = (const uint8_t *)(unityHeader + 1);
     const uint8_t *commandsEnd = cursor + unityHeader->sizeofcmds;

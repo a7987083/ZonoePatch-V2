@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNImageGeneration.h"
 #import "ZNNativeHookRuntime.h"
 
@@ -667,6 +668,10 @@ static NSDictionary *ZNNativeResolveDescriptor(NSString *assembly,
 }
 
 static NSString *ZNNativePreparedUUIDForHeader(const struct mach_header_64 *mh) {
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)mh);
+    if(!headerOwner)return @"";
+    mh=(const struct mach_header_64 *)headerOwner->bytes();
+
     if(!mh||mh->magic!=MH_MAGIC_64)return @"";
     const uint8_t *cursor=(const uint8_t *)(mh+1),*limit=cursor+mh->sizeofcmds;
     if(mh->ncmds>4096||mh->sizeofcmds>16*1024*1024)return @"";

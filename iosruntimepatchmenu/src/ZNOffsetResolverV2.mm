@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNPatchRuntimeValidator.h"
 #import "ZNPatchCore.h"
 #import "ZNExecutablePageProbe.h"
@@ -139,7 +140,9 @@ static NSData *ZNOV2DataFromHex(NSString *input, NSString **error) {
 
 static BOOL ZNOV2ParseLayout(uintptr_t header, ZNOV2Layout &layout, NSString **error) {
     if (!header) { if (error) *error = @"目标 image header 无效"; return NO; }
-    const struct mach_header_64 *mh = (const struct mach_header_64 *)header;
+    auto headerOwner=ZNCaptureLoadedImage(header);
+    if(!headerOwner){if(error)*error=@"Loaded image header changed or invalid";return NO;}
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     if (mh->magic != MH_MAGIC_64) { if (error) *error = @"目标不是当前支持的 thin 64-bit Mach-O image"; return NO; }
     if (mh->ncmds > 4096 || mh->sizeofcmds > 16 * 1024 * 1024) { if (error) *error = @"Mach-O load commands 异常"; return NO; }
     layout.imageVMBase = UINT64_MAX;

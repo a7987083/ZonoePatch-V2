@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNIL2CPPOwningMethodResolver.h"
 #import "ZNPatchCore.h"
 
@@ -102,12 +103,15 @@ static BOOL ZNM45LoadRuntime(ZNM45Runtime *runtime, NSString **error) {
             break;
         }
     }
-    if (!unityPath.length || !header || header->magic != MH_MAGIC_64) {
+    if (!unityPath.length || !header) {
         if (error) *error = @"M4.5：UnityFramework 尚未加载或不是 arm64 Mach-O";
         return NO;
     }
 
     runtime->runtimeBase = (uintptr_t)header;
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)header);
+    if(!headerOwner){if(error)*error=@"Loaded image header changed or invalid";return NO;}
+    header=(const struct mach_header_64 *)headerOwner->bytes();
     const uint8_t *cursor = (const uint8_t *)(header + 1);
     const uint8_t *commandsEnd = cursor + header->sizeofcmds;
     BOOL foundText = NO;

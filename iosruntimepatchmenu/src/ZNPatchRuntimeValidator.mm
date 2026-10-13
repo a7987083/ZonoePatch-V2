@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNPatchRuntimeValidator.h"
 #import "ZNPatchCore.h"
 #import "ZNExecutablePageProbe.h"
@@ -102,7 +103,9 @@ static BOOL ZN43QueryImageSegment(uintptr_t imageBase,
         return NO;
     }
 
-    const struct mach_header_64 *mh = (const struct mach_header_64 *)imageBase;
+    auto headerOwner=ZNCaptureLoadedImage(imageBase);
+    if(!headerOwner){if(error)*error=@"Loaded image header changed or invalid";return NO;}
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     if (mh->magic != MH_MAGIC_64) {
         if (error) *error = @"目标不是当前支持的 64-bit Mach-O image";
         return NO;

@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNAnyImageAddressResolver.h"
 #import "ZNPatchRuntimeValidator.h"
 #import "ZNPatchCore.h"
@@ -150,7 +151,9 @@ static NSDictionary *ZNARFindLoadedImage(NSString *target, NSString **error) {
 
 static BOOL ZNARParseLayout(uintptr_t imageBase, ZNARLayout &layout, NSString **error) {
     if (!imageBase) { if (error) *error = @"目标 image base 无效"; return NO; }
-    const struct mach_header_64 *mh = (const struct mach_header_64 *)imageBase;
+    auto headerOwner=ZNCaptureLoadedImage(imageBase);
+    if(!headerOwner){if(error)*error=@"Loaded image header changed or invalid";return NO;}
+    const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();
     if (mh->magic != MH_MAGIC_64) { if (error) *error = @"目标不是当前支持的 thin 64-bit Mach-O image"; return NO; }
     if (mh->ncmds > 4096 || mh->sizeofcmds > 16 * 1024 * 1024) { if (error) *error = @"Mach-O load commands 异常"; return NO; }
 

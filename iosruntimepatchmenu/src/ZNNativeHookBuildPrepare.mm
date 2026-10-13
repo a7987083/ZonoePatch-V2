@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNNativeHookBuildPrepare.h"
 
 #import "ZNNativeHookAction.h"
@@ -18,6 +19,10 @@ static NSString *ZNM69Trim(NSString *value) {
 }
 
 static NSString *ZNM69UUIDForHeader(const struct mach_header_64 *mh) {
+    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)mh);
+    if(!headerOwner)return @"";
+    mh=(const struct mach_header_64 *)headerOwner->bytes();
+
     if(!mh || mh->magic!=MH_MAGIC_64)return @"";
     const uint8_t *cursor=(const uint8_t *)(mh+1);
     const uint8_t *limit=cursor+mh->sizeofcmds;
