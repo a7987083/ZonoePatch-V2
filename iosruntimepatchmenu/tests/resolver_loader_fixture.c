@@ -1,3 +1,5 @@
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stddef.h>
 static int domain,image,klass,method;
@@ -14,9 +16,16 @@ const void *il2cpp_class_get_method_from_name(void *c,const char *name,int count
 const char *il2cpp_method_get_name(const void *m){(void)m;return "Run";}
 unsigned il2cpp_method_get_param_count(const void *m){(void)m;return 0;}
 void *il2cpp_method_get_pointer(const void *m){(void)m;return (void*)FixtureRun;}
-static unsigned callbackValue;
+static _Atomic unsigned callbackValue;
+static pthread_mutex_t invokeMutex=PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t invokeCondition=PTHREAD_COND_INITIALIZER;
+static int blockInvoke;
+static _Atomic unsigned invokeEntered;
+void FixtureBlockInvoke(int block){pthread_mutex_lock(&invokeMutex);blockInvoke=block;if(block)invokeEntered=0;else pthread_cond_broadcast(&invokeCondition);pthread_mutex_unlock(&invokeMutex);}
+unsigned FixtureInvokeEntered(void){return invokeEntered;}
+
 void *il2cpp_object_get_class(void *object){(void)object;return &klass;}
-void *il2cpp_runtime_invoke(const void *m,void *object,void **params,void **exception){(void)m;(void)object;*exception=NULL;callbackValue=*(unsigned char *)params[0];return NULL;}
+void *il2cpp_runtime_invoke(const void *m,void *object,void **params,void **exception){(void)m;(void)object;*exception=NULL;callbackValue=*(unsigned char *)params[0];pthread_mutex_lock(&invokeMutex);invokeEntered=1;while(blockInvoke)pthread_cond_wait(&invokeCondition,&invokeMutex);pthread_mutex_unlock(&invokeMutex);return NULL;}
 unsigned FixtureCallbackValue(void){return callbackValue;}
 
 unsigned char FixtureBoolOriginal(uintptr_t a,uintptr_t b,uintptr_t c,uintptr_t d,uintptr_t e,uintptr_t f,uintptr_t g,uintptr_t h){(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h;return a?1:0;}
