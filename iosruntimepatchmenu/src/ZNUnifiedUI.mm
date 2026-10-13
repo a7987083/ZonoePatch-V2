@@ -13,6 +13,7 @@
 extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
 #import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
 #import "ZNMenuUIKeys.h" // UI_MODULE_IMPORT
 #import "ZNMenuUIHelpers.h" // UI_MODULE_IMPORT
 #import "ZNMenuSearchPolicy.h" // UI_MODULE_IMPORT
