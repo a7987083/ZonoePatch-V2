@@ -1,3 +1,4 @@
+#include "ZNScalarParser.h"
 #import "ZNDirectNativeCallEngine.h"
 #import "ZNIL2CPPABIMetadata.h"
 #import "ZNIL2CPPInstanceResolver.h"
@@ -27,27 +28,11 @@ static BOOL ZNDNCGPRKind(ZNIL2CPPABIValueKind kind) {
 }
 
 static BOOL ZNDNCParseUnsigned(NSString *text, uint64_t *out) {
-    NSString *s=[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-    if(!s.length)return NO;
-    const char *raw=s.UTF8String;
-    if(!raw)return NO;
-    errno=0; char *end=NULL;
-    unsigned long long v=strtoull(raw,&end,0);
-    if(errno||end==raw||*end!='\0')return NO;
-    if(out)*out=(uint64_t)v;
-    return YES;
+    return ZNParseUnsignedScalar(text.UTF8String, out);
 }
 
 static BOOL ZNDNCParseSigned(NSString *text, int64_t *out) {
-    NSString *s=[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-    if(!s.length)return NO;
-    const char *raw=s.UTF8String;
-    if(!raw)return NO;
-    errno=0; char *end=NULL;
-    long long v=strtoll(raw,&end,0);
-    if(errno||end==raw||*end!='\0')return NO;
-    if(out)*out=(int64_t)v;
-    return YES;
+    return ZNParseSignedScalar(text.UTF8String, out);
 }
 
 static BOOL ZNDNCIsObscuredIntParam(NSDictionary *param) {

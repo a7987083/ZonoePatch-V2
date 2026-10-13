@@ -1,3 +1,4 @@
+#include "ZNScalarParser.h"
 #import "ZNIL2CPPInvokeEngine.h"
 #import "ZNRuntimeActionModel.h"
 #import "ZNIL2CPPResolver.h"
@@ -29,42 +30,15 @@ static BOOL ZNInvokeCStringFinished(char *end) {
 }
 
 static BOOL ZNInvokeParseSigned(NSString *text, int64_t *outValue) {
-    NSString *trimmed = ZNInvokeTrim(text);
-    if (!trimmed.length) return NO;
-    const char *raw = trimmed.UTF8String;
-    if (!raw) return NO;
-    errno = 0;
-    char *end = NULL;
-    long long value = strtoll(raw, &end, 0);
-    if (errno || end == raw || !ZNInvokeCStringFinished(end)) return NO;
-    if (outValue) *outValue = (int64_t)value;
-    return YES;
+    return ZNParseSignedScalar(text.UTF8String, outValue);
 }
 
 static BOOL ZNInvokeParseUnsigned(NSString *text, uint64_t *outValue) {
-    NSString *trimmed = ZNInvokeTrim(text);
-    if (!trimmed.length || [trimmed hasPrefix:@"-"]) return NO;
-    const char *raw = trimmed.UTF8String;
-    if (!raw) return NO;
-    errno = 0;
-    char *end = NULL;
-    unsigned long long value = strtoull(raw, &end, 0);
-    if (errno || end == raw || !ZNInvokeCStringFinished(end)) return NO;
-    if (outValue) *outValue = (uint64_t)value;
-    return YES;
+    return ZNParseUnsignedScalar(text.UTF8String, outValue);
 }
 
 static BOOL ZNInvokeParseDouble(NSString *text, double *outValue) {
-    NSString *trimmed = ZNInvokeTrim(text);
-    if (!trimmed.length) return NO;
-    const char *raw = trimmed.UTF8String;
-    if (!raw) return NO;
-    errno = 0;
-    char *end = NULL;
-    double value = strtod(raw, &end);
-    if (errno || end == raw || !ZNInvokeCStringFinished(end)) return NO;
-    if (outValue) *outValue = value;
-    return YES;
+    return ZNParseFiniteScalar(text.UTF8String, outValue);
 }
 
 static BOOL ZNInvokeParseBool(NSString *text, uint8_t *outValue) {

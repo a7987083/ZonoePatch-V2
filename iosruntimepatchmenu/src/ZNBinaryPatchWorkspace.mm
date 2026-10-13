@@ -72,7 +72,7 @@ static NSString *ZNW44Hex(NSData *data) {
 
 static BOOL ZNW44RVA(NSString *text,uint64_t *out) {
     NSString *s=[[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] lowercaseString];
-    if(!s.length) return NO; const char *c=s.UTF8String; char *end=NULL; errno=0;
+    if(!s.length || [s hasPrefix:@"-"]) return NO; const char *c=s.UTF8String; char *end=NULL; errno=0;
     unsigned long long v=strtoull(c,&end,0);
     if(errno||end==c||(end&&*end)){errno=0;end=NULL;v=strtoull(c,&end,16);} if(errno||end==c||(end&&*end)) return NO;
     if(out)*out=v; return YES;
