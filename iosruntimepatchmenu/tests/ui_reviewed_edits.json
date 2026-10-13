@@ -76,6 +76,12 @@
       "before": "- (void)zn60v3_setPage:(ZN60V3Page)page {",
       "after": "- (void)zn60v3_setPage:(NSInteger)page {",
       "reason": "Actual setter definition unified to the existing private NSInteger declaration; enum underlying NSInteger has identical Objective-C ABI; body and Selector unchanged."
+    },
+    {
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.mm:kZNM57FieldTag",
+      "before": "static const NSInteger kZNM57FieldTag  = 797000;\n",
+      "after": "// Field values are read by the existing execute owner; no local field tag consumer.\n",
+      "reason": "Internal unused constant with no runtime registration or consumers; remove strict compilation error without changing a pinned behavior baseline."
     }
   ]
 }

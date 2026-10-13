@@ -23,7 +23,7 @@
 // chain from owning the same event more than once.
 
 static const NSInteger kZNM57ExecTag   = 796000;
-static const NSInteger kZNM57FieldTag  = 797000;
+// Field values are read by the existing execute owner; no local field tag consumer.
 static const NSInteger kZNM57SwitchTag = 798000;
 static const NSInteger kZNM57SliderTag = 799000;
 static const void *kZNM57NumberReturnInstalledKey = &kZNM57NumberReturnInstalledKey;
