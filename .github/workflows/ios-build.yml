@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Source contracts
         run: |
+          python3 scripts/audit-compatibility.py
           python3 iosruntimepatchmenu/tests/retained_hook_contract.py
           bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh
           python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report topology.json
@@ -84,4 +85,5 @@ jobs:
             dist/
             build-ios.log
             topology.json
+            compatibility-audit.json
           if-no-files-found: error
