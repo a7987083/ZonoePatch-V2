@@ -14,7 +14,7 @@ static const NSInteger kZNRMCBuilderDeleteTagBase = 671000;
 static const NSInteger kZNRMCBuilderTitleTagBase = 672000;
 static const NSInteger kZNRMCBuilderArgumentTagBase = 674000;
 static const NSInteger kZNRMCBuilderDescriptionTagBase = 675000;
-static const NSInteger kZNNativeHookDeleteTagBase = 676000;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZNNativeHookDeleteTagBase
 
 static CGFloat ZNRMCBuilderMaxY(UIView *view) {
     CGFloat y = 0;

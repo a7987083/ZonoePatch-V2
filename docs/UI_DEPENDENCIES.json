@@ -1,96 +1,24 @@
 {
   "schema": "zonoe.ui-lexical-dependencies/v1",
-  "scope": "static/macro token references across .inc sections; comments may conservatively overcount; dynamic consumers and runtime dispatch not proven absent",
+  "scope": "static/macro token references across UI sections; relocated private symbols live in explicit owner interfaces; macro lifetimes require #undef analysis",
+  "resolvedBaseline": "docs/UI_DEPENDENCIES_BASELINE.json",
+  "macroFalseEdges": [
+    "ZonoePatchStart",
+    "ZonoePatchShow"
+  ],
   "symbols": {
-    "kZNNativeHookDeleteTagBase": {
-      "owner": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
-      "line": 17,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
     "ZonoePatchStart": {
       "owner": "ui/core/ZonoeRuntimeMenu.inc",
-      "line": 577,
+      "line": 546,
       "consumers": [
         "ui/shell/ZNDeferredBootstrap.inc"
       ]
     },
     "ZonoePatchShow": {
       "owner": "ui/core/ZonoeRuntimeMenu.inc",
-      "line": 578,
+      "line": 547,
       "consumers": [
         "ui/shell/ZNDeferredBootstrap.inc"
-      ]
-    },
-    "ZN48TopViewController": {
-      "owner": "ui/core/ZonoeRuntimeMenu.inc",
-      "line": 1613,
-      "consumers": [
-        "ui/features/ZNFeatureBuilderUI.inc"
-      ]
-    },
-    "kZNM47CaptureCandidateKey": {
-      "owner": "ui/execution/ZNM47ReceiverCaptureUI.inc",
-      "line": 14,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "kZN51CandidateKey": {
-      "owner": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
-      "line": 28,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "ZNM52XTop": {
-      "owner": "ui/execution/ZNM52ChainExecuteButton.inc",
-      "line": 140,
-      "consumers": [
-        "ui/features/ZNM630HardCutUI.inc"
-      ]
-    },
-    "kZNM65LiveHookStatusTag": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 25,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "kZNM54CandidateKey": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 27,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "kZNM54FilterKey": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 29,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "ZNM54AssemblyDisplay": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 54,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "ZNM54UnsupportedReason": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 93,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
-      ]
-    },
-    "ZNM54Field": {
-      "owner": "ui/finder/ZNMethodFinderUnifiedUI.inc",
-      "line": 150,
-      "consumers": [
-        "ui/execution/ZNM52ChainExecuteButton.inc"
       ]
     }
   },
@@ -223,16 +151,16 @@
       "exchanges": 9,
       "sets": 0,
       "dynamicLookupLines": [
-        788,
-        934,
-        1039,
-        1094,
-        1184,
-        1395,
-        1598,
-        1816,
-        1930,
-        2141
+        757,
+        903,
+        1008,
+        1063,
+        1153,
+        1364,
+        1567,
+        1769,
+        1883,
+        2094
       ]
     },
     {
@@ -316,18 +244,18 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        1637
+        1634
       ]
     },
     {
-      "path": "ui/features/ZNFeatureBuilderControlsV2.inc",
+      "path": "ui/features/ZNFeatureBuilderControlsV2.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderControlsV2)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        235
+        236
       ]
     },
     {
@@ -694,7 +622,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        691
+        641
       ]
     },
     {
@@ -718,7 +646,7 @@
       "dynamicLookupLines": []
     },
     {
-      "path": "ui/shell/ZNPublicCompactUI.inc",
+      "path": "ui/shell/ZNPublicCompactUI.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNPublicCompactUI)"
       ],
@@ -727,7 +655,7 @@
       "dynamicLookupLines": []
     },
     {
-      "path": "ui/shell/ZNRuntimeMenuModalShell.inc",
+      "path": "ui/shell/ZNRuntimeMenuModalShell.mm",
       "implementations": [
         "ZNModalPassthroughView",
         "ZNRuntimeMenuModalViewController",
@@ -736,7 +664,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        227
+        228
       ]
     }
   ]

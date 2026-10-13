@@ -8,6 +8,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #include "ZNPerformance.h"
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
+#import "ZNMenuUIKeys.h" // UI_MODULE_IMPORT
+#import "ZNMenuUIHelpers.h" // UI_MODULE_IMPORT
+#import "ZNMenuSearchPolicy.h" // UI_MODULE_IMPORT
 #include "ui/core/ZonoeRuntimeMenu.inc"
 
 @interface ZNRuntimeMenuControllerV040 (ZNUnifiedUICrossSectionDecls)
@@ -21,7 +25,7 @@
 #include "ui/shell/ZNDeferredBootstrap.inc"
 
 
-#include "ui/shell/ZNRuntimeMenuModalShell.inc"
+// UI_COMPILED_MODULE: ui/shell/ZNRuntimeMenuModalShell.mm
 
 
 #include "ui/features/ZNFeatureGroupUI.inc"
@@ -30,13 +34,13 @@
 #include "ui/features/ZNFeatureRuntimeControlsV2.inc"
 
 
-#include "ui/shell/ZNPublicCompactUI.inc"
+// UI_COMPILED_MODULE: ui/shell/ZNPublicCompactUI.mm
 
 
 #include "ui/features/ZNFeatureBuilderUI.inc"
 
 
-#include "ui/features/ZNFeatureBuilderControlsV2.inc"
+// UI_COMPILED_MODULE: ui/features/ZNFeatureBuilderControlsV2.mm
 
 
 #include "ui/finder/ZNIL2CPPMethodFinderUI.inc"

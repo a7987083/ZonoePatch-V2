@@ -11,7 +11,7 @@
 #import "ZNM47ReceiverCapture.h"
 #import "ZNPatchCore.h"
 
-static const void *kZNM47CaptureCandidateKey = &kZNM47CaptureCandidateKey;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZNM47CaptureCandidateKey
 static const uint32_t kZNM47MethodAttributeStatic = 0x0010u;
 typedef uint32_t (*ZNM47MethodGetFlagsFn)(const void *, uint32_t *);
 

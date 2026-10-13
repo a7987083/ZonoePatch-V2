@@ -1,3 +1,4 @@
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNRuntimeMenuModalShell.mm
 #line 1 "ZNRuntimeMenuModalShell.mm"
 #import "ZNRuntimeMenuModalShell.h"

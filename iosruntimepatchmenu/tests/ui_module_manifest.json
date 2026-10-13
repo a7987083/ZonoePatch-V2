@@ -5,7 +5,7 @@
     {
       "path": "ui/core/ZonoeRuntimeMenu.inc",
       "historical_section": "ZonoeRuntimeMenu.mm",
-      "sha256": "97a6d7448b9c8b053b453aa5286fa7040c43ad991bc59ee79b7b6a45ccd47264",
+      "sha256": "424554f15146015afe5e0a024e5c77b3a36a447449caca9ec2a7e8db075336b8",
       "category_count": 9
     },
     {
@@ -15,10 +15,11 @@
       "category_count": 0
     },
     {
-      "path": "ui/shell/ZNRuntimeMenuModalShell.inc",
+      "path": "ui/shell/ZNRuntimeMenuModalShell.mm",
       "historical_section": "ZNRuntimeMenuModalShell.mm",
-      "sha256": "f20682f6c8cd138159e58362bd7cbf96f02d14f6209c1e33e12ac70a69634428",
-      "category_count": 1
+      "sha256": "e334c4c24c29d5a2cde28196e560e3553537d1cf2bf80e4854434bd836829f84",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/features/ZNFeatureGroupUI.inc",
@@ -33,10 +34,11 @@
       "category_count": 1
     },
     {
-      "path": "ui/shell/ZNPublicCompactUI.inc",
+      "path": "ui/shell/ZNPublicCompactUI.mm",
       "historical_section": "ZNPublicCompactUI.mm",
-      "sha256": "40beef2a3f1bb8d8933184434fa6f3b523ad48ba99463954a50e7655ff5227b3",
-      "category_count": 1
+      "sha256": "4dd13e8eddff164b0fd19ac007c17bc5b2346d5faa3f6f4aba93ff8607110125",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/features/ZNFeatureBuilderUI.inc",
@@ -45,10 +47,11 @@
       "category_count": 2
     },
     {
-      "path": "ui/features/ZNFeatureBuilderControlsV2.inc",
+      "path": "ui/features/ZNFeatureBuilderControlsV2.mm",
       "historical_section": "ZNFeatureBuilderControlsV2.mm",
-      "sha256": "8771aa55b7d2608eb0627d3d1e0d3f7931f8729c3cd13131c460eb6b9dde7ed3",
-      "category_count": 1
+      "sha256": "9e980c85dba53212d7e406c1d0c7971022c870f133f9cb9b74ef06b3a55a56e6",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/finder/ZNIL2CPPMethodFinderUI.inc",
@@ -107,7 +110,7 @@
     {
       "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
       "historical_section": "ZNRuntimeMethodCallBuilderUI.mm",
-      "sha256": "460a986ccc07ac68e30d0ac9ec80efde658c7d71d503b485d7981701830cf3ce",
+      "sha256": "b879524ab9cece2eea7925843da72220174cfb8c5429a6dd1225d3e3237b69c5",
       "category_count": 1
     },
     {
@@ -185,7 +188,7 @@
     {
       "path": "ui/execution/ZNM47ReceiverCaptureUI.inc",
       "historical_section": "ZNM47ReceiverCaptureUI.mm",
-      "sha256": "698d3166ff75ac4ccd4cfd6b7e7384b6261d6f87a338f2204925401e08c79087",
+      "sha256": "7b60ca485492fde7af2cd17f180ef3d319942e174eea47188eaa5ca486007f46",
       "category_count": 1
     },
     {
@@ -215,13 +218,13 @@
     {
       "path": "ui/finder/ZNMethodFinderUnifiedUI.inc",
       "historical_section": "ZNMethodFinderUnifiedUI.mm",
-      "sha256": "8eef48a05e5d45b6fef6bb6eeb7b7e0b949c0d0128eae669226d992d4f38cde6",
+      "sha256": "1a838faee789ca9d7d81581badc6a6b4a93f73e6e31435e2f631afc174609d9c",
       "category_count": 1
     },
     {
       "path": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
       "historical_section": "ZNM51RuntimeArgControlsImmediateChain.mm",
-      "sha256": "d4bc3ab34eaf795bad5760d6e9090213628fdba7ce3f70c0a483409f5ae4048a",
+      "sha256": "1f7a08d75988ce55324f25d699f5d1b82a16ca0def023418e65bec8546c5e33c",
       "category_count": 2
     },
     {
@@ -233,7 +236,7 @@
     {
       "path": "ui/execution/ZNM52ChainExecuteButton.inc",
       "historical_section": "ZNM52ChainExecuteButton.mm",
-      "sha256": "b6b967f42cb8a24465376c6c8ff2bdd4c08e2b8c3bb070a7c3dae8a60f04dbd6",
+      "sha256": "94d9f01fd29e570d63a1fb5f9bbac5c503f1126b711cd54022261d4d85694b5c",
       "category_count": 1
     },
     {
@@ -332,6 +335,13 @@
     "ZNMenuPresentationDefaults.mm"
   ],
   "external_owner_hashes": {
-    "ZNMenuPresentationDefaults.mm": "31141170cad2e4c93bd7ea1e060da889c4a18c38fd0a45f61c378282894acdaf"
+    "ZNMenuPresentationDefaults.mm": "31141170cad2e4c93bd7ea1e060da889c4a18c38fd0a45f61c378282894acdaf",
+    "ZNMenuControllerInternal.h": "5098ad2c1d135bd31bfbf1f8415bc47e76bd6d40b90d1d6fc8fca664c5891e73",
+    "ZNMenuUIKeys.mm": "89c5a35c0a6c46cdb1b1f33d3834c7c6a4992a78b16432391773203f2cce5a14",
+    "ZNMenuUIKeys.h": "c19aad226f5eee25f1c7f13ae0ec87bec98f6ae4343ef51515e11ac77480f4d3",
+    "ZNMenuUIHelpers.mm": "f6715f9a20f224fd6d45190aafbcae95f64910c06b06172132e99342917012f1",
+    "ZNMenuUIHelpers.h": "87353d795d1ff03f05b5f605f315686806e1fc8a869e887e6742bd34e974e848",
+    "ZNMenuSearchPolicy.mm": "94ce3ff1ec8a53d1ab5b1318649cb581e7aefaa24420ed21538d8f45947452e0",
+    "ZNMenuSearchPolicy.h": "36b1f1400aa61e66538f6539459023ab76f9069ce2eb09c24b834bd76d93fd93"
   }
 }

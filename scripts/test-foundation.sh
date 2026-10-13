@@ -41,3 +41,5 @@ clang -dynamiclib "$work_image/image.c" -o "$work_image/loaded-image-fixture.dyl
 clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/loaded_image_apple_test.mm -o "$work_image/image-test"
 "$work_image/image-test" "$work_image/loaded-image-fixture.dylib"
 rm -rf "$work_image"
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuUIKeys.mm iosruntimepatchmenu/src/ZNMenuSearchPolicy.mm iosruntimepatchmenu/tests/ui_key_consumer_test.mm iosruntimepatchmenu/tests/ui_shared_owner_test.mm -o /tmp/ui-owner-test
+/tmp/ui-owner-test

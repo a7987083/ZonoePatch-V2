@@ -105,39 +105,8 @@ static UIImage *ZNSymbol(NSString *name, CGFloat size, UIImageSymbolWeight weigh
     return nil;
 }
 
-@interface ZNRuntimeMenuControllerV024 : NSObject
-@property(nonatomic,strong) UIButton *floatButton;
-@property(nonatomic,strong) UIView *panel;
-@property(nonatomic,strong) UIView *headerView;
-@property(nonatomic,strong) UILabel *titleLabel;
-@property(nonatomic,strong) UILabel *subtitleLabel;
-@property(nonatomic,strong) UIView *readyDot;
-@property(nonatomic,strong) UILabel *readyLabel;
-@property(nonatomic,strong) UIButton *themeButton;
-@property(nonatomic,strong) UIButton *modeButton;
-@property(nonatomic,strong) UIButton *closeButton;
-@property(nonatomic,strong) UIView *sidebarView;
-@property(nonatomic,strong) UIScrollView *contentScroll;
-@property(nonatomic,strong) UIView *contentView;
-@property(nonatomic,strong) UIView *footerView;
-@property(nonatomic,strong) UILabel *footerLabel;
-@property(nonatomic,strong) NSMutableArray<UIButton *> *sidebarButtons;
-@property(nonatomic,copy) NSArray<NSString *> *categories;
-@property(nonatomic,copy) NSArray<NSString *> *categorySymbols;
-@property(nonatomic,assign) NSInteger selectedCategory;
-@property(nonatomic,weak) UIWindow *hostWindow;
-@property(nonatomic,strong) NSTimer *timer;
-@property(nonatomic,assign) CGRect lastBounds;
-@property(nonatomic,assign) UIEdgeInsets lastInsets;
-@property(nonatomic,assign) UIUserInterfaceStyle lastStyle;
-@property(nonatomic,assign) BOOL uiReady;
-@property(nonatomic,assign) BOOL compactMode;
-@property(nonatomic,assign) BOOL autoSnap;
-@property(nonatomic,assign) BOOL rememberPosition;
-@property(nonatomic,assign) ZNThemeMode themeMode;
-@property(nonatomic,strong) ZNTheme *theme;
-@property(nonatomic,assign) CGFloat menuAlpha;
-@end
+// UI_RELOCATED: ZNMenuControllerInternal.h:controller
+
 
 @implementation ZNRuntimeMenuControllerV024
 
@@ -1610,24 +1579,8 @@ static void ZNInstallV044BinaryBuilder(void){@autoreleasepool{Class cls=NSClassF
 // Patch entries, import it automatically. Manual document picker remains a
 // fallback and reads the selected URL through coordinated security-scoped I/O.
 
-static UIViewController *ZN48TopViewController(UIViewController *vc) {
-    if (!vc) return nil;
-    UIViewController *presented=vc.presentedViewController;
-    if (presented && !presented.isBeingDismissed) return ZN48TopViewController(presented);
-    if ([vc isKindOfClass:UINavigationController.class]) {
-        UIViewController *top=((UINavigationController *)vc).visibleViewController;
-        return top?ZN48TopViewController(top):vc;
-    }
-    if ([vc isKindOfClass:UITabBarController.class]) {
-        UIViewController *sel=((UITabBarController *)vc).selectedViewController;
-        return sel?ZN48TopViewController(sel):vc;
-    }
-    if ([vc isKindOfClass:UISplitViewController.class]) {
-        UIViewController *last=((UISplitViewController *)vc).viewControllers.lastObject;
-        return last?ZN48TopViewController(last):vc;
-    }
-    return vc;
-}
+// UI_RELOCATED: ZNMenuUIHelpers.mm:ZN48TopViewController
+
 
 static void ZN48RelabelJSONList(UIView *view) {
     if ([view isKindOfClass:UILabel.class]) {

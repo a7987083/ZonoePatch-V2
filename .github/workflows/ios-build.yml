@@ -40,7 +40,9 @@ jobs:
       - name: Reproducible host microbenchmarks
         run: python3 scripts/benchmark.py --output performance-host.json
       - name: Strict ownership module warnings
-        run: bash scripts/check-module-warnings.sh
+        run: |
+          bash scripts/check-module-warnings.sh
+          bash scripts/check-ui-modules.sh
       - name: Foundation production regressions
         run: |
           set -euo pipefail

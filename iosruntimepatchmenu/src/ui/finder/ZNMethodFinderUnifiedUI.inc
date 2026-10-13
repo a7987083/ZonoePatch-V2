@@ -22,11 +22,11 @@ static NSString * const kZNM54HistoryDefaultsKey = @"zonoe.m52.method-search-his
 static const NSUInteger kZNM54HistoryMax = 50;
 static const NSInteger kZNM54QueryTag = 954001;
 static const NSInteger kZNM54LimitTag = 954002;
-static const NSInteger kZNM65LiveHookStatusTag = 965501;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZNM65LiveHookStatusTag
 static const void *kZNM65LiveHookTimerKey = &kZNM65LiveHookTimerKey;
-static const void *kZNM54CandidateKey = &kZNM54CandidateKey;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZNM54CandidateKey
 static const void *kZNM54StoreKey = &kZNM54StoreKey;
-static const void *kZNM54FilterKey = &kZNM54FilterKey;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZNM54FilterKey
 static const void *kZNM54HistoryKey = &kZNM54HistoryKey;
 
 @interface ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)
@@ -47,14 +47,11 @@ static const void *kZNM54HistoryKey = &kZNM54HistoryKey;
 - (void)znm65_stopLiveHookStatusTimer;
 @end
 
-static NSString *ZNM54Trim(NSString *value) {
-    return [value ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-}
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54Trim
 
-static NSString *ZNM54AssemblyDisplay(NSString *assembly) {
-    NSString *s = assembly ?: @"";
-    return [s.lowercaseString hasSuffix:@".dll"] && s.length > 4 ? [s substringToIndex:s.length - 4] : s;
-}
+
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54AssemblyDisplay
+
 
 static NSString *ZNM54CandidateIdentity(NSDictionary *candidate) {
     NSString *canonical = [candidate[@"canonical"] isKindOfClass:NSString.class] ? candidate[@"canonical"] : @"";
@@ -70,49 +67,17 @@ static NSString *ZNM54ArgStoreKey(NSDictionary *candidate, NSUInteger index) {
     return argc <= 1 ? identity : [NSString stringWithFormat:@"%@#arg:%lu", identity, (unsigned long)index];
 }
 
-static NSString *ZNM54ShortType(NSString *type) {
-    NSArray<NSString *> *parts = [(type ?: @"") componentsSeparatedByString:@"."];
-    NSString *last = parts.lastObject;
-    return last.length ? last : (type ?: @"?");
-}
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54ShortType
 
-static BOOL ZNM54IsString(NSString *type) {
-    NSString *n = ZNM54Trim(type).lowercaseString;
-    return [n isEqualToString:@"system.string"] || [n isEqualToString:@"string"];
-}
 
-static NSUInteger ZNM54StructCount(NSString *type) {
-    NSString *n = ZNM54Trim(type).lowercaseString;
-    if ([n isEqualToString:@"unityengine.vector2"] || [n isEqualToString:@"vector2"]) return 2;
-    if ([n isEqualToString:@"unityengine.vector3"] || [n isEqualToString:@"vector3"]) return 3;
-    if ([n isEqualToString:@"unityengine.quaternion"] || [n isEqualToString:@"quaternion"] ||
-        [n isEqualToString:@"unityengine.color"] || [n isEqualToString:@"color"]) return 4;
-    return 0;
-}
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54IsString
 
-static NSString *ZNM54UnsupportedReason(NSDictionary *param) {
-    if ([param[@"byRef"] boolValue]) return @"ref/out 暂不支持";
-    if ([param[@"pointer"] boolValue]) return @"pointer 暂不支持";
-    NSString *type = [param[@"name"] isKindOfClass:NSString.class] ? param[@"name"] : @"?";
-    if (ZNM54IsString(type)) return nil;
-    ZNIL2CPPABIValueKind kind = (ZNIL2CPPABIValueKind)[param[@"kind"] integerValue];
-    switch (kind) {
-        case ZNIL2CPPABIValueKindBool:
-        case ZNIL2CPPABIValueKindSigned32:
-        case ZNIL2CPPABIValueKindUnsigned32:
-        case ZNIL2CPPABIValueKindSigned64:
-        case ZNIL2CPPABIValueKindUnsigned64:
-        case ZNIL2CPPABIValueKindFloat32:
-        case ZNIL2CPPABIValueKindFloat64:
-            return nil;
-        case ZNIL2CPPABIValueKindComplexValueType:
-            return ZNM54StructCount(type) ? nil : [NSString stringWithFormat:@"%@ 暂不支持", ZNM54ShortType(type)];
-        case ZNIL2CPPABIValueKindObjectReference:
-            return [NSString stringWithFormat:@"%@ 对象参数暂不支持", ZNM54ShortType(type)];
-        default:
-            return [NSString stringWithFormat:@"%@ 类型未识别", ZNM54ShortType(type)];
-    }
-}
+
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54StructCount
+
+
+// UI_RELOCATED: ZNMenuSearchPolicy.mm:ZNM54UnsupportedReason
+
 
 static NSArray<NSString *> *ZNM54History(void) {
     id raw = [[NSUserDefaults standardUserDefaults] objectForKey:kZNM54HistoryDefaultsKey];
@@ -147,23 +112,8 @@ static void ZNM54RecordHistory(NSString *query) {
     [[NSUserDefaults standardUserDefaults] setObject:items forKey:kZNM54HistoryDefaultsKey];
 }
 
-static UITextField *ZNM54Field(CGRect frame, ZNTheme *theme, UIFont *font) {
-    UITextField *field = [[UITextField alloc] initWithFrame:frame];
-    field.textColor = theme.primaryTextColor;
-    field.backgroundColor = theme.controlColor;
-    field.tintColor = theme.accentColor;
-    field.font = font;
-    field.autocorrectionType = UITextAutocorrectionTypeNo;
-    field.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    field.spellCheckingType = UITextSpellCheckingTypeNo;
-    field.layer.cornerRadius = 7.0;
-    field.layer.borderWidth = 1.0;
-    field.layer.borderColor = theme.borderColor.CGColor;
-    UIView *pad = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 8, 1)];
-    field.leftView = pad;
-    field.leftViewMode = UITextFieldViewModeAlways;
-    return field;
-}
+// UI_RELOCATED: ZNMenuUIHelpers.mm:ZNM54Field
+
 
 static NSArray<NSDictionary *> *ZNM54Visible(ZNRuntimeMenuControllerV040 *controller) {
     NSArray<NSDictionary *> *all = [controller zn60v3_candidates] ?: @[];

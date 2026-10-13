@@ -25,7 +25,7 @@ static const NSInteger kZN51SwitchTag = 798000;
 static const NSInteger kZN51SliderTag = 799000;
 static const NSInteger kZN49CardTag = 786000;
 
-static const void *kZN51CandidateKey = &kZN51CandidateKey;
+// UI_RELOCATED: ZNMenuUIKeys.mm:kZN51CandidateKey
 static const void *kZN51ActionKey = &kZN51ActionKey;
 static const void *kZN51ArgKey = &kZN51ArgKey;
 static const void *kZN51ValuesKey = &kZN51ValuesKey;

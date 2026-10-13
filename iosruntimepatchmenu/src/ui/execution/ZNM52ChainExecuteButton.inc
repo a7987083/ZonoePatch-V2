@@ -137,11 +137,8 @@ static NSInteger ZNM52XFindChain(NSDictionary *candidate, ZNRuntimeMethodAction 
     return NSNotFound;
 }
 
-static UIViewController *ZNM52XTop(UIWindow *window) {
-    UIViewController *vc = window.rootViewController;
-    while (vc.presentedViewController) vc = vc.presentedViewController;
-    return vc;
-}
+// UI_RELOCATED: ZNMenuUIHelpers.mm:ZNM52XTop
+
 
 static NSString *ZNM52XTrace(NSDictionary *result) {
     NSArray *trace = [result[@"chainTrace"] isKindOfClass:NSArray.class] ? result[@"chainTrace"] : @[];

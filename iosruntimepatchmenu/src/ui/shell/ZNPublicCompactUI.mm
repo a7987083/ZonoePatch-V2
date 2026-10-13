@@ -1,3 +1,4 @@
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNPublicCompactUI.mm
 #line 1 "ZNPublicCompactUI.mm"
 #import <Foundation/Foundation.h>
