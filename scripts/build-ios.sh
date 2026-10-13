@@ -33,3 +33,7 @@ assert magic==0xfeedfacf and cpu==0x100000c and filetype==6,(magic,cpu,filetype)
 assert 'dobby' not in Path('dist/load-commands.txt').read_text().lower()
 print('Mach-O arm64 dylib + static Dobby linkage verified; device execution NOT verified')
 PY
+
+git archive --format=zip --output=dist/ZonoePatch-V2-Source.zip HEAD
+git log --format='%H %s' > dist/COMMITS.txt
+cp README.md docs/BUILD_BASELINE.md dist/

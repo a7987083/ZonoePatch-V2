@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/il2cpp_runtime_common_test.mm -o /tmp/common-test
+/tmp/common-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/native_hook_template_test.mm -o /tmp/hook-test
+/tmp/hook-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNNativeHookScheduler.mm iosruntimepatchmenu/tests/native_hook_scheduler_test.mm -o /tmp/scheduler-test
+/tmp/scheduler-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm -o /tmp/output-test
+/tmp/output-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm -o /tmp/activation-test
+/tmp/activation-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -o /tmp/build-session-test
+/tmp/build-session-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/tests/il2cpp_abi_classifier_test.mm -o /tmp/abi-test
+/tmp/abi-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildRouterShadow.mm iosruntimepatchmenu/tests/build_router_shadow_test.mm -o /tmp/router-test
+/tmp/router-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNFeatureMetadataCodec.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/tests/feature_metadata_policy_stub.mm iosruntimepatchmenu/tests/feature_metadata_codec_test.mm -o /tmp/metadata-test
+/tmp/metadata-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/tests/runtime_logger_test.mm -o /tmp/logger-test
+/tmp/logger-test
+if [ "$(uname -m)" = arm64 ]; then
+  clang++ -std=c++17 -O0 -Wall -Wextra -Werror iosruntimepatchmenu/tests/arm64_compiler_abi_fixture.cpp -o /tmp/native-arm64-abi
+  /tmp/native-arm64-abi
+else
+  echo 'Native arm64 compiler fixture NOT VERIFIED on this runner'
+fi

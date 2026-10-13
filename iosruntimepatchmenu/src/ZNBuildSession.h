@@ -1,6 +1,7 @@
 #pragma once
 #import <Foundation/Foundation.h>
 @class ZNBinaryPatchWorkspace, ZNRuntimeActionStore, ZNNativeHookStore;
+NS_ASSUME_NONNULL_BEGIN
 // Scoped synchronous builder inputs. No authored Store is mutated by prepare/emit.
 @interface ZNBuildSession : NSObject
 @property(nonatomic,copy,readonly) NSString *identifier;
@@ -12,6 +13,7 @@
 + (instancetype)captureWorkspace:(ZNBinaryPatchWorkspace *)workspace;
 - (BOOL)perform:(BOOL (^)(void))body;
 @end
+NS_ASSUME_NONNULL_END
 #define ZNBuildRuntimeStoreThreadKey @"zonoe.build-session.runtime-store"
 #define ZNBuildHookStoreThreadKey @"zonoe.build-session.hook-store"
 
