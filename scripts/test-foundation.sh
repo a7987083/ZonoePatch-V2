@@ -72,3 +72,11 @@ rm -rf "$work_resolver"
 
 clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation iosruntimepatchmenu/tests/finder_page_abi_test.mm -o /tmp/finder-page-abi-test
 /tmp/finder-page-abi-test
+
+work_footer=$(mktemp -d)
+python3 scripts/extract-footer-install-fixture.py "$work_footer/footer.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work_footer/footer.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm -o "$work_footer/footer-test"
+"$work_footer/footer-test"
+mkdir -p dist
+cp "$work_footer/footer.json" dist/footer-install-extraction.json
+rm -rf "$work_footer"
