@@ -1,6 +1,8 @@
 #import "ZNBuildSession.h"
-// Fixture supplies only +currentSession through runtime; this class deliberately
-// has no production authoring Store/backend. Use a dedicated narrow facade.
-#import <objc/runtime.h>
-static id absentSession(id object,SEL selector){(void)object;(void)selector;return nil;}
-__attribute__((constructor)) static void installSessionFacade(){Class cls=objc_allocateClassPair(NSObject.class,"ZNBuildSession",0);class_addMethod(object_getClass(cls),@selector(currentSession),(IMP)absentSession,"@@:");objc_registerClassPair(cls);}
+// Narrow linkage fixture. Real BuildSession isolation is separately executed.
+@implementation ZNBuildSession
+@dynamic identifier,staticDefaults,workspace,runtimeStore,hookStore,outputTransaction;
++ (instancetype)currentSession{return nil;}
++ (instancetype)captureWorkspace:(ZNBinaryPatchWorkspace *)workspace{(void)workspace;[NSException raise:@"UnexpectedFixtureCall" format:@"captureWorkspace belongs to the production session test"];return [self new];}
+- (BOOL)perform:(BOOL (^)(void))body{(void)body;[NSException raise:@"UnexpectedFixtureCall" format:@"perform belongs to the production session test"];return NO;}
+@end

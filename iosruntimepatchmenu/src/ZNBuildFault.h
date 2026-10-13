@@ -1,5 +1,6 @@
 #pragma once
 #include <cerrno>
+#include <cstring>
 #include <sys/mman.h>
 #include <unistd.h>
 #ifdef ZN_BUILD_FAULT_TESTING

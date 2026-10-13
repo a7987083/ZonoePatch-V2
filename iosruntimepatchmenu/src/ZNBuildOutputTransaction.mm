@@ -2,8 +2,11 @@
 #import "ZNBuildOutputIO.h"
 #include "ZNBuildFault.h"
 @interface ZNBuildOutputTransaction ()
-@property(nonatomic,copy) NSString *stage,*destination,*token;
-@property(nonatomic,assign) BOOL published,moved;
+@property(nonatomic,copy) NSString *stage;
+@property(nonatomic,copy) NSString *destination;
+@property(nonatomic,copy) NSString *token;
+@property(nonatomic,assign) BOOL published;
+@property(nonatomic,assign) BOOL moved;
 @end
 static id ZNRebaseOutputPaths(id value,NSString *old,NSString *replacement){
  if([value isKindOfClass:NSString.class]){NSString *prefix=[old stringByAppendingString:@"/"];return [value hasPrefix:prefix]?[replacement stringByAppendingString:[value substringFromIndex:old.length]]:value;}
