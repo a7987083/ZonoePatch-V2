@@ -204,10 +204,11 @@
       "category_count": 1
     },
     {
-      "path": "ui/compat/ZNM47VersionUI.inc",
+      "path": "ui/compat/ZNM47VersionUI.mm",
       "historical_section": "ZNM47VersionUI.mm",
-      "sha256": "f7743f763e096a435c63d0da38d4ccf7562d12240903cff50eeefcb788b9436e",
-      "category_count": 1
+      "sha256": "093996aa3f1c73ea0eb21e70fbd00bac485e7de4aea035ffa390948859b58ce4",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/execution/ZNM49GenericInvokeEditableArgs.inc",

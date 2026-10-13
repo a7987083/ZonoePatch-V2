@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNM47VersionUI.mm
 #line 1 "ZNM47VersionUI.mm"
 #import <Foundation/Foundation.h>

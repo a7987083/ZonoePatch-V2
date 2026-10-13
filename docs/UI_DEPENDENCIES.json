@@ -71,14 +71,14 @@
       ]
     },
     {
-      "path": "ui/compat/ZNM47VersionUI.inc",
+      "path": "ui/compat/ZNM47VersionUI.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM47VersionUI)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        32
+        34
       ]
     },
     {
@@ -255,7 +255,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        236
+        237
       ]
     },
     {
@@ -475,7 +475,7 @@
       "dynamicLookupLines": [
         129,
         130,
-        1109
+        1126
       ]
     },
     {
@@ -664,7 +664,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        228
+        229
       ]
     }
   ]

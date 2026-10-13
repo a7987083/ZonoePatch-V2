@@ -122,7 +122,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/compat/ZNM47BuilderArgsUI.inc"
 
 
-#include "ui/compat/ZNM47VersionUI.inc"
+// UI_COMPILED_MODULE: ui/compat/ZNM47VersionUI.mm
 
 
 #include "ui/execution/ZNM49GenericInvokeEditableArgs.inc"
