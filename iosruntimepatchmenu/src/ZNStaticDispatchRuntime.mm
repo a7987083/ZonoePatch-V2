@@ -100,7 +100,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 
     ZN55DecodedRVAs canonicalRVAs = {};
     if (!ZN55DecodeEntryRVAs(header, &entries[canonicalIndex], canonicalIndex, &canonicalRVAs)) return NO;
-    uintptr_t offTarget = imageBase + (uintptr_t)canonicalRVAs.offRVA;
+    uint64_t offTarget=0;if(!ZNCheckedAdd64(imageBase,canonicalRVAs.offRVA,&offTarget))return NO;
     if (current == offTarget) return YES;
 
     for (uint32_t i = 0; i < header->count; i++) {
@@ -108,7 +108,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         if (ZN44CanonicalIndex(header, candidate, i) != canonicalIndex) continue;
         ZN55DecodedRVAs candidateRVAs = {};
         if (!ZN55DecodeEntryRVAs(header, candidate, i, &candidateRVAs)) return NO;
-        uintptr_t onTarget = imageBase + (uintptr_t)candidateRVAs.onRVA;
+        uint64_t onTarget=0;if(!ZNCheckedAdd64(imageBase,candidateRVAs.onRVA,&onTarget))return NO;
         if (current == onTarget) return YES;
     }
     return NO;
@@ -194,6 +194,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
                 targetName:(NSString *)targetName
                      found:(NSMutableArray<ZNStaticPatchRecord *> *)found
               liveSiteKeys:(NSMutableSet<NSString *> *)liveSiteKeys {
+    std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());
+    @synchronized(self) {
     (void)header;
     auto lease=ZNLeaseForHeader(runtimeHeader);if(!lease)return NO;
     ZN44StaticHeader ownedHeader={};
@@ -229,7 +231,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         NSString *siteKey = [NSString stringWithFormat:@"%p:%p:%u:%llu", (void *)runtimeHeader, (void *)headerAddress, canonicalIndex,(unsigned long long)lease->incarnation()];
         [liveSiteKeys addObject:siteKey];
 
-        uintptr_t offTarget = runtimeHeader + (uintptr_t)dispatchRVAs.offRVA;
+        uint64_t offTarget=0;if(!ZNCheckedAdd64(runtimeHeader,dispatchRVAs.offRVA,&offTarget)||!lease->image->contains(offTarget,4,VM_PROT_EXECUTE))return NO;
         uint64_t current=0;uintptr_t dispatchAddress=headerAddress+sizeof(*header)+(uintptr_t)canonicalIndex*sizeof(ZN44StaticEntry);
         if(!lease->load64(dispatchAddress,&current))return NO;
         if (!ZN44CurrentTargetValid(header, entries, canonicalIndex, runtimeHeader, current)) {
@@ -285,6 +287,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         [found addObject:record];
     }
     return YES;
+}
 }
 
 - (void)refresh {
@@ -570,7 +573,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
     [owners removeObject:ownerID];
     if (enabled) [owners addObject:ownerID];
 
-    uintptr_t target = record.imageBase + (uintptr_t)record.offRVA;
+    uint64_t target=0;if(!ZNCheckedAdd64(record.imageBase,record.offRVA,&target)){[owners setArray:previousOwners];if(error)*error=@"Static target overflow";return NO;}
     ZNStaticPatchRecord *selectedRecord = nil;
     if (owners.count) {
         uint32_t selectedID = owners.lastObject.unsignedIntValue;
@@ -580,7 +583,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
             if (error) *error = @"Shared Site Owner Stack 无法解析当前 Variant";
             return NO;
         }
-        target = record.imageBase + (uintptr_t)selectedRecord.onRVA;
+        if(!ZNCheckedAdd64(record.imageBase,selectedRecord.onRVA,&target)){[owners setArray:previousOwners];if(error)*error=@"Static target overflow";return NO;}
     }
 
     if(!lease->image->contains(target,4,VM_PROT_EXECUTE)||!lease->store(record.dispatchAddress,target,8)){[owners setArray:previousOwners];if(error)*error=@"Static target write lease failed";return NO;}
