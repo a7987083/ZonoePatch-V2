@@ -80,10 +80,11 @@
       "category_count": 1
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.mm",
       "historical_section": "ZNIL2CPPMethodFinderM2.mm",
-      "sha256": "5635fe31edd981ac9de0031b412b075814a9462afa485ee154aaf39315cfb769",
-      "category_count": 1
+      "sha256": "465d9803e3e435d8ecea2119c732a93fa5c5f707a77e1c1c26922b891fa3f8da",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc",
