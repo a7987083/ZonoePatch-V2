@@ -606,6 +606,12 @@
         ],
         "reason": "Managed fixture extraction omitted production capacity constant",
         "fix": "69e78cc"
+      },
+      {
+        "commit": "0ccf52e",
+        "run": 38454150661,
+        "reason": "Complete Unified UI build exposed M43 consumer of moved RuntimeMethod detail selector; strict standalone modules passed; fixed by narrow existing private finder interface declaration",
+        "fix": "subsequent fix(H05.2): declare existing Runtime Method detail owner for M43 consumers"
       }
     ]
   }
