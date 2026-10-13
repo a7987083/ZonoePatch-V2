@@ -94,10 +94,11 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.mm",
       "historical_section": "ZNIL2CPPMethodFinderM22StableCancelUX.mm",
-      "sha256": "4c3d480973740b42ca58f9fd15a857602dc66fa42f22d0f3fd73b0588f0e8a5e",
-      "category_count": 1
+      "sha256": "b72e984a7a1cd2a89fcb60667286356696bd9375c7f795dbe6d9130e3cdfe699",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",

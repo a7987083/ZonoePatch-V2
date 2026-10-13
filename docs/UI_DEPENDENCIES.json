@@ -487,14 +487,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNMethodFinderM22StableCancelUX)"
       ],
       "exchanges": 2,
       "sets": 0,
       "dynamicLookupLines": [
-        98
+        100
       ]
     },
     {

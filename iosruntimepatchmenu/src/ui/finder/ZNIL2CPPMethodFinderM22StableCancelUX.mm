@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNIL2CPPMethodFinderM22StableCancelUX.mm
 #line 1 "ZNIL2CPPMethodFinderM22StableCancelUX.mm"
 #import <Foundation/Foundation.h>
