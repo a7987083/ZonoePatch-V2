@@ -1,3 +1,4 @@
+#import "ZNBuildFileTransaction.h"
 #include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNRuntimeActionSignaturePostprocess.h"
@@ -27,12 +28,12 @@ static BOOL ZNM46ZeroRange(const uint8_t *bytes, uint64_t length) {
 static NSString *ZNM46UnityOutput(NSArray<NSString *> *outputs) {
     for (NSString *path in outputs ?: @[]) {
         NSString *name = path.lastPathComponent.lowercaseString;
-        if ([name hasSuffix:@".znpatched"] && [name containsString:@"unityframework"]) return path;
+        if ([name containsString:@"unityframework"] && ([name hasSuffix:@".znpatched"] || !path.pathExtension.length)) return path;
     }
     return nil;
 }
 
-static BOOL ZNM46AugmentPath(NSString *path,
+static BOOL ZNM46AugmentPrivatePath(NSString *path,
                              NSArray<ZNRuntimeMethodAction *> *actions,
                              NSUInteger *outFullCount,
                              NSString **error) {
@@ -187,6 +188,13 @@ static BOOL ZNM46AugmentPath(NSString *path,
     if (outFullCount) *outFullCount = fullCount;
     if (!ok && error) *error = localError ?: @"M4.6 signature table augmentation 失败";
     return ok;
+}
+
+static BOOL ZNM46AugmentPath(NSString *path,NSArray<ZNRuntimeMethodAction *> *actions,NSUInteger *outFullCount,NSString **error){
+ __block NSUInteger count=0;
+ BOOL ok=ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **localError){return ZNM46AugmentPrivatePath(work,actions,&count,localError);},error);
+ if(ok&&outFullCount)*outFullCount=count;
+ return ok;
 }
 
 BOOL ZNRuntimeActionAugmentGeneratedOutputsM46(NSArray<NSString *> *builderOutputs,

@@ -1,3 +1,4 @@
+#import "ZNBuildFileTransaction.h"
 #include "ZNBuildFault.h"
 #include "ZNMachOFile.h"
 #import "ZNRuntimeActionBuilder.h"
@@ -240,7 +241,7 @@ static void ZNRABUpdateBuildReport(NSArray<NSString *> *builderOutputs,
     NSData *updated=[NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:nil];if(updated)[updated writeToFile:reportPath atomically:YES];
 }
 
-static BOOL ZNRABEmbedTableAtPath(NSString *path,NSData *table,NSString **error){
+static BOOL ZNRABEmbedTableAtPrivatePath(NSString *path,NSData *table,NSString **error){
     int fd=open(path.fileSystemRepresentation,O_RDWR);if(fd<0){if(error)*error=[NSString stringWithFormat:@"打开 %@ 失败 errno=%d",path.lastPathComponent,errno];return NO;}struct stat st={};if(fstat(fd,&st)!=0||st.st_size<=0){close(fd);if(error)*error=@"读取生成物大小失败";return NO;}size_t fileSize=(size_t)st.st_size;uint8_t *base=(uint8_t *)mmap(NULL,fileSize,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);if(base==MAP_FAILED){close(fd);if(error)*error=@"mmap 生成物失败";return NO;}
     BOOL ok=NO;NSString *localError=nil;do{
         znmacho::File checked; const char *reason=nullptr;
@@ -250,6 +251,10 @@ if(fileSize<sizeof(struct mach_header_64)){localError=@"生成物不是完整 Ma
         struct segment_command_64 *owned=(struct segment_command_64 *)(base+location.segmentOffset);
         struct section_64 *zndata=(struct section_64 *)(base+location.sectionOffset);
         if(!owned||!zndata){localError=@"生成物缺少 V3-owned __ZNDATA/__zndata";break;}if(owned->fileoff>fileSize||owned->filesize>fileSize-owned->fileoff){localError=@"__ZNDATA file range 越界";break;}if(zndata->offset>fileSize||zndata->size>fileSize-zndata->offset){localError=@"__zndata section range 越界";break;}if(zndata->size<sizeof(ZN44StaticHeader)){localError=@"__zndata 太小，缺少 Static Header";break;}ZN44StaticHeader *staticHeader=(ZN44StaticHeader *)(base+zndata->offset);if(staticHeader->magic0!=ZN44_STATIC_MAGIC0||staticHeader->magic1!=ZN44_STATIC_MAGIC1||staticHeader->entrySize!=sizeof(ZN44StaticEntry)||staticHeader->count>ZN44_STATIC_MAX_ENTRIES){localError=@"__zndata Static Dispatch Header 无效";break;}uint64_t actionRelative=0;if(!ZNGeneratedDataLayoutV1LocateRuntimeAction(base+zndata->offset,zndata->size,&actionRelative)){localError=@"__ZNDATA Generated Data Layout V1 无效";break;}uint64_t sectionStart=zndata->offset,actionOffset=sectionStart+actionRelative,segmentEnd=owned->fileoff+owned->filesize;if(actionOffset<sectionStart||actionOffset>segmentEnd||table.length>segmentEnd-actionOffset){localError=@"__ZNDATA owned capacity 不足";break;}if(actionOffset+table.length>fileSize){localError=@"Runtime Action 写入范围超出文件";break;}if(!ZNRABIsZeroRange(base+actionOffset,table.length)){localError=@"Runtime Action 目标区域不是 V3-owned zero padding；拒绝覆盖未知数据";break;}memcpy(base+actionOffset,table.bytes,table.length);uint64_t newSectionSize=(actionOffset-sectionStart)+table.length;if(newSectionSize>owned->filesize){localError=@"Runtime Action section size 超出 owned segment";break;}zndata->size=newSectionSize;if(ZNBuildMSync(base,fileSize,MS_SYNC)!=0){localError=[NSString stringWithFormat:@"Runtime Action msync 失败 errno=%d",errno];break;}ok=YES;}while(0);munmap(base,fileSize);close(fd);if(!ok&&error)*error=localError?:@"Runtime Action 写入失败";return ok;
+}
+
+static BOOL ZNRABEmbedTableAtPath(NSString *path,NSData *table,NSString **error){
+ return ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **localError){return ZNRABEmbedTableAtPrivatePath(work,table,localError);},error);
 }
 
 BOOL ZNRuntimeActionEmbedIntoGeneratedOutputs(NSArray<NSString *> *builderOutputs,NSString **report,NSString **error){

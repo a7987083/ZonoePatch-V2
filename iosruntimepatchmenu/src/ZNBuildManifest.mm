@@ -44,41 +44,10 @@ static BOOL ZNM684RuntimeSignatureBridge(NSArray<NSString *> *builderOutputs,
                                          BOOL runtimeOnly,
                                          NSString **report,
                                          NSString **error) {
-    if(!runtimeOnly)
-        return ZNRuntimeActionAugmentGeneratedOutputsM46(builderOutputs,report,error);
-
-    NSString *unity=nil;
-    for(NSString *path in builderOutputs ?: @[]) {
-        NSString *name=path.lastPathComponent.lowercaseString;
-        if([name containsString:@"unityframework"] &&
-           ![name hasSuffix:@".znpatched"] &&
-           [NSFileManager.defaultManager fileExistsAtPath:path]) {
-            unity=path; break;
-        }
-    }
-    if(!unity.length)
-        return ZNRuntimeActionAugmentGeneratedOutputsM46(builderOutputs,report,error);
-
-    NSString *alias=[unity stringByAppendingString:@".znpatched"];
-    // Every build owns a unique staging directory; never unlink a pre-existing alias.
-    NSError *linkError=nil;
-    if(![NSFileManager.defaultManager linkItemAtPath:unity toPath:alias error:&linkError]) {
-        if(error)*error=[NSString stringWithFormat:@"Runtime Full Signature bridge 创建失败：%@",
-                         linkError.localizedDescription ?: @"unknown"];
-        return NO;
-    }
-
-    NSMutableArray<NSString *> *bridged=[builderOutputs mutableCopy] ?: [NSMutableArray array];
-    [bridged addObject:alias];
-    NSString *innerReport=nil,*innerError=nil;
-    BOOL ok=ZNRuntimeActionAugmentGeneratedOutputsM46(bridged,&innerReport,&innerError);
-    [NSFileManager.defaultManager removeItemAtPath:alias error:nil];
-    if(!ok) {
-        if(error)*error=innerError ?: @"Runtime Full Signature 写入失败";
-        return NO;
-    }
-    if(report)*report=innerReport ?: @"Runtime Full Signature 完成";
-    return YES;
+    // Signature editing now commits by atomic replacement. A hard-link alias
+    // would retain the old inode and lose the committed augmentation.
+    (void)runtimeOnly;
+    return ZNRuntimeActionAugmentGeneratedOutputsM46(builderOutputs,report,error);
 }
 
 static BOOL ZNM69PrepareRuntimeMethodProvider(NSString **error) {

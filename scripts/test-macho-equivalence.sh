@@ -40,7 +40,7 @@ cmp "$work/runtime-baseline/output/fixture.dylib" "$work/runtime-current/output/
 echo 'extracted production runtime-only target generation baseline/current complete-byte equivalence PASS'
 
 python3 scripts/extract-builder-combinations.py "$work/combinations.mm"
-clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
 "$work/combinations-test" "$work/combinations"
 mkdir -p dist
 cp "$work/combinations.json" dist/production-builder-extraction.json
@@ -48,7 +48,7 @@ cp "$work/combinations.json" dist/production-builder-extraction.json
 # Independent final-byte CodeDirectory verification applies the same strict iOS
 # ARM64/SDK/signature policy as the deliverable, not just signer idempotence.
 verified_count=0
-for generated in "$work"/combinations/mode-0/*.znpatched "$work"/combinations/mode-1/*.dylib "$work"/combinations/mode-2/UnityFramework "$work"/combinations/mode-3/UnityFramework.znpatched "$work"/combinations/capacity/*.dylib; do
+for generated in "$work"/combinations/mode-0/*.znpatched "$work"/combinations/mode-1/UnityFramework "$work"/combinations/mode-2/UnityFramework "$work"/combinations/mode-3/UnityFramework.znpatched "$work"/combinations/capacity/*.dylib; do
   report="dist/generated-$(basename "$(dirname "$generated")")-signature.json"
   test -f "$generated"
   python3 scripts/verify-artifact.py "$generated" > "$report"
@@ -57,10 +57,10 @@ done
 test "$verified_count" = 5
 echo 'production combination outputs independent iOS ARM64 CodeDirectory page hashes PASS'
 
-clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-fault-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-fault-test"
 "$work/combinations-fault-test" "$work/fault-combinations"
 
 python3 scripts/extract-executor-transaction-fixture.py "$work/executor.mm"
-clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/executor.mm" iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNBuildItem.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/executor-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/executor.mm" iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNBuildItem.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/executor-test"
 "$work/executor-test" "$work/executor"
 cp "$work/executor.json" dist/production-executor-extraction.json
