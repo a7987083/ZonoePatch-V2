@@ -153,7 +153,6 @@ BOOL ZNPostProcessGeneratedBinaryOutputs(NSArray<NSString *> *innerOutputs,
             @"directSiteBranchStillArchitectural": @YES,
         };
 
-        NSData *updated = [NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:nil];
         if (!ZNWriteBuildReport(object,path,error))return NO;
         break;
     }

@@ -1370,7 +1370,6 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
             @"Output Mach-O must be re-signed before installation"
         ]
     };
-    NSData *json=[NSJSONSerialization dataWithJSONObject:reportObject options:NSJSONWritingPrettyPrinted error:nil];
     NSString *reportPath=[folder stringByAppendingPathComponent:@"build_report.json"];
     if(!ZNWriteBuildReport(reportObject,reportPath,error)){ZNDiscardOwnedBuildDirectory(folder);return NO;}[paths addObject:reportPath];
     NSDictionary *protectionV2Validation=@{
@@ -1391,7 +1390,6 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
             @"Generated Mach-O installs and launches after normal package re-sign"
         ]
     };
-    NSData *validationJSON=[NSJSONSerialization dataWithJSONObject:protectionV2Validation options:NSJSONWritingPrettyPrinted error:nil];
     NSString *validationPath=[folder stringByAppendingPathComponent:@"protection_v2_validation.json"];
     if(!ZNWriteBuildReport(protectionV2Validation,validationPath,error)){ZNDiscardOwnedBuildDirectory(folder);return NO;}[paths addObject:validationPath];
     if(outputs)*outputs=paths;
