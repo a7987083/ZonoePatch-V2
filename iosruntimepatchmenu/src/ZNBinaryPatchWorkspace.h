@@ -51,6 +51,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)applyAll:(NSString * _Nullable * _Nullable)error;
 - (BOOL)restoreAll:(NSString * _Nullable * _Nullable)error;
 - (void)setBuildOutputs:(NSArray<NSString *> *)paths status:(NSString *)status;
+@end
+
+@interface ZNBinaryPatchWorkspace (ZNBuildSnapshot)
 - (ZNBinaryPatchWorkspace *)buildSnapshotForRowIndexes:(NSArray<NSNumber *> *)rowIndexes;
 @end
 
