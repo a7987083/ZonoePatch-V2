@@ -123,3 +123,9 @@ done
 mkdir -p dist
 cp "$work_controls/controls.json" dist/runtime-control-install-extraction.json
 rm -rf "$work_controls"
+
+work_owning=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$work_owning/UnityFramework"
+clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -framework CoreFoundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPOwningMethodResolver.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/tests/owning_method_execution_test.mm -o "$work_owning/test"
+"$work_owning/test" "$work_owning/UnityFramework"
+rm -rf "$work_owning"

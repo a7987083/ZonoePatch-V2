@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #include "ZNLoadedImageApple.h"
 #import "ZNIL2CPPOwningMethodResolver.h"
 #import "ZNPatchCore.h"
@@ -75,7 +76,7 @@ static NSString *ZNM45NormalizedAssembly(NSString *value) {
 static void *ZNM45ResolveSymbol(ZNM45Runtime *runtime, const char *name) {
     void *symbol = runtime->handle ? dlsym(runtime->handle, name) : NULL;
     if (!symbol) symbol = dlsym(RTLD_DEFAULT, name);
-    return symbol;
+    return symbol&&ZNCurrentExecutionScope()&&ZNCurrentExecutionScope()->retain((uintptr_t)symbol)?symbol:nullptr;
 }
 
 static BOOL ZNM45Executable(const ZNM45Runtime *runtime, uintptr_t address) {
@@ -236,9 +237,11 @@ static NSDictionary<NSString *, id> *ZNM45RawCandidate(const void *method,
                                                         NSString *className,
                                                         NSString *methodName,
                                                         NSInteger argumentCount) {
+    if(!ZNCurrentExecutionScope()||!ZNCurrentExecutionScope()->retain(pointer))return nil;
     return @{
         @"methodInfo": @((uintptr_t)method),
         @"methodPointer": @(pointer),
+        @"runtimeImageIncarnation": @(ZNCurrentExecutionScope()->identity(pointer)),
         @"pointerSource": pointerSource ?: @"unavailable",
         @"assembly": assembly ?: @"",
         @"namespace": namespaceName ?: @"",
@@ -279,6 +282,7 @@ static NSDictionary<NSString *, id> *ZNM45FinishedCandidate(ZNM45Runtime *runtim
         @"argumentCount": raw[@"argumentCount"] ?: @(-1),
         @"methodInfo": raw[@"methodInfo"] ?: @0,
         @"methodPointer": raw[@"methodPointer"] ?: @0,
+        @"runtimeImageIncarnation": raw[@"runtimeImageIncarnation"] ?: @0,
         @"methodRVA": @(methodRVA),
         @"methodRVAText": [NSString stringWithFormat:@"0x%llX", (unsigned long long)methodRVA],
         @"methodRuntimeVA": @((uint64_t)methodRuntimeVA),
@@ -321,6 +325,7 @@ static NSDictionary<NSString *, id> *ZNM45FinishedCandidate(ZNM45Runtime *runtim
 - (NSArray<NSDictionary<NSString *,id> *> *)resolveRVA:(uint64_t)rva
                                                   limit:(NSUInteger)limit
                                                   error:(NSString **)error {
+    ZNRuntimeExecutionScope execution;
     limit = MAX((NSUInteger)1, MIN(limit ?: 16, kZNM45HardCandidateLimit));
     if (rva & 3ULL) {
         if (error) *error = [NSString stringWithFormat:@"M4.5：ARM64 instruction RVA 必须 4 字节对齐：0x%llX", (unsigned long long)rva];
@@ -398,6 +403,7 @@ static NSDictionary<NSString *, id> *ZNM45FinishedCandidate(ZNM45Runtime *runtim
                             }
                             if (methodRVA == bestStart && best.count < limit) {
                                 NSDictionary *raw = ZNM45RawCandidate(method, pointer, pointerSource, assemblyName, namespaceName, className, methodName, argc);
+                                if(!raw)continue;
                                 BOOL duplicate = NO;
                                 for (NSDictionary *existing in best) {
                                     if ([existing[@"methodInfo"] unsignedLongLongValue] == [raw[@"methodInfo"] unsignedLongLongValue]) { duplicate = YES; break; }
