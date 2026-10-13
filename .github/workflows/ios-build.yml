@@ -37,6 +37,8 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/test-foundation.sh 2>&1 | tee tests-foundation.log
+      - name: Production Mach-O binary equivalence
+        run: bash scripts/test-macho-equivalence.sh
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
