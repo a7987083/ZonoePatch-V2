@@ -1,3 +1,17 @@
+# 2026-10-13 深度整改追加
+
+本次起点0afc080，源码anchor4795049；全部真实Commit/CI见docs/DEEP_REMEDIATION_CI.json与交付Git记录。实际修复及验证边界见docs/DEEP_REMEDIATION_20261013.md。
+
+- M10.1：统一M56 scalar lease.store、Cell表/重叠/版本校验、拒绝F32溢出；atomic records/enabled和diagnostic Owner锁；实际unload/reload/三线程回归。
+- M10.2：Runtime Table/Full Signature私有副本+原子提交；去掉与rename不兼容的hard-link bridge；V3/Runtime-only拒覆盖；报告失败传播；11点Executor故障与既有树逐字节比较。
+- H05.2：SearchHistory/Restore、ABI Detail、Runtime-only Gate独立TU，明确Selector/BuildCapability依赖，14独立/40剩余；old UI expansion与安装顺序保留。
+- H05.1：增加实际SearchHistory前驱/alias/重复installer/50条历史fixture。没有删除未知外部兼容入口。
+- CI失败都追加修复：provenance空锚点、Unified consumer缺私有Selector及导入、Report fixture误定位inline helper。没有跳过测试/刷新历史digest/升级SDK。
+
+已修改/已提交、CI测试/编译与实机分开记录。当前SOURCE PENDING明细不是全项关闭。下面保留此前开发记录。
+
+---
+
 # Development change log
 
 完整逐项 Commit 对照：docs/COMMIT_RECORDS.md / .json，GitHub 分支历史为权威。

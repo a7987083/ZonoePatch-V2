@@ -1,3 +1,19 @@
+# 当前优先级更新（2026-10-13）
+
+本轮具体源码位置、已实现措施、失败证据和后续验收条件：docs/DEEP_REMEDIATION_20261013.md。以下剩余项均未全关闭。
+
+| 项目 | 当前剩余及后续验收 |
+|---|---|
+| M10.1 SOURCE PENDING | Native Managed API缓存未绑定incarnation；Common/Invoke/Direct/MultiArg/Codec的裸函数消费者未统一execution owner。生成BR stub/返回地址在途安全不能由Cell写租约推导。需无dyld等待的retire/drain、回调锁序、实际bridge/unload/ABA fixture后再实机。Cell写入和诊断并发本轮已修复。 |
+| M10.2 SOURCE PENDING | 生产内建provider/discovery不是完整Executor fixture后端；Runtime-only和Native prepatch仍单Unity目标，缺每action映像目标身份路由。已有V3多目标/碰撞拒绝与11点故障回滚不替代多个Runtime映像成功。需typed target grouping/作用域Store/完整内建prepare-emit fixture，保留旧格式兼容。 |
+| H05.2 SOURCE PENDING | 14独立UI单元，40段.inc。core/version、UnifiedFinder/chain/builder私有类/Block/Selector owner继续迁移。UI strict、真实全build与历史源码重建必须每组执行。 |
+| H05.1 SOURCE + DEVICE PENDING | M47/SearchHistory实际兼容alias仍有不同的前驱行为；全71安装源点的外部消费者及初始化途中未穷举，不删除。需逐族完整runtime trace与前中后/重复安装fixture。 |
+| DEVICE PENDING | 所有真实App Hook执行、GC receiver/scene、卸载与安装、iPhone UI/ABI、IPA重签安装、性能改善均未验证。 |
+
+以下保存历史清单；旧Entry/Cell状态及7/47数字已由上述当前状态覆盖，其余未关闭风险继续有效。
+
+---
+
 # 剩余技术债与验收边界
 
 源码完成、CI通过、目标App通过和iPhone实机通过是四种状态。业务源码anchor `42d5750`完整CI通过；最终交付身份见 DELIVERY_STATUS.json。尚未执行目标App/iPhone验证，性能改善未验证。已关闭P0没有重做。

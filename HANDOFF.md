@@ -1,3 +1,23 @@
+# ZonoePatch-V2 独立交接：2026-10-13 深度整改
+
+Repository `a7987083/ZonoePatch-V2`，继续使用 `dev/technical-debt-p0-p2-20261013`，draft PR https://github.com/a7987083/ZonoePatch-V2/pull/1 。禁止改写历史/强推。
+
+本次起点 `0afc080e8e264255424264b4480222275f0eca5b`（push CI 38353817406成功），用户参考 `afa81485978fa280ca025e4ccfdbb6aa55e70f94`，源码anchor `47950495e1f5293fc6851805b068bbdaa96a204a`，完整push CI `38356984676`成功。最终文档Commit也跑完整CI；精确交付Commit/Run/Artifact/digests见包内 DELIVERY_STATUS.json，不能使用PR merge SHA冒充branch HEAD。
+
+当前状态：M10.1已统一M56真实写租约/完整Cell几何/atomic records与诊断锁，但native execution/API消费者仍SOURCE PENDING。M10.2已增加Runtime table/signature私有文件事务、报告失败传播、拒绝已有输出覆盖以及11点Executor故障/输出树字节回滚；所有内建Provider和多个Runtime映像尚未闭环。H05.2为14个独立UI TU、40个.inc；H05.1新增真实SearchHistory前驱/alias/重复安装fixture，未知兼容层全部保留。目标App/iPhone未验证。
+
+关键调用链：Binder -> ZNStaticValueCellAddressForRecord -> ZNM56WriteTextToCell -> 同一ZNImageOperationLease::store；Static管理调用使用global Static gate -> runtime monitor -> ephemeral loader/per-image lease。诊断遵循同顺序；dyld callback只撤销不等待。Builder -> captured ZNBuildSession -> provider prepare -> base target stage -> provider emit -> file edits/postprocess/sign -> ZNBuildOutputTransaction一次目录发布，失败回滚owned stage；authoring stores使用scoped深拷贝。
+
+详细改动、源码位置、失败证据、测试double边界、阻塞与后续条件见 docs/DEEP_REMEDIATION_20261013.md、KNOWN_ISSUES.md、docs/DEEP_REMEDIATION_CI.json。新增Commit以分支真实Git为准；交付含完整历史、参考Commit之后与本任务之后记录。
+
+复现：按未修改pins的 .github/workflows/ios-build.yml 执行源码门禁、7 portable tests、strict ownership/UI、Foundation、Mach-O完整字节等价/独立签名页校验、Xcode16.4/SDK18.5/arm64 iOS14完整构建。Linux本机Apple编译未执行；本地portable用g++，ASan/UBSan，本地LSan关闭不改变CI。dylib下载后运行 scripts/verify-artifact.py，并逐文件核对Artifact源码ZIP与交付Commit tree。
+
+Next Task：优先统一Managed/native execution owner与method/API incarnation（含回调锁序/retire-drain fixture），再完成生产内建Provider的多Runtime目标路由和端到端故障矩阵；继续40段独立UI owner/实际installer fixture；设备按独立清单执行。不能用永久dlopen、header快照、格式变更或强行删除alias关闭技术债。
+
+下面保存前轮原始交接作为历史证据；其中旧7/47、旧anchor与旧CI不是本轮当前状态。
+
+---
+
 # ZonoePatch-V2：独立接手指南
 
 仓库 https://github.com/a7987083/ZonoePatch-V2 ，分支 `dev/technical-debt-p0-p2-20261013`，draft PR https://github.com/a7987083/ZonoePatch-V2/pull/1 。继续追加提交，没有amend/rebase/force-push，没有重做已关闭P0。

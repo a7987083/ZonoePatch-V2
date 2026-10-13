@@ -28,3 +28,13 @@
 - 启动前启用UI trace，导出每stage前后IMP、旧Selector实际调用；超4096事件需重采集，不能称complete。
 - 性能9指标、取消请求至completion、队列等待；display-link代理与真实首帧分别测量，采样开关对照。
 - Native-only/Mixed真实prepatch样本、所有template、ProtectionV2随机变体、IPA重签安装；native macOS fixture仍不能勾选此项。
+
+## 深度整改独立验收（全部未执行）
+
+- 填写最终Commit、dylib SHA256、App/Unity/metadata版本、iOS/设备、加载与签名方式。
+- M56各scalar类型/边界/超范围拒绝；并发Static switch、Cell slider、诊断与映像卸载。人为test revocation不可作为实机撤销证明。
+- 14独立UI TU：SearchHistory填充不自动搜、SearchRestore explicit Assembly/地址查询、ABI详情和Runtime-only build gate；首次/反复显示、键盘和转场。
+- Runtime-only suffixless输出的Full Signature实读及真实调用；Static/Runtime/Native/Mixed真实样本，签名后整包重签安装。
+- Native回调/BR/trampoline在途与退出/同址重载；当前统一execution owner源码尚未完成，不以CI管理路径稳定宣称动态卸载安全。
+- 生产内建provider真实discovery/prepare/emit，当前多Runtime目标路由未支持部分必须独立记录，不当作已关闭功能验收。
+- 逐族UI IMP完整trace及旧alias外部调用；overflow重采，保留兼容层直至消费者证明。

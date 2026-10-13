@@ -1,0 +1,44 @@
+[
+  {
+    "test": "scalar_parser",
+    "compiler": "g++",
+    "code": 0,
+    "output": "production scalar parser boundaries PASS\n"
+  },
+  {
+    "test": "checked_layout",
+    "compiler": "g++",
+    "code": 0,
+    "output": "checked arithmetic/unaligned/truncated/malformed production layout PASS\n"
+  },
+  {
+    "test": "macho_file",
+    "compiler": "g++",
+    "code": 0,
+    "output": "Mach-O parse/transactional shift/golden/fuzz PASS (seed 0x5a4e, 20000)\n"
+  },
+  {
+    "test": "performance",
+    "compiler": "g++",
+    "code": 0,
+    "output": "performance disabled/nesting/reset/concurrent bounded sampling PASS\n"
+  },
+  {
+    "test": "loaded_image",
+    "compiler": "g++",
+    "code": 0,
+    "output": "owned header/file-vs-mapping/VM read/unload/reload ABA/generation/overflow PASS\n"
+  },
+  {
+    "test": "async_performance",
+    "compiler": "g++",
+    "code": 0,
+    "output": "async ticket queue/cancel/timeout/epoch/exactly-once concurrent PASS\n"
+  },
+  {
+    "test": "image_lifetime",
+    "compiler": "g++",
+    "code": 0,
+    "output": ""
+  }
+]
