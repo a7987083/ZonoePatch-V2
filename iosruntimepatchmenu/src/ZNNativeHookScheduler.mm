@@ -11,8 +11,9 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
     @"zonoe.native-hook.runtime-value.v2";
 
 static NSString *ZNHookBindingIdentity(ZNNativeHookAction *a) {
-    return [NSString stringWithFormat:@"%@|%@|%llx|%lu|%lu|%lu|%llu|%@|%@|%@|%@|%@|%@|%llu",
-            a.preparedUUID?:@"",a.canonicalIdentity?:@"",(unsigned long long)a.preparedRVA,
+    NSString *extra=[NSString stringWithFormat:@"%@|%lu|%d|%d|%lu|%llu|%llu",a.codecSetterMethod?:@"",(unsigned long)a.callbackArgumentIndex,a.skipOriginal,a.preparedIsStatic,(unsigned long)a.argumentCount,(unsigned long long)a.preparedCodecGetterRVA,(unsigned long long)a.preparedCodecSetterRVA];
+    return [NSString stringWithFormat:@"%@|%@|%@|%llx|%lu|%lu|%lu|%llu|%@|%@|%@|%@|%@|%@|%llu",
+            extra,a.preparedUUID?:@"",a.canonicalIdentity?:@"",(unsigned long long)a.preparedRVA,
             (unsigned long)a.templateKind,(unsigned long)a.argumentIndex,(unsigned long)a.fieldArgumentIndex,
             (unsigned long long)a.fieldOffset,a.fieldArgumentMode?:@"",a.fieldCodec?:@"",
             a.codecAssembly?:@"",a.codecNamespaceName?:@"",a.codecClassName?:@"",a.codecGetterMethod?:@"",
@@ -33,6 +34,7 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
 @property(nonatomic,strong) NSMutableSet<NSNumber *> *pendingUpdates;
 @property(nonatomic,strong) NSMutableDictionary<NSNumber *,NSNumber *> *lifecycleGenerations;
 @property(nonatomic,strong) NSMutableSet<NSNumber *> *removedActions;
+@property(nonatomic,strong) NSMutableDictionary<NSNumber *,NSString *> *bindingIdentities;
 @end
 
 @implementation ZNNativeHookScheduler
@@ -59,6 +61,7 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
     _pendingUpdates=[NSMutableSet set];
     _lifecycleGenerations=[NSMutableDictionary dictionary];
     _removedActions=[NSMutableSet set];
+    _bindingIdentities=[NSMutableDictionary dictionary];
     return self;
 }
 
@@ -172,12 +175,14 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
                 // Explicit teardown is a tombstone until a new desired-value command.
                 if([self.removedActions containsObject:key])continue;
                 ZNNativeHookAction *prior=self.actionsByID[key];
-                if(prior && ![ZNHookBindingIdentity(prior) isEqualToString:ZNHookBindingIdentity(action)]) {
-                    [[ZNNativeHookRuntime sharedRuntime] removeAction:prior error:nil];
+                NSString *bound=self.bindingIdentities[key];
+                if(bound && ![bound isEqualToString:ZNHookBindingIdentity(action)]) {
+                    if(prior)[[ZNNativeHookRuntime sharedRuntime] removeAction:prior error:nil];
                     [self publishState:ZNNativeHookLifecycleStateFailed actionID:action.actionID
                                 error:@"actionID reused for a different Hook binding; use a new ID or restart"];
                     continue;
                 }
+                self.bindingIdentities[key]=ZNHookBindingIdentity(action);
                 self.actionsByID[key]=[action copy];
                 if(!self.states[key])self.states[key]=@(ZNNativeHookLifecycleStateDiscovered);
             }
@@ -206,13 +211,14 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
     NSUInteger epoch=0;
     BOOL needsSchedule=NO;
     @synchronized(self) {
-        ZNNativeHookAction *prior=self.actionsByID[key];
-        if(prior && ![ZNHookBindingIdentity(prior) isEqualToString:ZNHookBindingIdentity(action)]) {
+        NSString *bound=self.bindingIdentities[key];
+        if(bound && ![bound isEqualToString:ZNHookBindingIdentity(action)]) {
             [self publishState:ZNNativeHookLifecycleStateFailed actionID:action.actionID
                         error:@"actionID identity conflict; value update rejected"];
             return;
         }
         [self.removedActions removeObject:key];
+        self.bindingIdentities[key]=ZNHookBindingIdentity(action);
         self.actionsByID[key]=[action copy];
         self.desiredValues[key]=@(value);
         epoch=[self.epochs[key] unsignedIntegerValue]+1;

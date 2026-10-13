@@ -33,5 +33,6 @@ int main(){@autoreleasepool{
  [s setDesiredValue:3 forAction:conflict];drain(s);
  assert([s stateForActionID:71]==ZNNativeHookLifecycleStateFailed);
  [s reconcileActions:@[]];drain(s);assert([s stateForActionID:71]==ZNNativeHookLifecycleStateTeardown);
+ [s setDesiredValue:3 forAction:conflict];drain(s);assert([s stateForActionID:71]==ZNNativeHookLifecycleStateFailed);
  puts("scheduler remove/retry/reconcile/identity-conflict regression PASS");
 }}
