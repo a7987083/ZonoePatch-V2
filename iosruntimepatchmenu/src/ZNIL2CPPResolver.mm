@@ -1,3 +1,4 @@
+#include "ZNLoadedImageApple.h"
 #import "ZNIL2CPPResolver.h"
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
@@ -140,38 +141,10 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
 - (BOOL)isExecutableUnityAddress:(uintptr_t)address {
     uintptr_t imageBase = [self unityImageBase];
     if (!imageBase || !address) return NO;
-    const struct mach_header_64 *mh = (const struct mach_header_64 *)imageBase;
-    if (mh->magic != MH_MAGIC_64) return NO;
+    auto image = ZNCaptureLoadedImage(imageBase);
+    // This validates metadata/address eligibility, not an in-flight call lease.
+    return image && image->valid() && image->contains(address, 1, VM_PROT_EXECUTE);
 
-    const uint8_t *cursor = (const uint8_t *)(mh + 1);
-    const uint8_t *end = cursor + mh->sizeofcmds;
-    uint64_t imageVMBase = UINT64_MAX;
-    for (uint32_t i = 0; i < mh->ncmds; i++) {
-        if (cursor + sizeof(struct load_command) > end) return NO;
-        const struct load_command *lc = (const struct load_command *)cursor;
-        if (lc->cmdsize < sizeof(*lc) || cursor + lc->cmdsize > end) return NO;
-        if (lc->cmd == LC_SEGMENT_64 && lc->cmdsize >= sizeof(struct segment_command_64)) {
-            const struct segment_command_64 *seg = (const struct segment_command_64 *)cursor;
-            if (strncmp(seg->segname, SEG_TEXT, 16) == 0) imageVMBase = seg->vmaddr;
-        }
-        cursor += lc->cmdsize;
-    }
-    if (imageVMBase == UINT64_MAX) return NO;
-
-    cursor = (const uint8_t *)(mh + 1);
-    for (uint32_t i = 0; i < mh->ncmds; i++) {
-        const struct load_command *lc = (const struct load_command *)cursor;
-        if (lc->cmd == LC_SEGMENT_64 && lc->cmdsize >= sizeof(struct segment_command_64)) {
-            const struct segment_command_64 *seg = (const struct segment_command_64 *)cursor;
-            if ((seg->initprot & VM_PROT_EXECUTE) && seg->vmaddr >= imageVMBase) {
-                uintptr_t start = imageBase + (uintptr_t)(seg->vmaddr - imageVMBase);
-                uintptr_t finish = start + (uintptr_t)seg->vmsize;
-                if (address >= start && address < finish) return YES;
-            }
-        }
-        cursor += lc->cmdsize;
-    }
-    return NO;
 }
 
 - (void *)resolveSymbol:(const char *)name {

@@ -9,6 +9,7 @@ static Memory fixture(){Memory m;put(m,0,0xfeedfacfu);put(m,4,0x100000cu);put(m,
 int main(){
  Memory m=fixture();znimage::Reader r{&m,copy,generation};auto s=znimage::Snapshot::capture(m.base,r);assert(s&&s->headerSize()==104); // filesize deliberately greater than owned header.
  uint64_t a=0;assert(s->translate(0x8001,&a)&&a==0x1001);assert(!s->translate(0,&a));assert(s->fileAddress(1024,4,&a)&&a==0x1400);
+ assert(s->contains(m.base,1,4));assert(!s->contains(m.base+8192,1,4));assert(!s->contains(m.base,1,2));assert(!s->contains(m.base+8191,2,4));
  uint32_t out=99;assert(s->read(m.base,&out,4)&&out==0xfeedfacf);assert(!s->read(UINT64_MAX,&out,4));
  auto copied=*s;m.bytes[40]='X';assert(copied.bytes()[40]=='_'); // Owned storage, copies do not retain pointers into predecessor.
  m.live=false;++m.epoch;out=99;assert(!s->valid()&&!s->read(m.base,&out,4)&&out==99); // unload/cache invalidation
