@@ -4,6 +4,9 @@
 // UI drawing, layout and UIKit interaction handlers live in this translation unit.
 
 
+// UI_INCLUDE_DIAGNOSTICS_BEGIN
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullability-completeness"
 #include "ui/core/ZonoeRuntimeMenu.inc"
 
 @interface ZNRuntimeMenuControllerV040 (ZNUnifiedUICrossSectionDecls)
@@ -171,6 +174,8 @@
 
 
 #include "ui/features/ZNM630HardCutUI.inc"
+// UI_INCLUDE_DIAGNOSTICS_END
+#pragma clang diagnostic pop
 
 
 

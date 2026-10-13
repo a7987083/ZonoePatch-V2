@@ -3,7 +3,7 @@ from pathlib import Path
 import re,json,hashlib
 ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'iosruntimepatchmenu/src'
-INCLUDE=re.compile(r'^#include "(ui/[^"\n]+\.inc)"\n$',re.M)
+INCLUDE=re.compile(r'^#include "(ui/[^"\n]+\.inc)"\n',re.M)
 def expanded_ui(root=ROOT):
     source=root/'iosruntimepatchmenu/src'
     text=(source/'ZNUnifiedUI.mm').read_text()
@@ -11,6 +11,8 @@ def expanded_ui(root=ROOT):
         path=(source/m[1]).resolve()
         if not path.is_relative_to(source.resolve()):raise ValueError('include traversal')
         return path.read_text()
+    text=text.replace('// UI_INCLUDE_DIAGNOSTICS_BEGIN\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wnullability-completeness"\n','')
+    text=text.replace('// UI_INCLUDE_DIAGNOSTICS_END\n#pragma clang diagnostic pop\n','')
     return INCLUDE.sub(replace,text)
 def verify():
     manifest=json.loads((ROOT/'iosruntimepatchmenu/tests/ui_module_manifest.json').read_text())
