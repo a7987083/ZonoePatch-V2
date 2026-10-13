@@ -19,6 +19,8 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
 @property(nonatomic,strong) NSMutableDictionary<NSNumber *,NSNumber *> *retryCounts;
 @property(nonatomic,strong) NSMutableDictionary<NSNumber *,NSNumber *> *epochs;
 @property(nonatomic,strong) NSMutableSet<NSNumber *> *pendingUpdates;
+@property(nonatomic,strong) NSMutableDictionary<NSNumber *,NSNumber *> *lifecycleGenerations;
+@property(nonatomic,strong) NSMutableSet<NSNumber *> *removedActions;
 @end
 
 @implementation ZNNativeHookScheduler
@@ -43,6 +45,8 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
     _retryCounts=[NSMutableDictionary dictionary];
     _epochs=[NSMutableDictionary dictionary];
     _pendingUpdates=[NSMutableSet set];
+    _lifecycleGenerations=[NSMutableDictionary dictionary];
+    _removedActions=[NSMutableSet set];
     return self;
 }
 
@@ -82,6 +86,12 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
 - (void)prepareActionOnQueue:(ZNNativeHookAction *)action {
     if(!action||!action.actionID)return;
     NSNumber *key=@(action.actionID);
+    NSUInteger generation=0;
+    @synchronized(self) {
+        if([self.removedActions containsObject:key] || !self.actionsByID[key])return;
+        generation=[self.lifecycleGenerations[key] unsignedIntegerValue]+1;
+        self.lifecycleGenerations[key]=@(generation);
+    }
     NSInteger desired=[self initialDesiredValueForAction:action];
     [self publishState:ZNNativeHookLifecycleStatePreparing actionID:action.actionID error:nil];
 
@@ -121,6 +131,8 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
         if([self stateForActionID:action.actionID]==ZNNativeHookLifecycleStateActive)return;
         ZNNativeHookAction *latest=nil;
         @synchronized(self) {
+            if([self.removedActions containsObject:key] ||
+               generation!=[self.lifecycleGenerations[key] unsignedIntegerValue])return;
             latest=self.actionsByID[key];
         }
         if(latest)[self prepareActionOnQueue:latest];
@@ -138,6 +150,8 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
             if(!action.actionID)continue;
             NSNumber *key=@(action.actionID);
             @synchronized(self) {
+                // Explicit teardown is a tombstone until a new desired-value command.
+                if([self.removedActions containsObject:key])continue;
                 self.actionsByID[key]=[action copy];
                 if(!self.states[key])self.states[key]=@(ZNNativeHookLifecycleStateDiscovered);
             }
@@ -162,6 +176,7 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
     NSUInteger epoch=0;
     BOOL needsSchedule=NO;
     @synchronized(self) {
+        [self.removedActions removeObject:key];
         self.actionsByID[key]=[action copy];
         self.desiredValues[key]=@(value);
         epoch=[self.epochs[key] unsignedIntegerValue]+1;
@@ -187,7 +202,7 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
                 desired=[self.desiredValues[key] integerValue];
                 beforeEpoch=[self.epochs[key] unsignedIntegerValue];
             }
-            if(!latest)break;
+            if(!latest){@synchronized(self){[self.pendingUpdates removeObject:key];}break;}
 
             NSString *error=nil;
             BOOL ok=[[ZNNativeHookRuntime sharedRuntime] setValue:desired forAction:latest error:&error];
@@ -214,6 +229,16 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
     dispatch_async(self.queue,^{
         typeof(self) self=weakSelf;
         if(!self)return;
+        NSNumber *key=@(action.actionID);
+        @synchronized(self) {
+            self.lifecycleGenerations[key]=@([self.lifecycleGenerations[key] unsignedIntegerValue]+1);
+            [self.removedActions addObject:key];
+            [self.actionsByID removeObjectForKey:key];
+            [self.desiredValues removeObjectForKey:key];
+            [self.retryCounts removeObjectForKey:key];
+            [self.pendingUpdates removeObject:key];
+            self.epochs[key]=@([self.epochs[key] unsignedIntegerValue]+1);
+        }
         NSString *error=nil;
         BOOL ok=[[ZNNativeHookRuntime sharedRuntime] removeAction:action error:&error];
         [self publishState:(ok?ZNNativeHookLifecycleStateTeardown:ZNNativeHookLifecycleStateFailed)

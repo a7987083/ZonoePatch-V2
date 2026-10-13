@@ -23,6 +23,8 @@ jobs:
           /tmp/common-test
           clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/native_hook_template_test.mm -o /tmp/hook-test
           /tmp/hook-test
+          clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNNativeHookScheduler.mm iosruntimepatchmenu/tests/native_hook_scheduler_test.mm -o /tmp/scheduler-test
+          /tmp/scheduler-test
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
