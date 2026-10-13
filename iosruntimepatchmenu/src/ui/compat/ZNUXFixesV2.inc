@@ -231,7 +231,7 @@ static CGFloat ZNUXClampScrollY(UIScrollView *scroll, CGFloat y) {
     });
 }
 
-- (void)znux_renderPage {
+- (void)znux_renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh);
     UIScrollView *scroll = self.contentScroll;
     CGPoint oldOffset = scroll ? scroll.contentOffset : CGPointZero;
 

@@ -1,3 +1,4 @@
+#include "ZNPerformance.h"
 #import "ZNBuildSession.h"
 #import "ZNBuildExecutor.h"
 
@@ -99,6 +100,7 @@ static BOOL ZNBuildExecutorBuildSessionWorkspace(ZNBinaryPatchWorkspace *workspa
 
 BOOL ZNBuildExecutorBuildWorkspace(ZNBinaryPatchWorkspace *workspace,
                                   NSArray<NSString *> **outputs, NSString **report, NSString **error) {
+    znperf::Scope measure(znperf::BinaryGeneration);
     if(!workspace || workspace.hasAnyApplied){if(error)*error=@"生成前必须恢复所有临时 Runtime Patch";return NO;}
     ZNBuildSession *session=[ZNBuildSession captureWorkspace:workspace];
     __block NSArray<NSString *> *localOutputs=nil;

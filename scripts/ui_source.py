@@ -24,5 +24,8 @@ def verify():
     for m in manifest['modules']:
         assert hashlib.sha256((SRC/m['path']).read_bytes()).hexdigest()==m['sha256'],m['path']
     assert hashlib.sha256(expanded_ui().encode()).hexdigest()==manifest['expanded_sha256'],'UI expanded bytes changed'
-    print(f'{len(paths)} modules; exact baseline UI expansion/ownership/order PASS')
+    previous=expanded_ui().replace('#include "ZNPerformance.h"\n','').replace(' znperf::Scope znPageMeasure(znperf::PageRefresh);','')
+    previous=re.sub(r'^.*// ZN_PERF_ONLY\n','',previous,flags=re.M)
+    assert hashlib.sha256(previous.encode()).hexdigest()==manifest.get('pre_performance_expanded_sha256',manifest['expanded_sha256']), 'non-metric UI change'
+    print(f'{len(paths)} modules; reviewed expansion/metric-only delta/ownership/order PASS')
 if __name__=='__main__':verify()

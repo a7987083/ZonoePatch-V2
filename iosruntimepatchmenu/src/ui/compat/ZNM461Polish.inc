@@ -91,7 +91,7 @@ static CGFloat ZNM461Bottom(UIView *root) {
 
 @implementation ZNRuntimeMenuControllerV040 (ZNM461Polish)
 
-- (void)znm461_renderPage {
+- (void)znm461_renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh);
     [self znm461_renderPage];
 
     // Final post-render reconciliation is capability-driven. Do not branch on

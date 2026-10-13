@@ -26,3 +26,6 @@ if [ "$(uname -m)" = arm64 ]; then
 else
   echo 'Native arm64 compiler fixture NOT VERIFIED on this runner'
 fi
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNPerformanceReport.mm iosruntimepatchmenu/tests/performance_report_test.mm -o /tmp/performance-report-test
+/tmp/performance-report-test

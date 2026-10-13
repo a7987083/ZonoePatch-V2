@@ -474,7 +474,7 @@ static UIImage *ZNSymbol(NSString *name, CGFloat size, UIImageSymbolWeight weigh
     CGRect f=self.contentView.frame; f.size.height=MAX(CGRectGetHeight(self.contentScroll.bounds),y+4); self.contentView.frame=f; self.contentScroll.contentSize=f.size;
 }
 
-- (void)renderPage { if (!self.contentView) return; self.compactMode ? [self renderCompactPage] : [self renderFullPage]; }
+- (void)renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh); if (!self.contentView) return; self.compactMode ? [self renderCompactPage] : [self renderFullPage]; }
 
 - (void)updateSidebar {
     for (NSInteger i=0;i<self.sidebarButtons.count;i++) { UIButton *b=self.sidebarButtons[i]; BOOL sel=i==self.selectedCategory; b.backgroundColor=sel?self.theme.selectedColor:UIColor.clearColor; b.tintColor=sel?self.theme.accentColor:self.theme.secondaryTextColor; [b setTitleColor:sel?self.theme.primaryTextColor:self.theme.secondaryTextColor forState:UIControlStateNormal]; b.titleLabel.font=[self menuFont:11.0 weight:(sel?UIFontWeightSemibold:UIFontWeightMedium)]; }
@@ -1076,7 +1076,7 @@ static void ZNInstallV0401UIFixes(void) {
     [self zn402_applyTouchPolicy];
 }
 
-- (void)zn402_renderPage {
+- (void)zn402_renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh);
     [self zn402_applyTouchPolicy];
     [self zn402_renderPage];
 }
@@ -1999,7 +1999,7 @@ static void ZNInstallV049SharedSiteProbeUI(void) {
     [self zn40_updateSubtitle];
 }
 
-- (void)zn53_renderPage {
+- (void)zn53_renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh);
     [self zn53_renderPage];
 
     // Legacy V0402 is inside the historical render chain and may restore

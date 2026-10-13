@@ -7,6 +7,7 @@
 // UI_INCLUDE_DIAGNOSTICS_BEGIN
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
+#include "ZNPerformance.h"
 #include "ui/core/ZonoeRuntimeMenu.inc"
 
 @interface ZNRuntimeMenuControllerV040 (ZNUnifiedUICrossSectionDecls)

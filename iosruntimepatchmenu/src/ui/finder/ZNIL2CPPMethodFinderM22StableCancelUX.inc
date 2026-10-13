@@ -64,7 +64,7 @@ static BOOL ZN63ViewBelongsToRoot(UIView *view, UIView *root) {
     }
 }
 
-- (void)zn63m22_renderPage {
+- (void)zn63m22_renderPage { znperf::Scope znPageMeasure(znperf::PageRefresh);
     NSString *token = [self zn61m2_activeToken];
     BOOL suppress = [objc_getAssociatedObject(self, kZN63SuppressProgressRenderKey) boolValue];
     UILabel *cached = objc_getAssociatedObject(self, kZN63StatusLabelKey);

@@ -151,6 +151,8 @@ static UIWindow *ZNDeferredCurrentWindow(void) {
 }
 
 - (void)zn_beginActivation {
+    znperf::enable([NSUserDefaults.standardUserDefaults boolForKey:@"zonoe.diagnostics.performance.enabled"]); // ZN_PERF_ONLY
+    znperf::Scope znMenuMeasure(znperf::MenuStartup); // ZN_PERF_ONLY
     @try {
         // Install lightweight execution/UI wiring now. Expensive capability work
         // remains lazy. In particular there is no fixed sleep and no Resolver.

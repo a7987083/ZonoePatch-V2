@@ -1,3 +1,4 @@
+#include "ZNPerformance.h"
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <mach-o/dyld.h>
@@ -387,6 +388,7 @@ static BOOL ZN60MethodMatches(ZN60Runtime *runtime,
 - (NSArray<NSDictionary<NSString *,id> *> *)zn60_searchCandidates:(NSString *)expression
                                                              limit:(NSUInteger)limit
                                                              error:(NSString **)error {
+    znperf::Scope measure(znperf::Search);
     NSString *query = ZN60Trim(expression);
     if (!query.length) {
         if (error) *error = @"请输入方法名、Class::Method 或 0xRVA";

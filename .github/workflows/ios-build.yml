@@ -31,6 +31,10 @@ jobs:
           /tmp/layout-test
           clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/macho_file_test.cpp -o /tmp/macho-test
           /tmp/macho-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/performance_test.cpp -o /tmp/performance-test
+          /tmp/performance-test
+      - name: Reproducible host microbenchmarks
+        run: python3 scripts/benchmark.py --output performance-host.json
       - name: Strict ownership module warnings
         run: bash scripts/check-module-warnings.sh
       - name: Foundation production regressions
@@ -75,4 +79,5 @@ jobs:
             tests-foundation.log
             topology.json
             compatibility-audit.json
+            performance-host.json
           if-no-files-found: error

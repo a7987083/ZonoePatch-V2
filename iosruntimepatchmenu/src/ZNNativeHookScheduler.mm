@@ -1,3 +1,4 @@
+#include "ZNPerformance.h"
 #import "ZNNativeHookScheduler.h"
 
 #import "ZNNativeHookAction.h"
@@ -161,6 +162,7 @@ static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
         typeof(self) self=weakSelf;
         if(!self)return;
 
+        znperf::Scope measure(znperf::HookDispatch);
         NSMutableSet *incoming=[NSMutableSet set];
         for(ZNNativeHookAction *action in snapshot)if(action.actionID)[incoming addObject:@(action.actionID)];
         NSArray *oldKeys=nil;@synchronized(self){oldKeys=[self.actionsByID allKeys];}
