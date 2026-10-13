@@ -24,13 +24,13 @@ public:
  }
 };
 class ZNRuntimeExecutionScope;
-inline thread_local ZNRuntimeExecutionScope *gZNExecutionScope=nullptr;
+inline ZNRuntimeExecutionScope *&ZNCurrentExecutionScope(){static thread_local ZNRuntimeExecutionScope *scope=nullptr;return scope;}
 class ZNRuntimeExecutionScope {
  ZNRuntimeExecutionScope *previous;ZNRuntimeExecutionScope *root;
  std::vector<std::unique_ptr<ZNCodeExecutionOwner>> owners;
 public:
- ZNRuntimeExecutionScope():previous(gZNExecutionScope),root(previous?previous->root:this){gZNExecutionScope=this;}
- ~ZNRuntimeExecutionScope(){gZNExecutionScope=previous;}
+ ZNRuntimeExecutionScope():previous(ZNCurrentExecutionScope()),root(previous?previous->root:this){ZNCurrentExecutionScope()=this;}
+ ~ZNRuntimeExecutionScope(){ZNCurrentExecutionScope()=previous;}
  ZNRuntimeExecutionScope(const ZNRuntimeExecutionScope&)=delete;
  bool retain(uintptr_t address,uint64_t expected=0){
   Dl_info info={};if(!address||!dladdr((void *)address,&info))return false;
@@ -45,4 +45,4 @@ public:
  }
  uint64_t identity(uintptr_t address){Dl_info info={};if(!dladdr((void *)address,&info))return 0;for(auto &o:root->owners)if(o->base==(uintptr_t)info.dli_fbase&&o->valid())return o->incarnation();return 0;}
 };
-inline void *ZNResolveExecutionSymbol(const char *path,const char *name){return gZNExecutionScope?gZNExecutionScope->resolve(path,name):nullptr;}
+inline void *ZNResolveExecutionSymbol(const char *path,const char *name){return ZNCurrentExecutionScope()?ZNCurrentExecutionScope()->resolve(path,name):nullptr;}
