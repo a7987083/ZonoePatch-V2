@@ -37,3 +37,5 @@ PY
 git archive --format=zip --output=dist/ZonoePatch-V2-Source.zip HEAD
 git log --format='%H %s' > dist/COMMITS.txt
 cp README.md docs/BUILD_BASELINE.md dist/
+
+python3 scripts/verify-artifact.py dist/ZonoePatch-V2-arm64.dylib > dist/artifact-verification.json
