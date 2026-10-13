@@ -191,5 +191,109 @@
   {
     "sha": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
     "message": "ci(M10): retain production binary-equivalence logs in delivery artifacts"
+  },
+  {
+    "sha": "75986827d564f9085feed6f7878ae30ffb8c7a15",
+    "message": "feat(M10.1): own loaded headers and use generation-checked fault-safe VM reads"
+  },
+  {
+    "sha": "10d18c5fd2aee69d1e0c5ca8cf7cec1bbf842cbd",
+    "message": "fix(M10.1): use SDK-supported vm_read_overwrite on iOS and macOS"
+  },
+  {
+    "sha": "b4e9d3e27d3642e0fefa7f6b6338d73e4b922a89",
+    "message": "refactor(H05.2): resolve UI private dependencies and compile three category families independently"
+  },
+  {
+    "sha": "72ff18228d47ed5aeba142d3d7d98d1ed9b7422d",
+    "message": "refactor(M10.1): invalidate owned header cache and retain probe command owners across scans"
+  },
+  {
+    "sha": "c3666e998898fa61f02f09e5d242cd50ad111623",
+    "message": "fix(H05.2): declare preserved subtitle and builder selectors at the private UI boundary"
+  },
+  {
+    "sha": "06db3d05dbf716416c2cda0926d2418ba3d90f27",
+    "message": "fix(M10.1): parse copied runtime tables and retain the exact pre-adapter UI digest gate"
+  },
+  {
+    "sha": "19ddffb82e828cbde6cc599f9be2dabccb11c7ec",
+    "message": "feat(H05.1): inventory every selector installation and trace actual IMP transitions without changing order"
+  },
+  {
+    "sha": "1f531fd3fac94db28a9d2a4ea50c602673dd6e37",
+    "message": "fix(M10.1): restrict snapshot ownership to image info and preserve hook record layout"
+  },
+  {
+    "sha": "75c48b537f004b4b96c474562b2f71cc6cf43047",
+    "message": "feat(M11.2): measure async queue wait cancellation acknowledgment and first display tick with bounded tickets"
+  },
+  {
+    "sha": "6f0d3c7ccdc8cd45a4e236319de9ffe4997ede69",
+    "message": "test(M11.2): calibrate sampling overhead against an identical empty host workload"
+  },
+  {
+    "sha": "d3dc654f6ce144b57deac9afa1caa26791a261af",
+    "message": "fix(M11.2): preserve subnanosecond batch averages and distinguish batch quantiles"
+  },
+  {
+    "sha": "59ff521b94378b8e008c93e1580116f908e73a7e",
+    "message": "fix(M11.2): link async metrics and display tick owners into the production dylib"
+  },
+  {
+    "sha": "8e5a1cdb02fe077164d321d76cd2fefef2651f15",
+    "message": "test(M10.2): execute full production target builders and action writes across combination capacity and rollback cases"
+  },
+  {
+    "sha": "799e75c6b508b9cdb7b8b362341d915f1ff73560",
+    "message": "refactor(L02): remove the proven unused trailing-string predicate after reviewing its actual semantics"
+  },
+  {
+    "sha": "01e3c623942973e21f54ae65548f4056b8cf9192",
+    "message": "refactor(H05.2): compile the collision-free footer version category independently with unchanged installer body"
+  },
+  {
+    "sha": "051dfb651d14affdc794edc70be41a0897391da5",
+    "message": "fix(M10.1): route reads larger than the cache window through the bounded VM copy path"
+  },
+  {
+    "sha": "ffd4e4e132de69871d7429e78bcf698ae0f3af05",
+    "message": "refactor(M10.1): validate resolver executable ranges from owned image metadata instead of live load commands"
+  },
+  {
+    "sha": "a31fc1e1688f1a2e55e3b2a7e031999b53e309e0",
+    "message": "refactor(H05.2): compile the slider isolation owner independently without changing selectors or IMP installation"
+  },
+  {
+    "sha": "6978cc8f3060495addb8336bb198fad3d5d0351d",
+    "message": "refactor(H05.2): compile feature group controls as an independent unit with an explicit content-height interface"
+  },
+  {
+    "sha": "607a0b512112b1382c480dd37531aaac5c936661",
+    "message": "refactor(H05.2): compile runtime feature controls independently while preserving restore callbacks and installation order"
+  },
+  {
+    "sha": "fc681daf9362be0b424463ee41c8133e50b75cad",
+    "message": "test(M10.2): verify independently computed CodeDirectory page hashes for each signed builder combination"
+  },
+  {
+    "sha": "5fa9b196e6749bb0bd946e9e96ca9b49e2507b1c",
+    "message": "fix(M10.2): include runtime-only original filenames and require all five signed fixture outputs"
+  },
+  {
+    "sha": "8740bf547917a193efbb808ce0c040864bcf1ae1",
+    "message": "fix(H05.2): import the feature capability owner explicitly and fully initialize timebase metadata"
+  },
+  {
+    "sha": "bafc2017131d5984bb585577b004adfd28cd7648",
+    "message": "refactor(L02): remove the source-proven unused runtime feature metadata wrapper surfaced by strict compilation"
+  },
+  {
+    "sha": "54f7e6dbcb485e9819f74656d824414bbf40d84e",
+    "message": "test(M10.2): execute actual native static prepatch and signing in native-only and mixed target fixtures"
+  },
+  {
+    "sha": "42d57508e6fc1d50904d2409519ca67b2ec3092f",
+    "message": "refactor(L02): remove the unused legacy group metadata wrapper and its now-unreferenced trim helper"
   }
 ]

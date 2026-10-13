@@ -1,37 +1,39 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "repository": "a7987083/ZonoePatch-V2",
   "branch": "dev/technical-debt-p0-p2-20261013",
-  "business_source_commit": "0c2e02d5d22a875b15b363afa1016d227b891100",
-  "documented_repo_head_before_handoff_commit": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
+  "business_source_commit": "42d57508e6fc1d50904d2409519ca67b2ec3092f",
+  "documented_repo_head_before_handoff_commit": "42d57508e6fc1d50904d2409519ca67b2ec3092f",
   "baseline": {
-    "commit": "5e7d1d4c8b487c6c3fd5a3eb5685954ede24870a",
-    "run_id": 38333900370,
-    "artifact_id": 11783827840,
+    "commit": "94491dae3541d00af172db7bb7e4b16c634530cb",
+    "run_id": 38338809727,
+    "artifact_id": 11786396518,
     "compiled": true,
     "device_verified": false,
-    "dylib_sha256": "fc638e5a53a43ed0e793ac9cdcdfa72e1b03f27e5fade5ba61009bd51c7378ad"
+    "dylib_sha256": "c470424abd4830daef58af8cdfed20ae499a2d353e76dd1be957f1a7d12222dd"
   },
   "source_anchor_ci": {
-    "commit": "0c2e02d5d22a875b15b363afa1016d227b891100",
-    "run_id": 38338059240,
-    "artifact_id": 11785439746,
+    "commit": "42d57508e6fc1d50904d2409519ca67b2ec3092f",
+    "run_id": 38344834920,
+    "artifact_id": 11787828938,
     "result": "success",
     "compiled": true,
-    "production_regressions": "passed",
-    "dylib_sha256": "267f46b1f14377e554ce4cd690e7b01436bc253fbaaebc1f00b7d9fb48789f9e"
+    "production_regressions": "passed within documented scope",
+    "dylib_sha256": "1826810ca4c956d25fa03c8e515a4ea6add0b03f7a14c69b5c8a71b694a6ad9f"
   },
-  "phase": "handoff-exact-head-artifact-verification",
+  "phase": "final-documents-full-ci-and-exact-head-artifact",
   "final_delivery_ci": "See delivery DELIVERY_STATUS.json; final documentation HEAD also requires complete CI",
   "target_app_runtime": "未验证",
   "iphone_device": "未验证",
   "performance_improvement": "未验证",
-  "full_regression": "not_completed",
+  "full_regression": "automated source-anchor passed; target App and iPhone not completed",
   "debt_status": {
-    "H05": "partial: ordered modules and independent policy complete; historical IMP chains retained",
-    "M10": "partial: file pipelines checked and fixtures byte-equivalent; loaded-image lifetimes/readers remain",
-    "L02": "confirmed unused cleanup complete; external compatibility removal not authorized by dependency evidence",
-    "M11": "infrastructure complete; five target scenarios and improvement unverified"
+    "H05.1": "partial: 487 methods/71 sites trace and Objective-C fixtures; historical swizzles retained; SOURCE + DEVICE PENDING",
+    "H05.2": "partial: 7 independent UI translation units, shared owners, 11 real static edges resolved; 47 sections SOURCE PENDING",
+    "M10.1": "partial: owned header/cache/VM read and main reader migration tested; active entries/cells/native-call lease SOURCE + DEVICE PENDING",
+    "M10.2": "partial: full target builder/native prepatch/serialize/embed/signed combinations tested; full provider/multi-target/fault transaction SOURCE PENDING, execution DEVICE PENDING",
+    "L02": "8 proven unreferenced static helpers removed in total; unknown external selectors/API/prefs/compatibility preserved",
+    "M11.2": "9 metrics and async/first-display-tick/host sampling infrastructure verified; expanded event coverage SOURCE PENDING, real performance DEVICE PENDING"
   },
-  "next_task": "Typed UI interfaces/IMP-chain fixtures and owned LoadedImage snapshot/lifetime protocol; device acceptance tracked independently"
+  "next_task": "M2 typed engine owner and remaining UI TU compilation; real-family alias fixtures; active mapping read/write leases; full BuildExecutor provider and injected-fault transactions; device acceptance independently tracked"
 }

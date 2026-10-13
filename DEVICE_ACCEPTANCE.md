@@ -20,3 +20,11 @@
 - M10：真实App的thin ARM64二进制及workspace跑static/runtime-only/hook/mixed；合法输出字节/section/CodeDirectory结构复核；正常IPA整包重签与安装。
 - M10 loaded-image：映像动态加载/卸载时finder、resolver、运行表、Hook协调的指针生命周期与缓存回归。
 - M11：按 docs/PERFORMANCE_ACCEPTANCE.md采集五类span、首帧/queue等待/取消、CPU/峰值内存；留设备身份与raw结果。启用/关闭采样对照，不以host JSON推断真实性能。
+
+## owned-image / independent UI / async continuation（DEVICE PENDING）
+
+- 映像加载、卸载、同址重载与finder/probe并发；native在途函数/slot写入不得把header快照当租约。
+- 7个独立UI单元的compact/full、footer/tick、modal转场、Feature Group/Runtime控制/Slider交互回归。
+- 启动前启用UI trace，导出每stage前后IMP、旧Selector实际调用；超4096事件需重采集，不能称complete。
+- 性能9指标、取消请求至completion、队列等待；display-link代理与真实首帧分别测量，采样开关对照。
+- Native-only/Mixed真实prepatch样本、所有template、ProtectionV2随机变体、IPA重签安装；native macOS fixture仍不能勾选此项。

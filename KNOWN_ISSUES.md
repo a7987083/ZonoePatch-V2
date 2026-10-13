@@ -1,24 +1,18 @@
-# Known issues：具体剩余债务与验收边界
+# 剩余技术债与验收边界
 
-以下状态区分源码治理、编译/自动化证据、真实App验收。已关闭P0未重开；保留其原实机待办。
+源码完成、CI通过、目标App通过和iPhone实机通过是四种状态。业务源码anchor `42d5750`完整CI通过；最终交付身份见 DELIVERY_STATUS.json。尚未执行目标App/iPhone验证，性能改善未验证。已关闭P0没有重做。
 
-| 项目 | 当前状态 | 源码位置 / 真实阻塞 | 剩余工作与验收条件 |
+| 项目 | 位置与实际阻塞 | 已尝试/完成 | 剩余工作与验收条件 |
 |---|---|---|---|
-| H05.1 历史IMP链 | 部分完成；54段拆分、策略独立owner已完成 | `src/ui/core/ZonoeRuntimeMenu.inc` 的V040/V0401/V0402等；`src/ui/finder/ZNMethodFinderUnifiedUI.inc`；`src/ui/features/ZNM630HardCutUI.inc`；仍有63处exchange、8处setImplementation。前层通过改名Selector调用先前IMP，直接删层会断链；UIKit私有属性接口未集中 | 为每个调用族建立selector→安装前/后IMP→调用前驱图，测试重复安装/不同category加载顺序及shared初始化；先导出typed内部接口再逐族消层。旧Selector、C installer和安装顺序保持可观测兼容；最终目标App交互回归另验 |
-| H05.2 跨段静态作用域 | 明确保留 | `docs/UI_DEPENDENCIES.json`列13个词法跨段符号，例如core的`ZN48TopViewController`→FeatureBuilder、execution的`ZNM52XTop`→M630、`kZN51CandidateKey`→ChainExecute。根core私有controller声明和宏仍被后段使用；include必须维持lexical环境 | 逐个helper提取或构造私有接口，定义/消费者清单与编译均通过；消除该符号的跨段file-private依赖后再变独立TU。词法清单可能保守包含注释且不能证明动态引用不存在 |
-| M10.1 运行中映像解析 | 未全量统一；不能全项关闭 | `ZNIL2CPPOwningMethodResolver.mm:ZNM45LoadRuntime`、`ZNSharedSiteProbeV2.mm`、`ZNOffsetResolverV2.mm`、`ZNRuntimeActionRuntime.mm`、`ZNStaticDispatchRuntime.mm`、`ZNNativeHookRuntime.mm` 等仍读取dyld header/segments/functionStarts；generation缓存失效不是读取期间的映像租约。fileoff通常超过header字节数，不能用File parser处理mapping | 新建LoadedImage/header-owned-snapshot接口，checked unsigned/signed slide和VM range、section/table长度；模拟header截断/卸载竞争/缓存引用寿命；将长寿命raw command指针改为值或共享owner；共享policy逐个适配。真实动态load/unload另需目标App日志。阻塞包含源码生命周期协议和自动化fixture缺口，绝非只有缺手机 |
-| M10.2 完整业务生成覆盖 | 固定fixture字节验证已完成；业务组合未验证 | V3 fixture覆盖parse/install，runtime-only fixture执行单目标builder（路径provider stub），完整signer执行并重复签名；不运行真实IL2CPP resolver、复杂payload随机布局和所有provider组合 | 增加可公开复现的真实合法Mach-O/对应workspace样本，覆盖static/runtime/hook/mixed、section容量边界、签名后重新解析；最终替换IPA整包重签安装。未知新LC保持旧preservation policy，新增LINKEDIT命令必须有schema/样本再扩展 |
-| L02.1 外部兼容入口 | 必须保留 | `ZNStaticBinaryBuilder.mm`、`ZNAnyImageAddressResolver.mm`、`legacy/ZNLegacyStaticBinaryPipeline.mm`与旧UI Selector；当前Makefile未使用不代表source消费者不存在；ObjC/dlsym调用不能仅靠grep否定 | 列外部消费者/导出/selector注册与source发布边界，建立兼容migration fixture后才能弃用。四个file-private无调用align helper已删除；证据见L02_REMOVAL_EVIDENCE.json |
-| L02.2 历史命名与清理候选 | 部分完成；保留行为相关名字/文案 | `src/ui/compat`、版本号前缀Selector、偏好key以及`ZNIL2CPPInvokeEngine.mm:ZNInvokeCStringFinished`。后者仅无直接文本调用还不足以证明其生命周期设计已不需要；pref/Selector重命名会影响外部兼容/持久化 | 对命名区分纯内部名与协议/API名；只改纯内部并测试。未调用生命周期函数先查创建/清理责任，确认替代路径与失败清理测试后再删除 |
-| M11.1 真实性能 | 采样/报告/host harness完成；实际性能「未验证」 | `ZNPerformance.h` / `ZNPerformanceReport.mm`、生产五类span及docs/PERFORMANCE_ACCEPTANCE.md；host parser/editor fixture不代表UIKit/IL2CPP/Hook/完整生成。没有匹配设备基线、热状态、App输入集合 | 同设备/App/iOS/输入按5预热+30以上操作、3批基线/当前采样，记录raw环境/次数/错误、median/P95；cold startup独立30次。Instruments验证CPU/内存、异步首帧、队列等待。没有这些证据不宣称改善 |
-| M11.2 测量边界 | 显式保留的基础设施扩展待办 | `zn_beginActivation`只测可用window后的同步激活；`search.sync`只测V3同步核心；Hook只测reconcile执行，不测queue latency/目标函数或trampoline；1024样本有界ring丢弃更早样本 | 添加与业务请求关联的异步ticket/结果标签及raw导出，分别测cancel/debounce/首帧/queue等待；不能把现有span换名字冒充端到端测量；采样本身需开/关对照 |
+| H05.2 SOURCE PENDING | 47个 `.inc`；完整清单 `docs/UI_REMAINING_MODULES.json`。M2文件同时定义engine/type/block与UI，取消/统一finder/chain族仍借词法private Selector/类声明；13静态边不是完整依赖闭包 | 原只搬.inc不等于独立编译；本轮建立真实私有controller/key/helper/policy owners，7段独立TU；strict编译暴露缺capability import/内容高度声明/旧unused wrapper并已修复 | 提取M2 engine type/interface owner，逐族定义真实private契约，不以巨型复制头覆盖依赖；每段旧body/order reconstruction、同Selector无冲突、strict iPhone SDK编译、相关fixture+fullCI。仍有可做源码工作，不能标为仅DEVICE PENDING |
+| H05.1 SOURCE + DEVICE PENDING | core V040/V0401/V0402、unified finder/chain、compat族；`UI_SELECTOR_IMP_GRAPH.json`列所有63exchange/8set源点。alias Selector交换后保留前层IMP，源码不能穷举外部objc_msgSend或初始化途中调用 | 487方法/123 literal helper调用图、stage/Selector/前后IMP真实runtime trace，实际ObjC双层alias/旧IMP返回/禁用/还原测试；没有删除Swizzle | 对真实族执行安装前/中/后与重复安装fixture，采集目标App complete trace；明确外部兼容aliases再替换为显式实现/转发。不能直接跳过早期安装：后层接管前是否调用无证据 |
+| M10.1 SOURCE PENDING：活跃表与写租约 | `ZNStaticDispatchRuntime.mm:ZN44HeaderValid/parseHeader/selectedTarget`、`ZNM56StaticValueCellBinding.mm:ZNM56RecordMatches/ZNM56ValueCellAddress/ZNM56WriteTextToCell`仍使用mapping entry/header/cell，M56 flags读取在snapshot前。native slots/trampolines也有live地址 | metadata header-owned snapshot、safe VM adapter、cache epoch和读取复制完成，真实macOS卸载/ABA/畸形/窗口ASan通过；不能把这当execution lease | 所有active metadata读改copy并保留owner/generation；写路径需要撤销/在途同步设计与故障fixture。无条件dlopen pin会改变卸载语义，不能作为通用修复。可控卸载/同址重载/并发写/在途调用fixture后再实机；全项尚未关闭 |
+| M10.1 DEVICE PENDING：动态调用 | IL2CPP resolver/invoke、NativeHookRuntime、StaticDispatch dispatch | image/epoch校验与元数据寿命改善；VM复制不崩溃测试通过 | 真实IL2CPP API调用期间卸载、scene/receiver销毁、Hook在途撤销，需要目标App/设备日志与生命周期证据。当前不能承诺native函数指针安全 |
+| M10.2 SOURCE PENDING：完整业务事务 | `ZNBuildExecutor.mm`能力prepare/emit/postprocess；`ZNNativeHookStaticPrepatch.mm:ZNBuildInstallStaticPreparedNativeHooksV1`循环直接修改mmap、成功后更新descriptor与签名 | 完整生产单目标V3/runtime、实际Native prepatch与Mixed、输入未改/拒覆盖/容量/max entry/V3原字节失败输出删除、5产物独立pagehash通过 | BuildExecutor真实provider和多目标端到端fixture；第二target/第二hook/descriptor sink/签名/msync/pwrite失败注入，断言所有输出/Store恢复。现有单目标拒绝不是完整事务回滚，仍有源码测试与可能修复工作；不要只说“复杂/风险高” |
+| M10.2 DEVICE PENDING | 随机ProtectionV2 payload、所有Native template、目标IPA | 原格式fixture完整字节cmp、生成结构与签名验证 | 真App原样本/对应workspace，ARM64实际分支/trampoline执行、变体恢复、IPA整包重签安装。macOS构造Mach-O不证明iOS可安装/执行 |
+| M11.2 DEVICE PENDING：性能结果 | `ZNPerformance.h`、ZNAsyncPerformance、ZNFirstDisplayTick、scheduler和M2调用点 | 9指标、结果计数、async/reset/concurrency/cap测试、6 host微基准和sampling开关对照 | 首tick只是display-link代理，不是GPU首帧；host分位数是31批均值。按性能协议记录同设备/App/温度/输入/操作数/错误数，5预热/至少30操作/3批baseline-current，Instruments CPU/内存、采样开关对照；没有数据不称改善 |
+| M11.2 SOURCE PENDING：更细边界 | M2取消completion、ZNFirstDisplayTick、performance ticket/registry | queue等待与取消确认已采样，bounded registry含dropped；timeout计Failed | 真实首帧/GPU时间、全搜索族的debounce与取消端到端、Hook目标函数耗时尚非现有span。不要重新命名旧span冒充该指标；进一步业务入口需要对应事件/回调fixture |
+| L02 外部兼容保留 | legacy pipeline、兼容V1 builder、AnyImage resolver、版本Selector、prefs keys | 累计8个无调用static helpers移除、旧LINKEDIT包装合并；删除体hash和引用证据保留 | 未在Makefile中不能否定源码消费者；ObjC/dlsym/API/prefs未知消费者未证伪。先建立consumer/migration fixture、弃用协议与导出核对，未满足不得删除/重命名 |
+| 构建环境可复现性限制 | workflow brew/macOS hosted image | Xcode16.4/SDK18.5、Theos/Dobby/Actions pins、toolchain/artifact digest保存 | 外部SDK依赖不内嵌、hosted OS/brew未位级锁定。不能声称离线工具链或bit-identical跨runner；本次下载文件与对应CI源码逐字节核对 |
 
-## 前轮已治理项目的实机待办（未重做）
-
-- H01/H02/H03：调度撤销、BuildSession隔离和输出I/O已有生产回归；真实App事件burst、全能力组合与磁盘/签名故障仍待验收。
-- H04：retire停用且保留trampoline/registry；in-flight调用、槽长期占用和映像卸载的生命周期待验。不改回公开销毁。
-- H06：默认fail closed；raw receiver兼容开关保留但不能保证GC安全。需API缺失、对象销毁和scene切换证据。
-- M01/M04：image generation和lifecycle latch有自动化验证；读期间unload协议仍是独立设计问题。
-- M05/M07：固定SDK/依赖并执行macOS/ARM64 fixture；hosted image和brew未位级锁定，macOS ABI不是目标iOS App ABI实机证明。
-
-CI、format/pagehash验证不能替代 DEVICE_ACCEPTANCE.md。项目未宣称H05/M10/L02全部技术债清零，也未宣称性能改善。
+前轮P0实机待办继续保留：Hook scheduler事件burst、BuildSession真实全能力组合、retire保持trampoline的在途安全、GCHandle/缺API/scene切换、I/O/签名故障。没有把CI成功替代这些验收。详细证据和下一步见 `docs/CONTINUATION_EVIDENCE.md`、`DEVICE_ACCEPTANCE.md`。

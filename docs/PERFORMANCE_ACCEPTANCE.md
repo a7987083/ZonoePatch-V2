@@ -21,3 +21,9 @@ M11 tick 保留 0.5s fallback timer 和正常 active 场景的 window/attach/lay
 复现 host microbenchmark：`python3 scripts/benchmark.py --output performance-host.json`。固定 64KiB fixture，5 批预热、31 批测量、每批 1000 次，-O2；记录 Commit、平台、CPU 架构、编译器、clock。它只执行生产的 portable Mach-O parser/editor，不将结果命名为菜单、搜索、Hook 或完整生成性能。CI 上传该 JSON；不建立跨 hosted runner 的性能百分比门禁。
 
 实机协议：同 App/版本、iOS、设备、签名包、输入集合、温控/前后台状态；冷启动激活独立运行至少 30 次；其余场景先预热 5 次，reset 后执行至少 30 次相同操作，导出 snapshot 和操作数/失败数。搜索固定查询和加载映像；Hook 固定 action 集合并另测 queue 等待；生成固定 workspace 并核验产物。基线/当前分别运行至少 3 批，保存 raw device evidence、median/P95、成功率和 Instruments CPU/内存。诊断采样自身有开销，需启用/关闭对照。UIKit、IL2CPP、目标 Hook、完整二进制生成的实际性能均「未验证」；目前没有性能改善结论。
+
+## 本轮M11.2扩展（之前五类同步span仍保留）
+
+Snapshot现在包含9指标及completed/cancelled/failed计数。新增Hook队列等待、M2搜索队列等待、取消请求至completion确认、首个CADisplayLink tick。Ticket跨线程exactly-once/reset epoch隔离；搜索registry上限256，`ZNPerfAsyncState()`导出pending/dropped。首tick或1秒超时分别completed/failed，不是GPU首次呈现时间。窗口出现前/进程启动仍不在这段中。
+
+Host harness另测相同volatile工作负载empty、disabled scope、enabled scope、enabled ticket。分布为5预热+31测量批，每批1000次；JSON中的median/P95是批均值分位数，并非逐操作P95。double均值保留sub-ns结果。九个目标App场景以及实际改善仍未验证；保存采样开/关对照与raw设备结果后才能给真实性能结论。

@@ -1,6 +1,6 @@
 # Remote Commit records
 
-No amend/rebase/force-push. Full branch history is authoritative.
+No amend/rebase/force-push. GitHub branch and final dist/COMMITS.txt are authoritative; final handoff commit follows this snapshot.
 
 - `aa12054c9b19ef8b2e90ce66d2158b8c5687e1e1` chore: initialize independent development repository
 - `ae631f4ff17658e747016d596a71b11deab5450f` baseline: import unchanged 1.zip menu source with pinned CI build harness
@@ -21,7 +21,7 @@ No amend/rebase/force-push. Full branch history is authoritative.
 - `3b14df55e290b582abe408838097a8d70bb13006` fix(P1 M03): make parser control flow warning-clean; portable boundary tests pass
 - `c4cb55a1e242927e156adc7a851d64d313047bd9` build(P1 M05): pin baseline Xcode/SDK and Actions revisions; record dependency/toolchain identities
 - `749941b10b57c643000f48a5d5d0022aad229d94` refactor(P0 H05): checked activation dependencies without changing historical selector/IMP topology
-- `6cb57859575af97716ab55a4a925a19d106e5e82` refactor(P1 M10): shared checked byte views; fuzz production layout with sanitizers; cover Static cache generation — Metadata-only commit with unchanged tree; actual M10 source is cdcc759d05a60843d7bcc966fa59763a8022fa91.
+- `6cb57859575af97716ab55a4a925a19d106e5e82` refactor(P1 M10): shared checked byte views; fuzz production layout with sanitizers; cover Static cache generation
 - `cdcc759d05a60843d7bcc966fa59763a8022fa91` refactor(P1 M10): apply checked byte views and sanitizer malformed-layout regression
 - `43f77afe0c5a8539950681b82a40e94a82f7c46b` test(P1 M07): production build-session isolation, ABI and format tests; extract row/snapshot owners
 - `e8bafb206e67a7db251b385b3da0ff197e7cdc96` fix(P1 M02): reject identity reuse even after retirement and include codec/ABI binding fields
@@ -37,9 +37,6 @@ No amend/rebase/force-push. Full branch history is authoritative.
 - `53c1dbcf54fae17bf2809b726f27d0ac8ac31914` fix(P0 H03): fail postprocess on missing/malformed reports instead of claiming success
 - `3a53fbb992dad885476a14eb0c18e97b6a0c722b` fix(P0 H02): capture both action stores under a fixed lock order before preparing build copies
 - `d91c8d0be8d60232d738d5db0b7449688c0a9d6e` build: verify final Mach-O dependencies/platform and both CodeDirectory page-hash tables
-
-## H05/M10/L02/M11 continuation
-
 - `6de908d5c586bcf95ddde775fa3a1a3818074cf4` refactor(H05): decompose UI into ordered byte-equivalent source modules
 - `802256df7fcdc33c95026b75671785a1cb851693` fix(H05): preserve implementation diagnostic scope across UI includes
 - `32c839e5a86282df498876090d377a11b516ada5` refactor(M10): share checked Mach-O file parsing and transactional LINKEDIT edits
@@ -53,3 +50,29 @@ No amend/rebase/force-push. Full branch history is authoritative.
 - `770db3f7669ac054d748537bc86710d5c7a856ca` docs(H05): inventory concrete cross-section and dynamic UI dependencies
 - `0c2e02d5d22a875b15b363afa1016d227b891100` test(M10): compare actual runtime-only target generation bytes against baseline
 - `3e18504de52fe2e316c09826c1c350e6a6cba3a2` ci(M10): retain production binary-equivalence logs in delivery artifacts
+- `75986827d564f9085feed6f7878ae30ffb8c7a15` feat(M10.1): own loaded headers and use generation-checked fault-safe VM reads
+- `10d18c5fd2aee69d1e0c5ca8cf7cec1bbf842cbd` fix(M10.1): use SDK-supported vm_read_overwrite on iOS and macOS
+- `b4e9d3e27d3642e0fefa7f6b6338d73e4b922a89` refactor(H05.2): resolve UI private dependencies and compile three category families independently
+- `72ff18228d47ed5aeba142d3d7d98d1ed9b7422d` refactor(M10.1): invalidate owned header cache and retain probe command owners across scans
+- `c3666e998898fa61f02f09e5d242cd50ad111623` fix(H05.2): declare preserved subtitle and builder selectors at the private UI boundary
+- `06db3d05dbf716416c2cda0926d2418ba3d90f27` fix(M10.1): parse copied runtime tables and retain the exact pre-adapter UI digest gate
+- `19ddffb82e828cbde6cc599f9be2dabccb11c7ec` feat(H05.1): inventory every selector installation and trace actual IMP transitions without changing order
+- `1f531fd3fac94db28a9d2a4ea50c602673dd6e37` fix(M10.1): restrict snapshot ownership to image info and preserve hook record layout
+- `75c48b537f004b4b96c474562b2f71cc6cf43047` feat(M11.2): measure async queue wait cancellation acknowledgment and first display tick with bounded tickets
+- `6f0d3c7ccdc8cd45a4e236319de9ffe4997ede69` test(M11.2): calibrate sampling overhead against an identical empty host workload
+- `d3dc654f6ce144b57deac9afa1caa26791a261af` fix(M11.2): preserve subnanosecond batch averages and distinguish batch quantiles
+- `59ff521b94378b8e008c93e1580116f908e73a7e` fix(M11.2): link async metrics and display tick owners into the production dylib
+- `8e5a1cdb02fe077164d321d76cd2fefef2651f15` test(M10.2): execute full production target builders and action writes across combination capacity and rollback cases
+- `799e75c6b508b9cdb7b8b362341d915f1ff73560` refactor(L02): remove the proven unused trailing-string predicate after reviewing its actual semantics
+- `01e3c623942973e21f54ae65548f4056b8cf9192` refactor(H05.2): compile the collision-free footer version category independently with unchanged installer body
+- `051dfb651d14affdc794edc70be41a0897391da5` fix(M10.1): route reads larger than the cache window through the bounded VM copy path
+- `ffd4e4e132de69871d7429e78bcf698ae0f3af05` refactor(M10.1): validate resolver executable ranges from owned image metadata instead of live load commands
+- `a31fc1e1688f1a2e55e3b2a7e031999b53e309e0` refactor(H05.2): compile the slider isolation owner independently without changing selectors or IMP installation
+- `6978cc8f3060495addb8336bb198fad3d5d0351d` refactor(H05.2): compile feature group controls as an independent unit with an explicit content-height interface
+- `607a0b512112b1382c480dd37531aaac5c936661` refactor(H05.2): compile runtime feature controls independently while preserving restore callbacks and installation order
+- `fc681daf9362be0b424463ee41c8133e50b75cad` test(M10.2): verify independently computed CodeDirectory page hashes for each signed builder combination
+- `5fa9b196e6749bb0bd946e9e96ca9b49e2507b1c` fix(M10.2): include runtime-only original filenames and require all five signed fixture outputs
+- `8740bf547917a193efbb808ce0c040864bcf1ae1` fix(H05.2): import the feature capability owner explicitly and fully initialize timebase metadata
+- `bafc2017131d5984bb585577b004adfd28cd7648` refactor(L02): remove the source-proven unused runtime feature metadata wrapper surfaced by strict compilation
+- `54f7e6dbcb485e9819f74656d824414bbf40d84e` test(M10.2): execute actual native static prepatch and signing in native-only and mixed target fixtures
+- `42d57508e6fc1d50904d2409519ca67b2ec3092f` refactor(L02): remove the unused legacy group metadata wrapper and its now-unreferenced trim helper
