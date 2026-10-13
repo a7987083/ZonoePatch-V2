@@ -3,6 +3,7 @@
 #include <dlfcn.h>
 #include <mach-o/dyld.h>
 #include <string>
+inline uint64_t ZNLeasedImageGeneration(void *context){auto *lifetime=(znimage::Lifetime *)context;return lifetime->live.load(std::memory_order_acquire)?lifetime->incarnation:0;}
 // Ephemeral loader retain, balanced on scope exit; never retained by records or
 // caches. Main executable cannot unload and needs no artificial loader retain.
 class ZNImageOperationLease {
@@ -23,7 +24,7 @@ public:
   if(!main&&!h)return {};
   if(ZNImageLifetimeForHeader(base)!=state||!state->live){if(h)dlclose(h);return {};}
   auto lease=std::unique_ptr<ZNImageOperationLease>(new ZNImageOperationLease(h,state));
-  lease->image=znimage::Snapshot::capture(base,{nullptr,ZNImageVMCopy,ZNImageReadGeneration},nullptr,arm64);
+  lease->image=znimage::Snapshot::capture(base,{state.get(),ZNImageVMCopy,ZNLeasedImageGeneration},nullptr,arm64,state);
   if(!lease->valid())return {};
   return lease;
  }

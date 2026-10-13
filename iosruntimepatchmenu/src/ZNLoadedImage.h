@@ -11,10 +11,10 @@ struct Reader {
 };
 struct Segment {uint64_t vm,size,file,fileSize,start;uint32_t protection;};
 class Snapshot {
- Reader reader;uint64_t epoch=0,address=0,preferred=0;
+ Reader reader;std::shared_ptr<void> readerOwner;uint64_t epoch=0,address=0,preferred=0;
  std::vector<uint8_t> storage;std::vector<znmacho::Command> commandList;std::vector<Segment> segmentList;
 public:
- static std::shared_ptr<const Snapshot> capture(uint64_t address,Reader reader,const char **error=nullptr,bool arm64=true){
+ static std::shared_ptr<const Snapshot> capture(uint64_t address,Reader reader,const char **error=nullptr,bool arm64=true,std::shared_ptr<void> readerOwner={}){
   auto fail=[&](const char *why)->std::shared_ptr<const Snapshot>{if(error)*error=why;return {};};
   if(!address||!reader.copy||!reader.generation)return fail("invalid image reader");
   uint64_t epoch=reader.generation(reader.context);uint8_t header[32];
@@ -31,7 +31,7 @@ public:
    found=true;s->preferred=znmacho::read<uint64_t>(view.bytes,c.offset+24);
   }
   if(!found)return fail("missing __TEXT");
-  s->address=address;s->reader=reader;s->epoch=epoch;s->commandList=view.commands;
+  s->address=address;s->reader=reader;s->readerOwner=std::move(readerOwner);s->epoch=epoch;s->commandList=view.commands;
   for(const auto &c:view.commands)if(c.kind==0x19){
    Segment seg={znmacho::read<uint64_t>(view.bytes,c.offset+24),znmacho::read<uint64_t>(view.bytes,c.offset+32),znmacho::read<uint64_t>(view.bytes,c.offset+40),znmacho::read<uint64_t>(view.bytes,c.offset+48),0,znmacho::read<uint32_t>(view.bytes,c.offset+60)};
    // Unmapped __PAGEZERO is metadata, not a readable range.
