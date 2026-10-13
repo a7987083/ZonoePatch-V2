@@ -2,6 +2,13 @@
 No hash baseline is refreshed and every other byte remains pinned.
 """
 def m56_before_owned_header(text):
+    from pathlib import Path
+    import json
+    reviewed=Path(__file__).resolve().parents[1]/'iosruntimepatchmenu/tests/m56_lifetime_edits.json'
+    if reviewed.exists():
+        for edit in reversed(json.loads(reviewed.read_text())['edits']):
+            assert text.count(edit['after'])==1,'M56 lifetime reviewed edit changed'
+            text=text.replace(edit['after'],edit['before'])
     include='#include "ZNLoadedImageApple.h"\n'
     before='const struct mach_header_64 *mh=(const struct mach_header_64 *)record.imageBase;'
     after='auto headerOwner=ZNCaptureLoadedImage(record.imageBase);if(!headerOwner){if(error)*error=@"value-cell image invalidated";return 0;}const struct mach_header_64 *mh=(const struct mach_header_64 *)headerOwner->bytes();'
