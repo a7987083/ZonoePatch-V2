@@ -22,7 +22,7 @@ typedef void *(*ZNM47RuntimeInvokeFn)(const void *, void *, void **, void **);
 typedef uint32_t (*ZNM47MethodGetFlagsFn)(const void *, uint32_t *);
 typedef void *(*ZNM47StringNewFn)(const char *);
 
-static void *ZNM47Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+static void *ZNM47Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.length?path.fileSystemRepresentation:nullptr,name);}
 
 
 static NSString *ZNM47Trim(NSString *s) {

@@ -26,7 +26,7 @@ typedef void (*ZNM50GCHandleFreeFn)(ZNM50GCHandle handle);
 static ZNM50ManagedReturnState *gZNM50State = nil;
 static uint64_t gZNM50Generation = 0;
 
-static void *ZNM50Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+static void *ZNM50Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.length?path.fileSystemRepresentation:nullptr,name);}
 
 
 static BOOL ZNM50GCAPI(ZNM50GCHandleNewFn *newFn,

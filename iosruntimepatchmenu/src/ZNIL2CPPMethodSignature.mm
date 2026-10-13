@@ -39,7 +39,7 @@ static NSString *ZNM46String(const char *raw) {
     return [NSString stringWithUTF8String:raw] ?: @"";
 }
 
-static void *ZNM46Symbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.fileSystemRepresentation,name);}
+static void *ZNM46Symbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.length?unityPath.fileSystemRepresentation:nullptr,name);}
 
 
 static NSString *ZNM46TypeName(TypeGetNameFn typeGetName, Il2CppFreeFn il2cppFree, const void *type) {

@@ -39,7 +39,7 @@ static inline NSString *ZNIL2CPPConservativeInstanceKey(NSString * _Nullable ass
 
 static inline void * _Nullable ZNIL2CPPResolveSymbol(NSString * _Nullable imagePath,
                                                       const char * _Nullable name) {
-    return ZNResolveExecutionSymbol(imagePath.fileSystemRepresentation,name);
+    return ZNResolveExecutionSymbol(imagePath.length?imagePath.fileSystemRepresentation:nullptr,name);
 }
 
 NS_ASSUME_NONNULL_END

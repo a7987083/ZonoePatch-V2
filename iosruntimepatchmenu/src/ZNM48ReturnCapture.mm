@@ -13,7 +13,7 @@ typedef void *(*ZNM48ObjectUnboxFn)(void *obj);
 
 static NSString *gZNM48PendingReturnSummary = nil;
 
-static void *ZNM48Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.fileSystemRepresentation,name);}
+static void *ZNM48Symbol(NSString *path, const char *name) {return ZNResolveExecutionSymbol(path.length?path.fileSystemRepresentation:nullptr,name);}
 
 
 static NSString *ZNM48PointerString(uintptr_t value) {

@@ -20,7 +20,7 @@ typedef void *(*ZNMARRuntimeInvokeFn)(const void *, void *, void **, void **);
 typedef void *(*ZNMARObjectUnboxFn)(void *);
 
 
-static void *ZNMARSymbol(NSString *imagePath, const char *name) {return ZNResolveExecutionSymbol(imagePath.fileSystemRepresentation,name);}
+static void *ZNMARSymbol(NSString *imagePath, const char *name) {return ZNResolveExecutionSymbol(imagePath.length?imagePath.fileSystemRepresentation:nullptr,name);}
 
 
 @implementation ZNRuntimeArgumentMarshaller

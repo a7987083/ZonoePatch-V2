@@ -48,7 +48,7 @@ static NSString *ZNIRString(const char *value) {
     return s ?: @"";
 }
 
-static void *ZNIRResolveSymbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.fileSystemRepresentation,name);}
+static void *ZNIRResolveSymbol(NSString *unityPath, const char *name) {return ZNResolveExecutionSymbol(unityPath.length?unityPath.fileSystemRepresentation:nullptr,name);}
 
 
 static void ZNIRCollectObjects(void **objects, int count, void *userdata) {
