@@ -1,0 +1,618 @@
+{
+  "scope": "Snapshot before final documentation commit; final exact source/dylib/Run identity is delivery DELIVERY_STATUS.json",
+  "commits": [
+    {
+      "commit": "0e40bdfab2d87d63d0f25cc3c2d09789233b4753",
+      "message": "fix(M10.1): enforce leased value-cell stores and reject overlapping metadata",
+      "runs": [
+        {
+          "id": 38355017213,
+          "commit": "0e40bdfab2d87d63d0f25cc3c2d09789233b4753",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355017213",
+          "created_at": "2026-10-13T06:07:55Z"
+        },
+        {
+          "id": 38355013775,
+          "commit": "0e40bdfab2d87d63d0f25cc3c2d09789233b4753",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355013775",
+          "created_at": "2026-10-13T06:07:52Z"
+        }
+      ]
+    },
+    {
+      "commit": "876f9b29f173d63c4ca8afd0adee68edbea32ea7",
+      "message": "fix(test): reconstruct removed M56 helper with a unique provenance anchor",
+      "runs": [
+        {
+          "id": 38355173969,
+          "commit": "876f9b29f173d63c4ca8afd0adee68edbea32ea7",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355173969",
+          "created_at": "2026-10-13T06:09:42Z"
+        },
+        {
+          "id": 38355169767,
+          "commit": "876f9b29f173d63c4ca8afd0adee68edbea32ea7",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355169767",
+          "created_at": "2026-10-13T06:09:39Z"
+        }
+      ]
+    },
+    {
+      "commit": "f834aeeb8cfbc3856dba1778d5219a97a9be7383",
+      "message": "fix(M10.2): transact Runtime table and full-signature file edits without hard-link aliases",
+      "runs": [
+        {
+          "id": 38355437357,
+          "commit": "f834aeeb8cfbc3856dba1778d5219a97a9be7383",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355437357",
+          "created_at": "2026-10-13T06:12:35Z"
+        },
+        {
+          "id": 38355431343,
+          "commit": "f834aeeb8cfbc3856dba1778d5219a97a9be7383",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355431343",
+          "created_at": "2026-10-13T06:12:31Z"
+        }
+      ]
+    },
+    {
+      "commit": "f20dcfd50e9ee6af17bb78d1f18d80eb248a8b4e",
+      "message": "refactor(H05.2): compile search history and restore with explicit finder contracts and predecessor tests",
+      "runs": [
+        {
+          "id": 38355763005,
+          "commit": "f20dcfd50e9ee6af17bb78d1f18d80eb248a8b4e",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355763005",
+          "created_at": "2026-10-13T06:16:12Z"
+        },
+        {
+          "id": 38355757658,
+          "commit": "f20dcfd50e9ee6af17bb78d1f18d80eb248a8b4e",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38355757658",
+          "created_at": "2026-10-13T06:16:08Z"
+        }
+      ]
+    },
+    {
+      "commit": "9afb2cbb596483c39892d709c3de964101881fae",
+      "message": "fix(H05.2): declare Search Restore entry used by the unified finder",
+      "runs": [
+        {
+          "id": 38356071741,
+          "commit": "9afb2cbb596483c39892d709c3de964101881fae",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356071741",
+          "created_at": "2026-10-13T06:19:38Z"
+        },
+        {
+          "id": 38356066989,
+          "commit": "9afb2cbb596483c39892d709c3de964101881fae",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356066989",
+          "created_at": "2026-10-13T06:19:35Z"
+        }
+      ]
+    },
+    {
+      "commit": "175d7f8927f635c423b7b3c0f0618016886be8f9",
+      "message": "fix(H05.2): import finder-family private contracts in the remaining UI consumer",
+      "runs": [
+        {
+          "id": 38356371451,
+          "commit": "175d7f8927f635c423b7b3c0f0618016886be8f9",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356371451",
+          "created_at": "2026-10-13T06:22:54Z"
+        },
+        {
+          "id": 38356367060,
+          "commit": "175d7f8927f635c423b7b3c0f0618016886be8f9",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356367060",
+          "created_at": "2026-10-13T06:22:51Z"
+        }
+      ]
+    },
+    {
+      "commit": "5e0d23a8b49eeab512bf957675a6395ce905f330",
+      "message": "fix(M10.2): preserve existing target outputs and propagate Runtime report persistence failures",
+      "runs": [
+        {
+          "id": 38356438014,
+          "commit": "5e0d23a8b49eeab512bf957675a6395ce905f330",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356438014",
+          "created_at": "2026-10-13T06:23:37Z"
+        },
+        {
+          "id": 38356434477,
+          "commit": "5e0d23a8b49eeab512bf957675a6395ce905f330",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356434477",
+          "created_at": "2026-10-13T06:23:35Z"
+        }
+      ]
+    },
+    {
+      "commit": "1c277f82cda2d0ad506d79dc1ea868c424f66ca2",
+      "message": "fix(test): extract Runtime report template helper from its actual definition",
+      "runs": [
+        {
+          "id": 38356626605,
+          "commit": "1c277f82cda2d0ad506d79dc1ea868c424f66ca2",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356626605",
+          "created_at": "2026-10-13T06:25:38Z"
+        },
+        {
+          "id": 38356621110,
+          "commit": "1c277f82cda2d0ad506d79dc1ea868c424f66ca2",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356621110",
+          "created_at": "2026-10-13T06:25:34Z"
+        }
+      ]
+    },
+    {
+      "commit": "341a86756b46c0cd31eb9cc78aade15362f415f3",
+      "message": "fix(test): use the production inline Native template key owner in report regression",
+      "runs": [
+        {
+          "id": 38356669100,
+          "commit": "341a86756b46c0cd31eb9cc78aade15362f415f3",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356669100",
+          "created_at": "2026-10-13T06:26:06Z"
+        },
+        {
+          "id": 38356663900,
+          "commit": "341a86756b46c0cd31eb9cc78aade15362f415f3",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356663900",
+          "created_at": "2026-10-13T06:26:03Z"
+        }
+      ]
+    },
+    {
+      "commit": "29305a5e81a5d6a299eeb400bbd96085e204dad8",
+      "message": "test(M10.2): construct report fixture through Foundation JSON serialization",
+      "runs": [
+        {
+          "id": 38356736123,
+          "commit": "29305a5e81a5d6a299eeb400bbd96085e204dad8",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356736123",
+          "created_at": "2026-10-13T06:26:48Z"
+        },
+        {
+          "id": 38356730541,
+          "commit": "29305a5e81a5d6a299eeb400bbd96085e204dad8",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356730541",
+          "created_at": "2026-10-13T06:26:44Z"
+        }
+      ]
+    },
+    {
+      "commit": "2ea48af0bfad7c39c9c4cd3f6dc1786b504dcc11",
+      "message": "fix(M10.1): synchronize Static diagnostic ownership reads and atomic record publication",
+      "runs": [
+        {
+          "id": 38356775206,
+          "commit": "2ea48af0bfad7c39c9c4cd3f6dc1786b504dcc11",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356775206",
+          "created_at": "2026-10-13T06:27:13Z"
+        },
+        {
+          "id": 38356770663,
+          "commit": "2ea48af0bfad7c39c9c4cd3f6dc1786b504dcc11",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356770663",
+          "created_at": "2026-10-13T06:27:10Z"
+        }
+      ]
+    },
+    {
+      "commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+      "message": "refactor(H05.2): isolate ABI detail and Runtime-only builder gate with explicit owners",
+      "runs": [
+        {
+          "id": 38356988743,
+          "commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356988743",
+          "created_at": "2026-10-13T06:29:32Z"
+        },
+        {
+          "id": 38356984676,
+          "commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38356984676",
+          "created_at": "2026-10-13T06:29:29Z"
+        }
+      ]
+    }
+  ],
+  "execution_governance": {
+    "starting_commit": "e5361b701b081283a2c48bd61a5ff4b739077907",
+    "starting_run": 38357648704,
+    "branch": "dev/technical-debt-p0-p2-20261013",
+    "checkpoint": "d54cf6aca2b37c482e01a42eff8c92c3ff9fd9ca",
+    "checkpoint_push_ci": 38453579161,
+    "checkpoint_pull_ci": 38453588385,
+    "runs_snapshot": [
+      {
+        "id": 38454159764,
+        "commit": "0ccf52e14ee3b803cdc245cf866a0ec7f8604275",
+        "event": "pull_request",
+        "status": "queued",
+        "conclusion": null,
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38454159764",
+        "created_at": "2026-10-13T19:21:14Z"
+      },
+      {
+        "id": 38454150661,
+        "commit": "0ccf52e14ee3b803cdc245cf866a0ec7f8604275",
+        "event": "push",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38454150661",
+        "created_at": "2026-10-13T19:21:10Z"
+      },
+      {
+        "id": 38453588385,
+        "commit": "d54cf6aca2b37c482e01a42eff8c92c3ff9fd9ca",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453588385",
+        "created_at": "2026-10-13T19:16:53Z"
+      },
+      {
+        "id": 38453579161,
+        "commit": "d54cf6aca2b37c482e01a42eff8c92c3ff9fd9ca",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453579161",
+        "created_at": "2026-10-13T19:16:50Z"
+      },
+      {
+        "id": 38453486843,
+        "commit": "69e78cca96bd9371145274f409fbae03f4352302",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453486843",
+        "created_at": "2026-10-13T19:16:07Z"
+      },
+      {
+        "id": 38453479085,
+        "commit": "69e78cca96bd9371145274f409fbae03f4352302",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453479085",
+        "created_at": "2026-10-13T19:16:03Z"
+      },
+      {
+        "id": 38453378134,
+        "commit": "16b55ecfedac7d43e6df470646af5de35533eb9b",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453378134",
+        "created_at": "2026-10-13T19:15:17Z"
+      },
+      {
+        "id": 38453369416,
+        "commit": "16b55ecfedac7d43e6df470646af5de35533eb9b",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453369416",
+        "created_at": "2026-10-13T19:15:13Z"
+      },
+      {
+        "id": 38453000629,
+        "commit": "349a42a805a819dfad3ae4cd7172f514bafd2b91",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38453000629",
+        "created_at": "2026-10-13T19:12:28Z"
+      },
+      {
+        "id": 38452991167,
+        "commit": "349a42a805a819dfad3ae4cd7172f514bafd2b91",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38452991167",
+        "created_at": "2026-10-13T19:12:23Z"
+      },
+      {
+        "id": 38452757755,
+        "commit": "01472c01e4bde56cf6b22ac8a2030aa610fbf9bd",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38452757755",
+        "created_at": "2026-10-13T19:10:40Z"
+      },
+      {
+        "id": 38452750167,
+        "commit": "01472c01e4bde56cf6b22ac8a2030aa610fbf9bd",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38452750167",
+        "created_at": "2026-10-13T19:10:37Z"
+      },
+      {
+        "id": 38452540982,
+        "commit": "af2d19e417b7dd242323ba6a68e5f495a4ddbca3",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38452540982",
+        "created_at": "2026-10-13T19:09:05Z"
+      },
+      {
+        "id": 38452533941,
+        "commit": "af2d19e417b7dd242323ba6a68e5f495a4ddbca3",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38452533941",
+        "created_at": "2026-10-13T19:09:02Z"
+      },
+      {
+        "id": 38451801530,
+        "commit": "e3192bce2ebd442c25dc0ca1fa007324e08ce683",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451801530",
+        "created_at": "2026-10-13T19:03:34Z"
+      },
+      {
+        "id": 38451797362,
+        "commit": "e3192bce2ebd442c25dc0ca1fa007324e08ce683",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451797362",
+        "created_at": "2026-10-13T19:03:33Z"
+      },
+      {
+        "id": 38451162705,
+        "commit": "b8e745c3532ac8e3b7d3432c649baaf834af3e68",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451162705",
+        "created_at": "2026-10-13T18:58:59Z"
+      },
+      {
+        "id": 38451154007,
+        "commit": "b8e745c3532ac8e3b7d3432c649baaf834af3e68",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451154007",
+        "created_at": "2026-10-13T18:58:55Z"
+      },
+      {
+        "id": 38451094230,
+        "commit": "495d1595cc3019ffa0b688fad187bb4696d34d7f",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451094230",
+        "created_at": "2026-10-13T18:58:28Z"
+      },
+      {
+        "id": 38451087959,
+        "commit": "495d1595cc3019ffa0b688fad187bb4696d34d7f",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38451087959",
+        "created_at": "2026-10-13T18:58:25Z"
+      },
+      {
+        "id": 38450595545,
+        "commit": "dfc19e7a1b045375dc68d0dbc0a6339cc0caaf8c",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38450595545",
+        "created_at": "2026-10-13T18:54:47Z"
+      },
+      {
+        "id": 38450587652,
+        "commit": "dfc19e7a1b045375dc68d0dbc0a6339cc0caaf8c",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38450587652",
+        "created_at": "2026-10-13T18:54:44Z"
+      },
+      {
+        "id": 38449939866,
+        "commit": "f950dd099784fec8b67859f00b2819a2a188b1ae",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449939866",
+        "created_at": "2026-10-13T18:49:57Z"
+      },
+      {
+        "id": 38449932844,
+        "commit": "f950dd099784fec8b67859f00b2819a2a188b1ae",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449932844",
+        "created_at": "2026-10-13T18:49:54Z"
+      },
+      {
+        "id": 38449598416,
+        "commit": "cbee88be85c3cd2864cfa5b0eff74da07aa09256",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449598416",
+        "created_at": "2026-10-13T18:47:24Z"
+      },
+      {
+        "id": 38449592463,
+        "commit": "cbee88be85c3cd2864cfa5b0eff74da07aa09256",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449592463",
+        "created_at": "2026-10-13T18:47:21Z"
+      },
+      {
+        "id": 38449307012,
+        "commit": "993cc4c7234ce56098b552c7dded15ae2995af4c",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449307012",
+        "created_at": "2026-10-13T18:45:14Z"
+      },
+      {
+        "id": 38449298180,
+        "commit": "993cc4c7234ce56098b552c7dded15ae2995af4c",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38449298180",
+        "created_at": "2026-10-13T18:45:10Z"
+      },
+      {
+        "id": 38448997869,
+        "commit": "9b2c5ea7df9bb1d152bb1ab49ecd293e047be086",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38448997869",
+        "created_at": "2026-10-13T18:42:58Z"
+      },
+      {
+        "id": 38448990769,
+        "commit": "9b2c5ea7df9bb1d152bb1ab49ecd293e047be086",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/a7987083/ZonoePatch-V2/actions/runs/38448990769",
+        "created_at": "2026-10-13T18:42:55Z"
+      }
+    ],
+    "scope": "Snapshot before final documentation commit; final complete CI and artifact identity are in delivered DELIVERY_STATUS.json; historical failures retained.",
+    "failures": [
+      {
+        "commit": "9b2c5ea",
+        "reason": "empty NSString filesystemRepresentation exception",
+        "fix": "993cc4c"
+      },
+      {
+        "commits": [
+          "993cc4c",
+          "cbee88b"
+        ],
+        "reason": "older production C++ dialect inline thread_local Werror",
+        "fix": "f950dd0"
+      },
+      {
+        "commit": "f950dd0",
+        "run": 38449939866,
+        "reason": "PR install dependencies failed; same commit push and subsequent full CI passed"
+      },
+      {
+        "commit": "495d159",
+        "reason": "assert macro comma in Objective-C literal",
+        "fix": "b8e745c"
+      },
+      {
+        "commit": "af2d19e",
+        "reason": "unused private field tag in strict independent module",
+        "fix": "01472c0"
+      },
+      {
+        "commits": [
+          "349a42a",
+          "16b55ec"
+        ],
+        "reason": "Managed fixture extraction omitted production capacity constant",
+        "fix": "69e78cc"
+      },
+      {
+        "commit": "0ccf52e",
+        "run": 38454150661,
+        "reason": "Complete Unified UI build exposed M43 consumer of moved RuntimeMethod detail selector; strict standalone modules passed; fixed by narrow existing private finder interface declaration",
+        "fix": "subsequent fix(H05.2): declare existing Runtime Method detail owner for M43 consumers"
+      }
+    ]
+  }
+}

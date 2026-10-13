@@ -1,0 +1,8 @@
+.theos/
+**/.theos/
+vendor/
+dist/
+*.log
+__pycache__/
+compatibility-audit.json
+topology.json

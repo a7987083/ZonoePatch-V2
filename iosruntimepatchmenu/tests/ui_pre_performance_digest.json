@@ -1,0 +1,11 @@
+{
+  "import_commit": "ae631f4ff17658e747016d596a71b11deab5450f",
+  "basis": "These UI bytes are identical to imported 1.zip; old newline-only drift preserved as diagnostic.",
+  "source_hashes": {
+    "iosruntimepatchmenu/src/ZNUnifiedUI.mm": "d5f06854e9fd5e6f2bf2c5eafd771217423a0ed65cc9c8e478766d3cb8ab0a90",
+    "iosruntimepatchmenu/src/ZNRangeControl.mm": "06ead75a070b0fbe5c1ce8efe73cb5f3934c5990542df7b6b70bfbb09eed143f",
+    "iosruntimepatchmenu/src/ZNM55StaticTypedBinding.mm": "19cab58b893929f4052ff2d711b2af63b4d5dfdfc37af8195a25062f619b2075",
+    "iosruntimepatchmenu/src/ZNM56StaticValueCellBinding.mm": "592d52ee2e7db9f2ea1e00f9e3e4c2b01cf8a32d3215bf069ef057b7d1f9facf"
+  },
+  "review": "H05 stage runner plus M11/L02 tick: skip inactive/fully-hidden work, preserve active window/layout/theme path; see docs/UI_STAGE_REVIEW.md and PERFORMANCE_ACCEPTANCE.md"
+}

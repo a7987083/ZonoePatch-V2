@@ -1,0 +1,71 @@
+{
+  "baselineRemoteCommit": "e2ec0c74a580a1fbaca05e9598d9f2ab500025ac",
+  "scope": "all source .mm/.h/.inc/.cpp; no external visibility, constructor/used attributes, registration or calls",
+  "removed": [
+    {
+      "file": "iosruntimepatchmenu/src/ZNRuntimeActionBuilder.mm",
+      "symbol": "ZNRABAlign8",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "49d524d93d76b1e1d9e12536a49cc266c1c9cf6bbc0e010a77521b28f9897415"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ZNRuntimeActionRuntime.mm",
+      "symbol": "ZNRARAlign8",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "df4f58f639c659c816bc37038abd17526395ef48fa67c56b957c82511b029fc9"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ZNNativeHookRuntime.mm",
+      "symbol": "ZNNativeAlign8",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "6a18419455b0c371bda64e4e2f69b0c08007698af4966db67bb77ad656e8f9b4"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ZNM462RuntimeOnlyVerifier.mm",
+      "symbol": "ZNM462Align8",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "8d1929b10adc00c21a497b53bccfdeef8c93f5085808730e644cab206365a563"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ZNIL2CPPInvokeEngine.mm",
+      "symbol": "ZNInvokeCStringFinished",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "3a3e53960f0d4de429f48a92a4729532c49b877a04fc5a9b5f06cc6f016944ac",
+      "proof": "Pure trailing-whitespace/end-of-string predicate, not allocation/lifetime management. No calls/address-of/registration/export/used attributes. Signed/unsigned/float adapters already exclusively use tested ZNScalarParser.",
+      "reviewBase": "59ff521b94378b8e008c93e1580116f908e73a7e"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureRuntimeControlsV2.mm",
+      "symbol": "ZN65DisplayMetadata",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "661118ed82913ec7fe4eb6c8fe1d29a29dbb833c24e124c142088344955c35bd",
+      "proof": "Strict independent compilation detected unused helper. Entire source inventory has one definition, no call/address-of/registration/export attributes; active feature path delegates to ZNFeatureSnapshotProvider."
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm",
+      "symbol": "ZN50DisplayMetadata",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "3855c5bbe709c2813c3bbed7274fa47319e988f022e58bdc3b3fc24f637a6b30",
+      "proof": "No source call/address-of/registration/export; trim has no caller after removing its sole dead wrapper. Strict compilation remains enabled."
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm",
+      "symbol": "ZN50Trim",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "68ad0a7cff7640442e27cf3b5c4741fdcb3060d89d70fb496daf65ce9063a39b",
+      "proof": "No source call/address-of/registration/export; trim has no caller after removing its sole dead wrapper. Strict compilation remains enabled."
+    }
+  ],
+  "retained": [
+    "legacy static builder and AnyImage resolver: external source consumers not disproven",
+    "all UI selectors and installer entry points"
+  ]
+}

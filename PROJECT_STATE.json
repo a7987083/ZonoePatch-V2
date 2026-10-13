@@ -1,0 +1,45 @@
+{
+  "schema_version": 4,
+  "repository": "a7987083/ZonoePatch-V2",
+  "branch": "dev/technical-debt-p0-p2-20261013",
+  "business_source_commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+  "documented_repo_head_before_handoff_commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+  "baseline": {
+    "commit": "94491dae3541d00af172db7bb7e4b16c634530cb",
+    "run_id": 38338809727,
+    "artifact_id": 11786396518,
+    "compiled": true,
+    "device_verified": false,
+    "dylib_sha256": "c470424abd4830daef58af8cdfed20ae499a2d353e76dd1be957f1a7d12222dd"
+  },
+  "source_anchor_ci": {
+    "commit": "47950495e1f5293fc6851805b068bbdaa96a204a",
+    "run_id": 38356984676,
+    "result": "success",
+    "compiled": true,
+    "production_regressions": "passed within documented host scope; complete providers not proven",
+    "artifact_id": 11793370584,
+    "archive_digest": "sha256:1ce42d6014631cf2efd20b062cad0eeda6442d3e558e8faf2400d7c6235d91f6"
+  },
+  "phase": "deep-remediation-final-ci-and-artifact",
+  "final_delivery_ci": "See delivery DELIVERY_STATUS.json; final documentation HEAD also requires complete CI",
+  "target_app_runtime": "未验证",
+  "iphone_device": "未验证",
+  "performance_improvement": "未验证",
+  "full_regression": "automated source-anchor passed; target App and iPhone not completed",
+  "debt_status": {
+    "H05.1": "partial: actual M47 and SearchHistory installer/predecessor compatibility fixtures; unknown aliases retained, SOURCE + DEVICE PENDING",
+    "H05.2": "partial: 14 independent UI TU, 40 inc SOURCE PENDING",
+    "M10.1": "partial: owned entries/header, scoped cell writes/geometry and diagnostic concurrency verified; execution/API leases SOURCE + DEVICE PENDING",
+    "M10.2": "partial: Runtime file transactions/report failure/output collision protection, 11-point Executor rollback fixtures; actual built-in provider multi-runtime target source integration pending",
+    "L02": "8 proven unreferenced static helpers removed in total; unknown external selectors/API/prefs/compatibility preserved",
+    "M11.2": "9 metrics and async/first-display-tick/host sampling infrastructure verified; expanded event coverage SOURCE PENDING, real performance DEVICE PENDING"
+  },
+  "next_task": "M10.1 unified native/managed execution owner, incarnation and retire/drain fixtures; M10.2 typed runtime-target routing and complete built-in providers; 40 UI lexical modules and family consumer evidence",
+  "baseline_before_this_task": {
+    "commit": "0afc080e8e264255424264b4480222275f0eca5b",
+    "run_id": 38353817406,
+    "result": "success",
+    "device_verified": false
+  }
+}

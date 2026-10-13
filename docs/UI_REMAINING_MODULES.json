@@ -1,0 +1,849 @@
+{
+  "scope": "35 remaining lexical UI sections; type/Block/Selector/IMP/initialization inventory in UI_COMPILATION_DEPENDENCIES.json; semantic dependency closure and full migration remain incomplete",
+  "modules": [
+    {
+      "path": "ui/core/ZonoeRuntimeMenu.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV024",
+        "ZNRuntimeMenuControllerV040 (V040)",
+        "ZNRuntimeMenuControllerV040 (V0401)",
+        "ZNRuntimeMenuControllerV040 (V0402)",
+        "ZNRuntimeMenuControllerV040 (V042)",
+        "ZNRuntimeMenuControllerV040 (V043)",
+        "ZNRuntimeMenuControllerV040 (V044)",
+        "ZNRuntimeMenuControllerV040 (V048)",
+        "ZNRuntimeMenuControllerV040 (V049)",
+        "ZNRuntimeMenuControllerV040 (V053Current)"
+      ],
+      "sourceImports": [
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNBuildCapabilityRegistry.h\"",
+        "\"ZNBuildManifest.h\"",
+        "\"ZNBuildExecutor.h\"",
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNPatchCore.h\"",
+        "\"ZNDeveloperGate.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNDeferredBootstrap.h\"",
+        "\"ZNRuntimeCapabilityCoordinator.h\"",
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<QuartzCore/QuartzCore.h>",
+        "<stdint.h>",
+        "\"ZNTheme.h\"",
+        "\"ZNExecutablePageProbe.h\"",
+        "\"ZNPatchRuntimeValidator.h\"",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNStaticBinaryBuilder.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNPatchJSONImporter.h\"",
+        "\"ZNSharedSiteProbe.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (V040Private)",
+        "ZNRuntimeMenuControllerV040 (V040)",
+        "ZNRuntimeMenuControllerV040 (V0401)",
+        "ZNRuntimeMenuControllerV040 (V0402)",
+        "ZNRuntimeMenuControllerV040 (V042)",
+        "ZNRuntimeMenuControllerV040 (V043BaseMethods)",
+        "ZNRuntimeMenuControllerV040 (V043)",
+        "ZNRuntimeMenuControllerV040 (V044Base)",
+        "ZNRuntimeMenuControllerV040 (V044)",
+        "ZNRuntimeMenuControllerV040 (V048) <UIDocumentPickerDelegate>",
+        "ZNRuntimeMenuControllerV040 (V049)",
+        "ZNRuntimeMenuControllerV040 (V053Current)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/shell/ZNDeferredBootstrap.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNDeferredLauncher"
+      ],
+      "sourceImports": [
+        "\"ZNDeferredBootstrap.h\"",
+        "<UIKit/UIKit.h>",
+        "<atomic>",
+        "\"ZNActivationStageRunner.h\""
+      ],
+      "interfaces": [
+        "ZNDeferredLauncher : NSObject"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNFeatureEditing)",
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNNativeHookAction.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNIL2CPPHybridFinder.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderMenuBinding.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderMenuBinding)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<objc/runtime.h>",
+        "\"ZNDeveloperGate.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderMenuBinding)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUXV2.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUXV2)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNTheme.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUXV2)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUIV3.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUIV3)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPHybridFinder.h\"",
+        "\"ZNIL2CPPMethodFinderSearchV3.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUIV3)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNNativeHookAction.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNUXFixesV2.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNUXPassthroughRootView",
+        "ZNUXOverlayController",
+        "ZNRuntimeMenuControllerV040 (ZNUXFixesV2)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNPatchCore.h\"",
+        "\"ZNTheme.h\""
+      ],
+      "interfaces": [
+        "ZNUXPassthroughRootView : UIView",
+        "ZNUXOverlayController : UIViewController",
+        "ZNRuntimeMenuControllerV040 (ZNUXFixesV2)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM42UI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM42UI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM42UI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43UI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPHybridFinder.h\"",
+        "\"ZNIL2CPPMethodFinderSearchV3.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNInstanceSelectionV2UI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNInstanceSelectionV2UI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInstanceSelectionV2.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNInstanceSelectionV2UI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNM441Hotfix.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
+        "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<mach-o/dyld.h>",
+        "<dlfcn.h>",
+        "<errno.h>",
+        "<ctype.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPHybridFinder.h\"",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
+        "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNM45AddressOwningMethodUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM45AddressOwningMethod)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<mach-o/dyld.h>",
+        "<errno.h>",
+        "\"ZNIL2CPPOwningMethodResolver.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM45AddressOwningMethod)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM46FullSignatureUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM46FullSignatureUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInstanceSelectionV2.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNIL2CPPMethodSignature.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM46FullSignatureUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNM461Polish.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM461Polish)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNIL2CPPMethodSignature.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM461Polish)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM462CandidateBindingUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM462CandidateBindingUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInstanceSelectionV2.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNIL2CPPMethodSignature.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM462CandidateBindingUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM47ReceiverCaptureUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47ReceiverCaptureUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInstanceSelectionV2.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNM47ReceiverCapture.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47ReceiverCaptureUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM47MultiArgUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47MultiArgUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPMethodSignature.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47MultiArgUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNM47BuilderArgsUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47BuilderArgsUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47BuilderArgsUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM49GenericInvokeEditableArgs.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM49GenericInvokeEditableArgs)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM49GenericInvokeEditableArgs)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderUnifiedUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPMethodSignature.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNNativeHookRuntime.h\"",
+        "\"ZNNativeHookScheduler.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51)",
+        "ZNIL2CPPInvokeEngine (ZNM51ImmediateChain)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM51)",
+        "ZNIL2CPPInvokeEngine (ZNM51ImmediateChain)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNM51SilentCustomerExecution.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51SilentCustomerExecution)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM51SilentCustomerExecution)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/execution/ZNM52ChainExecuteButton.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNIL2CPPInstanceResolver.h\"",
+        "\"ZNIL2CPPInstanceSelectionV2.h\"",
+        "\"ZNIL2CPPResolver.h\"",
+        "\"ZNIL2CPPRuntimeCommon.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNNativeHookAction.h\"",
+        "\"ZNNativeHookRuntime.h\"",
+        "\"ZNIL2CPPABIMetadata.h\"",
+        "\"ZNCapabilityRegistry.h\"",
+        "\"ZNBuiltInCapabilityAdapters.h\"",
+        "\"ZNDirectNativeCallEngine.h\"",
+        "\"ZNComplexStructCodec.h\"",
+        "\"ZNComplexStructCodecResolver.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM53ControlBinding.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM53RuntimeAutoExecute)",
+        "ZNM53StaticControlBinder"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<math.h>",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNFeatureMetadataCodec.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimePatchExecutor.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNStaticPatchFormat.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM53Private)",
+        "ZNRuntimeMenuControllerV040 (ZNM53RuntimeAutoExecute)",
+        "ZNM53StaticControlBinder : NSObject"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM55TypedControlBinding.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNValueTypeModel.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM584SchemeALayout.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM584SchemeALayout)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNRangeControl.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM584SchemeALayout)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM585UnifiedControlSemantics.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM585UnifiedControlSemantics)",
+        "ZNRuntimeMenuControllerV040 (ZNM585BuilderUI)",
+        "ZNStaticBinaryBuilder (ZNM585UnifiedBuild)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<mach/mach.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNStaticBinaryBuilder.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNBinaryPatchWorkspace (ZNM585UnifiedControlSemantics)",
+        "ZNRuntimeMenuControllerV040 (ZNM585BuilderUI)",
+        "ZNStaticBinaryBuilder (ZNM585UnifiedBuild)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/compat/ZNM585StaticRuntimeRange.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM58UnifiedControlRuntime.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM58UnifiedControlRuntime)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNIL2CPPInvokeEngine.h\"",
+        "\"ZNRangeControl.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM58UnifiedControlRuntime)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM590UnifiedActionModel.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM590UnifiedValidation)",
+        "ZNRuntimeMenuControllerV040 (ZNM590BuilderAdapter)",
+        "ZNRuntimeMenuControllerV040 (ZNM590StaticPersistence)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNFeatureMetadataCodec.h\"",
+        "\"ZNFeatureSnapshotProvider.h\"",
+        "\"ZNRangeControl.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNStaticPatchFormat.h\"",
+        "\"ZNValueTypeModel.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM590Private)",
+        "ZNBinaryPatchWorkspace (ZNM590UnifiedValidation)",
+        "ZNRuntimeMenuControllerV040 (ZNM590BuilderAdapter)",
+        "ZNRuntimeMenuControllerV040 (ZNM590StaticPersistence)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM591OffsetHookControls.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNM591SyntheticValidator",
+        "ZNStaticBinaryBuilder (ZNM591OffsetHookBuild)",
+        "ZNRuntimeMenuControllerV040 (ZNM591BuilderUI)",
+        "ZNM56StaticValueCellBinder (ZNM591OffsetHook)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<mach/mach.h>",
+        "<os/lock.h>",
+        "\"ZNBinaryPatchWorkspace.h\"",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNFeatureMetadataCodec.h\"",
+        "\"ZNPatchRuntimeValidator.h\"",
+        "\"ZNStaticBinaryBuilder.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNStaticPatchFormat.h\"",
+        "\"ZNValueTypeModel.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNM591SyntheticValidator : ZNPatchRuntimeValidator",
+        "ZNStaticBinaryBuilder (ZNM591OffsetHookBuild)",
+        "ZNRuntimeMenuControllerV040 (ZNM591BuilderUI)",
+        "ZNStaticPatchRecord (ZNM591Private)",
+        "ZNM56StaticValueCellBinder : NSObject",
+        "ZNM56StaticValueCellBinder (ZNM591OffsetHook)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM600UnifiedFeatureSurface.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNM56StaticValueCellBinder (ZNM600SafeOffsetABI)",
+        "ZNRuntimeMenuControllerV040 (ZNM600UnifiedFeatureSurface)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "<dlfcn.h>",
+        "<os/lock.h>",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNFeatureMetadataCodec.h\"",
+        "\"ZNIL2CPPOwningMethodResolver.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNStaticPatchFormat.h\"",
+        "\"ZNValueTypeModel.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM600Private)",
+        "ZNM56StaticValueCellBinder (ZNM600SafeOffsetABI)",
+        "ZNRuntimeMenuControllerV040 (ZNM600UnifiedFeatureSurface)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    },
+    {
+      "path": "ui/features/ZNM630HardCutUI.inc",
+      "status": "SOURCE PENDING: not yet independently compiled",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM630HardCutUI)"
+      ],
+      "sourceImports": [
+        "<Foundation/Foundation.h>",
+        "<UIKit/UIKit.h>",
+        "<objc/runtime.h>",
+        "\"ZNFeatureControlModel.h\"",
+        "\"ZNFeatureSnapshotProvider.h\"",
+        "\"ZNStaticDispatchRuntime.h\"",
+        "\"ZNRuntimeActionModel.h\"",
+        "\"ZNRuntimeActionFormat.h\"",
+        "\"ZNRuntimeActionRuntime.h\"",
+        "\"ZNRuntimeCapabilityCoordinator.h\"",
+        "\"ZNNativeHookRuntime.h\"",
+        "\"ZNNativeHookAction.h\"",
+        "\"ZNRangeControl.h\"",
+        "\"ZNTheme.h\"",
+        "\"ZNPatchCore.h\""
+      ],
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM630HardCutRecord)",
+        "ZNRuntimeMenuControllerV040 (ZNM630HardCutUI)"
+      ],
+      "nextAcceptance": "Define/import the exact private class/type/selector contract; unchanged body/installer-order reconstruction, no selector collision, strict iPhone SDK compilation, relevant host fixture and full Actions; UIKit behavior DEVICE PENDING."
+    }
+  ]
+}

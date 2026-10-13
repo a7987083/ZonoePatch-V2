@@ -1,0 +1,2542 @@
+{
+  "schema": "zonoe.ui-compilation-dependencies/v2",
+  "scope": "All remaining inc sections: types, named Block edges, selector literals, self-call source lines, IMP and initialization sites. Lexical references include comments/macros; not proof of semantic closure or external consumers.",
+  "remaining": 35,
+  "independent": 19,
+  "typeOwners": {
+    "ZN50FeatureToggleControl": [
+      "ui/features/ZNFeatureGroupUI.mm"
+    ],
+    "ZNDeferredLauncher": [
+      "ui/shell/ZNDeferredBootstrap.inc"
+    ],
+    "ZNM44ReadyBlock": [
+      "ui/execution/ZNInstanceSelectionV2UI.inc"
+    ],
+    "ZNM462ReadyBlock": [
+      "ui/features/ZNM462CandidateBindingUI.inc"
+    ],
+    "ZNM46ReadyBlock": [
+      "ui/execution/ZNM46FullSignatureUI.inc"
+    ],
+    "ZNM53StaticControlBinder": [
+      "ui/features/ZNM53ControlBinding.inc"
+    ],
+    "ZNM56StaticValueCellBinder": [
+      "ui/features/ZNM591OffsetHookControls.inc"
+    ],
+    "ZNM591SyntheticValidator": [
+      "ui/features/ZNM591OffsetHookControls.inc"
+    ],
+    "ZNModalPassthroughView": [
+      "ui/shell/ZNRuntimeMenuModalShell.mm"
+    ],
+    "ZNRuntimeMenuModalViewController": [
+      "ui/shell/ZNRuntimeMenuModalShell.mm"
+    ],
+    "ZNUXOverlayController": [
+      "ui/compat/ZNUXFixesV2.inc"
+    ],
+    "ZNUXPassthroughRootView": [
+      "ui/compat/ZNUXFixesV2.inc"
+    ],
+    "block": [
+      "ui/compat/ZNM441Hotfix.inc"
+    ],
+    "decorated": [
+      "ui/finder/ZNMethodFinderM43UI.inc"
+    ]
+  },
+  "modules": [
+    {
+      "path": "ui/compat/ZNM441Hotfix.inc",
+      "sha256": "76dd84526957cc2e1528c5b3314270de35cbba0075f27b7b141785b343f9a9f3",
+      "lines": 504,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
+        "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
+        "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        178,
+        225,
+        308,
+        489
+      ],
+      "privateSelectorLiterals": [
+        "executeAssembly:namespace:className:method:argumentCount:argumentValues:error:",
+        "zn44_endEditing:",
+        "zn60v3_renderResultsAtWidth:",
+        "zn60v3_renderSearchAtWidth:",
+        "znm441_endEditing:",
+        "znm441_executeAssembly:namespace:className:method:argumentCount:argumentValues:error:",
+        "znm441_renderResultsAtWidth:",
+        "znm441_renderSearchAtWidth:",
+        "znm441_submitSearch:"
+      ],
+      "selfMessageLines": [
+        221,
+        253,
+        256,
+        258,
+        259,
+        267,
+        268,
+        271,
+        273,
+        281,
+        284,
+        285,
+        286,
+        290,
+        291,
+        294,
+        301,
+        302,
+        303,
+        307,
+        343,
+        368,
+        374,
+        379,
+        394,
+        444
+      ],
+      "installationLines": [
+        484,
+        487,
+        488,
+        489
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNM461Polish.inc",
+      "sha256": "d63e08115ce9a32ba07684320b2c974dc38c1fbacf6beb308c6c659a0ed3cdd5",
+      "lines": 208,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM461Polish)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM461Polish)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        126,
+        199
+      ],
+      "privateSelectorLiterals": [
+        "integerValue",
+        "renderPage",
+        "zn44_buildBinary:",
+        "zn60v3_renderResultsAtWidth:",
+        "znm43_testCandidate:",
+        "znm461_renderPage",
+        "znm461_renderResultsAtWidth:"
+      ],
+      "selfMessageLines": [
+        95,
+        113,
+        186
+      ],
+      "installationLines": [
+        194,
+        197,
+        198,
+        199
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNM47BuilderArgsUI.inc",
+      "sha256": "b5014d9ec37f61e48f1e7f94499f54ba704e32b2b9629869e4e1a65ce873923e",
+      "lines": 154,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47BuilderArgsUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47BuilderArgsUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        146
+      ],
+      "privateSelectorLiterals": [
+        "zn50b_renderOther",
+        "znm47b_argumentEnded:",
+        "znm47b_renderOther"
+      ],
+      "selfMessageLines": [
+        59,
+        109
+      ],
+      "installationLines": [
+        141,
+        144,
+        145,
+        146
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNM51SilentCustomerExecution.inc",
+      "sha256": "4317d1605e73352ab92e07b5e2f4b9887b7e9421289baa9fe0066dda34ea99cf",
+      "lines": 133,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM51SilentCustomerExecution)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51SilentCustomerExecution)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        127,
+        129
+      ],
+      "privateSelectorLiterals": [
+        "zn51_runtimeExecute:",
+        "zn51s_runtimeExecuteSilent:"
+      ],
+      "selfMessageLines": [],
+      "installationLines": [
+        122,
+        126,
+        128,
+        129
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNM585StaticRuntimeRange.inc",
+      "sha256": "35abc5cc80ffeecab0d4c230d1e7bb79509b05d620012d508e9bde98e29c57d2",
+      "lines": 15,
+      "interfaces": [],
+      "implementations": [],
+      "namedTypeEdges": [],
+      "blockLines": [
+        10
+      ],
+      "privateSelectorLiterals": [],
+      "selfMessageLines": [],
+      "installationLines": [
+        9,
+        10
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
+      "sha256": "b879524ab9cece2eea7925843da72220174cfb8c5429a6dd1225d3e3237b69c5",
+      "lines": 325,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        313
+      ],
+      "privateSelectorLiterals": [
+        "zn50b_renderOther",
+        "zn64_clearNativeHooks:",
+        "zn64_deleteNativeHook:",
+        "znm660_editHookControlTapped:",
+        "znrmc_argumentEditingChanged:",
+        "znrmc_argumentEditingEnded:",
+        "znrmc_clearAuthoringActions:",
+        "znrmc_deleteAuthoringAction:",
+        "znrmc_descriptionEditingEnded:",
+        "znrmc_renderOther",
+        "znrmc_titleEditingEnded:"
+      ],
+      "selfMessageLines": [
+        95,
+        101,
+        102,
+        108,
+        116,
+        117,
+        131,
+        140,
+        146,
+        182,
+        183,
+        187,
+        194,
+        195,
+        202,
+        203,
+        206,
+        208,
+        210,
+        224,
+        226,
+        239,
+        245,
+        251,
+        257,
+        263,
+        298
+      ],
+      "installationLines": [
+        311,
+        312,
+        313,
+        319
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/compat/ZNUXFixesV2.inc",
+      "sha256": "0fa2f7b373e2ea0bf66282465315e46af754c07578b2dad5d73082637c1d0443",
+      "lines": 362,
+      "interfaces": [
+        "ZNUXPassthroughRootView : UIView",
+        "ZNUXOverlayController : UIViewController",
+        "ZNRuntimeMenuControllerV040 (ZNUXFixesV2)"
+      ],
+      "implementations": [
+        "ZNUXPassthroughRootView",
+        "ZNUXOverlayController",
+        "ZNRuntimeMenuControllerV040 (ZNUXFixesV2)"
+      ],
+      "namedTypeEdges": [
+        {
+          "type": "block",
+          "owners": [
+            "ui/compat/ZNM441Hotfix.inc"
+          ]
+        }
+      ],
+      "blockLines": [
+        122,
+        152,
+        220,
+        266,
+        350
+      ],
+      "privateSelectorLiterals": [
+        "hide",
+        "isVisible",
+        "renderPage",
+        "show",
+        "zn44_buildBinary:",
+        "znux_binaryPickerTapped:",
+        "znux_buildBinary:",
+        "znux_hide",
+        "znux_isVisible",
+        "znux_renderPage",
+        "znux_show"
+      ],
+      "selfMessageLines": [
+        206,
+        238,
+        239,
+        240,
+        252,
+        277,
+        292,
+        296,
+        297,
+        299
+      ],
+      "installationLines": [
+        345,
+        348,
+        349,
+        350
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/core/ZonoeRuntimeMenu.inc",
+      "sha256": "424554f15146015afe5e0a024e5c77b3a36a447449caca9ec2a7e8db075336b8",
+      "lines": 2124,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (V040Private)",
+        "ZNRuntimeMenuControllerV040 (V040)",
+        "ZNRuntimeMenuControllerV040 (V0401)",
+        "ZNRuntimeMenuControllerV040 (V0402)",
+        "ZNRuntimeMenuControllerV040 (V042)",
+        "ZNRuntimeMenuControllerV040 (V043BaseMethods)",
+        "ZNRuntimeMenuControllerV040 (V043)",
+        "ZNRuntimeMenuControllerV040 (V044Base)",
+        "ZNRuntimeMenuControllerV040 (V044)",
+        "ZNRuntimeMenuControllerV040 (V048) <UIDocumentPickerDelegate>",
+        "ZNRuntimeMenuControllerV040 (V049)",
+        "ZNRuntimeMenuControllerV040 (V053Current)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV024",
+        "ZNRuntimeMenuControllerV040 (V040)",
+        "ZNRuntimeMenuControllerV040 (V0401)",
+        "ZNRuntimeMenuControllerV040 (V0402)",
+        "ZNRuntimeMenuControllerV040 (V042)",
+        "ZNRuntimeMenuControllerV040 (V043)",
+        "ZNRuntimeMenuControllerV040 (V044)",
+        "ZNRuntimeMenuControllerV040 (V048)",
+        "ZNRuntimeMenuControllerV040 (V049)",
+        "ZNRuntimeMenuControllerV040 (V053Current)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        116,
+        538,
+        546,
+        547,
+        548,
+        549,
+        1270,
+        1278,
+        1284,
+        1292,
+        1501,
+        1518,
+        1522,
+        1546,
+        1550,
+        1562,
+        1709
+      ],
+      "privateSelectorLiterals": [
+        "alphaSliderChanged:",
+        "autoSnapChanged:",
+        "categoryTapped:",
+        "closeTapped:",
+        "enabledForFeature:",
+        "featureSliderChanged:",
+        "featureSwitchChanged:",
+        "fullSizeForWindow:",
+        "init",
+        "makeUI:",
+        "modeTapped:",
+        "panFloat:",
+        "panPanel:",
+        "rememberPositionChanged:",
+        "removeFromSuperview",
+        "renderFullPage",
+        "renderPage",
+        "setFeature:enabled:",
+        "setFeature:value:",
+        "themeGridTapped:",
+        "themeTapped:",
+        "tick:",
+        "togglePanel:",
+        "valueForFeature:fallback:",
+        "zn401_button:selector:frame:",
+        "zn401_fullSizeForWindow:",
+        "zn401_makeUI:",
+        "zn401_themeTapped:",
+        "zn402_makeUI:",
+        "zn402_renderPage",
+        "zn40_addInfoCard:lines:y:width:",
+        "zn40_button:selector:frame:",
+        "zn40_enabledForFeature:",
+        "zn40_fullSizeForWindow:",
+        "zn40_init",
+        "zn40_makeUI:",
+        "zn40_renderDebug",
+        "zn40_renderFullPage",
+        "zn40_selfTest:",
+        "zn40_setFeature:enabled:",
+        "zn40_setFeature:value:",
+        "zn40_tick:",
+        "zn40_togglePanel:",
+        "zn40_valueForFeature:fallback:",
+        "zn42_addInfoCard:lines:y:width:",
+        "zn42_makeUI:",
+        "zn42_selfTest:",
+        "zn43_makeUI:",
+        "zn43_renderDebug",
+        "zn43_tick:",
+        "zn44_addOffset:",
+        "zn44_applyAll:",
+        "zn44_buildBinary:",
+        "zn44_endEditing:",
+        "zn44_fieldChanged:",
+        "zn44_fullSizeForWindow:",
+        "zn44_importJSON:",
+        "zn44_jsonTapped:",
+        "zn44_makeUI:",
+        "zn44_renderFullPage",
+        "zn44_renderOther",
+        "zn44_restoreAll:",
+        "zn44_tick:",
+        "zn44_validateAll:",
+        "zn48_importJSON:",
+        "zn48_makeUI:",
+        "zn48_renderOther",
+        "zn48_tick:",
+        "zn49_makeUI:",
+        "zn49_renderDebug",
+        "zn49_tick:",
+        "zn53_addInfoCard:lines:y:width:",
+        "zn53_button:selector:frame:",
+        "zn53_fullSizeForWindow:",
+        "zn53_init",
+        "zn53_makeUI:",
+        "zn53_renderFullPage",
+        "zn53_renderPage",
+        "zn53_selfTest:",
+        "zn53_themeTapped:",
+        "zn53_tick:",
+        "zn53_togglePanel:"
+      ],
+      "selfMessageLines": [
+        227,
+        281,
+        325,
+        341,
+        342,
+        343,
+        345,
+        347,
+        358,
+        359,
+        360,
+        361,
+        366,
+        367,
+        368,
+        369,
+        370,
+        378,
+        379,
+        383,
+        384,
+        388,
+        389,
+        394,
+        405,
+        409,
+        412,
+        413,
+        422,
+        423,
+        425,
+        427,
+        429,
+        431,
+        433,
+        435,
+        442,
+        446,
+        449,
+        467,
+        470,
+        472,
+        478,
+        481,
+        482,
+        484,
+        488,
+        489,
+        490,
+        491,
+        495,
+        498,
+        502,
+        503,
+        506,
+        511,
+        512,
+        513,
+        514,
+        515,
+        519,
+        520,
+        525,
+        527,
+        528,
+        529,
+        530,
+        531,
+        537,
+        540,
+        588,
+        592,
+        628,
+        629,
+        661,
+        662,
+        663,
+        676,
+        677,
+        678,
+        683,
+        685,
+        686,
+        692,
+        693,
+        694,
+        698,
+        718,
+        719,
+        724,
+        742,
+        751,
+        757,
+        780,
+        781,
+        791,
+        793,
+        801,
+        808,
+        809,
+        810,
+        811,
+        818,
+        820,
+        832,
+        836,
+        837,
+        838,
+        843,
+        844,
+        845,
+        865,
+        870,
+        872,
+        878,
+        879,
+        885,
+        892,
+        952,
+        968,
+        969,
+        970,
+        974,
+        992,
+        1044,
+        1045,
+        1049,
+        1050,
+        1088,
+        1103,
+        1104,
+        1112,
+        1126,
+        1135,
+        1139,
+        1211,
+        1217,
+        1221,
+        1222,
+        1225,
+        1228,
+        1231,
+        1235,
+        1240,
+        1258,
+        1313,
+        1314,
+        1321,
+        1322,
+        1330,
+        1331,
+        1339,
+        1346,
+        1351,
+        1415,
+        1427,
+        1428,
+        1432,
+        1439,
+        1443,
+        1450,
+        1452,
+        1453,
+        1454,
+        1455,
+        1456,
+        1460,
+        1461,
+        1462,
+        1467,
+        1469,
+        1470,
+        1471,
+        1472,
+        1476,
+        1478,
+        1480,
+        1481,
+        1483,
+        1487,
+        1494,
+        1495,
+        1496,
+        1497,
+        1515,
+        1543,
+        1562,
+        1563,
+        1618,
+        1632,
+        1657,
+        1664,
+        1677,
+        1678,
+        1688,
+        1693,
+        1700,
+        1717,
+        1725,
+        1738,
+        1746,
+        1751,
+        1756,
+        1800,
+        1806,
+        1810,
+        1813,
+        1816,
+        1819,
+        1828,
+        1832,
+        1841,
+        1842,
+        1847,
+        1853,
+        1861,
+        1865,
+        1870,
+        1912,
+        1916,
+        1935,
+        1936,
+        1937,
+        1938,
+        1943,
+        1946,
+        1951,
+        1952,
+        1956,
+        1961,
+        1965,
+        1971,
+        1974,
+        1975,
+        1976,
+        1977,
+        1978,
+        1982,
+        1985,
+        1987,
+        1988,
+        1989,
+        1995,
+        1996,
+        1997,
+        1998,
+        2002,
+        2029,
+        2030,
+        2031,
+        2035,
+        2044,
+        2056,
+        2057,
+        2062,
+        2076,
+        2083
+      ],
+      "installationLines": [
+        30,
+        39,
+        115,
+        116,
+        899,
+        902,
+        1003,
+        1006,
+        1058,
+        1061,
+        1148,
+        1151,
+        1359,
+        1362,
+        1500,
+        1501,
+        1566,
+        1567,
+        1764,
+        1767,
+        1878,
+        1881,
+        2090,
+        2093,
+        2114,
+        2118
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNInstanceSelectionV2UI.inc",
+      "sha256": "afa72f195c76eed016650166418493ceda7516c4ff298cbcb8b1ab3c37daf3ad",
+      "lines": 268,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNInstanceSelectionV2UI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNInstanceSelectionV2UI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        54,
+        105,
+        159,
+        215,
+        243,
+        258
+      ],
+      "privateSelectorLiterals": [
+        "znm43_testCandidate:",
+        "znm44_executeAction:",
+        "znm44_testCandidate:",
+        "znrmc_executeAction:"
+      ],
+      "selfMessageLines": [
+        200,
+        211,
+        226,
+        239
+      ],
+      "installationLines": [
+        253,
+        256,
+        257,
+        258,
+        259
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM46FullSignatureUI.inc",
+      "sha256": "39e6734feb0e5d40ffdadfa9423ce4ca435ea1fe51c75903a5b2c85e0b390ba2",
+      "lines": 364,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM46FullSignatureUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM46FullSignatureUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        20,
+        66,
+        220,
+        326,
+        354
+      ],
+      "privateSelectorLiterals": [
+        "integerValue",
+        "unsignedLongLongValue",
+        "zn60v3_createPatch:",
+        "zn60v3_renderResultsAtWidth:",
+        "znm43_testCandidate:",
+        "znm46_createPatch:",
+        "znm46_renderResultsAtWidth:",
+        "znm46_testCandidate:"
+      ],
+      "selfMessageLines": [
+        259,
+        269,
+        283,
+        285,
+        292,
+        296,
+        298,
+        302,
+        303,
+        308
+      ],
+      "installationLines": [
+        349,
+        352,
+        353,
+        354
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM47MultiArgUI.inc",
+      "sha256": "f3cf475ed2bf28d52b253bbcc86922fe7f1308c9d4f5d1c04b2a81e08954706b",
+      "lines": 282,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47MultiArgUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47MultiArgUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        273
+      ],
+      "privateSelectorLiterals": [
+        "zn60v3_renderResultsAtWidth:",
+        "znm43_argumentValues:",
+        "znm462_boundTestCandidate:",
+        "znm47ma_argumentChanged:",
+        "znm47ma_argumentValues:",
+        "znm47ma_done:",
+        "znm47ma_renderResultsAtWidth:"
+      ],
+      "selfMessageLines": [
+        147,
+        150,
+        156,
+        160,
+        165,
+        208,
+        214,
+        225,
+        261
+      ],
+      "installationLines": [
+        268,
+        271,
+        272,
+        273
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM47ReceiverCaptureUI.inc",
+      "sha256": "7b60ca485492fde7af2cd17f180ef3d319942e174eea47188eaa5ca486007f46",
+      "lines": 189,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM47ReceiverCaptureUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47ReceiverCaptureUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        118,
+        181
+      ],
+      "privateSelectorLiterals": [
+        "zn60v3_renderResultsAtWidth:",
+        "znm462_boundTestCandidate:",
+        "znm47_renderResultsAtWidth:",
+        "znm613_captureLongPress:"
+      ],
+      "selfMessageLines": [
+        72,
+        106,
+        107,
+        160,
+        161,
+        165,
+        168
+      ],
+      "installationLines": [
+        176,
+        179,
+        180,
+        181
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM49GenericInvokeEditableArgs.inc",
+      "sha256": "89c971e6ba8c710e650a92e29e5758ac4a7f370d7ccd0e5ef82663512e2e366c",
+      "lines": 294,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM49GenericInvokeEditableArgs)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM49GenericInvokeEditableArgs)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        200,
+        243,
+        256,
+        282
+      ],
+      "privateSelectorLiterals": [
+        "zn49_renderCompact",
+        "zn49_renderFull",
+        "zn49_runtimeActionTapped:",
+        "zn50_renderFeatureGroupsCompact",
+        "zn50_renderFeatureGroupsFull"
+      ],
+      "selfMessageLines": [
+        131,
+        135,
+        145,
+        159,
+        163,
+        164,
+        168,
+        169,
+        220
+      ],
+      "installationLines": [
+        277,
+        280,
+        281,
+        282
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
+      "sha256": "1f7a08d75988ce55324f25d699f5d1b82a16ca0def023418e65bec8546c5e33c",
+      "lines": 452,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM51)",
+        "ZNIL2CPPInvokeEngine (ZNM51ImmediateChain)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51)",
+        "ZNIL2CPPInvokeEngine (ZNM51ImmediateChain)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        228,
+        229,
+        230,
+        233,
+        439
+      ],
+      "privateSelectorLiterals": [
+        "executeAction:error:",
+        "zn50_renderFeatureGroupsCompact",
+        "zn50_renderFeatureGroupsFull",
+        "zn50b_renderOther",
+        "zn51_builderRender",
+        "zn51_chainTapped:",
+        "zn51_cycleArgType:",
+        "zn51_finderRender:",
+        "zn51_runtimeCompact",
+        "zn51_runtimeExecute:",
+        "zn51_runtimeFull",
+        "zn51_runtimeNumberChanged:",
+        "zn51_runtimeSliderChanged:",
+        "zn51_runtimeSwitchChanged:",
+        "zn51_toggleArg:",
+        "zn60v3_renderResultsAtWidth:",
+        "znm51_executeAction:error:"
+      ],
+      "selfMessageLines": [
+        100,
+        122,
+        128,
+        138,
+        156,
+        174,
+        178,
+        198,
+        204,
+        214,
+        215,
+        266,
+        276,
+        278,
+        281,
+        314,
+        333,
+        336,
+        337,
+        405,
+        421
+      ],
+      "installationLines": [
+        434,
+        437,
+        438,
+        439
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/execution/ZNM52ChainExecuteButton.inc",
+      "sha256": "94d9f01fd29e570d63a1fb5f9bbac5c503f1126b711cd54022261d4d85694b5c",
+      "lines": 1640,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        294,
+        420,
+        456,
+        461,
+        468,
+        487,
+        494,
+        925,
+        926,
+        927,
+        931,
+        1002,
+        1190,
+        1193,
+        1229,
+        1234,
+        1239,
+        1246,
+        1255,
+        1278,
+        1285,
+        1333,
+        1337,
+        1345,
+        1387,
+        1394,
+        1399,
+        1407,
+        1447,
+        1452,
+        1459,
+        1473,
+        1480,
+        1532,
+        1541,
+        1633
+      ],
+      "privateSelectorLiterals": [
+        "activateItem:value:error:",
+        "compare:",
+        "integerValue",
+        "zn52_chainTapped:",
+        "zn52x_batchTestInstances:",
+        "zn52x_directUnavailable:",
+        "zn52x_executeChainTapped:",
+        "zn52x_renderResultsAtWidth:",
+        "zn52x_reselectInstance:",
+        "zn52x_restartChainLongPress:",
+        "zn60v3_backToSearch:",
+        "zn60v3_renderResultsAtWidth:",
+        "zn64_hookTestTapped:",
+        "znm54_filterTapped:",
+        "znm54_openDetail:",
+        "znm613_applyOrRestoreHook:",
+        "znm613_argumentChanged:",
+        "znm613_argumentDone:",
+        "znm613_captureLongPress:",
+        "znm613_chainTapped:",
+        "znm613_createCurrentMode:",
+        "znm613_testRuntime:"
+      ],
+      "selfMessageLines": [
+        406,
+        525,
+        528,
+        537,
+        540,
+        545,
+        546,
+        551,
+        557,
+        566,
+        582,
+        586,
+        587,
+        597,
+        621,
+        632,
+        639,
+        645,
+        650,
+        657,
+        666,
+        683,
+        691,
+        699,
+        713,
+        721,
+        729,
+        736,
+        750,
+        760,
+        780,
+        791,
+        801,
+        811,
+        818,
+        824,
+        833,
+        845,
+        860,
+        861,
+        868,
+        869,
+        881,
+        884,
+        890,
+        891,
+        900,
+        901,
+        915,
+        916,
+        985,
+        986,
+        990,
+        991,
+        1041,
+        1042,
+        1045,
+        1046,
+        1061,
+        1067,
+        1072,
+        1092,
+        1093,
+        1102,
+        1112,
+        1113,
+        1118,
+        1143,
+        1144,
+        1150,
+        1156,
+        1157,
+        1162,
+        1170,
+        1174,
+        1325,
+        1363,
+        1519,
+        1520,
+        1564,
+        1565,
+        1595,
+        1613,
+        1620,
+        1621
+      ],
+      "installationLines": [
+        293,
+        294,
+        1628,
+        1631,
+        1632,
+        1633
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderUI.inc",
+      "sha256": "b0e034a79da37c3ba999c1d867910f205340fc180898e419c6f134b9f1beba6a",
+      "lines": 752,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderUI)"
+      ],
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNFeatureEditing)",
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        630,
+        639
+      ],
+      "privateSelectorLiterals": [
+        "removeFromSuperview",
+        "zn44_applyAll:",
+        "zn44_buildBinary:",
+        "zn44_importJSON:",
+        "zn44_jsonTapped:",
+        "zn44_renderOther",
+        "zn44_restoreAll:",
+        "zn50b_addFeature:",
+        "zn50b_addPatch:",
+        "zn50b_expandFeature:",
+        "zn50b_exportJSON:",
+        "zn50b_featureDescriptionEnd:",
+        "zn50b_featureNameEnd:",
+        "zn50b_renderOther",
+        "zn50b_sliderMaxChanged:"
+      ],
+      "selfMessageLines": [
+        262,
+        267,
+        274,
+        279,
+        290,
+        291,
+        299,
+        321,
+        322,
+        328,
+        340,
+        341,
+        366,
+        367,
+        397,
+        404,
+        412,
+        415,
+        434,
+        437,
+        450,
+        455,
+        470,
+        482,
+        483,
+        493,
+        494,
+        516,
+        517,
+        524,
+        525,
+        526,
+        537,
+        538,
+        553,
+        556,
+        569,
+        577,
+        589,
+        610,
+        619,
+        621,
+        732
+      ],
+      "installationLines": [
+        740,
+        743
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM462CandidateBindingUI.inc",
+      "sha256": "13c634a01dafd4d3099036ea685f1c826068562a09fd89c394a4a63be8d4377e",
+      "lines": 285,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM462CandidateBindingUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM462CandidateBindingUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        115,
+        171,
+        246,
+        277
+      ],
+      "privateSelectorLiterals": [
+        "zn60v3_renderResultsAtWidth:",
+        "znm43_testCandidate:",
+        "znm462_boundTestCandidate:",
+        "znm462_renderResultsAtWidth:"
+      ],
+      "selfMessageLines": [
+        208,
+        236,
+        256
+      ],
+      "installationLines": [
+        272,
+        275,
+        276,
+        277
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM53ControlBinding.inc",
+      "sha256": "74780bbe32624e068a19fea99fb3b75664a5b867c4995836c773e9e4d33c67c7",
+      "lines": 356,
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM53Private)",
+        "ZNRuntimeMenuControllerV040 (ZNM53RuntimeAutoExecute)",
+        "ZNM53StaticControlBinder : NSObject"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM53RuntimeAutoExecute)",
+        "ZNM53StaticControlBinder"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        53,
+        180,
+        252,
+        315,
+        341
+      ],
+      "privateSelectorLiterals": [
+        "actionRequested:",
+        "numberChanged:",
+        "sliderChanged:",
+        "zn51_runtimeNumberChanged:",
+        "zn51_runtimeSliderChanged:",
+        "zn51_runtimeSwitchChanged:",
+        "znm53_numberChanged:",
+        "znm53_sliderChanged:",
+        "znm53_sliderCommitted:",
+        "znm53_switchChanged:"
+      ],
+      "selfMessageLines": [
+        80,
+        87,
+        94,
+        265,
+        305,
+        318,
+        323
+      ],
+      "installationLines": [
+        251,
+        252,
+        336,
+        339,
+        340,
+        341
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM55TypedControlBinding.inc",
+      "sha256": "db70611811cf4a8f818f7d415040d5f6135902ff19592ca38d8b8f2ee82d6842",
+      "lines": 197,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        168,
+        171,
+        188
+      ],
+      "privateSelectorLiterals": [
+        "zn50b_renderOther",
+        "znm55_builderRender",
+        "znm55_cycleValueType:",
+        "znm55_rangeLongPress:"
+      ],
+      "selfMessageLines": [
+        68,
+        99,
+        151
+      ],
+      "installationLines": [
+        186,
+        187,
+        188,
+        192
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM584SchemeALayout.inc",
+      "sha256": "48e4c6654f7043211f50bdfc92c357101ed14bc7b571458264f67ec5270fd51b",
+      "lines": 474,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM584SchemeALayout)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM584SchemeALayout)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        454
+      ],
+      "privateSelectorLiterals": [
+        "layoutPanel",
+        "layoutSidebar",
+        "zn51_renderRuntime:",
+        "znm584_layoutPanel",
+        "znm584_layoutSidebar",
+        "znm584_renderRuntime:",
+        "znm58_execute:",
+        "znm58_numberChanged:",
+        "znm58_numberReturn:",
+        "znm58_sliderChanged:",
+        "znm58_sliderCommitted:",
+        "znm58_switchChanged:"
+      ],
+      "selfMessageLines": [
+        123,
+        160,
+        172,
+        187,
+        194,
+        227,
+        241,
+        244,
+        248,
+        275,
+        284,
+        301,
+        312,
+        332,
+        366,
+        395,
+        431,
+        447
+      ],
+      "installationLines": [
+        452,
+        453,
+        454,
+        460,
+        464,
+        468
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM585UnifiedControlSemantics.inc",
+      "sha256": "12173bf43863cefb2433d2507793aa5ec06a73870d0d79175404635d0e9ed52c",
+      "lines": 278,
+      "interfaces": [
+        "ZNBinaryPatchWorkspace (ZNM585UnifiedControlSemantics)",
+        "ZNRuntimeMenuControllerV040 (ZNM585BuilderUI)",
+        "ZNStaticBinaryBuilder (ZNM585UnifiedBuild)"
+      ],
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM585UnifiedControlSemantics)",
+        "ZNRuntimeMenuControllerV040 (ZNM585BuilderUI)",
+        "ZNStaticBinaryBuilder (ZNM585UnifiedBuild)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        258
+      ],
+      "privateSelectorLiterals": [
+        "buildWorkspace:outputs:report:error:",
+        "validateAll:",
+        "zn64fb_renderOther",
+        "znm585_buildWorkspace:outputs:report:error:",
+        "znm585_renderOther",
+        "znm585_sliderMaxChanged:",
+        "znm585_validateAll:"
+      ],
+      "selfMessageLines": [
+        152,
+        178,
+        232
+      ],
+      "installationLines": [
+        257,
+        258,
+        262,
+        267
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM58UnifiedControlRuntime.inc",
+      "sha256": "8087346594991f922121487c4858cd7e18362f0bffe10c9b2e1bfdc0ed4d984d",
+      "lines": 377,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM58UnifiedControlRuntime)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM58UnifiedControlRuntime)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        367
+      ],
+      "privateSelectorLiterals": [
+        "activateItem:value:error:",
+        "zn51_renderRuntime:",
+        "znm58_execute:",
+        "znm58_numberChanged:",
+        "znm58_numberReturn:",
+        "znm58_renderRuntime:",
+        "znm58_sliderChanged:",
+        "znm58_sliderCommitted:",
+        "znm58_switchChanged:"
+      ],
+      "selfMessageLines": [
+        136,
+        140,
+        160,
+        163,
+        171,
+        212,
+        219,
+        245,
+        257,
+        277,
+        281,
+        320
+      ],
+      "installationLines": [
+        365,
+        366,
+        367,
+        372
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM590UnifiedActionModel.inc",
+      "sha256": "df62217c3843711f0630ed3c5786bf4042d52be3e40c30ea9f057a4b95808b58",
+      "lines": 292,
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM590Private)",
+        "ZNBinaryPatchWorkspace (ZNM590UnifiedValidation)",
+        "ZNRuntimeMenuControllerV040 (ZNM590BuilderAdapter)",
+        "ZNRuntimeMenuControllerV040 (ZNM590StaticPersistence)"
+      ],
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM590UnifiedValidation)",
+        "ZNRuntimeMenuControllerV040 (ZNM590BuilderAdapter)",
+        "ZNRuntimeMenuControllerV040 (ZNM590StaticPersistence)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        223,
+        256,
+        276
+      ],
+      "privateSelectorLiterals": [
+        "validateAll:",
+        "zn64fb_renderOther",
+        "znm590_renderOther",
+        "znm590_validateAll:"
+      ],
+      "selfMessageLines": [
+        133,
+        144,
+        270
+      ],
+      "installationLines": [
+        223,
+        275,
+        276,
+        280,
+        285
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM591OffsetHookControls.inc",
+      "sha256": "db1391fb97631c4cd1f3d37dfdbc1e5c8e7b5059bba9a260a9e68162972a9aa1",
+      "lines": 279,
+      "interfaces": [
+        "ZNM591SyntheticValidator : ZNPatchRuntimeValidator",
+        "ZNStaticBinaryBuilder (ZNM591OffsetHookBuild)",
+        "ZNRuntimeMenuControllerV040 (ZNM591BuilderUI)",
+        "ZNStaticPatchRecord (ZNM591Private)",
+        "ZNM56StaticValueCellBinder : NSObject",
+        "ZNM56StaticValueCellBinder (ZNM591OffsetHook)"
+      ],
+      "implementations": [
+        "ZNM591SyntheticValidator",
+        "ZNStaticBinaryBuilder (ZNM591OffsetHookBuild)",
+        "ZNRuntimeMenuControllerV040 (ZNM591BuilderUI)",
+        "ZNM56StaticValueCellBinder (ZNM591OffsetHook)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        262
+      ],
+      "privateSelectorLiterals": [
+        "applyText:info:error:",
+        "zn64fb_renderOther",
+        "znm591_applyText:info:error:",
+        "znm591_renderOther"
+      ],
+      "selfMessageLines": [
+        126,
+        146,
+        246
+      ],
+      "installationLines": [
+        261,
+        262,
+        268,
+        273
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM600UnifiedFeatureSurface.inc",
+      "sha256": "cefb3b24820eabafe20a55d0071b68f90cf1699c06dc9f36d5c33c9030dd74ba",
+      "lines": 318,
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM600Private)",
+        "ZNM56StaticValueCellBinder (ZNM600SafeOffsetABI)",
+        "ZNRuntimeMenuControllerV040 (ZNM600UnifiedFeatureSurface)"
+      ],
+      "implementations": [
+        "ZNM56StaticValueCellBinder (ZNM600SafeOffsetABI)",
+        "ZNRuntimeMenuControllerV040 (ZNM600UnifiedFeatureSurface)"
+      ],
+      "namedTypeEdges": [
+        {
+          "type": "ZNM56StaticValueCellBinder",
+          "owners": [
+            "ui/features/ZNM591OffsetHookControls.inc"
+          ]
+        }
+      ],
+      "blockLines": [
+        293,
+        309
+      ],
+      "privateSelectorLiterals": [
+        "applyText:info:error:",
+        "zn51_renderRuntime:",
+        "znm600_applyText:info:error:",
+        "znm600_renderRuntime:"
+      ],
+      "selfMessageLines": [
+        247,
+        279,
+        301
+      ],
+      "installationLines": [
+        306,
+        308,
+        309
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/features/ZNM630HardCutUI.inc",
+      "sha256": "c47226daaeb8a18575d5adc5a12d27617d77a860dbcdcbaf51b5c8ca3ad3d1ed",
+      "lines": 768,
+      "interfaces": [
+        "ZNStaticPatchRecord (ZNM630HardCutRecord)",
+        "ZNRuntimeMenuControllerV040 (ZNM630HardCutUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM630HardCutUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        628,
+        630,
+        748
+      ],
+      "privateSelectorLiterals": [
+        "removeFromSuperview",
+        "renderCompactPage",
+        "renderFullPage",
+        "znm58_execute:",
+        "znm58_numberChanged:",
+        "znm58_numberReturn:",
+        "znm58_sliderChanged:",
+        "znm58_sliderCommitted:",
+        "znm58_switchChanged:",
+        "znm630_hardCutButtonTapped:",
+        "znm630_hardCutNumberChanged:",
+        "znm630_hardCutNumberExecute:",
+        "znm630_hardCutNumberReturn:",
+        "znm630_hardCutRenderCompactPage",
+        "znm630_hardCutSliderChanged:",
+        "znm630_hardCutSliderCommitted:",
+        "znm630_hardCutSwitchChanged:",
+        "znm640_nativeHookSliderChanged:",
+        "znm640_nativeHookSliderCommitted:",
+        "znm650_nativeHookSwitchChanged:",
+        "znm660_nativeHookButtonTapped:",
+        "znm660_nativeHookNumberTapped:"
+      ],
+      "selfMessageLines": [
+        202,
+        204,
+        214,
+        228,
+        232,
+        260,
+        293,
+        295,
+        304,
+        362,
+        416,
+        418,
+        419,
+        425,
+        438,
+        441,
+        449,
+        535,
+        549,
+        550,
+        556,
+        585,
+        597,
+        609,
+        620,
+        635,
+        638,
+        684
+      ],
+      "installationLines": [
+        746,
+        747,
+        748,
+        754,
+        755,
+        761
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderMenuBinding.inc",
+      "sha256": "e297c89d208d4ad2b12ccd7c7e7eef1e933c8242b828f9e9e3c76951a8954e7e",
+      "lines": 16,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderMenuBinding)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderMenuBinding)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        15
+      ],
+      "privateSelectorLiterals": [
+        "zn40_baseCategories",
+        "zn40_baseSymbols",
+        "zn58mfb_baseCategories",
+        "zn58mfb_baseSymbols"
+      ],
+      "selfMessageLines": [
+        12,
+        13
+      ],
+      "installationLines": [
+        7,
+        15
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUI.inc",
+      "sha256": "a7e82c71cda3466fb453082b0bff2bf96a9a1a31e7b209911eae05a447ab3e37",
+      "lines": 415,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        404
+      ],
+      "privateSelectorLiterals": [
+        "fullSizeForWindow:",
+        "removeFromSuperview",
+        "renderFullPage",
+        "zn40_baseCategories",
+        "zn40_baseSymbols",
+        "zn57mf_addToBuilder:",
+        "zn57mf_baseCategories",
+        "zn57mf_baseSymbols",
+        "zn57mf_copyResult:",
+        "zn57mf_fullSizeForWindow:",
+        "zn57mf_queryChanged:",
+        "zn57mf_renderFullPage",
+        "zn57mf_search:"
+      ],
+      "selfMessageLines": [
+        97,
+        106,
+        107,
+        116,
+        133,
+        136,
+        142,
+        147,
+        169,
+        170,
+        174,
+        176,
+        183,
+        184,
+        195,
+        196,
+        198,
+        199,
+        206,
+        211,
+        212,
+        216,
+        225,
+        240,
+        241,
+        246,
+        258,
+        259,
+        274,
+        275,
+        276,
+        285,
+        286,
+        294,
+        298,
+        304,
+        305,
+        308,
+        309,
+        310,
+        318,
+        321,
+        332,
+        335,
+        340,
+        343,
+        344,
+        349,
+        350,
+        355,
+        356,
+        362,
+        363,
+        391
+      ],
+      "installationLines": [
+        399,
+        402,
+        403,
+        404
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUIV3.inc",
+      "sha256": "efc92a5cd42ad1b172a85fe079254b4f3ebad1f4a1e99077910da04f68099f94",
+      "lines": 469,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUIV3)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUIV3)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        460
+      ],
+      "privateSelectorLiterals": [
+        "removeFromSuperview",
+        "zn57mf_renderFinder",
+        "zn60v3_backToResults:",
+        "zn60v3_backToSearch:",
+        "zn60v3_candidateTapped:",
+        "zn60v3_copyAll:",
+        "zn60v3_copyValue:",
+        "zn60v3_createPatch:",
+        "zn60v3_cycleLimit:",
+        "zn60v3_queryChanged:",
+        "zn60v3_renderFinder",
+        "zn60v3_startSearch:"
+      ],
+      "selfMessageLines": [
+        123,
+        132,
+        137,
+        156,
+        157,
+        161,
+        163,
+        170,
+        171,
+        174,
+        177,
+        182,
+        183,
+        185,
+        192,
+        194,
+        195,
+        203,
+        208,
+        209,
+        210,
+        212,
+        219,
+        221,
+        230,
+        231,
+        235,
+        239,
+        242,
+        246,
+        258,
+        262,
+        268,
+        269,
+        275,
+        277,
+        278,
+        283,
+        284,
+        286,
+        292,
+        293,
+        304,
+        314,
+        315,
+        318,
+        319,
+        320,
+        321,
+        322,
+        326,
+        327,
+        331,
+        337,
+        338,
+        347,
+        350,
+        358,
+        363,
+        369,
+        370,
+        371,
+        373,
+        378,
+        383,
+        387,
+        390,
+        392,
+        394,
+        395,
+        398,
+        399,
+        401,
+        403,
+        404,
+        408,
+        410,
+        411,
+        416,
+        418,
+        419,
+        420,
+        424,
+        425,
+        429,
+        430,
+        437,
+        441,
+        444,
+        448,
+        452,
+        453
+      ],
+      "installationLines": [
+        458,
+        459,
+        460,
+        465
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUXV2.inc",
+      "sha256": "75d2c341d7644056685acbc6bf71ce5866049fff6946d440bcb1125cf5198026",
+      "lines": 200,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUXV2)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUXV2)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        191
+      ],
+      "privateSelectorLiterals": [
+        "zn57mf_renderFinder",
+        "zn58ux_copyAddress:",
+        "zn58ux_renderFinder"
+      ],
+      "selfMessageLines": [
+        44,
+        60,
+        114,
+        145,
+        146,
+        149,
+        160,
+        161,
+        167,
+        175,
+        183,
+        184
+      ],
+      "installationLines": [
+        189,
+        190,
+        191,
+        196
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNM45AddressOwningMethodUI.inc",
+      "sha256": "6b2efef136267b5b77aee2c207bf96ef165cc66799ff66badd819e0441d645c6",
+      "lines": 270,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNM45AddressOwningMethod)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM45AddressOwningMethod)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        260
+      ],
+      "privateSelectorLiterals": [
+        "zn60v3_renderDetailAtWidth:",
+        "zn60v3_renderResultsAtWidth:",
+        "znm442_submitSearch:",
+        "znm45_renderDetailAtWidth:",
+        "znm45_renderResultsAtWidth:",
+        "znm45_submitSearch:"
+      ],
+      "selfMessageLines": [
+        149,
+        156,
+        162,
+        163,
+        164,
+        168,
+        171,
+        174,
+        175,
+        176,
+        180,
+        181,
+        190,
+        204,
+        205,
+        210,
+        216,
+        217,
+        221,
+        222,
+        239,
+        247
+      ],
+      "installationLines": [
+        255,
+        258,
+        259,
+        260
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM42UI.inc",
+      "sha256": "99d692b4238076e64a119ba235f5bfa38bf179dfb7f3c0ccd150ff47ef0d9c28",
+      "lines": 493,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM42UI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM42UI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        145,
+        451,
+        484
+      ],
+      "privateSelectorLiterals": [
+        "compare:",
+        "integerValue",
+        "zn60v3_backToSearch:",
+        "zn60v3_renderResultsAtWidth:",
+        "znm42_argumentChanged:",
+        "znm42_binaryPickerTapped:",
+        "znm42_createCandidate:",
+        "znm42_filterTapped:",
+        "znm42_openDetail:",
+        "znm42_renderResultsAtWidth:",
+        "znm42_testCandidate:",
+        "znux_binaryPickerTapped:"
+      ],
+      "selfMessageLines": [
+        188,
+        193,
+        201,
+        204,
+        214,
+        215,
+        220,
+        227,
+        233,
+        240,
+        251,
+        264,
+        266,
+        267,
+        279,
+        291,
+        302,
+        327,
+        333,
+        338,
+        342,
+        347,
+        351,
+        358,
+        363,
+        364,
+        370,
+        376,
+        377,
+        378,
+        385,
+        387,
+        388,
+        400,
+        402,
+        404,
+        411,
+        414,
+        415,
+        424,
+        426,
+        428,
+        430,
+        437,
+        462
+      ],
+      "installationLines": [
+        479,
+        482,
+        483,
+        484
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43UI.inc",
+      "sha256": "f819a642dd2fec4757460b680986492b55b8a1360f5809dbb739f123bc96db0e",
+      "lines": 448,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        125,
+        241,
+        246,
+        251,
+        438
+      ],
+      "privateSelectorLiterals": [
+        "compare:",
+        "integerValue",
+        "zn60v3_backToSearch:",
+        "zn60v3_renderDetailAtWidth:",
+        "zn60v3_renderResultsAtWidth:",
+        "zn60v3_renderSearchAtWidth:",
+        "zn60v3_startSearch:",
+        "znm43_argumentChanged:",
+        "znm43_assemblyTapped:",
+        "znm43_createCandidate:",
+        "znm43_doneEditing:",
+        "znm43_filterTapped:",
+        "znm43_limitChanged:",
+        "znm43_openDetail:",
+        "znm43_renderDetailAtWidth:",
+        "znm43_renderResultsAtWidth:",
+        "znm43_renderSearchAtWidth:",
+        "znm43_startSearch:",
+        "znm43_testCandidate:"
+      ],
+      "selfMessageLines": [
+        162,
+        163,
+        167,
+        171,
+        173,
+        178,
+        181,
+        183,
+        188,
+        193,
+        207,
+        214,
+        216,
+        217,
+        224,
+        229,
+        240,
+        257,
+        271,
+        273,
+        275,
+        276,
+        279,
+        287,
+        289,
+        290,
+        291,
+        294,
+        295,
+        298,
+        299,
+        300,
+        301,
+        305,
+        309,
+        310,
+        315,
+        316,
+        318,
+        322,
+        328,
+        336,
+        338,
+        339,
+        349,
+        358,
+        360,
+        365,
+        379,
+        382,
+        383,
+        384,
+        385,
+        388,
+        391,
+        392,
+        393,
+        397,
+        402,
+        403,
+        409,
+        410,
+        411,
+        416,
+        417,
+        420,
+        421,
+        427
+      ],
+      "installationLines": [
+        433,
+        436,
+        437,
+        438
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderUnifiedUI.inc",
+      "sha256": "1a838faee789ca9d7d81581badc6a6b4a93f73e6e31435e2f631afc174609d9c",
+      "lines": 650,
+      "interfaces": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)"
+      ],
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)"
+      ],
+      "namedTypeEdges": [
+        {
+          "type": "block",
+          "owners": [
+            "ui/compat/ZNM441Hotfix.inc"
+          ]
+        }
+      ],
+      "blockLines": [
+        105,
+        131,
+        219,
+        640
+      ],
+      "privateSelectorLiterals": [
+        "compare:",
+        "zn60v3_backToResults:",
+        "zn60v3_backToSearch:",
+        "zn60v3_renderDetailAtWidth:",
+        "zn60v3_renderResultsAtWidth:",
+        "zn60v3_renderSearchAtWidth:",
+        "zn64_hookTestTapped:",
+        "znm43_assemblyTapped:",
+        "znm43_testCandidate:",
+        "znm54_argumentChanged:",
+        "znm54_createCandidate:",
+        "znm54_done:",
+        "znm54_filterTapped:",
+        "znm54_historyTapped:",
+        "znm54_limitChanged:",
+        "znm54_openDetail:",
+        "znm54_queryChanged:",
+        "znm54_renderDetailAtWidth:",
+        "znm54_renderResultsAtWidth:",
+        "znm54_renderSearchAtWidth:",
+        "znm54_submitSearch:"
+      ],
+      "selfMessageLines": [
+        216,
+        224,
+        228,
+        233,
+        238,
+        239,
+        245,
+        254,
+        256,
+        257,
+        261,
+        265,
+        267,
+        275,
+        280,
+        283,
+        284,
+        291,
+        296,
+        301,
+        314,
+        315,
+        327,
+        344,
+        346,
+        347,
+        354,
+        359,
+        360,
+        365,
+        369,
+        376,
+        377,
+        378,
+        384,
+        390,
+        393,
+        397,
+        402,
+        405,
+        406,
+        408,
+        417,
+        425,
+        441,
+        445,
+        446,
+        456,
+        472,
+        481,
+        486,
+        499,
+        504,
+        512,
+        522,
+        530,
+        540,
+        543,
+        548,
+        552,
+        555,
+        559,
+        565,
+        569,
+        570,
+        572,
+        573,
+        575,
+        582,
+        610,
+        611,
+        617,
+        627
+      ],
+      "installationLines": [
+        130,
+        131,
+        635,
+        638,
+        639,
+        640
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    },
+    {
+      "path": "ui/shell/ZNDeferredBootstrap.inc",
+      "sha256": "cd3e7c24082f9aae83299b6b36bf4f1e32a29dec5b1bbe82a7cd3eab12d59b31",
+      "lines": 182,
+      "interfaces": [
+        "ZNDeferredLauncher : NSObject"
+      ],
+      "implementations": [
+        "ZNDeferredLauncher"
+      ],
+      "namedTypeEdges": [],
+      "blockLines": [
+        80,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        144,
+        160,
+        161,
+        162,
+        163,
+        164,
+        177
+      ],
+      "privateSelectorLiterals": [
+        "zn_windowChanged:"
+      ],
+      "selfMessageLines": [
+        99,
+        119,
+        150,
+        165,
+        167
+      ],
+      "installationLines": [
+        7,
+        8,
+        9,
+        10,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        79,
+        80,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        160,
+        161,
+        162,
+        163,
+        176
+      ],
+      "initializationOrder": "Original ZNUnifiedUI marker and deferred installers preserved; module-specific closure requires source review + strict standalone compile + real IMP fixture"
+    }
+  ]
+}

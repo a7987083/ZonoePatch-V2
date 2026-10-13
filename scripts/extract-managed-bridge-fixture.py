@@ -1,0 +1,20 @@
+from pathlib import Path
+import sys,json,hashlib
+root=Path(__file__).resolve().parents[1];p=root/'iosruntimepatchmenu/src/ZNNativeHookRuntime.mm';s=p.read_text();out=Path(sys.argv[1]);parts=[];spans=[]
+for start,end in [('static const NSUInteger kZNManagedCallbackMaxSlots','typedef struct {'),('static BOOL ZNManagedInvokeBoolCallback','typedef uintptr_t (*ZNManagedCallbackOriginalFn'),('static const NSUInteger kZNReturnBoolMaxSlots','static ZNReturnBoolSlot *ZNReturnBoolSlotForTarget'),('typedef uint8_t (*ZNReturnBoolOriginalFn','#define ZN_RETURN_BOOL_REPLACEMENT'),('typedef struct {\n    std::atomic<uintptr_t> target;\n    std::atomic<uint64_t> incarnation;\n    std::atomic<uintptr_t> original;\n    std::atomic<uint32_t> callbackRegister;','static ZNManagedCallbackSlot *ZNManagedCallbackSlotForTarget'),('typedef uintptr_t (*ZNManagedCallbackOriginalFn','#define ZN_MANAGED_CALLBACK_REPLACEMENT')]:
+ a=s.index(start);b=s.index(end,a);code=s[a:b];parts.append(code);spans.append(dict(start=start,end=end,sha256=hashlib.sha256(code.encode()).hexdigest()))
+header='#import <Foundation/Foundation.h>\n#include "ZNRuntimeSymbolCache.h"\n#include <cassert>\n#include <thread>\n#include <chrono>\n'
+test='''int main(int argc,char **argv){@autoreleasepool{assert(argc==2);ZNCurrentImageGeneration();for(int pass=0;pass<2;pass++){void *h=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(h);auto get=(unsigned(*)(void))dlsym(h,"FixtureCallbackValue");Dl_info info={};assert(dladdr((void *)get,&info));auto state=ZNImageLifetimeForHeader((uintptr_t)info.dli_fbase);NSString *error=nil;assert(ZNManagedPrepareInvokeBridge(&error));assert(state->executions.inFlight()==0);assert(ZNManagedInvokeBoolCallback(0x2000,YES)&&get()==1);assert(ZNManagedInvokeBoolCallback(0x2000,NO)&&get()==0);assert(!ZNManagedInvokeBoolCallback(0,YES));auto original=(uintptr_t)dlsym(h,"FixtureBoolOriginal");assert(original);
+ auto &r=gZNReturnBoolSlots[0];r.target.store(original);r.incarnation.store(state->incarnation);r.original.store(original);r.enabled.store(0);
+ assert(ZNReturnBoolHandle(0,1,0,0,0,0,0,0,0)==1);r.incarnation.store(state->incarnation+1);assert(ZNReturnBoolHandle(0,1,0,0,0,0,0,0,0)==0);
+ auto &m=gZNManagedCallbackSlots[0];m.target.store(original);m.incarnation.store(state->incarnation);m.enabled.store(1);m.callbackRegister.store(0);m.callbackValue.store(1);
+ assert(ZNManagedCallbackHandle(0,0x2000,0,0,0,0,0,0,0)==0&&get()==1);auto success=m.callbackSuccess.load();m.incarnation.store(state->incarnation+1);assert(ZNManagedCallbackHandle(0,0x2000,0,0,0,0,0,0,0)==0&&m.callbackSuccess.load()==success);
+ assert(state->executions.inFlight()==0);assert(dlclose(h)==0&&!state->live);}
+ void *h=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(h);auto block=(void(*)(int))dlsym(h,"FixtureBlockInvoke");auto entered=(unsigned(*)(void))dlsym(h,"FixtureInvokeEntered");Dl_info info={};assert(dladdr((void *)block,&info));auto state=ZNImageLifetimeForHeader((uintptr_t)info.dli_fbase);block(1);
+ std::thread caller([]{assert(ZNManagedInvokeBoolCallback(0x2000,YES));});auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+ while(!entered()&&std::chrono::steady_clock::now()<deadline)std::this_thread::yield();assert(entered()&&state->executions.inFlight()==1);
+ assert(dlclose(h)==0&&state->live);assert(!state->executions.drain(std::chrono::milliseconds(1)));
+ {ZNRuntimeExecutionScope control;assert(control.retain((uintptr_t)block,state->incarnation));block(0);caller.join();}assert(!state->live&&state->executions.inFlight()==0);
+ puts("actual production Managed prepare/invoke cache + leased API calls + callback value + repeated unload/reload PASS (synthetic IL2CPP export/object backend)");}}
+'''
+out.write_text(header+'\n'.join(parts)+'\n'+test);out.with_suffix('.json').write_text(json.dumps(dict(source=str(p.relative_to(root)),spans=spans,backend='Real dylib loader and production helpers; synthetic IL2CPP objects/exports, not device ABI or trampoline execution'),indent=2)+'\n')

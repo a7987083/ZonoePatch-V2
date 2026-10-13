@@ -1,0 +1,668 @@
+{
+  "schema": "zonoe.ui-lexical-dependencies/v1",
+  "scope": "static/macro token references across UI sections; relocated private symbols live in explicit owner interfaces; macro lifetimes require #undef analysis",
+  "resolvedBaseline": "docs/UI_DEPENDENCIES_BASELINE.json",
+  "macroFalseEdges": [
+    "ZonoePatchStart",
+    "ZonoePatchShow"
+  ],
+  "symbols": {
+    "ZonoePatchStart": {
+      "owner": "ui/core/ZonoeRuntimeMenu.inc",
+      "line": 546,
+      "consumers": [
+        "ui/shell/ZNDeferredBootstrap.inc"
+      ]
+    },
+    "ZonoePatchShow": {
+      "owner": "ui/core/ZonoeRuntimeMenu.inc",
+      "line": 547,
+      "consumers": [
+        "ui/shell/ZNDeferredBootstrap.inc"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "path": "ui/compat/ZNIL2CPPABIDetailUI.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPABIDetailUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        122
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM441Hotfix.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM441Hotfix)",
+        "ZNIL2CPPInvokeEngine (ZNM441CommonStruct)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        168,
+        175,
+        490
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM461Polish.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM461Polish)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        200
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM47BuilderArgsUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47BuilderArgsUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        147
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM47VersionUI.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47VersionUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        34
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM51SilentCustomerExecution.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51SilentCustomerExecution)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        117
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM57RuntimeOnlyBuilderGate)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        74
+      ]
+    },
+    {
+      "path": "ui/compat/ZNM585StaticRuntimeRange.inc",
+      "implementations": [],
+      "exchanges": 0,
+      "sets": 0,
+      "dynamicLookupLines": []
+    },
+    {
+      "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallBuilderUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        314
+      ]
+    },
+    {
+      "path": "ui/compat/ZNUXFixesV2.inc",
+      "implementations": [
+        "ZNUXPassthroughRootView",
+        "ZNUXOverlayController",
+        "ZNRuntimeMenuControllerV040 (ZNUXFixesV2)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        351
+      ]
+    },
+    {
+      "path": "ui/core/ZonoeRuntimeMenu.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV024",
+        "ZNRuntimeMenuControllerV040 (V040)",
+        "ZNRuntimeMenuControllerV040 (V0401)",
+        "ZNRuntimeMenuControllerV040 (V0402)",
+        "ZNRuntimeMenuControllerV040 (V042)",
+        "ZNRuntimeMenuControllerV040 (V043)",
+        "ZNRuntimeMenuControllerV040 (V044)",
+        "ZNRuntimeMenuControllerV040 (V048)",
+        "ZNRuntimeMenuControllerV040 (V049)",
+        "ZNRuntimeMenuControllerV040 (V053Current)"
+      ],
+      "exchanges": 9,
+      "sets": 0,
+      "dynamicLookupLines": [
+        757,
+        903,
+        1008,
+        1063,
+        1153,
+        1364,
+        1567,
+        1769,
+        1883,
+        2094
+      ]
+    },
+    {
+      "path": "ui/execution/ZNInstanceSelectionV2UI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNInstanceSelectionV2UI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        66,
+        73,
+        260
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM46FullSignatureUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM46FullSignatureUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        88,
+        95,
+        355
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM47MultiArgUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47MultiArgUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        274
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM47ReceiverCaptureUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM47ReceiverCaptureUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        42,
+        49,
+        182
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM49GenericInvokeEditableArgs.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM49GenericInvokeEditableArgs)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        283
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM51)",
+        "ZNIL2CPPInvokeEngine (ZNM51ImmediateChain)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        440
+      ]
+    },
+    {
+      "path": "ui/execution/ZNM52ChainExecuteButton.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM52ChainExecuteButton)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        1634
+      ]
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderControlsV2.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderControlsV2)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        237
+      ]
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderUI.inc",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNFeatureEditing)",
+        "ZNRuntimeMenuControllerV040 (ZNFeatureBuilderUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        745
+      ]
+    },
+    {
+      "path": "ui/features/ZNFeatureGroupUI.mm",
+      "implementations": [
+        "ZN50FeatureToggleControl",
+        "ZNRuntimeMenuControllerV040 (ZNFeatureGroupUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        484
+      ]
+    },
+    {
+      "path": "ui/features/ZNFeatureRuntimeControlsV2.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNFeatureRuntimeControlsV2)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        180
+      ]
+    },
+    {
+      "path": "ui/features/ZNM462CandidateBindingUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM462CandidateBindingUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        50,
+        57,
+        278
+      ]
+    },
+    {
+      "path": "ui/features/ZNM53ControlBinding.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM53RuntimeAutoExecute)",
+        "ZNM53StaticControlBinder"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        342
+      ]
+    },
+    {
+      "path": "ui/features/ZNM551RuntimeSliderStability.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM551RuntimeSliderStability)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        83
+      ]
+    },
+    {
+      "path": "ui/features/ZNM55TypedControlBinding.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM55Typed)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        189
+      ]
+    },
+    {
+      "path": "ui/features/ZNM562SliderIsolation.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM562SliderIsolation)"
+      ],
+      "exchanges": 0,
+      "sets": 1,
+      "dynamicLookupLines": [
+        44
+      ]
+    },
+    {
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM57UnifiedRuntimeControls)"
+      ],
+      "exchanges": 0,
+      "sets": 1,
+      "dynamicLookupLines": [
+        122
+      ]
+    },
+    {
+      "path": "ui/features/ZNM584SchemeALayout.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM584SchemeALayout)"
+      ],
+      "exchanges": 0,
+      "sets": 3,
+      "dynamicLookupLines": [
+        455
+      ]
+    },
+    {
+      "path": "ui/features/ZNM585UnifiedControlSemantics.inc",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM585UnifiedControlSemantics)",
+        "ZNRuntimeMenuControllerV040 (ZNM585BuilderUI)",
+        "ZNStaticBinaryBuilder (ZNM585UnifiedBuild)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        259,
+        264,
+        269
+      ]
+    },
+    {
+      "path": "ui/features/ZNM58UnifiedControlRuntime.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM58UnifiedControlRuntime)"
+      ],
+      "exchanges": 0,
+      "sets": 1,
+      "dynamicLookupLines": [
+        368
+      ]
+    },
+    {
+      "path": "ui/features/ZNM590UnifiedActionModel.inc",
+      "implementations": [
+        "ZNBinaryPatchWorkspace (ZNM590UnifiedValidation)",
+        "ZNRuntimeMenuControllerV040 (ZNM590BuilderAdapter)",
+        "ZNRuntimeMenuControllerV040 (ZNM590StaticPersistence)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        277,
+        282
+      ]
+    },
+    {
+      "path": "ui/features/ZNM591OffsetHookControls.inc",
+      "implementations": [
+        "ZNM591SyntheticValidator",
+        "ZNStaticBinaryBuilder (ZNM591OffsetHookBuild)",
+        "ZNRuntimeMenuControllerV040 (ZNM591BuilderUI)",
+        "ZNM56StaticValueCellBinder (ZNM591OffsetHook)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        265,
+        270
+      ]
+    },
+    {
+      "path": "ui/features/ZNM600UnifiedFeatureSurface.inc",
+      "implementations": [
+        "ZNM56StaticValueCellBinder (ZNM600SafeOffsetABI)",
+        "ZNRuntimeMenuControllerV040 (ZNM600UnifiedFeatureSurface)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        80,
+        310,
+        312
+      ]
+    },
+    {
+      "path": "ui/features/ZNM630HardCutUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM630HardCutUI)"
+      ],
+      "exchanges": 0,
+      "sets": 2,
+      "dynamicLookupLines": [
+        749
+      ]
+    },
+    {
+      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFeatureUI)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        138
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM2UI)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        185
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM21CancelUX)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        81
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM22StableCancelUX)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        101
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderMenuBinding.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderMenuBinding)"
+      ],
+      "exchanges": 2,
+      "sets": 0,
+      "dynamicLookupLines": [
+        15
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        405
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUIV3.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUIV3)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        461
+      ]
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUXV2.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNIL2CPPMethodFinderUXV2)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        192
+      ]
+    },
+    {
+      "path": "ui/finder/ZNM442SearchRestore.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM442SearchRestore)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        225
+      ]
+    },
+    {
+      "path": "ui/finder/ZNM45AddressOwningMethodUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM45AddressOwningMethod)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        261
+      ]
+    },
+    {
+      "path": "ui/finder/ZNM52MethodSearchHistory.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNM52MethodSearchHistory)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        169
+      ]
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM42UI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM42UI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        485
+      ]
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43Polish.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43Polish)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        63
+      ]
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43UI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43UI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        110,
+        111,
+        112,
+        113,
+        439
+      ]
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderUnifiedUI.inc",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNMethodFinderUnifiedUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        641
+      ]
+    },
+    {
+      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFinderUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        127
+      ]
+    },
+    {
+      "path": "ui/shell/ZNDeferredBootstrap.inc",
+      "implementations": [
+        "ZNDeferredLauncher"
+      ],
+      "exchanges": 0,
+      "sets": 0,
+      "dynamicLookupLines": []
+    },
+    {
+      "path": "ui/shell/ZNPublicCompactUI.mm",
+      "implementations": [
+        "ZNRuntimeMenuControllerV040 (ZNPublicCompactUI)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": []
+    },
+    {
+      "path": "ui/shell/ZNRuntimeMenuModalShell.mm",
+      "implementations": [
+        "ZNModalPassthroughView",
+        "ZNRuntimeMenuModalViewController",
+        "ZNRuntimeMenuControllerV040 (ZNRuntimeMenuModalShell)"
+      ],
+      "exchanges": 1,
+      "sets": 0,
+      "dynamicLookupLines": [
+        229
+      ]
+    }
+  ]
+}

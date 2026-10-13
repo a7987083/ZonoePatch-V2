@@ -1,0 +1,299 @@
+[
+  {
+    "sha": "aa12054c9b19ef8b2e90ce66d2158b8c5687e1e1",
+    "message": "chore: initialize independent development repository"
+  },
+  {
+    "sha": "ae631f4ff17658e747016d596a71b11deab5450f",
+    "message": "baseline: import unchanged 1.zip menu source with pinned CI build harness"
+  },
+  {
+    "sha": "71795f613e2d97447ac147a5bde3674c61b6ffb4",
+    "message": "fix(P0 H01): cancel stale hook retries after explicit teardown; add scheduler regression"
+  },
+  {
+    "sha": "0623bde46103c6d0b06b29cb415b90bbe75c4e61",
+    "message": "fix(P0 H02): isolate prepare and emit in a captured build session; deep-copy static rows"
+  },
+  {
+    "sha": "781a4e04f8b7a9f82698ed2714aaea1ec0aaf254",
+    "message": "fix(P0 H03): unique owned output staging and checked report writes; add I/O fault regression"
+  },
+  {
+    "sha": "e1c917b4882014a353e103c3a2ad49ef1be44f35",
+    "message": "test: match production GNU Objective-C++ dialect for scheduler regression"
+  },
+  {
+    "sha": "f73dbc2b0ad192d9781ee39adc5de8cdb3b3ab5c",
+    "message": "fix(P0 H03): propagate static report and validation I/O errors without false success"
+  },
+  {
+    "sha": "e6607c89c6a0ad30b0b6ece98dc1a29bd44bb81b",
+    "message": "fix(P0 H04): retire hooks without reclaiming in-flight trampolines; preserve legacy destruction privately"
+  },
+  {
+    "sha": "d17a650440e076a0b456951c89a4888f977e4b8a",
+    "message": "fix(P0 H06): gate raw receiver compatibility and revalidate its bounded lease; keep GCHandle path"
+  },
+  {
+    "sha": "839ae2234f15b5e0a3c632cec9e0b748b4d710df",
+    "message": "test(P0 H07): preserve historical topology baseline and enforce exact imported UI digests"
+  },
+  {
+    "sha": "733971226a3a81f796380fee7205128808c54e2e",
+    "message": "fix(P0 H02): transfer synchronous build results through owned block locals"
+  },
+  {
+    "sha": "b63b3bd6dcfeb54375a3822c58ffbb673692497c",
+    "message": "fix(P1 M01): retain in-flight lifecycle requests and compare against scanned image count"
+  },
+  {
+    "sha": "3ddc39dd2c3f3ce5734eccba8450735b9d27f201",
+    "message": "fix(P1 M04): key runtime caches by dyld add/remove generation instead of image count alone"
+  },
+  {
+    "sha": "1bbba24c1e0199ad55168ea20fff9aa27d29ba08",
+    "message": "fix(P0 H03): remove superseded serialization temporaries caught by compiler warnings"
+  },
+  {
+    "sha": "f9eab4135cc789f8ba43a76e9e11af1ce63872bf",
+    "message": "fix(P1 M02): identity-scoped Hook persistence, inventory removal and ordered desired commands"
+  },
+  {
+    "sha": "4cf2e0a48987ad11238f8f44c172502d72e7be1d",
+    "message": "fix(P1 M03): use one production scalar parser and reject negative unsigned/non-finite inputs"
+  },
+  {
+    "sha": "3b14df55e290b582abe408838097a8d70bb13006",
+    "message": "fix(P1 M03): make parser control flow warning-clean; portable boundary tests pass"
+  },
+  {
+    "sha": "c4cb55a1e242927e156adc7a851d64d313047bd9",
+    "message": "build(P1 M05): pin baseline Xcode/SDK and Actions revisions; record dependency/toolchain identities"
+  },
+  {
+    "sha": "749941b10b57c643000f48a5d5d0022aad229d94",
+    "message": "refactor(P0 H05): checked activation dependencies without changing historical selector/IMP topology"
+  },
+  {
+    "sha": "6cb57859575af97716ab55a4a925a19d106e5e82",
+    "message": "refactor(P1 M10): shared checked byte views; fuzz production layout with sanitizers; cover Static cache generation",
+    "note": "Metadata-only commit with unchanged tree; actual M10 source is cdcc759d05a60843d7bcc966fa59763a8022fa91."
+  },
+  {
+    "sha": "cdcc759d05a60843d7bcc966fa59763a8022fa91",
+    "message": "refactor(P1 M10): apply checked byte views and sanitizer malformed-layout regression"
+  },
+  {
+    "sha": "43f77afe0c5a8539950681b82a40e94a82f7c46b",
+    "message": "test(P1 M07): production build-session isolation, ABI and format tests; extract row/snapshot owners"
+  },
+  {
+    "sha": "e8bafb206e67a7db251b385b3da0ff197e7cdc96",
+    "message": "fix(P1 M02): reject identity reuse even after retirement and include codec/ABI binding fields"
+  },
+  {
+    "sha": "658c1865d1c40a86b94e829883cb3442736c0044",
+    "message": "perf(P2 L01): extract bounded logger ring and remove per-line formatter/array shifting"
+  },
+  {
+    "sha": "babc9c348644006a3805563e7d46721bd405e4e6",
+    "message": "perf(P1 M11): skip inactive/fully-hidden polling and redundant view reordering; preserve fallback timer"
+  },
+  {
+    "sha": "d2c933ffb7dc29969158d17403b567a107728818",
+    "message": "test(P1 M07): protect Objective-C dictionary literals from C assert macro comma parsing"
+  },
+  {
+    "sha": "849fc4445ec56f82d9ec8932622aef2ad43ee995",
+    "message": "build(P2 L03): strict warnings on new owners; document authoring/build/runtime model boundaries"
+  },
+  {
+    "sha": "69125a46db9be3fb7cf25f1391659cea758a7e9a",
+    "message": "docs(P1 M09): protect retained compatibility paths and record hashes/references in CI"
+  },
+  {
+    "sha": "3f9cc8e578ca6b62fadeda20b5c77e0c5a6087d8",
+    "message": "test(P1 M07): declare snapshot category owner and complete codec test linkage with explicit policy stubs"
+  },
+  {
+    "sha": "974cf073cd81ce62340fe86b1670b0e7582bbe5b",
+    "message": "refactor(P2 L04): typed build context, frozen slider preferences and fail-closed provider collection"
+  },
+  {
+    "sha": "701e43c3acbd3ddd302819f149c0c43b1c02b6ff",
+    "message": "build: capture production regression logs, native ARM64 fixture and complete source/commit artifacts"
+  },
+  {
+    "sha": "7cd6c1f3eecbdd5bfabc0abc42d7c2dfe99e778a",
+    "message": "fix(P1 M01): lifecycle owns scheduler reconciliation even when capability discovery is cached"
+  },
+  {
+    "sha": "53c1dbcf54fae17bf2809b726f27d0ac8ac31914",
+    "message": "fix(P0 H03): fail postprocess on missing/malformed reports instead of claiming success"
+  },
+  {
+    "sha": "3a53fbb992dad885476a14eb0c18e97b6a0c722b",
+    "message": "fix(P0 H02): capture both action stores under a fixed lock order before preparing build copies"
+  },
+  {
+    "sha": "d91c8d0be8d60232d738d5db0b7449688c0a9d6e",
+    "message": "build: verify final Mach-O dependencies/platform and both CodeDirectory page-hash tables"
+  },
+  {
+    "sha": "6de908d5c586bcf95ddde775fa3a1a3818074cf4",
+    "message": "refactor(H05): decompose UI into ordered byte-equivalent source modules"
+  },
+  {
+    "sha": "802256df7fcdc33c95026b75671785a1cb851693",
+    "message": "fix(H05): preserve implementation diagnostic scope across UI includes"
+  },
+  {
+    "sha": "32c839e5a86282df498876090d377a11b516ada5",
+    "message": "refactor(M10): share checked Mach-O file parsing and transactional LINKEDIT edits"
+  },
+  {
+    "sha": "582557fb60a400519a1c9d3a4f8b2acd8eaed6c2",
+    "message": "test(M10): compare production signing output against stable baseline bytes"
+  },
+  {
+    "sha": "e2ec0c74a580a1fbaca05e9598d9f2ab500025ac",
+    "message": "feat(M11): add bounded opt-in production spans and reproducible performance harness"
+  },
+  {
+    "sha": "f0f718784aeefd519d9493bb4c2014724109f27c",
+    "message": "refactor(L02): remove four proven unreferenced file-local alignment helpers"
+  },
+  {
+    "sha": "1ccb74267d497f701e9b2fdfabb301d6318bc615",
+    "message": "fix(M10): validate owner sections and remaining active file pipelines before writes"
+  },
+  {
+    "sha": "273966cbbe7ad313b1d7c906c7d55343e7d43110",
+    "message": "refactor(H05): isolate presentation defaults with production Foundation regressions"
+  },
+  {
+    "sha": "84d7c1c9e3ced9ce4c5b9a3018772ee75eb7910b",
+    "message": "refactor(M10): retain legacy builder while adopting shared checked file view"
+  },
+  {
+    "sha": "2bcb98bf8dcbba29a39c871feefeb646e141a8b4",
+    "message": "test(M10): verify actual owned-segment layout against baseline and guard allocation overflow"
+  },
+  {
+    "sha": "770db3f7669ac054d748537bc86710d5c7a856ca",
+    "message": "docs(H05): inventory concrete cross-section and dynamic UI dependencies"
+  },
+  {
+    "sha": "0c2e02d5d22a875b15b363afa1016d227b891100",
+    "message": "test(M10): compare actual runtime-only target generation bytes against baseline"
+  },
+  {
+    "sha": "3e18504de52fe2e316c09826c1c350e6a6cba3a2",
+    "message": "ci(M10): retain production binary-equivalence logs in delivery artifacts"
+  },
+  {
+    "sha": "75986827d564f9085feed6f7878ae30ffb8c7a15",
+    "message": "feat(M10.1): own loaded headers and use generation-checked fault-safe VM reads"
+  },
+  {
+    "sha": "10d18c5fd2aee69d1e0c5ca8cf7cec1bbf842cbd",
+    "message": "fix(M10.1): use SDK-supported vm_read_overwrite on iOS and macOS"
+  },
+  {
+    "sha": "b4e9d3e27d3642e0fefa7f6b6338d73e4b922a89",
+    "message": "refactor(H05.2): resolve UI private dependencies and compile three category families independently"
+  },
+  {
+    "sha": "72ff18228d47ed5aeba142d3d7d98d1ed9b7422d",
+    "message": "refactor(M10.1): invalidate owned header cache and retain probe command owners across scans"
+  },
+  {
+    "sha": "c3666e998898fa61f02f09e5d242cd50ad111623",
+    "message": "fix(H05.2): declare preserved subtitle and builder selectors at the private UI boundary"
+  },
+  {
+    "sha": "06db3d05dbf716416c2cda0926d2418ba3d90f27",
+    "message": "fix(M10.1): parse copied runtime tables and retain the exact pre-adapter UI digest gate"
+  },
+  {
+    "sha": "19ddffb82e828cbde6cc599f9be2dabccb11c7ec",
+    "message": "feat(H05.1): inventory every selector installation and trace actual IMP transitions without changing order"
+  },
+  {
+    "sha": "1f531fd3fac94db28a9d2a4ea50c602673dd6e37",
+    "message": "fix(M10.1): restrict snapshot ownership to image info and preserve hook record layout"
+  },
+  {
+    "sha": "75c48b537f004b4b96c474562b2f71cc6cf43047",
+    "message": "feat(M11.2): measure async queue wait cancellation acknowledgment and first display tick with bounded tickets"
+  },
+  {
+    "sha": "6f0d3c7ccdc8cd45a4e236319de9ffe4997ede69",
+    "message": "test(M11.2): calibrate sampling overhead against an identical empty host workload"
+  },
+  {
+    "sha": "d3dc654f6ce144b57deac9afa1caa26791a261af",
+    "message": "fix(M11.2): preserve subnanosecond batch averages and distinguish batch quantiles"
+  },
+  {
+    "sha": "59ff521b94378b8e008c93e1580116f908e73a7e",
+    "message": "fix(M11.2): link async metrics and display tick owners into the production dylib"
+  },
+  {
+    "sha": "8e5a1cdb02fe077164d321d76cd2fefef2651f15",
+    "message": "test(M10.2): execute full production target builders and action writes across combination capacity and rollback cases"
+  },
+  {
+    "sha": "799e75c6b508b9cdb7b8b362341d915f1ff73560",
+    "message": "refactor(L02): remove the proven unused trailing-string predicate after reviewing its actual semantics"
+  },
+  {
+    "sha": "01e3c623942973e21f54ae65548f4056b8cf9192",
+    "message": "refactor(H05.2): compile the collision-free footer version category independently with unchanged installer body"
+  },
+  {
+    "sha": "051dfb651d14affdc794edc70be41a0897391da5",
+    "message": "fix(M10.1): route reads larger than the cache window through the bounded VM copy path"
+  },
+  {
+    "sha": "ffd4e4e132de69871d7429e78bcf698ae0f3af05",
+    "message": "refactor(M10.1): validate resolver executable ranges from owned image metadata instead of live load commands"
+  },
+  {
+    "sha": "a31fc1e1688f1a2e55e3b2a7e031999b53e309e0",
+    "message": "refactor(H05.2): compile the slider isolation owner independently without changing selectors or IMP installation"
+  },
+  {
+    "sha": "6978cc8f3060495addb8336bb198fad3d5d0351d",
+    "message": "refactor(H05.2): compile feature group controls as an independent unit with an explicit content-height interface"
+  },
+  {
+    "sha": "607a0b512112b1382c480dd37531aaac5c936661",
+    "message": "refactor(H05.2): compile runtime feature controls independently while preserving restore callbacks and installation order"
+  },
+  {
+    "sha": "fc681daf9362be0b424463ee41c8133e50b75cad",
+    "message": "test(M10.2): verify independently computed CodeDirectory page hashes for each signed builder combination"
+  },
+  {
+    "sha": "5fa9b196e6749bb0bd946e9e96ca9b49e2507b1c",
+    "message": "fix(M10.2): include runtime-only original filenames and require all five signed fixture outputs"
+  },
+  {
+    "sha": "8740bf547917a193efbb808ce0c040864bcf1ae1",
+    "message": "fix(H05.2): import the feature capability owner explicitly and fully initialize timebase metadata"
+  },
+  {
+    "sha": "bafc2017131d5984bb585577b004adfd28cd7648",
+    "message": "refactor(L02): remove the source-proven unused runtime feature metadata wrapper surfaced by strict compilation"
+  },
+  {
+    "sha": "54f7e6dbcb485e9819f74656d824414bbf40d84e",
+    "message": "test(M10.2): execute actual native static prepatch and signing in native-only and mixed target fixtures"
+  },
+  {
+    "sha": "42d57508e6fc1d50904d2409519ca67b2ec3092f",
+    "message": "refactor(L02): remove the unused legacy group metadata wrapper and its now-unreferenced trim helper"
+  }
+]

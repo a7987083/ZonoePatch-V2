@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-13",
+  "scope": "final source state before handoff documentation commit; Linux portable/source checks; Apple production tests/build ran in CI anchor separately",
+  "results": [
+    {
+      "test": "scalar_parser",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "none",
+      "result": "PASS",
+      "output": "production scalar parser boundaries PASS\n"
+    },
+    {
+      "test": "checked_layout",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "ASan/UBSan (Linux local LSan off)",
+      "result": "PASS",
+      "output": "checked arithmetic/unaligned/truncated/malformed production layout PASS\n"
+    },
+    {
+      "test": "macho_file",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "ASan/UBSan (Linux local LSan off)",
+      "result": "PASS",
+      "output": "Mach-O parse/transactional shift/golden/fuzz PASS (seed 0x5a4e, 20000)\n"
+    },
+    {
+      "test": "performance",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "none",
+      "result": "PASS",
+      "output": "performance disabled/nesting/reset/concurrent bounded sampling PASS\n"
+    },
+    {
+      "test": "loaded_image",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "ASan/UBSan (Linux local LSan off)",
+      "result": "PASS",
+      "output": "owned header/file-vs-mapping/VM read/unload/reload ABA/generation/overflow PASS\n"
+    },
+    {
+      "test": "async_performance",
+      "compiler": "g++ C++17 -Wall -Wextra -Werror",
+      "sanitizers": "none",
+      "result": "PASS",
+      "output": "async ticket queue/cancel/timeout/epoch/exactly-once concurrent PASS\n"
+    },
+    {
+      "test": "python3 scripts/ui_source.py",
+      "result": "PASS",
+      "output": "54 modules; reviewed expansion/metric-only delta/ownership/order PASS\n"
+    },
+    {
+      "test": "python3 scripts/check-cleanup.py",
+      "result": "PASS",
+      "output": "proven unreferenced file-local helpers removed; cleanup contract PASS\n"
+    },
+    {
+      "test": "python3 scripts/ui-dependencies.py",
+      "result": "PASS",
+      "output": "54 sections, 2 cross-section file-private/macro symbols recorded\nZonoePatchStart ui/core/ZonoeRuntimeMenu.inc 1\nZonoePatchShow ui/core/ZonoeRuntimeMenu.inc 1\n"
+    },
+    {
+      "test": "python3 scripts/ui-install-graph.py",
+      "result": "PASS",
+      "output": "487 method definitions / 71 install sites / 123 literal helper invocations recorded\nindependent category method bodies have no same-class selector collision PASS\n"
+    },
+    {
+      "test": "python3 scripts/audit-compatibility.py",
+      "result": "PASS",
+      "output": "compatibility code retained; active builder routed via executor PASS\n"
+    },
+    {
+      "test": "python3 iosruntimepatchmenu/tests/retained_hook_contract.py",
+      "result": "PASS",
+      "output": "public retirement retains native callbacks; legacy destructive code preserved PASS\n"
+    },
+    {
+      "test": "bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh",
+      "result": "PASS",
+      "output": "single UI owner + M6.8.6 Lifecycle + M6.9 Prepared + M6.10 Static Prepatch + M6.11 Instant Menu + M6.12 Capability substrate + M6.13 Plugin/Struct Codec + M6.13.1 Result Card single-owner contract: OK\n"
+    },
+    {
+      "test": "python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report /tmp/final-local-topology.json",
+      "result": "PASS",
+      "output": "{\n  \"status\": \"PASS\",\n  \"newline_count\": 19253,\n  \"implementation_count\": 83,\n  \"method_exchange_implementations_count\": 63,\n  \"method_set_implementation_count\": 8,\n  \"dispatch_once_count\": 63,\n  \"activation_stage_order\": [\n    \"RuntimeMenu\",\n    \"FeatureGroupUI\",\n    \"PublicCompactDefaults\",\n    \"IL2CPPNamedOffsetWorkspace\",\n    \"FeatureBuilderUI\",\n    \"RuntimeMethodBuilderUI\",\n    \"MethodFinderUnifiedUI\",\n    \"M630HardCutUI\",\n    \"SharedSiteExecutionProbeV3\",\n    \"PublicCompactLayout\",\n    \"RuntimeExecutorV041\",\n    \"RuntimeDiagnosticsV042\",\n    \"StaticDispatchPrepare\"\n  ],\n  \"failures\": []\n}\n"
+    }
+  ],
+  "appleProductionCI": 38344834920,
+  "targetApp": "未验证",
+  "iPhone": "DEVICE PENDING"
+}

@@ -1,0 +1,87 @@
+{
+  "scope": "exact inverse reconstruction of loaded-header and opt-in timing additions; original UI digest unchanged",
+  "edits": [
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "    if (!unityHeader || unityHeader->magic != MH_MAGIC_64 || !unityPath)",
+      "after": "    uintptr_t liveHeader=(uintptr_t)unityHeader;\n    auto headerOwner=ZNCaptureLoadedImage(liveHeader);\n    if(!headerOwner){if(error)*error=@\"M2 loaded image invalidated\";return NO;}\n    unityHeader=(const struct mach_header_64 *)headerOwner->bytes();\n    if (!unityHeader || unityHeader->magic != MH_MAGIC_64 || !unityPath)"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "    runtime->runtimeBase = (uintptr_t)unityHeader;",
+      "after": "    runtime->runtimeBase = liveHeader;"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "    runtime->header = unityHeader;",
+      "after": "    runtime->header = (const struct mach_header_64 *)liveHeader;"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "static NSString *ZN61UUIDString(const struct mach_header_64 *header) {",
+      "after": "static NSString *ZN61UUIDString(const struct mach_header_64 *header) {\n    auto headerOwner=ZNCaptureLoadedImage((uintptr_t)header);\n    if(!headerOwner)return @\"\";\n    header=(const struct mach_header_64 *)headerOwner->bytes();"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "    ZN61Cancel(token);",
+      "after": "    ZNPerfSearchCancelRequested(token);\n    ZN61Cancel(token);"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "    NSString *token = [NSUUID UUID].UUIDString;",
+      "after": "    NSString *token = [NSUUID UUID].UUIDString;\n    if(znperf::state().enabled.load()){\n        ZNPerfSearchEnqueue(token);\n        ZN61CompletionBlock originalCompletion=completion;\n        completion=^(NSArray *results,NSDictionary *stats,NSString *failure){\n            ZNPerfSearchFinished(token,[stats[@\"cancelled\"] boolValue]||[failure isEqualToString:@\"搜索已取消\"]);\n            originalCompletion(results,stats,failure);\n        };\n    }"
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "before": "        CFAbsoluteTime started = CFAbsoluteTimeGetCurrent();",
+      "after": "        ZNPerfSearchStarted(token);\n        CFAbsoluteTime started = CFAbsoluteTimeGetCurrent();"
+    },
+    {
+      "path": "ui/shell/ZNDeferredBootstrap.inc",
+      "before": "        ZNRunActivationStage(@\"ZonoePatchStart\", ^{ ZonoePatchStart(); });",
+      "after": "        ZNRunActivationStage(@\"ZonoePatchStart\", ^{ ZonoePatchStart(); });\n        ZNObserveFirstDisplayTick();"
+    },
+    {
+      "path": "ui/features/ZNFeatureGroupUI.mm:ZN50PerfMilliseconds",
+      "before": "static mach_timebase_info_data_t tb = {0};",
+      "after": "static mach_timebase_info_data_t tb = {};",
+      "reason": "Equivalent full zero initialization; strict independent module warning is fixed, not suppressed."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureRuntimeControlsV2.mm",
+      "before": "static NSDictionary<NSString *, id> *ZN65DisplayMetadata(ZNStaticPatchRecord *record) {\n    NSDictionary *embedded = ZNFeatureMetadataDecodeEntry(record.entry); if (embedded) return embedded;\n    NSString *title=ZN65Trim(record.title),*group=ZN65Trim(record.group); if(!title.length||[title hasPrefix:@\"Patch #\"])title=[NSString stringWithFormat:@\"功能 #%u\",record.patchID]; if(!group.length)group=@\"Imported\";\n    return @{@\"featureID\":@0,@\"title\":title,@\"group\":group,@\"explicitGroup\":@([group caseInsensitiveCompare:@\"Imported\"]!=NSOrderedSame),@\"controlType\":@(ZNFeatureControlTypeSwitch),@\"valueType\":@(ZNValueTypeAuto)};\n}\n",
+      "after": "// L02: removed unused file-local display wrapper; active features use ZNFeatureSnapshotProvider.\n",
+      "reason": "Proven unused static wrapper, not Selector/API; exact body recorded and restored only for historical equivalence audit."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm:ZN50DisplayMetadata",
+      "before": "static NSDictionary<NSString *, id> *ZN50DisplayMetadata(ZNStaticPatchRecord *record) {\n    NSDictionary<NSString *, id> *embedded = ZNFeatureMetadataDecodeEntry(record.entry);\n    if (embedded) return embedded;\n\n    NSString *title = ZN50Trim(record.title);\n    NSString *group = ZN50Trim(record.group);\n    if (!title.length || [title hasPrefix:@\"Patch #\"]) title = [NSString stringWithFormat:@\"功能 #%u\", record.patchID];\n    if (!group.length) group = @\"Imported\";\n    return @{\n        @\"featureID\": @0,\n        @\"title\": title,\n        @\"group\": group,\n        @\"explicitGroup\": @([group caseInsensitiveCompare:@\"Imported\"] != NSOrderedSame),\n        @\"source\": @\"legacy-entry\"\n    };\n}\n",
+      "after": "// L02: removed unused internal legacy metadata wrapper.\n",
+      "reason": "No active source references, no external linkage or registration; active provider path unchanged."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/features/ZNFeatureGroupUI.mm:ZN50Trim",
+      "before": "static NSString *ZN50Trim(NSString *value) {\n    return [value ?: @\"\" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];\n}\n",
+      "after": "// L02: removed unused internal metadata whitespace helper.\n",
+      "reason": "No active source references, no external linkage or registration; active provider path unchanged."
+    },
+    {
+      "path": "ZNMethodFinderM2Engine.h:interface",
+      "before": "@interface ZNMethodFinderM2Engine : NSObject\n@property(nonatomic,copy) NSString *indexStatusText;\n+ (instancetype)shared;\n- (NSString *)startSearch:(NSString *)query\n                    limit:(NSUInteger)limit\n                 progress:(ZN61ProgressBlock)progress\n               completion:(ZN61CompletionBlock)completion;\n- (void)cancel:(NSString *)token;\n@end\n",
+      "after": "@interface ZNMethodFinderM2Engine : NSObject\n@property(nonatomic,copy) NSString *indexStatusText;\n+ (instancetype)shared;\n- (NSString *)startSearch:(NSString *)query\n                    limit:(NSUInteger)limit\n                 progress:(ZN61ProgressBlock _Nullable)progress\n               completion:(ZN61CompletionBlock _Nullable)completion;\n- (void)cancel:(NSString *)token;\n@end\n",
+      "reason": "Explicit optional callback nullability matches existing guarded call behavior; typed declaration only, Selector/IMP/ABI and method bodies unchanged."
+    },
+    {
+      "path": "iosruntimepatchmenu/src/ui/finder/ZNIL2CPPMethodFinderUIV3.inc",
+      "before": "- (void)zn60v3_setPage:(ZN60V3Page)page {",
+      "after": "- (void)zn60v3_setPage:(NSInteger)page {",
+      "reason": "Actual setter definition unified to the existing private NSInteger declaration; enum underlying NSInteger has identical Objective-C ABI; body and Selector unchanged."
+    },
+    {
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.mm:kZNM57FieldTag",
+      "before": "static const NSInteger kZNM57FieldTag  = 797000;\n",
+      "after": "// Field values are read by the existing execute owner; no local field tag consumer.\n",
+      "reason": "Internal unused constant with no runtime registration or consumers; remove strict compilation error without changing a pinned behavior baseline."
+    }
+  ]
+}

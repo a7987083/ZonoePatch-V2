@@ -1,0 +1,101 @@
+name: ZonoePatch V2 iOS Build
+on:
+  push:
+    branches: ['dev/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Source contracts
+        run: |
+          python3 scripts/ui_source.py
+          python3 scripts/check-cleanup.py
+          python3 iosruntimepatchmenu/tests/static_owned_metadata_contract.py
+          python3 scripts/ui-dependencies.py
+          python3 scripts/audit-ui-compilation-dependencies.py
+          python3 scripts/ui-install-graph.py
+          python3 scripts/audit-compatibility.py
+          python3 iosruntimepatchmenu/tests/retained_hook_contract.py
+          bash iosruntimepatchmenu/tests/single_ui_owner_contract.sh
+          python3 iosruntimepatchmenu/tests/znunifiedui_topology_audit.py --report topology.json
+      - name: Portable scalar tests
+        run: |
+          clang++ -std=c++17 -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/scalar_parser_test.cpp -o /tmp/scalar-test
+          /tmp/scalar-test
+          clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/checked_layout_test.cpp -o /tmp/layout-test
+          /tmp/layout-test
+          clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/macho_file_test.cpp -o /tmp/macho-test
+          /tmp/macho-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/performance_test.cpp -o /tmp/performance-test
+          /tmp/performance-test
+          clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/loaded_image_test.cpp -o /tmp/loaded-image-test
+          /tmp/loaded-image-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/async_performance_test.cpp -o /tmp/async-performance-test
+          /tmp/async-performance-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/image_lifetime_test.cpp -o /tmp/image-lifetime-test
+          /tmp/image-lifetime-test
+          clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/execution_gate_test.cpp -o /tmp/execution-gate-test
+          /tmp/execution-gate-test
+      - name: Reproducible host microbenchmarks
+        run: python3 scripts/benchmark.py --output performance-host.json
+      - name: Strict ownership module warnings
+        run: |
+          bash scripts/check-module-warnings.sh
+          bash scripts/check-ui-modules.sh
+      - name: Foundation production regressions
+        run: |
+          set -euo pipefail
+          bash scripts/test-foundation.sh 2>&1 | tee tests-foundation.log
+      - name: Production Mach-O binary equivalence
+        run: |
+          set -euo pipefail
+          bash scripts/test-macho-equivalence.sh 2>&1 | tee tests-macho-equivalence.log
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          brew install ldid cmake
+          git clone https://github.com/theos/theos.git "$HOME/theos"
+          git -C "$HOME/theos" checkout 304e0799973e8145f32e4ca2de6c747a84b758ce
+          git -C "$HOME/theos" submodule update --init --recursive
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          mkdir -p vendor
+          git clone https://github.com/jmpews/Dobby.git vendor/Dobby
+          git -C vendor/Dobby checkout 5dfc8546954ce3b3198132ab13fddb89ee92cdd7
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('vendor/Dobby/scripts/platform_builder.py')
+          p.write_text(p.read_text().replace('import pipes\n',''))
+          p=Path('vendor/Dobby/include/dobby.h'); s=p.read_text()
+          old='#ifdef __cplusplus\nextern "C" {\n#endif\n\n#include <stdbool.h>\n#include <stdint.h>\n#include <sys/types.h>\n'
+          new='#include <stdbool.h>\n#include <stdint.h>\n#include <sys/types.h>\n\n#ifdef __cplusplus\nextern "C" {\n#endif\n'
+          if old not in s: raise SystemExit('unexpected pinned Dobby header')
+          p.write_text(s.replace(old,new,1))
+          PY
+          (cd vendor/Dobby && python3 scripts/platform_builder.py --platform iphoneos --arch arm64 --library_build_type static)
+          test -f vendor/Dobby/build/iphoneos/arm64/libdobby.a
+      - name: Build and verify arm64 dylib
+        run: bash scripts/build-ios.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ZonoePatch-V2-${{ github.sha }}
+          path: |
+            dist/
+            build-ios.log
+            tests-foundation.log
+            tests-macho-equivalence.log
+            topology.json
+            compatibility-audit.json
+            performance-host.json
+          if-no-files-found: error

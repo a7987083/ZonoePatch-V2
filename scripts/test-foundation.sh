@@ -1,0 +1,131 @@
+#!/bin/bash
+set -euo pipefail
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/il2cpp_runtime_common_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/common-test
+/tmp/common-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/native_hook_template_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/hook-test
+/tmp/hook-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNNativeHookScheduler.mm iosruntimepatchmenu/tests/native_hook_scheduler_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/scheduler-test
+/tmp/scheduler-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/tests/build_output_io_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/output-test
+/tmp/output-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNActivationStageRunner.mm iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/activation_stage_runner_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/activation-test
+/tmp/activation-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildSession.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildWorkspaceSnapshot.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNRuntimeActionModel.mm iosruntimepatchmenu/src/ZNNativeHookAction.mm iosruntimepatchmenu/src/ZNIL2CPPMethodSignature.mm iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/src/ZNComplexStructCodec.mm iosruntimepatchmenu/tests/build_session_test.mm -DZN_BUILD_FAULT_TESTING iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/build-session-test
+/tmp/build-session-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPABIMetadata.mm iosruntimepatchmenu/tests/il2cpp_abi_classifier_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/abi-test
+/tmp/abi-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildRouterShadow.mm iosruntimepatchmenu/tests/build_router_shadow_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/router-test
+/tmp/router-test
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNFeatureMetadataCodec.mm iosruntimepatchmenu/src/ZNValueTypeModel.mm iosruntimepatchmenu/tests/feature_metadata_policy_stub.mm iosruntimepatchmenu/tests/feature_metadata_codec_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/metadata-test
+/tmp/metadata-test
+clang++ -std=gnu++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/tests/runtime_logger_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/logger-test
+/tmp/logger-test
+if [ "$(uname -m)" = arm64 ]; then
+  clang++ -std=c++17 -O0 -Wall -Wextra -Werror iosruntimepatchmenu/tests/arm64_compiler_abi_fixture.cpp -o /tmp/native-arm64-abi
+  /tmp/native-arm64-abi
+else
+  echo 'Native arm64 compiler fixture NOT VERIFIED on this runner'
+fi
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNPerformanceReport.mm iosruntimepatchmenu/tests/performance_report_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/performance-report-test
+/tmp/performance-report-test
+for class_mode in present absent; do
+  flag=""
+  if [ "$class_mode" = absent ]; then flag=-DTEST_NO_MENU_CLASS; fi
+  clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror $flag -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuPresentationDefaults.mm iosruntimepatchmenu/tests/menu_presentation_defaults_test.mm -o /tmp/menu-defaults-test
+  /tmp/menu-defaults-test
+done
+work_image=$(mktemp -d)
+printf 'int ZNImageFixture(void){return 42;}\n' > "$work_image/image.c"
+clang -dynamiclib "$work_image/image.c" -o "$work_image/loaded-image-fixture.dylib"
+clang -dynamiclib "$work_image/image.c" -o "$work_image/other-image-fixture.dylib"
+clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/loaded_image_apple_test.mm -o "$work_image/image-test"
+"$work_image/image-test" "$work_image/loaded-image-fixture.dylib" "$work_image/other-image-fixture.dylib"
+rm -rf "$work_image"
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNMenuUIKeys.mm iosruntimepatchmenu/src/ZNMenuSearchPolicy.mm iosruntimepatchmenu/tests/ui_key_consumer_test.mm iosruntimepatchmenu/tests/ui_shared_owner_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/ui-owner-test
+/tmp/ui-owner-test
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/tests/ui_install_trace_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/ui-trace-test
+/tmp/ui-trace-test
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNAsyncPerformance.mm iosruntimepatchmenu/tests/async_search_metrics_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/search-metrics-test
+/tmp/search-metrics-test
+
+work_static=$(mktemp -d)
+clang -dynamiclib -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/static_runtime_image_fixture.c -o "$work_static/static-runtime-fixture.dylib"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticDispatchRuntime.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/static_owned_metadata_test.mm -o "$work_static/static-test"
+"$work_static/static-test" "$work_static/static-runtime-fixture.dylib"
+rm -rf "$work_static"
+
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_io_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/output-transaction-link-test
+/tmp/output-transaction-link-test
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_transaction_test.mm iosruntimepatchmenu/tests/build_session_current_stub.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/output-transaction-test
+/tmp/output-transaction-test
+
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/tests/build_file_transaction_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/file-transaction-test
+/tmp/file-transaction-test
+
+work_resolver=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$work_resolver/UnityFramework"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPResolver.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/resolver_loader_lease_test.mm -o "$work_resolver/resolver-test"
+"$work_resolver/resolver-test" "$work_resolver/UnityFramework"
+rm -rf "$work_resolver"
+
+clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation iosruntimepatchmenu/tests/finder_page_abi_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o /tmp/finder-page-abi-test
+/tmp/finder-page-abi-test
+
+work_footer=$(mktemp -d)
+python3 scripts/extract-footer-install-fixture.py "$work_footer/footer.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work_footer/footer.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work_footer/footer-test"
+"$work_footer/footer-test"
+mkdir -p dist
+cp "$work_footer/footer.json" dist/footer-install-extraction.json
+rm -rf "$work_footer"
+
+work_history=$(mktemp -d)
+python3 scripts/extract-search-history-install-fixture.py "$work_history/history.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work_history/history.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work_history/history-test"
+"$work_history/history-test"
+mkdir -p dist
+cp "$work_history/history.json" dist/search-history-install-extraction.json
+rm -rf "$work_history"
+
+work_runtime_report=$(mktemp -d)
+python3 scripts/extract-runtime-report-fixture.py "$work_runtime_report/report.mm"
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work_runtime_report/report.mm" iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/tests/build_session_current_stub.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$work_runtime_report/report-test"
+"$work_runtime_report/report-test"
+cp "$work_runtime_report/report.json" dist/runtime-report-extraction.json
+rm -rf "$work_runtime_report"
+
+execution_fixture=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$execution_fixture/UnityFramework"
+clang++ -std=c++17 -pthread -Wall -Wextra -Werror -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/runtime_execution_scope_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$execution_fixture/execution-test"
+"$execution_fixture/execution-test" "$execution_fixture/UnityFramework"
+rm -rf "$execution_fixture"
+
+managed_fixture=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$managed_fixture/UnityFramework"
+python3 scripts/extract-managed-bridge-fixture.py "$managed_fixture/managed.mm"
+clang++ -std=c++17 -pthread -Wall -Wextra -Werror -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$managed_fixture/managed.mm" iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$managed_fixture/managed-test"
+"$managed_fixture/managed-test" "$managed_fixture/UnityFramework"
+cp "$managed_fixture/managed.json" dist/managed-bridge-extraction.json
+rm -rf "$managed_fixture"
+
+work_controls=$(mktemp -d)
+python3 scripts/extract-runtime-control-install-fixture.py "$work_controls/controls.mm"
+for mode in normal missing-method missing-class; do
+ flag=""
+ if [ "$mode" = missing-method ]; then flag=-DTEST_MISSING_METHOD; fi
+ if [ "$mode" = missing-class ]; then flag=-DTEST_NO_CLASS; fi
+ clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror $flag -framework Foundation -Iiosruntimepatchmenu/src "$work_controls/controls.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm -o "$work_controls/test"
+ "$work_controls/test"
+done
+mkdir -p dist
+cp "$work_controls/controls.json" dist/runtime-control-install-extraction.json
+rm -rf "$work_controls"
+
+work_owning=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$work_owning/UnityFramework"
+clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror -framework Foundation -framework CoreFoundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPOwningMethodResolver.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/tests/owning_method_execution_test.mm -o "$work_owning/test"
+"$work_owning/test" "$work_owning/UnityFramework"
+rm -rf "$work_owning"
