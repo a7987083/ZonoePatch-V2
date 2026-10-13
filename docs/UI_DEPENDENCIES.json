@@ -279,7 +279,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        500
+        484
       ]
     },
     {
@@ -290,7 +290,7 @@
       "exchanges": 2,
       "sets": 0,
       "dynamicLookupLines": [
-        184
+        180
       ]
     },
     {
