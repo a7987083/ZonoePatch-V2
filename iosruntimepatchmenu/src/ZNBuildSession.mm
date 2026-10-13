@@ -14,6 +14,10 @@
 + (instancetype)captureWorkspace:(ZNBinaryPatchWorkspace *)workspace {
     ZNBuildSession *session=[self new];session.identifier=NSUUID.UUID.UUIDString;
     void (^capture)(void)=^{
+        ZNRuntimeActionStore *runtime=[ZNRuntimeActionStore sharedStore];
+        ZNNativeHookStore *hooks=[ZNNativeHookStore sharedStore];
+        // Store mutation APIs are synchronized; hold both locks while capturing.
+        @synchronized(runtime) { @synchronized(hooks) {
         NSMutableDictionary *defaults=[NSMutableDictionary dictionary];
         NSDictionary *all=NSUserDefaults.standardUserDefaults.dictionaryRepresentation;
         for(NSString *key in all)if([key hasPrefix:@"zonoe.m5.8.5.static-slider-max.v1."])defaults[key]=all[key];
@@ -21,8 +25,9 @@
         NSMutableArray *indexes=[NSMutableArray array];
         for(NSUInteger i=0;i<workspace.rows.count;i++)[indexes addObject:@(i)];
         session.workspace=[workspace buildSnapshotForRowIndexes:indexes];
-        session.runtimeStore=[[ZNRuntimeActionStore alloc] initForBuildWithActions:[[ZNRuntimeActionStore sharedStore] actionsSnapshot]];
-        session.hookStore=[[ZNNativeHookStore alloc] initForBuildWithActions:[[ZNNativeHookStore sharedStore] actionsSnapshot]];
+        session.runtimeStore=[[ZNRuntimeActionStore alloc] initForBuildWithActions:[runtime actionsSnapshot]];
+        session.hookStore=[[ZNNativeHookStore alloc] initForBuildWithActions:[hooks actionsSnapshot]];
+        } }
     };
     // Editing belongs to UIKit/main. Capture all three inputs in one main turn.
     if(NSThread.isMainThread)capture();else dispatch_sync(dispatch_get_main_queue(),capture);
