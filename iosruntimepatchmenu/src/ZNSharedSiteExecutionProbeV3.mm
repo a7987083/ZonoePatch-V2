@@ -18,7 +18,6 @@ typedef struct {
     IMP original;
     unsigned stage;
     char image[256];
-    std::shared_ptr<const znimage::Snapshot> owner;
     uintptr_t rva;
 } ZNSSP3DynamicApplyHook;
 
@@ -27,7 +26,6 @@ typedef struct {
     SEL sel;
     IMP original;
     char image[256];
-    std::shared_ptr<const znimage::Snapshot> owner;
     uintptr_t rva;
 } ZNSSP3NativeHookAPI;
 
