@@ -7,3 +7,8 @@ uint64_t ZNCurrentImageGeneration(void);
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+#include "ZNImageLifetime.h"
+std::shared_ptr<znimage::Lifetime> ZNImageLifetimeForHeader(uintptr_t header);
+#endif
