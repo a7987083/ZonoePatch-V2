@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNFeatureGroupUI.mm
 #line 1 "ZNFeatureGroupUI.mm"
 #import <Foundation/Foundation.h>

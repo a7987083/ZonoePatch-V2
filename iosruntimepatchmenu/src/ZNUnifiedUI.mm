@@ -32,7 +32,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/shell/ZNRuntimeMenuModalShell.mm
 
 
-#include "ui/features/ZNFeatureGroupUI.inc"
+// UI_COMPILED_MODULE: ui/features/ZNFeatureGroupUI.mm
 
 
 #include "ui/features/ZNFeatureRuntimeControlsV2.inc"

@@ -271,7 +271,7 @@
       ]
     },
     {
-      "path": "ui/features/ZNFeatureGroupUI.inc",
+      "path": "ui/features/ZNFeatureGroupUI.mm",
       "implementations": [
         "ZN50FeatureToggleControl",
         "ZNRuntimeMenuControllerV040 (ZNFeatureGroupUI)"
@@ -279,7 +279,7 @@
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        498
+        500
       ]
     },
     {

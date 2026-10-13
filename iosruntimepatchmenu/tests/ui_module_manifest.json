@@ -22,10 +22,11 @@
       "compilation": "independent"
     },
     {
-      "path": "ui/features/ZNFeatureGroupUI.inc",
+      "path": "ui/features/ZNFeatureGroupUI.mm",
       "historical_section": "ZNFeatureGroupUI.mm",
-      "sha256": "1d50f78a904b123d9ecd3d78465fbbe6ef45f73da73fb1b46799090bd113336f",
-      "category_count": 1
+      "sha256": "7be4035aa22d8ddeda81f8a95567413af3330a7904f3cbffad6092323751ecef",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/features/ZNFeatureRuntimeControlsV2.inc",
@@ -338,7 +339,7 @@
   ],
   "external_owner_hashes": {
     "ZNMenuPresentationDefaults.mm": "31141170cad2e4c93bd7ea1e060da889c4a18c38fd0a45f61c378282894acdaf",
-    "ZNMenuControllerInternal.h": "74b251be52b5911b7b350ef2b6b20de1b3c8dba0eac07214d1133e7470d7c5c2",
+    "ZNMenuControllerInternal.h": "edfafb3c37a1f68505dd364d1ec0ff4036df0361c1dc669bca7f8af3771b765a",
     "ZNMenuUIKeys.mm": "89c5a35c0a6c46cdb1b1f33d3834c7c6a4992a78b16432391773203f2cce5a14",
     "ZNMenuUIKeys.h": "c19aad226f5eee25f1c7f13ae0ec87bec98f6ae4343ef51515e11ac77480f4d3",
     "ZNMenuUIHelpers.mm": "f6715f9a20f224fd6d45190aafbcae95f64910c06b06172132e99342917012f1",
