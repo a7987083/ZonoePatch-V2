@@ -341,14 +341,14 @@
       ]
     },
     {
-      "path": "ui/features/ZNM562SliderIsolation.inc",
+      "path": "ui/features/ZNM562SliderIsolation.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM562SliderIsolation)"
       ],
       "exchanges": 0,
       "sets": 1,
       "dynamicLookupLines": [
-        42
+        44
       ]
     },
     {

@@ -1,3 +1,5 @@
+#import "ZNUIInstallationTrace.h" // UI_MODULE_IMPORT
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNM562SliderIsolation.mm
 #line 1 "ZNM562SliderIsolation.mm"
 #import <Foundation/Foundation.h>

@@ -265,10 +265,11 @@
       "category_count": 1
     },
     {
-      "path": "ui/features/ZNM562SliderIsolation.inc",
+      "path": "ui/features/ZNM562SliderIsolation.mm",
       "historical_section": "ZNM562SliderIsolation.mm",
-      "sha256": "2c40c8f7d1dadf048f26a56aba0419bf2b93b64e79d241190e1fa68539ff741a",
-      "category_count": 1
+      "sha256": "7e90ce8f71b58237c66772ddbfc50d090d8ad430a55076830ee633b5eaac762b",
+      "category_count": 1,
+      "compilation": "independent"
     },
     {
       "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc",

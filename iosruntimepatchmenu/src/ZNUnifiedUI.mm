@@ -152,7 +152,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/features/ZNM551RuntimeSliderStability.inc"
 
 
-#include "ui/features/ZNM562SliderIsolation.inc"
+// UI_COMPILED_MODULE: ui/features/ZNM562SliderIsolation.mm
 
 
 #include "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc"

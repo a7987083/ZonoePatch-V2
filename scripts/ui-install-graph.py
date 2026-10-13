@@ -41,7 +41,7 @@ report=dict(schema='zonoe.selector-install-source/v1',sourceSHA256=hashlib.sha25
 (root/'docs/UI_SELECTOR_IMP_GRAPH.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print(f'{len(methods)} method definitions / {len(operations)} install sites / {len(invocations)} literal helper invocations recorded')
 # A moved category cannot override an existing body implicitly via changed loader order.
-independent=['ZNM47VersionUI','ZNPublicCompactUI','ZNFeatureBuilderControlsV2','ZNRuntimeMenuModalShell']
+independent=['ZNM562SliderIsolation','ZNM47VersionUI','ZNPublicCompactUI','ZNFeatureBuilderControlsV2','ZNRuntimeMenuModalShell']
 for category in independent:
  for method in (m for m in methods if m['category']==category):
   collisions=[m for m in methods if (m['owner'],m['kind'],m['selector'])==(method['owner'],method['kind'],method['selector'])]
