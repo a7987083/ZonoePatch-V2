@@ -2,6 +2,7 @@
 // Thin little-endian 64-bit FILE view. Never use file ranges for a dyld mapping.
 #include "ZNCheckedByteView.h"
 #include <vector>
+#include <array>
 #include <limits>
 namespace znmacho {
 struct Command { uint64_t offset; uint32_t kind, size; };
@@ -40,7 +41,7 @@ inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nu
         if(c==0x19) {
             uint64_t vm=read<uint64_t>(p,o+24),vs=read<uint64_t>(p,o+32);
             uint64_t fo=read<uint64_t>(p,o+40),fs=read<uint64_t>(p,o+48),end;
-            if(!ZNCheckedAdd64(vm,vs,&end)||!ZNCheckedRange64(size,fo,fs))return fail("invalid segment range");
+            if(!ZNCheckedAdd64(vm,vs,&end)||!ZNCheckedAdd64(vm,fs,&end)||!ZNCheckedRange64(size,fo,fs))return fail("invalid segment range");
             uint32_t ns=read<uint32_t>(p,o+64);
             if(uint64_t(ns)>(len-72)/80)return fail("truncated section table");
             for(uint32_t j=0;j<ns;j++) {
@@ -50,9 +51,38 @@ inline bool parse(const uint8_t *p,uint64_t size,File &out,const char **error=nu
                 if(type!=1&&type!=0xc&&type!=0x12 && sz && !ZNCheckedRange64(size,read<uint32_t>(p,s+48),sz))return fail("section outside file");
             }
         }
+        auto range=[&](unsigned offset,unsigned length,unsigned stride=1){
+            uint64_t count=read<uint32_t>(p,o+length);
+            return !count || ZNCheckedRange64(size,read<uint32_t>(p,o+offset),count*stride);
+        };
+        if(c==2 && (!range(8,12,16)||!range(16,20)))return fail("symbol table outside file");
+        if(c==0xb)for(auto pair:{std::array<unsigned,3>{32,36,8},{40,44,56},{48,52,4},{56,60,4},{64,68,8},{72,76,8}})
+            if(!range(pair[0],pair[1],pair[2]))return fail("dynamic symbol table outside file");
+        if(c==0x22||c==0x80000022)for(unsigned x:{8u,16u,24u,32u,40u})if(!range(x,x+4))return fail("dyld data outside file");
+        if(c==0x1d||c==0x1e||c==0x26||c==0x29||c==0x2b||c==0x2e||c==0x80000033||c==0x80000034)
+            if(!range(8,12))return fail("LINKEDIT data outside file");
+        if(c==0x16&&!range(8,12,4))return fail("hints outside file");
+        if(c==0x31 && read<uint64_t>(p,o+32) && !ZNCheckedRange64(size,read<uint64_t>(p,o+24),read<uint64_t>(p,o+32)))return fail("note outside file");
         f.commands.push_back({o,c,len}); o+=len;
     }
     f.bytes=p; f.size=size; out=std::move(f); if(error)*error=why; return true;
+}
+struct SectionLocation { uint64_t segmentOffset=0,sectionOffset=0; };
+inline bool findSection(const File &f,const char *segment,const char *section,SectionLocation &out,const char **error=nullptr) {
+    SectionLocation found; unsigned segmentCount=0,sectionCount=0;
+    for(const auto &c:f.commands)if(c.kind==0x19 && strncmp((const char*)f.bytes+c.offset+8,segment,16)==0) {
+        ++segmentCount;
+        for(uint32_t i=0;i<read<uint32_t>(f.bytes,c.offset+64);i++) {
+            uint64_t o=c.offset+72+uint64_t(i)*80;
+            if(strncmp((const char*)f.bytes+o,section,16))continue;
+            ++sectionCount;found={c.offset,o};
+            uint64_t start=read<uint32_t>(f.bytes,o+48),size=read<uint64_t>(f.bytes,o+40);
+            uint64_t segStart=read<uint64_t>(f.bytes,c.offset+40),segSize=read<uint64_t>(f.bytes,c.offset+48);
+            if(start<segStart||!ZNCheckedRange64(segSize,start-segStart,size)) {if(error)*error="section outside owner segment";return false;}
+        }
+    }
+    if(segmentCount!=1||sectionCount!=1){if(error)*error="missing or ambiguous owner section";return false;}
+    out=found;return true;
 }
 struct Patch { uint64_t offset,value; unsigned width; };
 // Preflight every field before writing any byte: overflow never leaves a partial edit.

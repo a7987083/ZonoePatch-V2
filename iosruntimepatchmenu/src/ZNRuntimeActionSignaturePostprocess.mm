@@ -16,9 +16,7 @@
 #import <errno.h>
 #include <string.h>
 
-static uint64_t ZNM46Align8(uint64_t value) {
-    return (value + 7ULL) & ~7ULL;
-}
+
 
 static BOOL ZNM46ZeroRange(const uint8_t *bytes, uint64_t length) {
     for (uint64_t i = 0; i < length; i++) if (bytes[i] != 0) return NO;
@@ -69,29 +67,11 @@ static BOOL ZNM46AugmentPath(NSString *path,
         uint64_t commandEnd = sizeof(*mh) + (uint64_t)mh->sizeofcmds;
         if (commandEnd > fileSize) { localError = @"M4.6 Mach-O load commands 越界"; break; }
 
-        struct segment_command_64 *owned = NULL;
-        struct section_64 *zndata = NULL;
-        uint8_t *cursor = base + sizeof(*mh);
-        uint8_t *limit = base + commandEnd;
-        for (uint32_t i = 0; i < mh->ncmds; i++) {
-            if (cursor + sizeof(struct load_command) > limit) { localError = @"M4.6 load command 损坏"; break; }
-            struct load_command *lc = (struct load_command *)cursor;
-            if (lc->cmdsize < sizeof(*lc) || cursor + lc->cmdsize > limit) { localError = @"M4.6 load command size 损坏"; break; }
-            if (lc->cmd == LC_SEGMENT_64 && lc->cmdsize >= sizeof(struct segment_command_64)) {
-                struct segment_command_64 *seg = (struct segment_command_64 *)cursor;
-                if (strncmp(seg->segname, "__ZNDATA", 16) == 0) {
-                    owned = seg;
-                    uint64_t sectionBytes = (uint64_t)seg->nsects * sizeof(struct section_64);
-                    if (lc->cmdsize < sizeof(*seg) + sectionBytes) { localError = @"M4.6 __ZNDATA section table 越界"; break; }
-                    struct section_64 *sections = (struct section_64 *)(seg + 1);
-                    for (uint32_t j = 0; j < seg->nsects; j++) {
-                        if (strncmp(sections[j].sectname, "__zndata", 16) == 0) { zndata = &sections[j]; break; }
-                    }
-                }
-            }
-            cursor += lc->cmdsize;
-        }
-        if (localError) break;
+        znmacho::SectionLocation location;
+        if(!znmacho::findSection(checked,"__ZNDATA","__zndata",location,&reason)){localError=[NSString stringWithUTF8String:reason];break;}
+        struct segment_command_64 *owned=(struct segment_command_64 *)(base+location.segmentOffset);
+        struct section_64 *zndata=(struct section_64 *)(base+location.sectionOffset);
+
         if (!owned || !zndata) { localError = @"M4.6 缺少 __ZNDATA/__zndata"; break; }
         if (owned->fileoff > fileSize || owned->filesize > fileSize - owned->fileoff) { localError = @"M4.6 __ZNDATA file range 越界"; break; }
         if (zndata->offset > fileSize || zndata->size > fileSize - zndata->offset) { localError = @"M4.6 __zndata range 越界"; break; }
@@ -162,9 +142,10 @@ static BOOL ZNM46AugmentPath(NSString *path,
         if (localError) break;
 
         uint64_t oldTotal = header->totalSize;
-        uint64_t newTotalUnaligned = oldTotal + addedBytes;
-        uint64_t newTotal = ZNM46Align8(newTotalUnaligned);
-        uint64_t tableEnd = tableOffset + newTotal;
+        uint64_t newTotalUnaligned=0,newTotal=0,tableEnd=0;
+        if(!ZNCheckedAdd64(oldTotal,addedBytes,&newTotalUnaligned)||!ZNCheckedAlign8(newTotalUnaligned,&newTotal)||!ZNCheckedAdd64(tableOffset,newTotal,&tableEnd)){
+            localError=@"signature string pool range overflow";break;
+        }
         uint64_t segmentEnd = owned->fileoff + owned->filesize;
         if (tableEnd < tableOffset || tableEnd > segmentEnd || tableEnd > fileSize) {
             localError = [NSString stringWithFormat:@"M4.6 signature string pool capacity 不足：+%llu bytes",

@@ -12,3 +12,6 @@ for version in baseline current; do
 done
 cmp "$work/baseline/fixture.dylib" "$work/current/fixture.dylib"
 echo 'production signer baseline/current complete-byte equivalence PASS'
+
+clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticRVAProtection.mm iosruntimepatchmenu/tests/macho_writer_rejection_test.mm -o "$work/writer-test"
+"$work/writer-test"

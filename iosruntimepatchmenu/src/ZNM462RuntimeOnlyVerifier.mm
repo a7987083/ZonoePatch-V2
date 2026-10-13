@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNM462RuntimeOnlyVerifier.h"
 #import "ZNRuntimeActionFormat.h"
 #import "ZNStaticPatchFormat.h"
@@ -135,6 +136,9 @@ static BOOL ZNM462VerifyPath(NSString *path,
     BOOL ok = NO;
     NSString *localError = nil;
     do {
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,size,checked,&reason)){localError=[NSString stringWithUTF8String:reason];break;}
+
         const struct mach_header_64 *mh = (const struct mach_header_64 *)base;
         if (mh->magic != MH_MAGIC_64) { localError = @"M4.6.2 verifier：不是 thin 64-bit Mach-O"; break; }
         uint64_t commandEnd = sizeof(*mh) + (uint64_t)mh->sizeofcmds;

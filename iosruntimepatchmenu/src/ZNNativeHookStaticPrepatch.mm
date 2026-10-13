@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNNativeHookStaticPrepatch.h"
 
 #import "ZNNativeHookAction.h"
@@ -294,6 +295,9 @@ BOOL ZNBuildInstallStaticPreparedNativeHooksV1(NSArray<NSString *> *builderOutpu
     NSString *local=nil;
     NSMutableArray<NSDictionary<NSString *,id> *> *descriptors=[NSMutableArray arrayWithCapacity:actions.count];
     do{
+        znmacho::File checked; const char *reason=nullptr;
+        if(!znmacho::parse(base,fileSize,checked,&reason)){local=[NSString stringWithUTF8String:reason];break;}
+
         const struct mach_header_64 *mh=(const struct mach_header_64 *)base;
         NSString *uuid=ZNM610UUIDForHeader(mh);
         if(!uuid.length){local=@"Static Prepared Native Hook 无法读取 UnityFramework UUID";break;}
