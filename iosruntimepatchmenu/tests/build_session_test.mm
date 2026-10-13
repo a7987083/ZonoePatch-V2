@@ -35,7 +35,7 @@ static const void *controlKey=&controlKey,*valueKey=&valueKey;
 int main(){@autoreleasepool{
  ZNBinaryPatchWorkspace *w=[ZNBinaryPatchWorkspace new];ZNBinaryPatchRow *row=[ZNBinaryPatchRow new];row.title=@"old";row.offsetText=@"0x100";row.featureControlType=ZNFeatureControlTypeSlider;[w.rows addObject:row];
  ZNRuntimeActionStore *global=[ZNRuntimeActionStore sharedStore];NSString *error=nil;
- assert([global replaceWithImportedDictionaries:@[@{@"actionID":@7,@"executionKind":@1,@"class":@"Example",@"method":@"Run",@"title":@"old",@"argumentCount":@0,@"argumentValues":@[]}] error:&error]);
+ assert(([global replaceWithImportedDictionaries:@[@{@"actionID":@7,@"executionKind":@1,@"class":@"Example",@"method":@"Run",@"title":@"old",@"argumentCount":@0,@"argumentValues":@[]}] error:&error]));
  ZNBuildSession *session=[ZNBuildSession captureWorkspace:w];
  row.title=@"edited";assert([global updateTitle:@"edited" atIndex:0 error:&error]);
  assert(session.workspace.rows[0]!=row);assert([session.workspace.rows[0].title isEqualToString:@"old"]);
