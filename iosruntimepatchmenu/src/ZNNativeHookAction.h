@@ -4,6 +4,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ZNNativeHookAction : NSObject <NSCopying>
+// Runtime-only identity; deliberately absent from persistence and binary descriptors.
+@property(nonatomic,assign) uint64_t runtimeImageIncarnation;
 @property(nonatomic,assign) uint32_t actionID;
 @property(nonatomic,copy) NSString *title;
 @property(nonatomic,copy) NSString *group;

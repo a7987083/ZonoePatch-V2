@@ -1,4 +1,4 @@
-#include "ZNLoadedImageApple.h"
+#include "ZNImageOperationLease.h"
 #import "ZNImageGeneration.h"
 #import "ZNNativeHookRuntime.h"
 
@@ -848,6 +848,8 @@ static BOOL ZNNativeStaticPrepatchBind(ZNNativeHookAction *action,
         return NO;
     }
     uintptr_t imageBase=target-(uintptr_t)action.preparedRVA;
+    auto lease=ZNLeaseForHeader(imageBase,action.runtimeImageIncarnation);if(!lease){if(error)*error=@"Native hook image lease revoked";return NO;}
+    action.runtimeImageIncarnation=lease->incarnation();
     if(action.staticHookSlotRVA>UINTPTR_MAX-imageBase||
        action.staticTrampolineRVA>UINTPTR_MAX-imageBase||
        action.staticCodeCaveRVA>UINTPTR_MAX-imageBase){
@@ -870,15 +872,14 @@ static BOOL ZNNativeStaticPrepatchBind(ZNNativeHookAction *action,
     // Verify that the signed UnityFramework still contains the build-time
     // instrumentation before activating the writable slot.
     uint32_t targetInsn=0,trampolineInsn=0;
-    memcpy(&targetInsn,(const void *)target,sizeof(targetInsn));
-    memcpy(&trampolineInsn,(const void *)trampoline,sizeof(trampolineInsn));
+    if(!lease->image->read(target,&targetInsn,sizeof(targetInsn))||!lease->image->read(trampoline,&trampolineInsn,sizeof(trampolineInsn))){if(error)*error=@"Native prepatch read lease failed";return NO;}
     if((targetInsn&UINT32_C(0xFC000000))!=UINT32_C(0x14000000)){
         if(error)*error=@"Static Prepared target 未检测到预埋 B 指令";
         return NO;
     }
     int32_t imm26=(int32_t)(targetInsn&UINT32_C(0x03FFFFFF));
     if(imm26&INT32_C(0x02000000))imm26|=(int32_t)UINT32_C(0xFC000000);
-    uintptr_t decoded=(uintptr_t)((int64_t)target+((int64_t)imm26<<2));
+    int64_t delta=(int64_t)imm26*4;uint64_t decoded=0;if(delta>=0){if(!ZNCheckedAdd64(target,(uint64_t)delta,&decoded))return NO;}else{if(target<(uint64_t)(-delta))return NO;decoded=target-(uint64_t)(-delta);}
     if(decoded!=cave){
         if(error)*error=@"Static Prepared target branch 与 descriptor 不一致";
         return NO;
@@ -888,7 +889,7 @@ static BOOL ZNNativeStaticPrepatchBind(ZNNativeHookAction *action,
         return NO;
     }
 
-    __atomic_store_n((uintptr_t *)slot,(uintptr_t)replacement,__ATOMIC_RELEASE);
+    if(!lease->store(slot,(uintptr_t)replacement,8)){if(error)*error=@"Native hook slot write lease failed";return NO;}
     if(outOriginal)*outOriginal=trampoline;
     [[ZNRuntimeLogger sharedLogger]log:[NSString stringWithFormat:
         @"[static-prepatch-hook] bind action=%u target=0x%llX slot=0x%llX replacement=0x%llX trampoline=0x%llX",
@@ -905,6 +906,8 @@ static BOOL ZNNativeStaticPrepatchClear(ZNNativeHookAction *action,
         return NO;
     }
     uintptr_t imageBase=target-(uintptr_t)action.preparedRVA;
+    auto lease=ZNLeaseForHeader(imageBase,action.runtimeImageIncarnation);if(!lease){if(error)*error=@"Native hook image lease revoked";return NO;}
+    action.runtimeImageIncarnation=lease->incarnation();
     if(action.staticHookSlotRVA>UINTPTR_MAX-imageBase){
         if(error)*error=@"Static Prepared hook slot RVA 地址溢出";
         return NO;
@@ -914,7 +917,7 @@ static BOOL ZNNativeStaticPrepatchClear(ZNNativeHookAction *action,
         if(error)*error=@"Static Prepared hook slot 不可写";
         return NO;
     }
-    __atomic_store_n((uintptr_t *)slot,(uintptr_t)0,__ATOMIC_RELEASE);
+    if(!lease->store(slot,0,8)){if(error)*error=@"Native hook clear lease failed";return NO;}
     return YES;
 }
 

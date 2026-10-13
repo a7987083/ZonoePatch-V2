@@ -77,7 +77,7 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
 }
 - (id)copyWithZone:(NSZone *)zone {
     ZNNativeHookAction *c=[[[self class] allocWithZone:zone]init];
-    c.actionID=self.actionID;c.title=self.title;c.group=self.group;c.featureDescription=self.featureDescription;c.controlTypeKey=self.controlTypeKey;
+    c.runtimeImageIncarnation=self.runtimeImageIncarnation;c.actionID=self.actionID;c.title=self.title;c.group=self.group;c.featureDescription=self.featureDescription;c.controlTypeKey=self.controlTypeKey;
     c.assembly=self.assembly;c.namespaceName=self.namespaceName;c.className=self.className;c.methodName=self.methodName;
     c.argumentCount=self.argumentCount;c.parameterTypeNames=self.parameterTypeNames;c.signatureAvailable=self.signatureAvailable;
     c.templateKind=self.templateKind;c.argumentIndex=self.argumentIndex;c.minValue=self.minValue;c.maxValue=self.maxValue;
