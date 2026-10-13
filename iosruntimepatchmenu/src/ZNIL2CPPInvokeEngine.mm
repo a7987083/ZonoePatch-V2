@@ -23,11 +23,6 @@ static NSString *ZNInvokeTrim(NSString *value) {
     return [value ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
 }
 
-static BOOL ZNInvokeCStringFinished(char *end) {
-    if (!end) return NO;
-    while (*end && isspace((unsigned char)*end)) end++;
-    return *end == '\0';
-}
 
 static BOOL ZNInvokeParseSigned(NSString *text, int64_t *outValue) {
     return ZNParseSignedScalar(text.UTF8String, outValue);

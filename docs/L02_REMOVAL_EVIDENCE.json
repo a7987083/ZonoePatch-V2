@@ -29,10 +29,18 @@
       "linkage": "static",
       "sourceOccurrencesBefore": 1,
       "removedBodySHA256": "8d1929b10adc00c21a497b53bccfdeef8c93f5085808730e644cab206365a563"
+    },
+    {
+      "file": "iosruntimepatchmenu/src/ZNIL2CPPInvokeEngine.mm",
+      "symbol": "ZNInvokeCStringFinished",
+      "linkage": "static",
+      "sourceOccurrencesBefore": 1,
+      "removedBodySHA256": "3a3e53960f0d4de429f48a92a4729532c49b877a04fc5a9b5f06cc6f016944ac",
+      "proof": "Pure trailing-whitespace/end-of-string predicate, not allocation/lifetime management. No calls/address-of/registration/export/used attributes. Signed/unsigned/float adapters already exclusively use tested ZNScalarParser.",
+      "reviewBase": "59ff521b94378b8e008c93e1580116f908e73a7e"
     }
   ],
   "retained": [
-    "ZNInvokeCStringFinished: lifetime intent needs separate review",
     "legacy static builder and AnyImage resolver: external source consumers not disproven",
     "all UI selectors and installer entry points"
   ]
