@@ -2,6 +2,8 @@
 #include "ZNImageOperationLease.h"
 #include "ZNStaticValueCellAccess.h"
 #include <cassert>
+#include <thread>
+#include "ZNStaticOperationGate.h"
 #import <dlfcn.h>
 @interface ZNStaticDispatchRuntime (FixtureConsume)
 - (BOOL)zn44_consumeHeader:(const ZN44StaticHeader *)header address:(uintptr_t)address regionEnd:(uintptr_t)end runtimeHeader:(uintptr_t)base targetName:(NSString *)name found:(NSMutableArray *)found liveSiteKeys:(NSMutableSet *)keys;
@@ -13,6 +15,8 @@ int main(int argc,char **argv){@autoreleasepool{
  ZNStaticDispatchRuntime *runtime=[ZNStaticDispatchRuntime sharedRuntime];NSMutableArray *found=[NSMutableArray array];assert([runtime zn44_consumeHeader:header address:table regionEnd:table+64+2*128+24+2*128 runtimeHeader:base targetName:@"fixture" found:found liveSiteKeys:[NSMutableSet set]]);assert(found.count==2);[runtime setValue:found forKey:@"records"];ZNStaticPatchRecord *a=found[0],*b=found[1];assert(a.entry!=entries&&a.entryAddress==(uintptr_t)entries);strcpy(entries[0].title,"changed");assert(strcmp(a.entry->title,"A")==0);NSString *error=nil;
  assert([runtime setEnabled:YES forRecord:a error:&error]&&entries[0].selectedTarget==base+onA);assert([runtime setEnabled:YES forRecord:b error:&error]&&entries[0].selectedTarget==base+onB);assert([runtime setEnabled:NO forRecord:b error:&error]&&entries[0].selectedTarget==base+onA);assert([runtime setEnabled:NO forRecord:a error:&error]&&entries[0].selectedTarget==base+off);
  {auto writeLease=ZNLeaseForHeader(base,a.imageIncarnation);assert(writeLease);ZNValueType type=ZNValueTypeAuto;uintptr_t cell=ZNStaticValueCellAddressForRecord(a,*writeLease,&type,&error);assert(cell&&type==ZNValueTypeI32);assert(writeLease->store(cell,123,4));uint32_t value=0;assert(writeLease->image->read(cell,&value,4)&&value==123);a.entryIndex=UINT32_MAX;assert(!ZNStaticValueCellAddressForRecord(a,*writeLease,&type,&error));a.entryIndex=0;}
+ std::thread writer([&]{@autoreleasepool{for(int i=0;i<100;i++){NSString *e=nil;assert([runtime setEnabled:YES forRecord:a error:&e]);assert([runtime setEnabled:NO forRecord:a error:&e]);}}});
+ std::thread cellWriter([&]{@autoreleasepool{for(int i=0;i<100;i++){std::lock_guard<std::recursive_mutex> g(ZNStaticOperationGate());auto lease=ZNLeaseForHeader(base,a.imageIncarnation);assert(lease);ZNValueType t=ZNValueTypeAuto;NSString *e=nil;uintptr_t cell=ZNStaticValueCellAddressForRecord(a,*lease,&t,&e);assert(cell&&lease->store(cell,i,4));assert([runtime setEnabled:YES forRecord:b error:&e]);}}});writer.join();cellWriter.join();
  uint64_t incarnation=a.imageIncarnation;assert(dlclose(handle)==0);assert(strcmp(a.entry->title,"A")==0);assert(![runtime setEnabled:YES forRecord:a error:&error]);assert(error.length);handle=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);assert(handle);assert(!ZNLeaseForHeader(base,incarnation));assert(![runtime setEnabled:YES forRecord:a error:&error]);assert(dlclose(handle)==0);
  puts("production Static Dispatch owned entries/shared-owner activation/scoped write/unload/reload stale-record rejection PASS");
 }}

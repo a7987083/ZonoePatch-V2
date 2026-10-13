@@ -1,4 +1,5 @@
 #include "ZNImageOperationLease.h"
+#include "ZNStaticOperationGate.h"
 #import "ZNImageGeneration.h"
 #import "ZNStaticDispatchRuntime.h"
 #import "ZNStaticPatchFormat.h"
@@ -287,6 +288,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 }
 
 - (void)refresh {
+    std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());
     @synchronized(self) {
     // M6.2.1 discovery cache: legacy UI layers still call refresh() as if it
     // were a getter. Keep those callers untouched for now, but make repeated
@@ -547,6 +549,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 }
 
 - (BOOL)setEnabled:(BOOL)enabled forRecord:(ZNStaticPatchRecord *)record error:(NSString **)error {
+    std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());
     @synchronized(self) {
     auto lease=record?ZNLeaseForHeader(record.imageBase,record.imageIncarnation):nullptr;
     if(!lease){if(error)*error=@"Static image unloaded or incarnation changed";return NO;}

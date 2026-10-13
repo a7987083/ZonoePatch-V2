@@ -14,6 +14,16 @@
       "before": "for(ZNStaticPatchRecord *r in records){ZNValueType resolved=ZNValueTypeAuto;",
       "after": "for(ZNStaticPatchRecord *r in records){auto writeLease=ZNLeaseForHeader(r.imageBase,r.imageIncarnation);if(!writeLease){if(error)*error=@\"value-cell write lease revoked\";return NO;}ZNValueType resolved=ZNValueTypeAuto;",
       "reason": "Hold loader reference and per-image operation gate through cell write and Static activation."
+    },
+    {
+      "before": "#include \"ZNStaticValueCellAccess.h\"\n",
+      "after": "#include \"ZNStaticValueCellAccess.h\"\n#include \"ZNStaticOperationGate.h\"\n",
+      "reason": "Unify the Static/M56 lock order before acquiring image and runtime state locks."
+    },
+    {
+      "before": "- (BOOL)applyText:(NSString *)text info:(NSDictionary *)info error:(NSString **)error{NSArray<ZNStaticPatchRecord *> *records=",
+      "after": "- (BOOL)applyText:(NSString *)text info:(NSDictionary *)info error:(NSString **)error{std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());NSArray<ZNStaticPatchRecord *> *records=",
+      "reason": "Unify the Static/M56 lock order before acquiring image and runtime state locks."
     }
   ]
 }
