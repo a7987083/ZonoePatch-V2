@@ -15,3 +15,6 @@ echo 'production signer baseline/current complete-byte equivalence PASS'
 
 clang++ -std=c++17 -fobjc-arc -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticRVAProtection.mm iosruntimepatchmenu/tests/macho_writer_rejection_test.mm -o "$work/writer-test"
 "$work/writer-test"
+# Compatibility builder is retained and gets source compilation coverage even
+# though the production Makefile routes only to V3/runtime-only.
+clang++ -std=c++17 -fobjc-arc -fblocks -fsyntax-only -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticBinaryBuilder.mm

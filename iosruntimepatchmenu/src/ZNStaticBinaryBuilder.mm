@@ -1,3 +1,4 @@
+#include "ZNMachOFile.h"
 #import "ZNStaticBinaryBuilder.h"
 #import "ZNBinaryPatchWorkspace.h"
 #import "ZNPatchRuntimeValidator.h"
@@ -86,6 +87,9 @@ static BOOL ZNBParse(uint8_t *base,
                      std::vector<ZNBSegment> &segments,
                      uint64_t &imageVMBase,
                      NSString **error) {
+    znmacho::File checked; const char *reason=nullptr;
+    if(!znmacho::parse(base,size,checked,&reason)){if(error)*error=[NSString stringWithUTF8String:reason];return NO;}
+
     if (size < sizeof(struct mach_header_64)) {
         if (error) *error = @"Mach-O 太小";
         return NO;
@@ -106,20 +110,9 @@ static BOOL ZNBParse(uint8_t *base,
     }
 
     imageVMBase = UINT64_MAX;
-    uint8_t *cursor = base + sizeof(*mh);
-    uint8_t *commandEnd = cursor + mh->sizeofcmds;
-
-    for (uint32_t i = 0; i < mh->ncmds; i++) {
-        if (cursor + sizeof(struct load_command) > commandEnd) {
-            if (error) *error = @"load command 损坏";
-            return NO;
-        }
-        struct load_command *lc = (struct load_command *)cursor;
-        if (lc->cmdsize < sizeof(struct load_command) || cursor + lc->cmdsize > commandEnd) {
-            if (error) *error = @"load command size 损坏";
-            return NO;
-        }
-
+    for(const auto &command:checked.commands){
+        uint8_t *cursor=base+command.offset;
+        struct load_command *lc=(struct load_command *)cursor;
         if (lc->cmd == LC_SEGMENT_64 && lc->cmdsize >= sizeof(struct segment_command_64)) {
             struct segment_command_64 *seg = (struct segment_command_64 *)cursor;
             if (seg->fileoff + seg->filesize > size) {
@@ -154,7 +147,6 @@ static BOOL ZNBParse(uint8_t *base,
             }
             segments.push_back(parsed);
         }
-        cursor += lc->cmdsize;
     }
 
     if (imageVMBase == UINT64_MAX) {
