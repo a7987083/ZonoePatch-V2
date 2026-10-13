@@ -533,9 +533,9 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
 }
 
 - (NSDictionary<NSString *,id> *)resolveNamedOffsetExpression:(NSString *)expression error:(NSString **)error {
+    @synchronized(self) {
     auto operationLease=ZNLeaseForHeader([self unityImageBase]);
     if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
-    @synchronized(self) {
 
     NSString *parseError = nil;
     NSDictionary *parsed = [ZNIL2CPPResolver parseNamedOffsetExpression:expression error:&parseError];
@@ -661,9 +661,9 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
                                               className:(NSString *)className
                                                  method:(NSString *)methodName
                                           argumentCount:(NSInteger)argumentCount {
+    @synchronized(self) {
     auto operationLease=ZNLeaseForHeader([self unityImageBase]);
     if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
-    @synchronized(self) {
 
     [self refresh];
     if (!self.available) return nil;
@@ -704,9 +704,9 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
                                              namespace:(NSString *)namespaceName
                                              className:(NSString *)className
                                                   field:(NSString *)fieldName {
+    @synchronized(self) {
     auto operationLease=ZNLeaseForHeader([self unityImageBase]);
     if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
-    @synchronized(self) {
 
     [self refresh];
     if (!self.available) return nil;
