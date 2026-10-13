@@ -1,6 +1,7 @@
 #pragma once
 #import <Foundation/Foundation.h>
-FOUNDATION_EXPORT NSString *ZN61Trim(NSString *value);
+NS_ASSUME_NONNULL_BEGIN
+FOUNDATION_EXPORT NSString *ZN61Trim(NSString * _Nullable value);
 FOUNDATION_EXPORT const NSInteger kZN61SearchFieldTag;
 // UI_RELOCATED_BEGIN blocks
 typedef void (^ZN61ProgressBlock)(NSDictionary<NSString *, id> *progress);
@@ -14,8 +15,9 @@ typedef void (^ZN61CompletionBlock)(NSArray<NSDictionary<NSString *, id> *> * _N
 + (instancetype)shared;
 - (NSString *)startSearch:(NSString *)query
                     limit:(NSUInteger)limit
-                 progress:(ZN61ProgressBlock)progress
-               completion:(ZN61CompletionBlock)completion;
+                 progress:(ZN61ProgressBlock _Nullable)progress
+               completion:(ZN61CompletionBlock _Nullable)completion;
 - (void)cancel:(NSString *)token;
 @end
 // UI_RELOCATED_END interface
+NS_ASSUME_NONNULL_END

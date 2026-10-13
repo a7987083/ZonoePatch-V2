@@ -64,6 +64,12 @@
       "before": "static NSString *ZN50Trim(NSString *value) {\n    return [value ?: @\"\" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];\n}\n",
       "after": "// L02: removed unused internal metadata whitespace helper.\n",
       "reason": "No active source references, no external linkage or registration; active provider path unchanged."
+    },
+    {
+      "path": "ZNMethodFinderM2Engine.h:interface",
+      "before": "@interface ZNMethodFinderM2Engine : NSObject\n@property(nonatomic,copy) NSString *indexStatusText;\n+ (instancetype)shared;\n- (NSString *)startSearch:(NSString *)query\n                    limit:(NSUInteger)limit\n                 progress:(ZN61ProgressBlock)progress\n               completion:(ZN61CompletionBlock)completion;\n- (void)cancel:(NSString *)token;\n@end\n",
+      "after": "@interface ZNMethodFinderM2Engine : NSObject\n@property(nonatomic,copy) NSString *indexStatusText;\n+ (instancetype)shared;\n- (NSString *)startSearch:(NSString *)query\n                    limit:(NSUInteger)limit\n                 progress:(ZN61ProgressBlock _Nullable)progress\n               completion:(ZN61CompletionBlock _Nullable)completion;\n- (void)cancel:(NSString *)token;\n@end\n",
+      "reason": "Explicit optional callback nullability matches existing guarded call behavior; typed declaration only, Selector/IMP/ABI and method bodies unchanged."
     }
   ]
 }
