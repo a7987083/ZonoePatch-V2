@@ -8,7 +8,7 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 static unsigned installs,removes;
 @implementation ZNNativeHookAction
-- (id)copyWithZone:(NSZone *)zone { ZNNativeHookAction *a=[ZNNativeHookAction new];a.actionID=self.actionID;a.minValue=self.minValue;a.maxValue=self.maxValue;return a; }
+- (id)copyWithZone:(NSZone *)zone { ZNNativeHookAction *a=[ZNNativeHookAction new];a.actionID=self.actionID;a.minValue=self.minValue;a.maxValue=self.maxValue;a.preparedRVA=self.preparedRVA;return a; }
 @end
 @implementation ZNNativeHookRuntime
 + (instancetype)sharedRuntime {static id x;static dispatch_once_t once;dispatch_once(&once,^{x=[self new];});return x;}
@@ -20,7 +20,7 @@ static unsigned installs,removes;
 + (instancetype)sharedLogger {static id x;static dispatch_once_t once;dispatch_once(&once,^{x=[self new];});return x;}
 - (void)log:(NSString *)s {(void)s;}
 @end
-static void drain(id scheduler) {dispatch_queue_t q=[scheduler valueForKey:@"queue"];dispatch_sync(q,^{});}
+static void drain(id scheduler) {dispatch_queue_t q=[scheduler valueForKey:@"queue"];dispatch_sync(q,^{});dispatch_sync(q,^{});}
 int main(){@autoreleasepool{
  ZNNativeHookScheduler *s=[ZNNativeHookScheduler new];ZNNativeHookAction *a=[ZNNativeHookAction new];a.actionID=71;a.maxValue=10;
  [s reconcileActions:@[a]];drain(s);assert(installs==1);
@@ -29,5 +29,9 @@ int main(){@autoreleasepool{
  [s reconcileActions:@[a]];drain(s);assert(installs==1);
  assert([s stateForActionID:71]==ZNNativeHookLifecycleStateTeardown);
  [s setDesiredValue:2 forAction:a];drain(s);assert([s stateForActionID:71]==ZNNativeHookLifecycleStateActive);
- puts("scheduler remove/retry/reconcile regression PASS");
+ ZNNativeHookAction *conflict=[a copy];conflict.preparedRVA=0x1234;
+ [s setDesiredValue:3 forAction:conflict];drain(s);
+ assert([s stateForActionID:71]==ZNNativeHookLifecycleStateFailed);
+ [s reconcileActions:@[]];drain(s);assert([s stateForActionID:71]==ZNNativeHookLifecycleStateTeardown);
+ puts("scheduler remove/retry/reconcile/identity-conflict regression PASS");
 }}

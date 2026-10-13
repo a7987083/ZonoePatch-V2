@@ -8,7 +8,19 @@ NSNotificationName const ZNNativeHookSchedulerStateDidChangeNotification =
     @"ZNNativeHookSchedulerStateDidChangeNotification";
 
 static NSString * const kZNNativeHookSchedulerValuePrefix =
-    @"zonoe.native-hook.runtime-value.v1";
+    @"zonoe.native-hook.runtime-value.v2";
+
+static NSString *ZNHookBindingIdentity(ZNNativeHookAction *a) {
+    return [NSString stringWithFormat:@"%@|%@|%llx|%lu|%lu|%lu|%llu|%@|%@|%@|%@|%@|%@|%llu",
+            a.preparedUUID?:@"",a.canonicalIdentity?:@"",(unsigned long long)a.preparedRVA,
+            (unsigned long)a.templateKind,(unsigned long)a.argumentIndex,(unsigned long)a.fieldArgumentIndex,
+            (unsigned long long)a.fieldOffset,a.fieldArgumentMode?:@"",a.fieldCodec?:@"",
+            a.codecAssembly?:@"",a.codecNamespaceName?:@"",a.codecClassName?:@"",a.codecGetterMethod?:@"",
+            (unsigned long long)a.staticHookSlotRVA];
+}
+static NSString *ZNHookStorageKey(ZNNativeHookAction *a) {
+    return [NSString stringWithFormat:@"%@.%u.%@",kZNNativeHookSchedulerValuePrefix,a.actionID,ZNHookBindingIdentity(a)];
+}
 
 @interface ZNNativeHookScheduler ()
 @property(nonatomic,strong) dispatch_queue_t queue;
@@ -73,7 +85,7 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
         NSNumber *cached=self.desiredValues[key];
         if(cached)return cached.integerValue;
     }
-    NSString *storageKey=[NSString stringWithFormat:@"%@.%u",kZNNativeHookSchedulerValuePrefix,action.actionID];
+    NSString *storageKey=ZNHookStorageKey(action);
     id stored=[NSUserDefaults.standardUserDefaults objectForKey:storageKey];
     NSInteger value=stored?[stored integerValue]:action.defaultValue;
     value=MIN(MAX(value,action.minValue),action.maxValue);
@@ -146,12 +158,26 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
         typeof(self) self=weakSelf;
         if(!self)return;
 
+        NSMutableSet *incoming=[NSMutableSet set];
+        for(ZNNativeHookAction *action in snapshot)if(action.actionID)[incoming addObject:@(action.actionID)];
+        NSArray *oldKeys=nil;@synchronized(self){oldKeys=[self.actionsByID allKeys];}
+        for(NSNumber *oldKey in oldKeys)if(![incoming containsObject:oldKey]){
+            ZNNativeHookAction *old=nil;@synchronized(self){old=self.actionsByID[oldKey];}
+            if(old)[self teardownAction:old];
+        }
         for(ZNNativeHookAction *action in snapshot){
             if(!action.actionID)continue;
             NSNumber *key=@(action.actionID);
             @synchronized(self) {
                 // Explicit teardown is a tombstone until a new desired-value command.
                 if([self.removedActions containsObject:key])continue;
+                ZNNativeHookAction *prior=self.actionsByID[key];
+                if(prior && ![ZNHookBindingIdentity(prior) isEqualToString:ZNHookBindingIdentity(action)]) {
+                    [[ZNNativeHookRuntime sharedRuntime] removeAction:prior error:nil];
+                    [self publishState:ZNNativeHookLifecycleStateFailed actionID:action.actionID
+                                error:@"actionID reused for a different Hook binding; use a new ID or restart"];
+                    continue;
+                }
                 self.actionsByID[key]=[action copy];
                 if(!self.states[key])self.states[key]=@(ZNNativeHookLifecycleStateDiscovered);
             }
@@ -169,6 +195,10 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
 }
 
 - (void)setDesiredValue:(NSInteger)value forAction:(ZNNativeHookAction *)action {
+    ZNNativeHookAction *snapshot=[action copy];
+    dispatch_async(self.queue,^{[self zn_setDesiredValueOnQueue:value forAction:snapshot];});
+}
+- (void)zn_setDesiredValueOnQueue:(NSInteger)value forAction:(ZNNativeHookAction *)action {
     if(!action||!action.actionID)return;
     value=MIN(MAX(value,action.minValue),action.maxValue);
     NSNumber *key=@(action.actionID);
@@ -176,6 +206,12 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
     NSUInteger epoch=0;
     BOOL needsSchedule=NO;
     @synchronized(self) {
+        ZNNativeHookAction *prior=self.actionsByID[key];
+        if(prior && ![ZNHookBindingIdentity(prior) isEqualToString:ZNHookBindingIdentity(action)]) {
+            [self publishState:ZNNativeHookLifecycleStateFailed actionID:action.actionID
+                        error:@"actionID identity conflict; value update rejected"];
+            return;
+        }
         [self.removedActions removeObject:key];
         self.actionsByID[key]=[action copy];
         self.desiredValues[key]=@(value);
@@ -186,6 +222,7 @@ static NSString * const kZNNativeHookSchedulerValuePrefix =
             needsSchedule=YES;
         }
     }
+    [NSUserDefaults.standardUserDefaults setInteger:value forKey:ZNHookStorageKey(action)];
     if(!needsSchedule)return;
 
     __weak typeof(self) weakSelf=self;
