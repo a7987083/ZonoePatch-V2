@@ -125,6 +125,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Build-time only: persists the final prepared RVA/static/UUID descriptor that
 // the generated dylib will consume at runtime.
+// Optimistic whole-store commit: validation and all per-descriptor failures run
+// on a private build store before authoring state is replaced/persisted once.
+- (BOOL)applyPreparedDescriptors:(NSArray<NSDictionary *> *)descriptors
+                expectedActions:(NSArray<ZNNativeHookAction *> *)expected
+                          error:(NSString * _Nullable * _Nullable)error;
 - (BOOL)updatePreparedDescriptor:(NSDictionary<NSString *, id> *)descriptor
                          atIndex:(NSUInteger)index
                            error:(NSString * _Nullable * _Nullable)error;

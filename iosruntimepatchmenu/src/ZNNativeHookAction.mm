@@ -598,6 +598,19 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
     return [a copy];
 }
 
+- (BOOL)applyPreparedDescriptors:(NSArray<NSDictionary *> *)descriptors expectedActions:(NSArray<ZNNativeHookAction *> *)expected error:(NSString **)error {
+    @synchronized(self){
+        if(descriptors.count!=expected.count||expected.count!=self.mutableActions.count){if(error)*error=@"Prepared descriptor batch size/authoring state changed";return NO;}
+        for(NSUInteger i=0;i<expected.count;i++)if(![[self dictionaryForAction:self.mutableActions[i]] isEqual:[self dictionaryForAction:expected[i]]]){if(error)*error=@"Prepared authoring state changed during discovery";return NO;}
+        ZNNativeHookStore *privateStore=[[ZNNativeHookStore alloc] initForBuildWithActions:expected];
+        for(NSUInteger i=0;i<descriptors.count;i++)if(![privateStore updatePreparedDescriptor:descriptors[i] atIndex:i error:error])return NO;
+        NSMutableArray *previous=self.mutableActions;
+        self.mutableActions=[[privateStore actionsSnapshot] mutableCopy];
+        @try{[self persist];}@catch(NSException *exception){self.mutableActions=previous;if(error)*error=exception.reason;return NO;}
+        return YES;
+    }
+}
+
 - (BOOL)updatePreparedDescriptor:(NSDictionary<NSString *,id> *)descriptor
                          atIndex:(NSUInteger)index
                            error:(NSString **)error {
@@ -605,6 +618,7 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
         if(error)*error=@"Prepared Native Hook descriptor 无效";
         return NO;
     }
+    if(ZNBuildFail("prepared-descriptor.write")){if(error)*error=@"Injected prepared descriptor write failure";return NO;}
     @synchronized(self){
         if(index>=self.mutableActions.count){
             if(error)*error=@"Prepared Native Hook index 越界";

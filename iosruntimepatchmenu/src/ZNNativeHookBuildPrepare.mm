@@ -241,13 +241,7 @@ BOOL ZNBuildPrepareNativeHookDescriptorsV1(NSString **report, NSString **error) 
 
     // Commit only after every action prepared successfully, so a failed build
     // cannot leave a half-updated Native Hook store.
-    for(NSUInteger i=0;i<prepared.count;i++){
-        NSString *local=nil;
-        if(![store updatePreparedDescriptor:prepared[i] atIndex:i error:&local]){
-            if(error)*error=local ?: @"Prepared Native Hook descriptor 持久化失败";
-            return NO;
-        }
-    }
+    if(![store applyPreparedDescriptors:prepared expectedActions:actions error:error])return NO;
 
     NSUInteger structCodecCount=0;
     for(ZNNativeHookAction *action in actions)
