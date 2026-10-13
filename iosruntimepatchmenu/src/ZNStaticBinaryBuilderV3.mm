@@ -1372,7 +1372,7 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
     };
     NSData *json=[NSJSONSerialization dataWithJSONObject:reportObject options:NSJSONWritingPrettyPrinted error:nil];
     NSString *reportPath=[folder stringByAppendingPathComponent:@"build_report.json"];
-    [json writeToFile:reportPath atomically:YES];[paths addObject:reportPath];
+    if(!ZNWriteBuildReport(reportObject,reportPath,error)){ZNDiscardOwnedBuildDirectory(folder);return NO;}[paths addObject:reportPath];
     NSDictionary *protectionV2Validation=@{
         @"format":@"com.zonoe.protection-v2-validation/v1",
         @"version":@"0.5.6",
@@ -1393,7 +1393,7 @@ BOOL ZNStaticBinaryBuilderV3BuildWorkspace(ZNBinaryPatchWorkspace *workspace,
     };
     NSData *validationJSON=[NSJSONSerialization dataWithJSONObject:protectionV2Validation options:NSJSONWritingPrettyPrinted error:nil];
     NSString *validationPath=[folder stringByAppendingPathComponent:@"protection_v2_validation.json"];
-    if(validationJSON){[validationJSON writeToFile:validationPath atomically:YES];[paths addObject:validationPath];}
+    if(!ZNWriteBuildReport(protectionV2Validation,validationPath,error)){ZNDiscardOwnedBuildDirectory(folder);return NO;}[paths addObject:validationPath];
     if(outputs)*outputs=paths;
     if(report)*report=[NSString stringWithFormat:@"Static Binary Builder V3 生成成功：%lu 个目标 · %lu 个逻辑 Patch\n输出：%@\n已新增 __ZNTEXT + __ZNDATA；不再使用目标 Mach-O 的 code/data gap；必须重新签名后安装",
                         (unsigned long)groups.count,(unsigned long)workspace.filledCount,folder];
