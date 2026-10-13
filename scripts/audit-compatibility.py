@@ -2,7 +2,8 @@ from pathlib import Path
 import hashlib,json
 root=Path(__file__).resolve().parents[1]
 source=root/'iosruntimepatchmenu/src'
-ui=(source/'ZNUnifiedUI.mm').read_text()
+from ui_source import expanded_ui
+ui=expanded_ui()
 make=(root/'iosruntimepatchmenu/Makefile').read_text()
 assert 'src/legacy/ZNLegacyStaticBinaryPipeline.mm' in make
 assert 'ZNBuildExecutorBuildWorkspace' in ui

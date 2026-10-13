@@ -1,0 +1,330 @@
+{
+  "baseline_remote_commit": "5e7d1d4c8b487c6c3fd5a3eb5685954ede24870a",
+  "expanded_sha256": "d5f06854e9fd5e6f2bf2c5eafd771217423a0ed65cc9c8e478766d3cb8ab0a90",
+  "modules": [
+    {
+      "path": "ui/core/ZonoeRuntimeMenu.inc",
+      "historical_section": "ZonoeRuntimeMenu.mm",
+      "sha256": "613ee20a1582580da369644da5256224e8880baada9d16ff8fecd4a9ac7be904",
+      "category_count": 9
+    },
+    {
+      "path": "ui/shell/ZNDeferredBootstrap.inc",
+      "historical_section": "ZNDeferredBootstrap.mm",
+      "sha256": "50a477c966e782db289f07436be71b9627a7615b421fe4bc80d36edd145aa0f2",
+      "category_count": 0
+    },
+    {
+      "path": "ui/shell/ZNRuntimeMenuModalShell.inc",
+      "historical_section": "ZNRuntimeMenuModalShell.mm",
+      "sha256": "f20682f6c8cd138159e58362bd7cbf96f02d14f6209c1e33e12ac70a69634428",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNFeatureGroupUI.inc",
+      "historical_section": "ZNFeatureGroupUI.mm",
+      "sha256": "1d50f78a904b123d9ecd3d78465fbbe6ef45f73da73fb1b46799090bd113336f",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNFeatureRuntimeControlsV2.inc",
+      "historical_section": "ZNFeatureRuntimeControlsV2.mm",
+      "sha256": "73fedaceed0327f927bde1422b2b09d49102865c8afa2a5a301a73e46ac2b04e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/shell/ZNPublicCompactUI.inc",
+      "historical_section": "ZNPublicCompactUI.mm",
+      "sha256": "38137730a679ea9b37242d073d145a2bdfd122a3d61d28eeb165c8ec2d1af886",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderUI.inc",
+      "historical_section": "ZNFeatureBuilderUI.mm",
+      "sha256": "b0e034a79da37c3ba999c1d867910f205340fc180898e419c6f134b9f1beba6a",
+      "category_count": 2
+    },
+    {
+      "path": "ui/features/ZNFeatureBuilderControlsV2.inc",
+      "historical_section": "ZNFeatureBuilderControlsV2.mm",
+      "sha256": "8771aa55b7d2608eb0627d3d1e0d3f7931f8729c3cd13131c460eb6b9dde7ed3",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUI.inc",
+      "historical_section": "ZNIL2CPPMethodFinderUI.mm",
+      "sha256": "a7e82c71cda3466fb453082b0bff2bf96a9a1a31e7b209911eae05a447ab3e37",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderMenuBinding.inc",
+      "historical_section": "ZNIL2CPPMethodFinderMenuBinding.mm",
+      "sha256": "e297c89d208d4ad2b12ccd7c7e7eef1e933c8242b828f9e9e3c76951a8954e7e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUXV2.inc",
+      "historical_section": "ZNIL2CPPMethodFinderUXV2.mm",
+      "sha256": "75d2c341d7644056685acbc6bf71ce5866049fff6946d440bcb1125cf5198026",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderUIV3.inc",
+      "historical_section": "ZNIL2CPPMethodFinderUIV3.mm",
+      "sha256": "95838fae1897bfb82d6f18f1ce80d911116e19170b0a0bd8b91d4edba6b7b498",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "historical_section": "ZNIL2CPPMethodFinderM2.mm",
+      "sha256": "ed0fe2041910d2d3c6d6df2a3db6ea1d1c539e523195c7c4085721850559cd3b",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM21CancelUX.inc",
+      "historical_section": "ZNIL2CPPMethodFinderM21CancelUX.mm",
+      "sha256": "9272d611549391639f02eb402c613a3b173d4ccdab495a991ff0c868840fa023",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNIL2CPPMethodFinderM22StableCancelUX.inc",
+      "historical_section": "ZNIL2CPPMethodFinderM22StableCancelUX.mm",
+      "sha256": "6b074bee00b7ce8509de09771d02236f33499a896bc2b9529d50c0732257db0e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNIL2CPPABIDetailUI.inc",
+      "historical_section": "ZNIL2CPPABIDetailUI.mm",
+      "sha256": "6b43daeb347e26f27735e753a05d06089c5e953e49f70dc964e696e9615dce32",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.inc",
+      "historical_section": "ZNRuntimeMethodCallFinderUI.mm",
+      "sha256": "7fbba8ad4e0d034b3990199ecdda360ff69ee4ab9e088a6cdba81ec82752ffb7",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNRuntimeMethodCallBuilderUI.inc",
+      "historical_section": "ZNRuntimeMethodCallBuilderUI.mm",
+      "sha256": "460a986ccc07ac68e30d0ac9ec80efde658c7d71d503b485d7981701830cf3ce",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.inc",
+      "historical_section": "ZNRuntimeMethodCallFeatureUI.mm",
+      "sha256": "6fc68ad77e460f90e032e06835297725a30026267986b0079991b00423ad5b0c",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNUXFixesV2.inc",
+      "historical_section": "ZNUXFixesV2.mm",
+      "sha256": "a949a6b13d951e618fc467eec6d9b3891c8d71f095cee08ff59e6f5329a6a0e8",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM42UI.inc",
+      "historical_section": "ZNMethodFinderM42UI.mm",
+      "sha256": "99d692b4238076e64a119ba235f5bfa38bf179dfb7f3c0ccd150ff47ef0d9c28",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43UI.inc",
+      "historical_section": "ZNMethodFinderM43UI.mm",
+      "sha256": "f819a642dd2fec4757460b680986492b55b8a1360f5809dbb739f123bc96db0e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderM43Polish.inc",
+      "historical_section": "ZNMethodFinderM43Polish.mm",
+      "sha256": "5e9cd7cfc48fb95fd7d981c960ba6310aeef427dacd76d88fc971083d7b6991f",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNInstanceSelectionV2UI.inc",
+      "historical_section": "ZNInstanceSelectionV2UI.mm",
+      "sha256": "afa72f195c76eed016650166418493ceda7516c4ff298cbcb8b1ab3c37daf3ad",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNM441Hotfix.inc",
+      "historical_section": "ZNM441Hotfix.mm",
+      "sha256": "76dd84526957cc2e1528c5b3314270de35cbba0075f27b7b141785b343f9a9f3",
+      "category_count": 2
+    },
+    {
+      "path": "ui/finder/ZNM442SearchRestore.inc",
+      "historical_section": "ZNM442SearchRestore.mm",
+      "sha256": "5e1c1ed21b8363c8da6bd5cdc8178772b7f0b77ed248a910f80ba554204e558f",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNM45AddressOwningMethodUI.inc",
+      "historical_section": "ZNM45AddressOwningMethodUI.mm",
+      "sha256": "6b2efef136267b5b77aee2c207bf96ef165cc66799ff66badd819e0441d645c6",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM46FullSignatureUI.inc",
+      "historical_section": "ZNM46FullSignatureUI.mm",
+      "sha256": "39e6734feb0e5d40ffdadfa9423ce4ca435ea1fe51c75903a5b2c85e0b390ba2",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNM461Polish.inc",
+      "historical_section": "ZNM461Polish.mm",
+      "sha256": "183e94b1498272910627008da702ef6e00224a97931e3f832fdf5c7e10406948",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM462CandidateBindingUI.inc",
+      "historical_section": "ZNM462CandidateBindingUI.mm",
+      "sha256": "13c634a01dafd4d3099036ea685f1c826068562a09fd89c394a4a63be8d4377e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM47ReceiverCaptureUI.inc",
+      "historical_section": "ZNM47ReceiverCaptureUI.mm",
+      "sha256": "698d3166ff75ac4ccd4cfd6b7e7384b6261d6f87a338f2204925401e08c79087",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM47MultiArgUI.inc",
+      "historical_section": "ZNM47MultiArgUI.mm",
+      "sha256": "f3cf475ed2bf28d52b253bbcc86922fe7f1308c9d4f5d1c04b2a81e08954706b",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNM47BuilderArgsUI.inc",
+      "historical_section": "ZNM47BuilderArgsUI.mm",
+      "sha256": "b5014d9ec37f61e48f1e7f94499f54ba704e32b2b9629869e4e1a65ce873923e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNM47VersionUI.inc",
+      "historical_section": "ZNM47VersionUI.mm",
+      "sha256": "f7743f763e096a435c63d0da38d4ccf7562d12240903cff50eeefcb788b9436e",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM49GenericInvokeEditableArgs.inc",
+      "historical_section": "ZNM49GenericInvokeEditableArgs.mm",
+      "sha256": "89c971e6ba8c710e650a92e29e5758ac4a7f370d7ccd0e5ef82663512e2e366c",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNMethodFinderUnifiedUI.inc",
+      "historical_section": "ZNMethodFinderUnifiedUI.mm",
+      "sha256": "8eef48a05e5d45b6fef6bb6eeb7b7e0b949c0d0128eae669226d992d4f38cde6",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM51RuntimeArgControlsImmediateChain.inc",
+      "historical_section": "ZNM51RuntimeArgControlsImmediateChain.mm",
+      "sha256": "d4bc3ab34eaf795bad5760d6e9090213628fdba7ce3f70c0a483409f5ae4048a",
+      "category_count": 2
+    },
+    {
+      "path": "ui/compat/ZNM51SilentCustomerExecution.inc",
+      "historical_section": "ZNM51SilentCustomerExecution.mm",
+      "sha256": "4317d1605e73352ab92e07b5e2f4b9887b7e9421289baa9fe0066dda34ea99cf",
+      "category_count": 1
+    },
+    {
+      "path": "ui/execution/ZNM52ChainExecuteButton.inc",
+      "historical_section": "ZNM52ChainExecuteButton.mm",
+      "sha256": "b6b967f42cb8a24465376c6c8ff2bdd4c08e2b8c3bb070a7c3dae8a60f04dbd6",
+      "category_count": 1
+    },
+    {
+      "path": "ui/finder/ZNM52MethodSearchHistory.inc",
+      "historical_section": "ZNM52MethodSearchHistory.mm",
+      "sha256": "9aedad3e00637ef18f5218c04b4d977de7e69cef1237296adf5766117b4f488c",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM53ControlBinding.inc",
+      "historical_section": "ZNM53ControlBinding.mm",
+      "sha256": "74780bbe32624e068a19fea99fb3b75664a5b867c4995836c773e9e4d33c67c7",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM55TypedControlBinding.inc",
+      "historical_section": "ZNM55TypedControlBinding.mm",
+      "sha256": "db70611811cf4a8f818f7d415040d5f6135902ff19592ca38d8b8f2ee82d6842",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM551RuntimeSliderStability.inc",
+      "historical_section": "ZNM551RuntimeSliderStability.mm",
+      "sha256": "5076c67004e888c7ea599c27c20ec52ffb40051b25a560bfd74ffe378eb6afbf",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM562SliderIsolation.inc",
+      "historical_section": "ZNM562SliderIsolation.mm",
+      "sha256": "2c40c8f7d1dadf048f26a56aba0419bf2b93b64e79d241190e1fa68539ff741a",
+      "category_count": 1
+    },
+    {
+      "path": "ui/compat/ZNM57RuntimeOnlyBuilderGate.inc",
+      "historical_section": "ZNM57RuntimeOnlyBuilderGate.mm",
+      "sha256": "e05b1278d9494d57dcbb6e34212b7e8c9b7880b3e4f1bc2630a1d5a74f8d1ab6",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.inc",
+      "historical_section": "ZNM57UnifiedRuntimeControls.mm",
+      "sha256": "ea8876fea615934669ce195732470cb6de5fc0a8a4bdf8a9ea124a76c0e12bdf",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM584SchemeALayout.inc",
+      "historical_section": "ZNM584SchemeALayout.mm",
+      "sha256": "48e4c6654f7043211f50bdfc92c357101ed14bc7b571458264f67ec5270fd51b",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM585UnifiedControlSemantics.inc",
+      "historical_section": "ZNM585UnifiedControlSemantics.mm",
+      "sha256": "12173bf43863cefb2433d2507793aa5ec06a73870d0d79175404635d0e9ed52c",
+      "category_count": 3
+    },
+    {
+      "path": "ui/compat/ZNM585StaticRuntimeRange.inc",
+      "historical_section": "ZNM585StaticRuntimeRange.mm",
+      "sha256": "35abc5cc80ffeecab0d4c230d1e7bb79509b05d620012d508e9bde98e29c57d2",
+      "category_count": 0
+    },
+    {
+      "path": "ui/features/ZNM58UnifiedControlRuntime.inc",
+      "historical_section": "ZNM58UnifiedControlRuntime.mm",
+      "sha256": "8087346594991f922121487c4858cd7e18362f0bffe10c9b2e1bfdc0ed4d984d",
+      "category_count": 1
+    },
+    {
+      "path": "ui/features/ZNM590UnifiedActionModel.inc",
+      "historical_section": "ZNM590UnifiedActionModel.mm",
+      "sha256": "df62217c3843711f0630ed3c5786bf4042d52be3e40c30ea9f057a4b95808b58",
+      "category_count": 3
+    },
+    {
+      "path": "ui/features/ZNM591OffsetHookControls.inc",
+      "historical_section": "ZNM591OffsetHookControls.mm",
+      "sha256": "db1391fb97631c4cd1f3d37dfdbc1e5c8e7b5059bba9a260a9e68162972a9aa1",
+      "category_count": 3
+    },
+    {
+      "path": "ui/features/ZNM600UnifiedFeatureSurface.inc",
+      "historical_section": "ZNM600UnifiedFeatureSurface.mm",
+      "sha256": "cefb3b24820eabafe20a55d0071b68f90cf1699c06dc9f36d5c33c9030dd74ba",
+      "category_count": 2
+    },
+    {
+      "path": "ui/features/ZNM630HardCutUI.inc",
+      "historical_section": "ZNM630HardCutUI.mm",
+      "sha256": "c47226daaeb8a18575d5adc5a12d27617d77a860dbcdcbaf51b5c8ca3ad3d1ed",
+      "category_count": 1
+    }
+  ]
+}

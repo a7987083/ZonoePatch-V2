@@ -4,7 +4,16 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 SRC="$ROOT/src"
 MAKEFILE="$ROOT/Makefile"
-UI="$SRC/ZNUnifiedUI.mm"
+UI_ENTRY="$SRC/ZNUnifiedUI.mm"
+UI="$(mktemp)"
+trap 'rm -f "$UI"' EXIT
+python3 - "$ROOT/.." > "$UI" <<'PY'
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(sys.argv[1])/"scripts"))
+from ui_source import expanded_ui
+sys.stdout.write(expanded_ui())
+PY
 
 test -f "$UI"
 grep -q 'src/ZNUnifiedUI.mm' "$MAKEFILE"

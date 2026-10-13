@@ -2,6 +2,8 @@
 import argparse, collections, hashlib, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/"scripts"))
+from ui_source import expanded_ui
 SOURCE = ROOT / "iosruntimepatchmenu/src/ZNUnifiedUI.mm"
 SPLIT_MODULES = [
     ROOT / "iosruntimepatchmenu/src/ZNRangeControl.mm",
@@ -31,7 +33,7 @@ def main():
     ap.add_argument("--report", help="write complete observed topology JSON")
     args = ap.parse_args()
     source_paths = [SOURCE] + [p for p in SPLIT_MODULES if p.exists()]
-    texts = [SOURCE.read_text(encoding="utf-8")]
+    texts = [expanded_ui()]
     for p in source_paths[1:]:
         module_text = p.read_text(encoding="utf-8")
         begin = f"#pragma mark - BEGIN {p.name}"
@@ -52,7 +54,7 @@ def main():
     imported=ROOT / "iosruntimepatchmenu/tests/imported_ui_digest.json"
     current=json.loads(imported.read_text())
     for rel,want in current["source_hashes"].items():
-        got=hashlib.sha256((ROOT/rel).read_bytes()).hexdigest()
+        got=hashlib.sha256(expanded_ui().encode()).hexdigest() if rel=="iosruntimepatchmenu/src/ZNUnifiedUI.mm" else hashlib.sha256((ROOT/rel).read_bytes()).hexdigest()
         if got!=want:failures.append(f"UI source digest changed: {rel}")
     scalar_keys = [
         "implementation_count",
