@@ -17,7 +17,7 @@
 @property(nonatomic,copy,readwrite) NSString *featureDescription;
 @property(nonatomic,assign,readwrite) uint64_t siteRVA;
 @property(nonatomic,assign,readwrite) uint32_t patchID;
-@property(nonatomic,assign,readwrite,getter=isEnabled) BOOL enabled;
+@property(atomic,assign,readwrite,getter=isEnabled) BOOL enabled;
 @property(nonatomic,assign) uintptr_t imageBase;
 @property(nonatomic,assign) uint64_t imageIncarnation;
 @property(nonatomic,assign) uintptr_t headerAddress;
@@ -43,7 +43,7 @@
 @end
 
 @interface ZNStaticDispatchRuntime ()
-@property(nonatomic,copy,readwrite) NSArray<ZNStaticPatchRecord *> *records;
+@property(atomic,copy,readwrite) NSArray<ZNStaticPatchRecord *> *records;
 // Per physical site, stores logical patchIDs in activation order. The last
 // owner wins. Disabling the last owner automatically falls back to the
 // previous active owner; an empty stack selects OFF/Original.
@@ -632,6 +632,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 }
 
 - (NSArray<NSString *> *)diagnosticLines {
+    std::lock_guard<std::recursive_mutex> operationGuard(ZNStaticOperationGate());
+    @synchronized(self) {
     NSMutableArray<NSString *> *lines = [NSMutableArray array];
     NSMutableSet<NSString *> *sites = [NSMutableSet set];
     for (ZNStaticPatchRecord *r in self.records) if (r.siteKey.length) [sites addObject:r.siteKey];
@@ -644,6 +646,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         if (lines.count >= 12) break;
     }
     return lines;
+    }
 }
 
 @end
