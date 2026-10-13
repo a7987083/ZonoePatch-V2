@@ -52,7 +52,7 @@ int main(){@autoreleasepool{
  assert(threw&&[ZNRuntimeActionStore sharedStore]==global);
  ZNNativeHookAction *ha=[ZNNativeHookAction new],*hb=[ZNNativeHookAction new];ha.actionID=11;hb.actionID=12;ha.className=hb.className=@"Example";ha.methodName=@"First";hb.methodName=@"Second";ha.templateKind=hb.templateKind=ZNNativeHookTemplateReturnBoolOverride;
  ZNNativeHookStore *batch=[[ZNNativeHookStore alloc] initForBuildWithActions:@[ha,hb]];NSArray *before=[batch actionsSnapshot];NSDictionary *valid=@{@"rva":@4096,@"uuid":@"fixture",@"staticKnown":@YES,@"isStatic":@YES};
- assert(![batch applyPreparedDescriptors:@[valid,@{}] expectedActions:before error:&error]);assert(![batch actionsSnapshot][0].preparedDescriptor&&![batch actionsSnapshot][1].preparedDescriptor);
+ assert((![batch applyPreparedDescriptors:@[valid,@{}] expectedActions:before error:&error]));assert(![batch actionsSnapshot][0].preparedDescriptor&&![batch actionsSnapshot][1].preparedDescriptor);
 #ifdef ZN_BUILD_FAULT_TESTING
  unsigned sinks=0;znfault::fail=[&](const char *point){return strcmp(point,"prepared-descriptor.write")==0&&++sinks==2;};assert((![batch applyPreparedDescriptors:@[valid,valid] expectedActions:before error:&error]));znfault::fail={};assert(![batch actionsSnapshot][0].preparedDescriptor&&![batch actionsSnapshot][1].preparedDescriptor);
 #endif
