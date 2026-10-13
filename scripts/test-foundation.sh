@@ -102,3 +102,11 @@ clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$execu
 clang++ -std=c++17 -pthread -Wall -Wextra -Werror -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/runtime_execution_scope_test.mm iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$execution_fixture/execution-test"
 "$execution_fixture/execution-test" "$execution_fixture/UnityFramework"
 rm -rf "$execution_fixture"
+
+managed_fixture=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$managed_fixture/UnityFramework"
+python3 scripts/extract-managed-bridge-fixture.py "$managed_fixture/managed.mm"
+clang++ -std=c++17 -pthread -Wall -Wextra -Werror -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$managed_fixture/managed.mm" iosruntimepatchmenu/src/ZNImageGeneration.mm -o "$managed_fixture/managed-test"
+"$managed_fixture/managed-test" "$managed_fixture/UnityFramework"
+cp "$managed_fixture/managed.json" dist/managed-bridge-extraction.json
+rm -rf "$managed_fixture"

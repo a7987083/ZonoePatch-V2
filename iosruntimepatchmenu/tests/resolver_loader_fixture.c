@@ -13,3 +13,7 @@ const void *il2cpp_class_get_method_from_name(void *c,const char *name,int count
 const char *il2cpp_method_get_name(const void *m){(void)m;return "Run";}
 unsigned il2cpp_method_get_param_count(const void *m){(void)m;return 0;}
 void *il2cpp_method_get_pointer(const void *m){(void)m;return (void*)FixtureRun;}
+static unsigned callbackValue;
+void *il2cpp_object_get_class(void *object){(void)object;return &klass;}
+void *il2cpp_runtime_invoke(const void *m,void *object,void **params,void **exception){(void)m;(void)object;*exception=NULL;callbackValue=*(unsigned char *)params[0];return NULL;}
+unsigned FixtureCallbackValue(void){return callbackValue;}
