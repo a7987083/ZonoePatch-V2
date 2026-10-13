@@ -60,3 +60,6 @@ clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Found
 /tmp/output-transaction-link-test
 clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildOutputTransaction.mm iosruntimepatchmenu/src/ZNBuildOutputIO.mm iosruntimepatchmenu/tests/build_output_transaction_test.mm iosruntimepatchmenu/tests/build_session_current_stub.mm -o /tmp/output-transaction-test
 /tmp/output-transaction-test
+
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/tests/build_file_transaction_test.mm -o /tmp/file-transaction-test
+/tmp/file-transaction-test

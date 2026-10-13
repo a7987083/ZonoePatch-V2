@@ -1,4 +1,6 @@
 #include "ZNMachOFile.h"
+#import "ZNBuildFileTransaction.h"
+#include "ZNBuildFault.h"
 #import "ZNNativeHookStaticPrepatch.h"
 
 #import "ZNNativeHookAction.h"
@@ -270,7 +272,7 @@ static NSString *ZNM610FindUnityOutput(NSArray<NSString *> *builderOutputs){
     return nil;
 }
 
-BOOL ZNBuildInstallStaticPreparedNativeHooksV1(NSArray<NSString *> *builderOutputs,
+static BOOL ZNM610InstallPreparedHooksAtPrivatePath(NSArray<NSString *> *builderOutputs,
                                                 NSString **report,
                                                 NSString **error){
     ZNNativeHookStore *store=[ZNNativeHookStore sharedStore];
@@ -380,7 +382,7 @@ BOOL ZNBuildInstallStaticPreparedNativeHooksV1(NSArray<NSString *> *builderOutpu
         }
         if(local.length||descriptors.count!=actions.count)break;
 
-        if(msync(base,(size_t)fileSize,MS_SYNC)!=0){local=@"Static Prepared Native Hook msync 失败";break;}
+        if(ZNBuildMSync(base,(size_t)fileSize,MS_SYNC)!=0){local=@"Static Prepared Native Hook msync 失败";break;}
         ok=YES;
     }while(0);
 
@@ -408,4 +410,16 @@ BOOL ZNBuildInstallStaticPreparedNativeHooksV1(NSArray<NSString *> *builderOutpu
         @"Static Prepared Native Hook：%lu actions · branch/cave/slot · UnityFramework resigned",
         (unsigned long)actions.count];
     return YES;
+}
+
+BOOL ZNBuildInstallStaticPreparedNativeHooksV1(NSArray<NSString *> *outputs,NSString **report,NSString **error){
+    ZNNativeHookStore *store=[ZNNativeHookStore sharedStore];
+    @synchronized(store){
+        NSArray *before=[store actionsSnapshot];if(!before.count)return ZNM610InstallPreparedHooksAtPrivatePath(outputs,report,error);
+        NSString *path=ZNM610FindUnityOutput(outputs);if(!path.length){if(error)*error=@"Static Prepared Native Hook 找不到生成后的 UnityFramework";return NO;}
+        __block NSString *localReport=nil;
+        BOOL ok=ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **localError){return ZNM610InstallPreparedHooksAtPrivatePath(@[work],&localReport,localError);},error);
+        if(!ok){[store restoreStaticPrepatchDescriptorsFromActions:before];return NO;}
+        if(report)*report=localReport;return YES;
+    }
 }

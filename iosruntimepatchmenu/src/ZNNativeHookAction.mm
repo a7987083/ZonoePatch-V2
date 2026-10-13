@@ -1,3 +1,4 @@
+#include "ZNBuildFault.h"
 #import "ZNBuildSession.h"
 #import "ZNNativeHookAction.h"
 #import "ZNIL2CPPABIMetadata.h"
@@ -697,6 +698,7 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
         if(error)*error=@"Static Prepared descriptor 无效";
         return NO;
     }
+    if(ZNBuildFail("descriptor.write")){if(error)*error=@"Injected descriptor write failure";return NO;}
     @synchronized(self){
         if(index>=self.mutableActions.count){
             if(error)*error=@"Static Prepared Native Hook index 越界";
@@ -719,6 +721,10 @@ static uint32_t ZNNHFNV1a32(NSString *text) {
         [self persist];
     }
     return YES;
+}
+
+- (void)restoreStaticPrepatchDescriptorsFromActions:(NSArray<ZNNativeHookAction *> *)actions {
+    @synchronized(self){for(NSUInteger i=0;i<actions.count&&i<self.mutableActions.count;i++){ZNNativeHookAction *a=self.mutableActions[i],*old=actions[i];if(a.actionID!=old.actionID)continue;a.staticPrepatch=old.staticPrepatch;a.staticHookSlotRVA=old.staticHookSlotRVA;a.staticTrampolineRVA=old.staticTrampolineRVA;a.staticCodeCaveRVA=old.staticCodeCaveRVA;a.staticDisplacedInstruction=old.staticDisplacedInstruction;}[self persist];}
 }
 
 - (BOOL)updatePresentationForActionID:(uint32_t)actionID

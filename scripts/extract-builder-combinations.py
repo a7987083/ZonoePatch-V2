@@ -14,7 +14,7 @@ def function(file,name):
   e+=1
  code=s[a:e];parts.append(code);records.append(dict(file=file,symbol=name,sha256=hashlib.sha256(code.encode()).hexdigest()))
 headers=(src/'ZNStaticBinaryBuilderV3.mm').read_text().split('// Static Binary Builder V3')[0]
-headers+='\n#import "ZNRuntimeActionModel.h"\n#import "ZNNativeHookAction.h"\n#import "ZNIL2CPPMethodSignature.h"\n#import "ZNComplexStructCodec.h"\n#import "ZNRuntimeActionFormat.h"\n#import "ZNGeneratedDataLayout.h"\n#import "ZNAdhocMachOSigner.h"\n#include <cassert>\n'
+headers+='\n#include "ZNBuildFault.h"\n#import "ZNBuildFileTransaction.h"\n#import "ZNRuntimeActionModel.h"\n#import "ZNNativeHookAction.h"\n#import "ZNIL2CPPMethodSignature.h"\n#import "ZNComplexStructCodec.h"\n#import "ZNRuntimeActionFormat.h"\n#import "ZNGeneratedDataLayout.h"\n#import "ZNAdhocMachOSigner.h"\n#include <cassert>\n'
 mock='''
 // Input adapters, not replacement builders or runtime validation.
 static NSDictionary *fixtureModule;
@@ -51,12 +51,14 @@ static NSArray<ZNNativeHookAction *> *fixtureHooks;
 @interface FixtureHookStore:NSObject
 + (instancetype)sharedStore;
 - (NSArray *)actionsSnapshot;
+- (void)restoreStaticPrepatchDescriptorsFromActions:(NSArray *)actions;
 - (BOOL)updateStaticPrepatchDescriptor:(NSDictionary *)d atIndex:(NSUInteger)i error:(NSString **)error;
 @end
 @implementation FixtureHookStore
 + (instancetype)sharedStore {static FixtureHookStore *s;if(!s)s=[self new];return s;}
-- (NSArray *)actionsSnapshot {return fixtureHooks;}
-- (BOOL)updateStaticPrepatchDescriptor:(NSDictionary *)d atIndex:(NSUInteger)i error:(NSString **)error {(void)error;ZNNativeHookAction *h=fixtureHooks[i];h.staticPrepatch=YES;h.staticHookSlotRVA=[d[@"hookSlotRVA"] unsignedLongLongValue];h.staticTrampolineRVA=[d[@"trampolineRVA"] unsignedLongLongValue];h.staticCodeCaveRVA=[d[@"codeCaveRVA"] unsignedLongLongValue];h.staticDisplacedInstruction=[d[@"displacedInstruction"] unsignedIntValue];return YES;}
+- (NSArray *)actionsSnapshot {NSMutableArray *a=[NSMutableArray array];for(ZNNativeHookAction *h in fixtureHooks)[a addObject:[h copy]];return a;}
+- (void)restoreStaticPrepatchDescriptorsFromActions:(NSArray *)actions {for(NSUInteger i=0;i<actions.count;i++){ZNNativeHookAction *old=actions[i],*h=fixtureHooks[i];h.staticPrepatch=old.staticPrepatch;h.staticHookSlotRVA=old.staticHookSlotRVA;h.staticTrampolineRVA=old.staticTrampolineRVA;h.staticCodeCaveRVA=old.staticCodeCaveRVA;h.staticDisplacedInstruction=old.staticDisplacedInstruction;}}
+- (BOOL)updateStaticPrepatchDescriptor:(NSDictionary *)d atIndex:(NSUInteger)i error:(NSString **)error {if(ZNBuildFail("descriptor.write")){if(error)*error=@"Injected sink failure";return NO;}ZNNativeHookAction *h=fixtureHooks[i];h.staticPrepatch=YES;h.staticHookSlotRVA=[d[@"hookSlotRVA"] unsignedLongLongValue];h.staticTrampolineRVA=[d[@"trampolineRVA"] unsignedLongLongValue];h.staticCodeCaveRVA=[d[@"codeCaveRVA"] unsignedLongLongValue];h.staticDisplacedInstruction=[d[@"displacedInstruction"] unsignedIntValue];return YES;}
 @end
 #define ZNNativeHookStore FixtureHookStore
 #import <uuid/uuid.h>

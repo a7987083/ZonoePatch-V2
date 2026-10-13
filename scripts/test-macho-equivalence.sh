@@ -40,7 +40,7 @@ cmp "$work/runtime-baseline/output/fixture.dylib" "$work/runtime-current/output/
 echo 'extracted production runtime-only target generation baseline/current complete-byte equivalence PASS'
 
 python3 scripts/extract-builder-combinations.py "$work/combinations.mm"
-clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-test"
 "$work/combinations-test" "$work/combinations"
 mkdir -p dist
 cp "$work/combinations.json" dist/production-builder-extraction.json
@@ -56,3 +56,6 @@ for generated in "$work"/combinations/mode-0/*.znpatched "$work"/combinations/mo
 done
 test "$verified_count" = 5
 echo 'production combination outputs independent iOS ARM64 CodeDirectory page hashes PASS'
+
+clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src "$work/combinations.mm" iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/src/ZNBinaryPatchRow.mm iosruntimepatchmenu/src/ZNAdhocMachOSigner.mm -o "$work/combinations-fault-test"
+"$work/combinations-fault-test" "$work/fault-combinations"

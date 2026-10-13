@@ -128,6 +128,8 @@ NS_ASSUME_NONNULL_BEGIN
                            error:(NSString * _Nullable * _Nullable)error;
 
 // M6.10 emit-time metadata after UnityFramework has been statically instrumented.
+// Restores only build-dependent fields while the caller holds the Store lock.
+- (void)restoreStaticPrepatchDescriptorsFromActions:(NSArray<ZNNativeHookAction *> *)actions;
 - (BOOL)updateStaticPrepatchDescriptor:(NSDictionary<NSString *, id> *)descriptor
                                atIndex:(NSUInteger)index
                                  error:(NSString * _Nullable * _Nullable)error;

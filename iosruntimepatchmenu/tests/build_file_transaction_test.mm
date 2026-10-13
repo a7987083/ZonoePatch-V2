@@ -1,0 +1,8 @@
+#import "ZNBuildFileTransaction.h"
+#include "ZNBuildFault.h"
+#include <cassert>
+int main(){@autoreleasepool{
+ NSString *root=[NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];NSFileManager *fm=NSFileManager.defaultManager;assert([fm createDirectoryAtPath:root withIntermediateDirectories:YES attributes:nil error:nil]);NSString *path=[root stringByAppendingPathComponent:@"UnityFramework"];NSData *original=[@"valid-original" dataUsingEncoding:NSUTF8StringEncoding],*replacement=[@"complete-signed-replacement" dataUsingEncoding:NSUTF8StringEncoding];assert([original writeToFile:path atomically:YES]);
+ for(const char *point:{"file.write","pwrite","file.publish"}){znfault::fail=[=](const char *p){return strcmp(p,point)==0;};NSString *error=nil;assert(!ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **e){(void)e;return [replacement writeToFile:work atomically:YES];},&error));assert([original isEqual:[NSData dataWithContentsOfFile:path]]);assert([fm contentsOfDirectoryAtPath:root error:nil].count==1);znfault::fail={};}
+ NSString *error=nil;assert(!ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **e){(void)e;assert([replacement writeToFile:work atomically:YES]);return NO;},&error));assert([original isEqual:[NSData dataWithContentsOfFile:path]]);assert(ZNEditBuildFileAtPath(path,^BOOL(NSString *work,NSString **e){(void)e;return [replacement writeToFile:work atomically:YES];},&error));assert([replacement isEqual:[NSData dataWithContentsOfFile:path]]);[fm removeItemAtPath:root error:nil];puts("actual file transaction edit/pwrite/publication failure rollback and successful atomic replacement PASS");
+}}
