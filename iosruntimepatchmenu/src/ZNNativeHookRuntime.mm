@@ -1,3 +1,4 @@
+#include "ZNRuntimeSymbolCache.h"
 #include "ZNImageOperationLease.h"
 #import "ZNImageGeneration.h"
 #import "ZNNativeHookRuntime.h"
@@ -408,13 +409,15 @@ typedef uint8_t (*ZNReturnBoolOriginalFn)(uintptr_t,uintptr_t,uintptr_t,uintptr_
 static uint8_t ZNReturnBoolHandle(NSUInteger index,
                                   uintptr_t x0,uintptr_t x1,uintptr_t x2,uintptr_t x3,
                                   uintptr_t x4,uintptr_t x5,uintptr_t x6,uintptr_t x7) {
+    ZNRuntimeExecutionScope execution;
     if(index>=kZNReturnBoolMaxSlots)return 0;
     ZNReturnBoolSlot *slot=&gZNReturnBoolSlots[index];
     if(!slot->target.load(std::memory_order_acquire))return 0;
     slot->hits.fetch_add(1,std::memory_order_relaxed);
     if(!slot->enabled.load(std::memory_order_relaxed)){
         uintptr_t original=slot->original.load(std::memory_order_acquire);
-        if(!original)return 0;
+        if(!original||!execution.retain(slot->target.load(std::memory_order_acquire)))return 0;
+        Dl_info originalImage={};if(dladdr((void *)original,&originalImage)&&!execution.retain(original))return 0;
         uint8_t value=((ZNReturnBoolOriginalFn)original)(x0,x1,x2,x3,x4,x5,x6,x7);
         slot->lastOriginal.store(value?1u:0u,std::memory_order_relaxed);
         return value;
@@ -453,55 +456,21 @@ typedef void *(*ZNManagedObjectGetClassFn)(void *);
 typedef const void *(*ZNManagedClassGetMethodFromNameFn)(void *, const char *, int);
 typedef void *(*ZNManagedRuntimeInvokeFn)(const void *, void *, void **, void **);
 
-static std::atomic<uintptr_t> gZNManagedObjectGetClass;
-static std::atomic<uintptr_t> gZNManagedClassGetMethodFromName;
-static std::atomic<uintptr_t> gZNManagedRuntimeInvoke;
-
+static ZNRuntimeSymbolCache gZNManagedObjectGetClass,gZNManagedClassGetMethodFromName,gZNManagedRuntimeInvoke;
 static NSString *ZNNativeLoadedUnityFrameworkPath(void) {
-    uint32_t count=_dyld_image_count();
-    for(uint32_t i=0;i<count;i++){
-        const char *cpath=_dyld_get_image_name(i);
-        if(!cpath)continue;
-        NSString *path=[NSString stringWithUTF8String:cpath]?:@"";
-        if([path.lastPathComponent isEqualToString:@"UnityFramework"]||
-           [path rangeOfString:@"UnityFramework.framework/UnityFramework"
-                       options:NSCaseInsensitiveSearch].location!=NSNotFound)
-            return path;
+    for(uint32_t i=0;i<_dyld_image_count();i++){
+        auto copied=ZNImagePathForHeader((uintptr_t)_dyld_get_image_header(i));
+        NSString *path=[NSString stringWithUTF8String:copied.c_str()];
+        if([path.lastPathComponent isEqualToString:@"UnityFramework"]||[path rangeOfString:@"UnityFramework.framework/UnityFramework" options:NSCaseInsensitiveSearch].location!=NSNotFound)return path;
     }
     return @"";
 }
-
 static BOOL ZNManagedPrepareInvokeBridge(NSString **error) {
-    if(gZNManagedObjectGetClass.load(std::memory_order_acquire) &&
-       gZNManagedClassGetMethodFromName.load(std::memory_order_acquire) &&
-       gZNManagedRuntimeInvoke.load(std::memory_order_acquire)) return YES;
-
-    NSString *path=ZNNativeLoadedUnityFrameworkPath();
-    if(!path.length){
-        if(error)*error=@"Managed Callback prepare：UnityFramework 尚未加载";
-        return NO;
-    }
-    void *handle=NULL;
-#ifdef RTLD_NOLOAD
-    handle=dlopen(path.fileSystemRepresentation,RTLD_LAZY|RTLD_NOLOAD);
-#else
-    handle=dlopen(path.fileSystemRepresentation,RTLD_LAZY);
-#endif
-    uintptr_t objectGetClass=(uintptr_t)(handle?dlsym(handle,"il2cpp_object_get_class"):NULL);
-    uintptr_t classGetMethod=(uintptr_t)(handle?dlsym(handle,"il2cpp_class_get_method_from_name"):NULL);
-    uintptr_t runtimeInvoke=(uintptr_t)(handle?dlsym(handle,"il2cpp_runtime_invoke"):NULL);
-    if(!objectGetClass)objectGetClass=(uintptr_t)dlsym(RTLD_DEFAULT,"il2cpp_object_get_class");
-    if(!classGetMethod)classGetMethod=(uintptr_t)dlsym(RTLD_DEFAULT,"il2cpp_class_get_method_from_name");
-    if(!runtimeInvoke)runtimeInvoke=(uintptr_t)dlsym(RTLD_DEFAULT,"il2cpp_runtime_invoke");
-    if(handle)dlclose(handle);
-    if(!objectGetClass||!classGetMethod||!runtimeInvoke){
-        if(error)*error=@"Managed Callback prepare：IL2CPP invoke API 不完整";
-        return NO;
-    }
-    gZNManagedObjectGetClass.store(objectGetClass,std::memory_order_release);
-    gZNManagedClassGetMethodFromName.store(classGetMethod,std::memory_order_release);
-    gZNManagedRuntimeInvoke.store(runtimeInvoke,std::memory_order_release);
-    return YES;
+    ZNRuntimeExecutionScope scope;NSString *path=ZNNativeLoadedUnityFrameworkPath();
+    const char *raw=path.length?path.fileSystemRepresentation:nullptr;
+    BOOL ready=gZNManagedObjectGetClass.resolve(scope,raw,"il2cpp_object_get_class")&&gZNManagedClassGetMethodFromName.resolve(scope,raw,"il2cpp_class_get_method_from_name")&&gZNManagedRuntimeInvoke.resolve(scope,raw,"il2cpp_runtime_invoke");
+    if(!ready&&error)*error=@"Managed Callback prepare：IL2CPP invoke API 不完整或映像已撤销";
+    return ready;
 }
 
 typedef struct {
@@ -544,9 +513,10 @@ static ZNManagedCallbackSlot *ZNManagedCallbackFreeSlot(void) {
 
 static BOOL ZNManagedInvokeBoolCallback(uintptr_t callbackObject, BOOL value) {
     if(!callbackObject)return NO;
-    ZNManagedObjectGetClassFn objectGetClass=(ZNManagedObjectGetClassFn)gZNManagedObjectGetClass.load(std::memory_order_acquire);
-    ZNManagedClassGetMethodFromNameFn classGetMethod=(ZNManagedClassGetMethodFromNameFn)gZNManagedClassGetMethodFromName.load(std::memory_order_acquire);
-    ZNManagedRuntimeInvokeFn runtimeInvoke=(ZNManagedRuntimeInvokeFn)gZNManagedRuntimeInvoke.load(std::memory_order_acquire);
+    ZNRuntimeExecutionScope scope;NSString *path=ZNNativeLoadedUnityFrameworkPath();const char *raw=path.length?path.fileSystemRepresentation:nullptr;
+    ZNManagedObjectGetClassFn objectGetClass=(ZNManagedObjectGetClassFn)gZNManagedObjectGetClass.resolve(scope,raw,"il2cpp_object_get_class");
+    ZNManagedClassGetMethodFromNameFn classGetMethod=(ZNManagedClassGetMethodFromNameFn)gZNManagedClassGetMethodFromName.resolve(scope,raw,"il2cpp_class_get_method_from_name");
+    ZNManagedRuntimeInvokeFn runtimeInvoke=(ZNManagedRuntimeInvokeFn)gZNManagedRuntimeInvoke.resolve(scope,raw,"il2cpp_runtime_invoke");
     if(!objectGetClass||!classGetMethod||!runtimeInvoke)return NO;
     void *klass=objectGetClass((void *)callbackObject);
     if(!klass)return NO;
@@ -564,13 +534,15 @@ typedef uintptr_t (*ZNManagedCallbackOriginalFn)(uintptr_t,uintptr_t,uintptr_t,u
 static uintptr_t ZNManagedCallbackHandle(NSUInteger index,
                                          uintptr_t x0,uintptr_t x1,uintptr_t x2,uintptr_t x3,
                                          uintptr_t x4,uintptr_t x5,uintptr_t x6,uintptr_t x7) {
+    ZNRuntimeExecutionScope execution;
     if(index>=kZNManagedCallbackMaxSlots)return 0;
     ZNManagedCallbackSlot *slot=&gZNManagedCallbackSlots[index];
     if(!slot->target.load(std::memory_order_acquire))return 0;
     slot->hits.fetch_add(1,std::memory_order_relaxed);
     if(!slot->enabled.load(std::memory_order_relaxed)){
         uintptr_t original=slot->original.load(std::memory_order_acquire);
-        if(!original)return 0;
+        if(!original||!execution.retain(slot->target.load(std::memory_order_acquire)))return 0;
+        Dl_info originalImage={};if(dladdr((void *)original,&originalImage)&&!execution.retain(original))return 0;
         return ((ZNManagedCallbackOriginalFn)original)(x0,x1,x2,x3,x4,x5,x6,x7);
     }
     uintptr_t regs[8]={x0,x1,x2,x3,x4,x5,x6,x7};

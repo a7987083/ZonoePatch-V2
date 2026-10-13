@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNIL2CPPABIMetadata.h"
 
 #import <Foundation/Foundation.h>
@@ -51,36 +52,14 @@ struct ZNABIAPI {
     Il2CppFreeFn il2cppFree = nullptr;
 };
 
-static void *ZNABISymbol(void *handle, const char *name) {
-    void *p = handle ? dlsym(handle, name) : nullptr;
-    if (!p) p = dlsym(RTLD_DEFAULT, name);
-    return p;
-}
-
-static void *ZNABIUnityHandle(void) {
-    static void *handle = nullptr;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        uint32_t count = _dyld_image_count();
-        for (uint32_t i = 0; i < count; i++) {
-            const char *path = _dyld_get_image_name(i);
-            if (!path) continue;
-            NSString *p = [NSString stringWithUTF8String:path];
-            if (![p.lastPathComponent isEqualToString:@"UnityFramework"]) continue;
-            handle = dlopen(path, RTLD_LAZY | RTLD_NOLOAD);
-            if (!handle) handle = dlopen(path, RTLD_LAZY);
-            break;
-        }
-    });
-    return handle;
-}
-
-static const ZNABIAPI &ZNABIResolvedAPI(void) {
-    static ZNABIAPI api;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        api.handle = ZNABIUnityHandle();
-#define ZNABI_LOAD(field, type, symbol) api.field = reinterpret_cast<type>(ZNABISymbol(api.handle, symbol))
+static ZNABIAPI ZNABIResolvedAPI(void) {
+    ZNABIAPI api;NSString *path=nil;
+    for(uint32_t i=0;i<_dyld_image_count();i++){
+        auto copied=ZNImagePathForHeader((uintptr_t)_dyld_get_image_header(i));
+        NSString *candidate=[NSString stringWithUTF8String:copied.c_str()];
+        if([candidate.lastPathComponent isEqualToString:@"UnityFramework"]){path=candidate;break;}
+    }
+#define ZNABI_LOAD(field, type, symbol) api.field = reinterpret_cast<type>(ZNResolveExecutionSymbol(path.length?path.fileSystemRepresentation:nullptr, symbol))
         ZNABI_LOAD(methodGetReturnType, MethodGetReturnTypeFn, "il2cpp_method_get_return_type");
         ZNABI_LOAD(methodGetParam, MethodGetParamFn, "il2cpp_method_get_param");
         ZNABI_LOAD(methodGetParamCount, MethodGetParamCountFn, "il2cpp_method_get_param_count");
@@ -105,7 +84,6 @@ static const ZNABIAPI &ZNABIResolvedAPI(void) {
         ZNABI_LOAD(classEnumBaseType, ClassEnumBaseTypeFn, "il2cpp_class_enum_basetype");
         ZNABI_LOAD(il2cppFree, Il2CppFreeFn, "il2cpp_free");
 #undef ZNABI_LOAD
-    });
     return api;
 }
 
@@ -448,6 +426,7 @@ BOOL ZNIL2CPPABIGPRLocation(NSDictionary<NSString *, id> *abi,
 }
 
 NSDictionary<NSString *, id> *ZNIL2CPPDescribeMethodABI(NSDictionary<NSString *, id> *candidate) {
+    ZNRuntimeExecutionScope znExecution;
     uintptr_t methodInfoAddress = (uintptr_t)[candidate[@"methodInfo"] unsignedLongLongValue];
     uintptr_t methodPointer = (uintptr_t)[candidate[@"methodPointer"] unsignedLongLongValue];
     const ZNABIAPI &api = ZNABIResolvedAPI();

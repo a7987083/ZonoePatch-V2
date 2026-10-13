@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #import "ZNComplexStructCodec.h"
 #import "ZNNativeHookTemplate.h"
 
@@ -31,6 +32,7 @@ static BOOL ZNCSecureLongWholeTransform(uintptr_t base,
                                         int64_t *before,
                                         int64_t *after) {
     if(base<0x1000||!f||!f->function0||!f->function1)return NO;
+    ZNRuntimeExecutionScope execution;if(!execution.retain(f->function0)||!execution.retain(f->function1))return NO;
     ZNCSLongGetterFn getter=(ZNCSLongGetterFn)f->function0;
     ZNCSLongSetterFn setter=(ZNCSLongSetterFn)f->function1;
     int64_t input=getter(base,f->methodInfo0);
@@ -54,6 +56,7 @@ static BOOL ZNCSObscuredIntTransform(uintptr_t base,
     if(base<0x1000||!f||f->variant!=1||
        !f->function0||!f->function1||!f->function2||!f->function3)return NO;
 
+    ZNRuntimeExecutionScope execution;if(!execution.retain(f->function0)||!execution.retain(f->function1)||!execution.retain(f->function2)||!execution.retain(f->function3))return NO;
     ZNCSObscuredGetDecryptedFn getDecrypted=(ZNCSObscuredGetDecryptedFn)f->function0;
     ZNCSObscuredGetEncryptedModernFn getEncrypted=(ZNCSObscuredGetEncryptedModernFn)f->function1;
     ZNCSObscuredEncryptFn encrypt=(ZNCSObscuredEncryptFn)f->function2;
