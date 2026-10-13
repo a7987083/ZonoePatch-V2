@@ -47,8 +47,15 @@ def main():
     expected = json.loads(BASELINE.read_text(encoding="utf-8"))
 
     failures = []
+    # Newline count is formatting, not behavior. Preserve old value as historical evidence.
+    # Imported source digest pins the actual UI bytes, stronger than counting lines.
+    imported=ROOT / "iosruntimepatchmenu/tests/imported_ui_digest.json"
+    current=json.loads(imported.read_text())
+    for rel,want in current["source_hashes"].items():
+        got=hashlib.sha256((ROOT/rel).read_bytes()).hexdigest()
+        if got!=want:failures.append(f"UI source digest changed: {rel}")
     scalar_keys = [
-        "newline_count", "implementation_count",
+        "implementation_count",
         "method_exchange_implementations_count",
         "method_set_implementation_count", "dispatch_once_count"
     ]
