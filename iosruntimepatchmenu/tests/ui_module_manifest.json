@@ -107,9 +107,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.inc",
+      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.mm",
       "historical_section": "ZNRuntimeMethodCallFinderUI.mm",
-      "sha256": "7fbba8ad4e0d034b3990199ecdda360ff69ee4ab9e088a6cdba81ec82752ffb7",
+      "sha256": "f0f51e0fc65125c83c4ff4b6aac13eb92951a4e7fecd4cf53c263814f7c1d635",
       "category_count": 1
     },
     {
@@ -119,9 +119,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.inc",
+      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.mm",
       "historical_section": "ZNRuntimeMethodCallFeatureUI.mm",
-      "sha256": "6fc68ad77e460f90e032e06835297725a30026267986b0079991b00423ad5b0c",
+      "sha256": "af7842ec4622e31e77da2e05a0bc22a860b8474ebc5283dccafbb4dc02e490a3",
       "category_count": 1
     },
     {

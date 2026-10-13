@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys,json,hashlib
 root=Path(__file__).resolve().parents[1];out=Path(sys.argv[1]);spans=[];code=[]
-for file,start in [('ui/features/ZNM551RuntimeSliderStability.mm','extern "C" void ZNInstallM551'),('ui/features/ZNM57UnifiedRuntimeControls.mm','static void ZNM57Replace'),('ui/finder/ZNMethodFinderM43Polish.mm','static void ZNM43PolishSwap')]:
+for file,start in [('ui/finder/ZNRuntimeMethodCallFinderUI.mm','extern "C" void ZNInstallRuntimeMethodCallFinderUI'),('ui/features/ZNRuntimeMethodCallFeatureUI.mm','extern "C" void ZNInstallRuntimeMethodCallFeatureUI'),('ui/features/ZNM551RuntimeSliderStability.mm','extern "C" void ZNInstallM551'),('ui/features/ZNM57UnifiedRuntimeControls.mm','static void ZNM57Replace'),('ui/finder/ZNMethodFinderM43Polish.mm','static void ZNM43PolishSwap')]:
  s=(root/'iosruntimepatchmenu/src'/file).read_text();body=s[s.index(start):s.index('#pragma mark - END')];code.append(body);spans.append(dict(source=file,sha256=hashlib.sha256(body.encode()).hexdigest()))
 headers='''#import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -13,6 +13,12 @@ headers='''#import <Foundation/Foundation.h>
 @interface ZNRuntimeMenuControllerV040:NSObject
 @end
 @implementation ZNRuntimeMenuControllerV040
+- (void)zn60v3_renderDetailAtWidth:(double)w{(void)w;}
+- (void)znrmc_renderDetailAtWidth:(double)w{(void)w;}
+- (void)zn50_renderFeatureGroupsFull{}
+- (void)znrmc_renderFeatureGroupsFull{}
+- (void)zn50_renderFeatureGroupsCompact{}
+- (void)znrmc_renderFeatureGroupsCompact{}
 - (void)zn51_runtimeSliderChanged:(id)c{(void)c;}
 - (void)znm551_runtimeSliderChanged:(id)c{(void)c;}
 - (void)znm57_runtimeSliderChanged:(id)c{(void)c;}
@@ -50,15 +56,25 @@ int main(){@autoreleasepool{
 #else
  assert(cls==Nil);ZNInstallM551RuntimeSliderStabilityDeferred();ZNInstallM57UnifiedRuntimeControlsDeferred();ZNInstallMethodFinderM43PolishDeferred();
 #endif
+ 
+#ifndef TEST_NO_CLASS
+ const char *selectors[]={"zn60v3_renderDetailAtWidth:","zn50_renderFeatureGroupsFull","zn50_renderFeatureGroupsCompact"};
+ const char *aliases[]={"znrmc_renderDetailAtWidth:","znrmc_renderFeatureGroupsFull","znrmc_renderFeatureGroupsCompact"};
+ IMP bases[3],wrappers[3];for(int i=0;i<3;i++){bases[i]=method_getImplementation(class_getInstanceMethod(cls,sel_registerName(selectors[i])));wrappers[i]=method_getImplementation(class_getInstanceMethod(cls,sel_registerName(aliases[i])));}
+#endif
+ ZNInstallRuntimeMethodCallFinderUIDeferred();ZNInstallRuntimeMethodCallFeatureUIDeferred();
+#ifndef TEST_NO_CLASS
+ for(int i=0;i<3;i++){assert(method_getImplementation(class_getInstanceMethod(cls,sel_registerName(selectors[i])))==wrappers[i]);assert(method_getImplementation(class_getInstanceMethod(cls,sel_registerName(aliases[i])))==bases[i]);}
+#endif
  NSUInteger total=[ZNUITraceSnapshot()[@"total"] unsignedIntegerValue];
- for(int i=0;i<100;i++){ZNInstallM551RuntimeSliderStabilityDeferred();ZNInstallM57UnifiedRuntimeControlsDeferred();ZNInstallMethodFinderM43PolishDeferred();}
+ for(int i=0;i<100;i++){ZNInstallRuntimeMethodCallFinderUIDeferred();ZNInstallRuntimeMethodCallFeatureUIDeferred();ZNInstallM551RuntimeSliderStabilityDeferred();ZNInstallM57UnifiedRuntimeControlsDeferred();ZNInstallMethodFinderM43PolishDeferred();}
  assert([ZNUITraceSnapshot()[@"total"] unsignedIntegerValue]==total);
 #ifdef TEST_NO_CLASS
  assert(total==0);
 #elif defined(TEST_MISSING_METHOD)
- assert(total==5);
+ assert(total==8);
 #else
- assert(total==6);
+ assert(total==9);
 #endif
  puts("exact RuntimeControls/Polish installers: predecessor, replacement, repeated install and missing class/method PASS; UIKit handlers DEVICE PENDING");
 }}

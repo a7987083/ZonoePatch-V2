@@ -72,13 +72,13 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/compat/ZNIL2CPPABIDetailUI.mm
 
 
-#include "ui/finder/ZNRuntimeMethodCallFinderUI.inc"
+// UI_COMPILED_MODULE: ui/finder/ZNRuntimeMethodCallFinderUI.mm
 
 
 #include "ui/compat/ZNRuntimeMethodCallBuilderUI.inc"
 
 
-#include "ui/features/ZNRuntimeMethodCallFeatureUI.inc"
+// UI_COMPILED_MODULE: ui/features/ZNRuntimeMethodCallFeatureUI.mm
 
 
 #include "ui/compat/ZNUXFixesV2.inc"

@@ -1,3 +1,4 @@
+#import "ZNMethodFinderUIInternal.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNRuntimeMethodCallFinderUI.mm
 #line 1 "ZNRuntimeMethodCallFinderUI.mm"
 #import <Foundation/Foundation.h>

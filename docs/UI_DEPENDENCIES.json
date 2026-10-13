@@ -454,14 +454,14 @@
       ]
     },
     {
-      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.inc",
+      "path": "ui/features/ZNRuntimeMethodCallFeatureUI.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFeatureUI)"
       ],
       "exchanges": 2,
       "sets": 0,
       "dynamicLookupLines": [
-        136
+        138
       ]
     },
     {
@@ -623,14 +623,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.inc",
+      "path": "ui/finder/ZNRuntimeMethodCallFinderUI.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNRuntimeMethodCallFinderUI)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        126
+        127
       ]
     },
     {

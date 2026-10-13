@@ -1,3 +1,5 @@
+#import "ZNMenuControllerInternal.h" // UI_MODULE_IMPORT
+#import "ZNRuntimeCapabilityCoordinator.h" // UI_MODULE_IMPORT
 #pragma mark - BEGIN ZNRuntimeMethodCallFeatureUI.mm
 #line 1 "ZNRuntimeMethodCallFeatureUI.mm"
 #import <Foundation/Foundation.h>
