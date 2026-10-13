@@ -5,6 +5,7 @@
 #import <UIKit/UIKit.h>
 
 #import "ZNCapabilityRegistry.h"
+#import "ZNNativeHookScheduler.h"
 #import "ZNBuiltInCapabilityAdapters.h"
 #import "ZNPatchCore.h"
 
@@ -91,6 +92,8 @@ static void ZNNativeHookLifecycleImageAdded(const struct mach_header *mh, intptr
                                             error:&prepareError];
         id<ZNRuntimeCapabilityAdapter> adapter=[registry adapterForIdentifier:ZNCapabilityNativeHookIdentifier];
         NSArray *actions=[adapter snapshotItems]?:@[];
+        // Foreground retry is a scheduler event even when discovery is cached.
+        [[ZNNativeHookScheduler sharedScheduler] reconcileActions:actions];
 
         @synchronized(self) {
             self.lastImageCount=_dyld_image_count();

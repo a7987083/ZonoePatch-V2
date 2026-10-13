@@ -47,7 +47,7 @@ NSString * const ZNCapabilityDirectNativeCallIdentifier=@"direct-native-call";
     (void)c;(void)e;
     ZNNativeHookRuntime *runtime=[ZNNativeHookRuntime sharedRuntime];
     [runtime refreshGeneratedActions];
-    [[ZNNativeHookScheduler sharedScheduler] reconcileActions:runtime.generatedActions?:@[]];
+    // Discovery does not own scheduling; lifecycle bootstrap reconciles snapshots.
     return YES;
 }
 - (NSArray *)snapshotItems{return [ZNNativeHookRuntime sharedRuntime].generatedActions?:@[];}
