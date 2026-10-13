@@ -73,16 +73,17 @@ public:
  }
 };
 class Cache {
- Reader reader;std::mutex lock;uint64_t epoch=0;std::map<uint64_t,std::shared_ptr<const Snapshot>> entries;
+ Reader reader;std::mutex lock;uint64_t epoch=0;std::map<std::pair<uint64_t,bool>,std::shared_ptr<const Snapshot>> entries;
 public:
  explicit Cache(Reader r):reader(r){}
  std::shared_ptr<const Snapshot> get(uint64_t address,const char **error=nullptr,bool arm64=true){
   std::lock_guard<std::mutex> guard(lock);
   uint64_t current=reader.generation(reader.context);
   if(current!=epoch){entries.clear();epoch=current;}
-  auto found=entries.find(address);if(found!=entries.end()&&found->second->valid())return found->second;
+  const auto key=std::make_pair(address,arm64);
+  auto found=entries.find(key);if(found!=entries.end()&&found->second->valid())return found->second;
   auto snapshot=Snapshot::capture(address,reader,error,arm64);
-  if(snapshot){if(entries.size()>=256)entries.clear();entries[address]=snapshot;}
+  if(snapshot){if(entries.size()>=256)entries.clear();entries[key]=snapshot;}
   return snapshot;
  }
 };
