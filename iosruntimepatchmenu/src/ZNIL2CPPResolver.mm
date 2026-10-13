@@ -1,4 +1,4 @@
-#include "ZNLoadedImageApple.h"
+#include "ZNImageOperationLease.h"
 #import "ZNIL2CPPResolver.h"
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
@@ -175,6 +175,7 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
 }
 
 - (void)refresh {
+    @synchronized(self) {
     self.available = NO;
     self.lastError = @"";
     [self clearFunctions];
@@ -186,12 +187,11 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
         return;
     }
 
-#ifdef RTLD_NOLOAD
-    _handle = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    _handle = dlopen(path.fileSystemRepresentation, RTLD_LAZY);
-#endif
-    if (!_handle) _handle = NULL;
+    auto refreshLease=ZNLeaseForHeader([self unityImageBase]);
+    if(!refreshLease){self.lastError=@"UnityFramework image lease unavailable";return;}
+    // Borrow only while resolving exports; no persistent loader reference.
+    _handle=refreshLease->nativeHandle();
+    struct ClearBorrow {void **value;~ClearBorrow(){*value=nullptr;}} clearBorrow{&_handle};
 
     _domainGet = (ZNIl2CppDomainGetFn)[self resolveSymbol:"il2cpp_domain_get"];
     _domainGetAssemblies = (ZNIl2CppDomainGetAssembliesFn)[self resolveSymbol:"il2cpp_domain_get_assemblies"];
@@ -215,6 +215,8 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
                 _classFromName && _classGetMethodFromName;
     self.available = core;
     if (!core) self.lastError = @"IL2CPP Runtime API 不完整或已被隐藏";
+}
+
 }
 
 - (NSDictionary<NSString *,NSNumber *> *)capabilities {
@@ -531,6 +533,10 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
 }
 
 - (NSDictionary<NSString *,id> *)resolveNamedOffsetExpression:(NSString *)expression error:(NSString **)error {
+    auto operationLease=ZNLeaseForHeader([self unityImageBase]);
+    if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
+    @synchronized(self) {
+
     NSString *parseError = nil;
     NSDictionary *parsed = [ZNIL2CPPResolver parseNamedOffsetExpression:expression error:&parseError];
     if (!parsed) {
@@ -647,6 +653,7 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
         @"method": candidate[@"method"] ?: @"",
         @"argumentCount": candidate[@"argumentCount"] ?: @(-1),
     };
+    }
 }
 
 - (NSDictionary<NSString *,id> *)resolveMethodAssembly:(NSString *)assembly
@@ -654,6 +661,10 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
                                               className:(NSString *)className
                                                  method:(NSString *)methodName
                                           argumentCount:(NSInteger)argumentCount {
+    auto operationLease=ZNLeaseForHeader([self unityImageBase]);
+    if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
+    @synchronized(self) {
+
     [self refresh];
     if (!self.available) return nil;
     const void *image = [self imageForAssembly:assembly];
@@ -686,12 +697,17 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
         @"methodPointer": @(methodPointer),
         @"pointerSource": pointerSource ?: @"unavailable",
     };
+    }
 }
 
 - (NSDictionary<NSString *,id> *)resolveFieldAssembly:(NSString *)assembly
                                              namespace:(NSString *)namespaceName
                                              className:(NSString *)className
                                                   field:(NSString *)fieldName {
+    auto operationLease=ZNLeaseForHeader([self unityImageBase]);
+    if(!operationLease){self.lastError=@"UnityFramework image lease unavailable";return nil;}
+    @synchronized(self) {
+
     [self refresh];
     if (!self.available) return nil;
     if (!_classGetFieldFromName || !_fieldGetOffset) {
@@ -727,6 +743,7 @@ static BOOL ZNIL2CPPParseMagnitude(NSString *text, uint64_t *value) {
         @"fieldInfo": @((uintptr_t)field),
         @"offset": @((unsigned long long)offset),
     };
+    }
 }
 
 - (NSString *)diagnosticReport {

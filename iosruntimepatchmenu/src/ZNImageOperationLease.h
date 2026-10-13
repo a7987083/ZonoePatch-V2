@@ -13,6 +13,7 @@ public:
  std::shared_ptr<const znimage::Snapshot> image;
  ~ZNImageOperationLease(){gate.unlock();if(handle)dlclose(handle);}
  ZNImageOperationLease(const ZNImageOperationLease&)=delete;
+ void *nativeHandle()const{return handle;}
  uint64_t incarnation()const{return lifetime->incarnation;}
  bool valid()const{return lifetime->live.load(std::memory_order_acquire)&&image&&image->valid();}
  static std::unique_ptr<ZNImageOperationLease> acquire(uintptr_t base,const char *path,uint64_t expected=0,bool arm64=true){

@@ -63,3 +63,9 @@ clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Found
 
 clang++ -std=c++17 -fobjc-arc -fblocks -DZN_BUILD_FAULT_TESTING -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNBuildFileTransaction.mm iosruntimepatchmenu/tests/build_file_transaction_test.mm -o /tmp/file-transaction-test
 /tmp/file-transaction-test
+
+work_resolver=$(mktemp -d)
+clang -dynamiclib iosruntimepatchmenu/tests/resolver_loader_fixture.c -o "$work_resolver/UnityFramework"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNIL2CPPResolver.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/resolver_loader_lease_test.mm -o "$work_resolver/resolver-test"
+"$work_resolver/resolver-test" "$work_resolver/UnityFramework"
+rm -rf "$work_resolver"
