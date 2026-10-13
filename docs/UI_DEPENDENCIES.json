@@ -319,14 +319,14 @@
       ]
     },
     {
-      "path": "ui/features/ZNM551RuntimeSliderStability.inc",
+      "path": "ui/features/ZNM551RuntimeSliderStability.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM551RuntimeSliderStability)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        82
+        83
       ]
     },
     {
@@ -352,14 +352,14 @@
       ]
     },
     {
-      "path": "ui/features/ZNM57UnifiedRuntimeControls.inc",
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNM57UnifiedRuntimeControls)"
       ],
       "exchanges": 0,
       "sets": 1,
       "dynamicLookupLines": [
-        121
+        122
       ]
     },
     {
@@ -586,14 +586,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNMethodFinderM43Polish.inc",
+      "path": "ui/finder/ZNMethodFinderM43Polish.mm",
       "implementations": [
         "ZNRuntimeMenuControllerV040 (ZNMethodFinderM43Polish)"
       ],
       "exchanges": 1,
       "sets": 0,
       "dynamicLookupLines": [
-        62
+        63
       ]
     },
     {

@@ -143,9 +143,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/finder/ZNMethodFinderM43Polish.inc",
+      "path": "ui/finder/ZNMethodFinderM43Polish.mm",
       "historical_section": "ZNMethodFinderM43Polish.mm",
-      "sha256": "5e9cd7cfc48fb95fd7d981c960ba6310aeef427dacd76d88fc971083d7b6991f",
+      "sha256": "1d2d551097ed80861e665fa7f9bbf1c1d82a4424b0ff3cbcf172cf7d7d606545",
       "category_count": 1
     },
     {
@@ -264,9 +264,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/features/ZNM551RuntimeSliderStability.inc",
+      "path": "ui/features/ZNM551RuntimeSliderStability.mm",
       "historical_section": "ZNM551RuntimeSliderStability.mm",
-      "sha256": "5076c67004e888c7ea599c27c20ec52ffb40051b25a560bfd74ffe378eb6afbf",
+      "sha256": "1aa37015c214f207282f56806ecc858fa5e2949afca29b248b3d16b66a198d52",
       "category_count": 1
     },
     {
@@ -283,9 +283,9 @@
       "category_count": 1
     },
     {
-      "path": "ui/features/ZNM57UnifiedRuntimeControls.inc",
+      "path": "ui/features/ZNM57UnifiedRuntimeControls.mm",
       "historical_section": "ZNM57UnifiedRuntimeControls.mm",
-      "sha256": "ea8876fea615934669ce195732470cb6de5fc0a8a4bdf8a9ea124a76c0e12bdf",
+      "sha256": "5ad8108cd018216ffd2872c6cdec7cc4e05b84c2f0fff4131ea4a0c48474e9f9",
       "category_count": 1
     },
     {
@@ -354,6 +354,7 @@
     "ZNUIInstallationTrace.mm": "a7b620570c6bd886b89faf1b8028cd66184caecc84f925500e864fa9c05122ca",
     "ZNMethodFinderM2Engine.mm": "947dad820de698b085028509fcdaff8a3e3ea39a372c066ae5a50d523ec61f8f",
     "ZNMethodFinderM2Engine.h": "19ba68530b3e96c93c3c55125387db8ef721cbe4fd26cb4794aaa993790a14a9",
-    "ZNMethodFinderUIInternal.h": "9bcf369ed2e6aca1eafbec1c3c471a8b4f93f4fd0951c22da4b4953e0666e3ef"
+    "ZNMethodFinderUIInternal.h": "9bcf369ed2e6aca1eafbec1c3c471a8b4f93f4fd0951c22da4b4953e0666e3ef",
+    "ZNRuntimeControlsUIInternal.h": "1df52e8e6a17da3aeaab378eb470efd6250b0feebd78b073e1641c7b10f15838"
   }
 }

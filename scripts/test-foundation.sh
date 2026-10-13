@@ -110,3 +110,16 @@ clang++ -std=c++17 -pthread -Wall -Wextra -Werror -fobjc-arc -fblocks -framework
 "$managed_fixture/managed-test" "$managed_fixture/UnityFramework"
 cp "$managed_fixture/managed.json" dist/managed-bridge-extraction.json
 rm -rf "$managed_fixture"
+
+work_controls=$(mktemp -d)
+python3 scripts/extract-runtime-control-install-fixture.py "$work_controls/controls.mm"
+for mode in normal missing-method missing-class; do
+ flag=""
+ if [ "$mode" = missing-method ]; then flag=-DTEST_MISSING_METHOD; fi
+ if [ "$mode" = missing-class ]; then flag=-DTEST_NO_CLASS; fi
+ clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra -Werror $flag -framework Foundation -Iiosruntimepatchmenu/src "$work_controls/controls.mm" iosruntimepatchmenu/src/ZNUIInstallationTrace.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm -o "$work_controls/test"
+ "$work_controls/test"
+done
+mkdir -p dist
+cp "$work_controls/controls.json" dist/runtime-control-install-extraction.json
+rm -rf "$work_controls"

@@ -90,7 +90,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/finder/ZNMethodFinderM43UI.inc"
 
 
-#include "ui/finder/ZNMethodFinderM43Polish.inc"
+// UI_COMPILED_MODULE: ui/finder/ZNMethodFinderM43Polish.mm
 
 
 #include "ui/execution/ZNInstanceSelectionV2UI.inc"
@@ -150,7 +150,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 #include "ui/features/ZNM55TypedControlBinding.inc"
 
 
-#include "ui/features/ZNM551RuntimeSliderStability.inc"
+// UI_COMPILED_MODULE: ui/features/ZNM551RuntimeSliderStability.mm
 
 
 // UI_COMPILED_MODULE: ui/features/ZNM562SliderIsolation.mm
@@ -159,7 +159,7 @@ extern "C" void ZNObserveFirstDisplayTick(void); // UI_MODULE_IMPORT
 // UI_COMPILED_MODULE: ui/compat/ZNM57RuntimeOnlyBuilderGate.mm
 
 
-#include "ui/features/ZNM57UnifiedRuntimeControls.inc"
+// UI_COMPILED_MODULE: ui/features/ZNM57UnifiedRuntimeControls.mm
 
 
 #include "ui/features/ZNM584SchemeALayout.inc"
