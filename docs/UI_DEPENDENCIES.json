@@ -465,17 +465,14 @@
       ]
     },
     {
-      "path": "ui/finder/ZNIL2CPPMethodFinderM2.inc",
+      "path": "ui/finder/ZNIL2CPPMethodFinderM2.mm",
       "implementations": [
-        "ZNMethodFinderM2Engine",
         "ZNRuntimeMenuControllerV040 (ZNMethodFinderM2UI)"
       ],
       "exchanges": 2,
       "sets": 0,
       "dynamicLookupLines": [
-        129,
-        130,
-        1126
+        200
       ]
     },
     {
