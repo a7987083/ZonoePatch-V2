@@ -91,7 +91,9 @@ class ReadWindow {
 public:
  explicit ReadWindow(const Snapshot &s):image(s){}
  bool copy(uint64_t address,void *out,size_t length){
-  if(!image.valid())return false;
+  if(!out||!length||!image.valid())return false;
+  // A window holds at most 64 KiB; larger valid requests use the bounded VM reader.
+  if(length>65536)return image.read(address,out,length);
   if(address>=start&&ZNCheckedRange64(bytes.size(),address-start,length)){memcpy(out,bytes.data()+address-start,length);return true;}
   for(const auto &seg:image.segments())if((seg.protection&1)&&address>=seg.start&&ZNCheckedRange64(seg.size,address-seg.start,length)){
    start=address;size_t size=(size_t)std::min<uint64_t>(65536,seg.size-(address-seg.start));bytes.resize(size);
