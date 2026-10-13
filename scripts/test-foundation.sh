@@ -49,3 +49,9 @@ clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosr
 
 clang++ -std=c++17 -fobjc-arc -Wall -Wextra -Werror -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNAsyncPerformance.mm iosruntimepatchmenu/tests/async_search_metrics_test.mm -o /tmp/search-metrics-test
 /tmp/search-metrics-test
+
+work_static=$(mktemp -d)
+clang -dynamiclib -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/static_runtime_image_fixture.c -o "$work_static/static-runtime-fixture.dylib"
+clang++ -std=c++17 -fobjc-arc -fblocks -framework Foundation -Iiosruntimepatchmenu/src iosruntimepatchmenu/src/ZNStaticDispatchRuntime.mm iosruntimepatchmenu/src/ZNRuntimeLogger.mm iosruntimepatchmenu/src/ZNImageGeneration.mm iosruntimepatchmenu/tests/static_owned_metadata_test.mm -o "$work_static/static-test"
+"$work_static/static-test" "$work_static/static-runtime-fixture.dylib"
+rm -rf "$work_static"

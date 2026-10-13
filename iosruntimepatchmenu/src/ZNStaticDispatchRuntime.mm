@@ -1,4 +1,4 @@
-#include "ZNLoadedImageApple.h"
+#include "ZNImageOperationLease.h"
 #import "ZNImageGeneration.h"
 #import "ZNStaticDispatchRuntime.h"
 #import "ZNStaticPatchFormat.h"
@@ -18,6 +18,11 @@
 @property(nonatomic,assign,readwrite) uint32_t patchID;
 @property(nonatomic,assign,readwrite,getter=isEnabled) BOOL enabled;
 @property(nonatomic,assign) uintptr_t imageBase;
+@property(nonatomic,assign) uint64_t imageIncarnation;
+@property(nonatomic,assign) uintptr_t headerAddress;
+@property(nonatomic,assign) uintptr_t entryAddress;
+@property(nonatomic,assign) uintptr_t dispatchAddress;
+@property(nonatomic,assign) uint32_t entryIndex;
 @property(nonatomic,assign) ZN44StaticEntry *entry;
 @property(nonatomic,assign) ZN44StaticEntry *dispatchEntry;
 @property(nonatomic,assign) uint64_t offRVA;
@@ -27,7 +32,13 @@
 @property(nonatomic,assign) uint32_t headerVersion;
 @property(nonatomic,assign) BOOL payloadProtectionV2;
 @end
-@implementation ZNStaticPatchRecord
+@implementation ZNStaticPatchRecord {
+    ZN44StaticEntry ownedEntry,ownedDispatch;BOOL hasEntry,hasDispatch;
+}
+- (ZN44StaticEntry *)entry {return hasEntry?&ownedEntry:nullptr;}
+- (void)setEntry:(ZN44StaticEntry *)value {hasEntry=value&&ZNImageVMCopy(nullptr,(uintptr_t)value,&ownedEntry,sizeof(ownedEntry));}
+- (ZN44StaticEntry *)dispatchEntry {return hasDispatch?&ownedDispatch:nullptr;}
+- (void)setDispatchEntry:(ZN44StaticEntry *)value {hasDispatch=value&&ZNImageVMCopy(nullptr,(uintptr_t)value,&ownedDispatch,sizeof(ownedDispatch));}
 @end
 
 @interface ZNStaticDispatchRuntime ()
@@ -65,7 +76,7 @@ static BOOL ZN44HeaderValid(const ZN44StaticHeader *h, uintptr_t headerAddress, 
         h->entrySize != sizeof(ZN44StaticEntry)) return NO;
     if (h->count == 0 || h->count > ZN44_STATIC_MAX_ENTRIES) return NO;
     uint64_t bytes = sizeof(ZN44StaticHeader) + (uint64_t)h->count * sizeof(ZN44StaticEntry);
-    if ((uint64_t)headerAddress + bytes > (uint64_t)segmentEnd) return NO;
+    if (headerAddress>segmentEnd || bytes>segmentEnd-headerAddress) return NO;
     return YES;
 }
 
@@ -182,21 +193,21 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
                 targetName:(NSString *)targetName
                      found:(NSMutableArray<ZNStaticPatchRecord *> *)found
               liveSiteKeys:(NSMutableSet<NSString *> *)liveSiteKeys {
-    if (!ZN44HeaderValid(header, headerAddress, regionEnd)) return NO;
-
-    ZN44StaticEntry *entries = (ZN44StaticEntry *)(headerAddress + sizeof(ZN44StaticHeader));
-    const ZN44FeatureDescriptionEntry *descriptionEntries = NULL;
-    uint64_t descriptionOffset=(sizeof(ZN44StaticHeader)+(uint64_t)header->count*sizeof(ZN44StaticEntry)+7u)&~UINT64_C(7);
-    uintptr_t descriptionAddress=headerAddress+(uintptr_t)descriptionOffset;
-    if(descriptionAddress+sizeof(ZN44FeatureDescriptionHeader)<=regionEnd){
-        const ZN44FeatureDescriptionHeader *descriptionHeader=(const ZN44FeatureDescriptionHeader *)descriptionAddress;
-        uint64_t descriptionBytes=sizeof(*descriptionHeader)+(uint64_t)descriptionHeader->count*sizeof(ZN44FeatureDescriptionEntry);
-        if(descriptionHeader->magic0==ZN44_FEATURE_DESC_MAGIC0 &&
-           descriptionHeader->magic1==ZN44_FEATURE_DESC_MAGIC1 &&
-           descriptionHeader->count==header->count &&
-           descriptionHeader->entrySize==sizeof(ZN44FeatureDescriptionEntry) &&
-           descriptionAddress+descriptionBytes<=regionEnd){
-            descriptionEntries=(const ZN44FeatureDescriptionEntry *)(descriptionHeader+1);
+    (void)header;
+    auto lease=ZNLeaseForHeader(runtimeHeader);if(!lease)return NO;
+    ZN44StaticHeader ownedHeader={};
+    if(!lease->image->read(headerAddress,&ownedHeader,sizeof(ownedHeader))||!ZN44HeaderValid(&ownedHeader,headerAddress,regionEnd))return NO;
+    header=&ownedHeader;
+    std::vector<ZN44StaticEntry> ownedEntries(header->count);
+    if(!lease->image->read(headerAddress+sizeof(*header),ownedEntries.data(),ownedEntries.size()*sizeof(ZN44StaticEntry)))return NO;
+    ZN44StaticEntry *entries=ownedEntries.data();
+    std::vector<ZN44FeatureDescriptionEntry> ownedDescriptions;
+    const ZN44FeatureDescriptionEntry *descriptionEntries=nullptr;
+    uint64_t descriptionOffset=0,descriptionAddress=0;
+    if(ZNCheckedAlign8(sizeof(*header)+(uint64_t)header->count*sizeof(ZN44StaticEntry),&descriptionOffset)&&ZNCheckedAdd64(headerAddress,descriptionOffset,&descriptionAddress)&&descriptionAddress<=regionEnd&&sizeof(ZN44FeatureDescriptionHeader)<=regionEnd-descriptionAddress){
+        ZN44FeatureDescriptionHeader d={};
+        if(lease->image->read(descriptionAddress,&d,sizeof(d))&&d.magic0==ZN44_FEATURE_DESC_MAGIC0&&d.magic1==ZN44_FEATURE_DESC_MAGIC1&&d.count==header->count&&d.entrySize==sizeof(ZN44FeatureDescriptionEntry)&&sizeof(d)+(uint64_t)d.count*sizeof(ZN44FeatureDescriptionEntry)<=regionEnd-descriptionAddress){
+            ownedDescriptions.resize(d.count);if(lease->image->read(descriptionAddress+sizeof(d),ownedDescriptions.data(),ownedDescriptions.size()*sizeof(ZN44FeatureDescriptionEntry)))descriptionEntries=ownedDescriptions.data();
         }
     }
     if (!ZN55ValidateProtectedHeader(header, entries)) {
@@ -214,13 +225,14 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         ZN55DecodedRVAs dispatchRVAs = {};
         if (!ZN55DecodeEntryRVAs(header, dispatchEntry, canonicalIndex, &dispatchRVAs)) continue;
 
-        NSString *siteKey = [NSString stringWithFormat:@"%p:%p:%u", (void *)runtimeHeader, (void *)headerAddress, canonicalIndex];
+        NSString *siteKey = [NSString stringWithFormat:@"%p:%p:%u:%llu", (void *)runtimeHeader, (void *)headerAddress, canonicalIndex,(unsigned long long)lease->incarnation()];
         [liveSiteKeys addObject:siteKey];
 
         uintptr_t offTarget = runtimeHeader + (uintptr_t)dispatchRVAs.offRVA;
-        uintptr_t current = __atomic_load_n((uintptr_t *)&dispatchEntry->selectedTarget, __ATOMIC_ACQUIRE);
+        uint64_t current=0;uintptr_t dispatchAddress=headerAddress+sizeof(*header)+(uintptr_t)canonicalIndex*sizeof(ZN44StaticEntry);
+        if(!lease->load64(dispatchAddress,&current))return NO;
         if (!ZN44CurrentTargetValid(header, entries, canonicalIndex, runtimeHeader, current)) {
-            __atomic_store_n((uintptr_t *)&dispatchEntry->selectedTarget, offTarget, __ATOMIC_RELEASE);
+            if(!lease->store(dispatchAddress,offTarget,8))return NO;
             current = offTarget;
         }
 
@@ -257,6 +269,9 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         record.siteRVA = entryRVAs.siteRVA;
         record.patchID = entry->patchID;
         record.imageBase = runtimeHeader;
+        record.imageIncarnation=lease->incarnation();record.headerAddress=headerAddress;
+        record.entryAddress=headerAddress+sizeof(*header)+(uintptr_t)e*sizeof(ZN44StaticEntry);
+        record.dispatchAddress=dispatchAddress;record.entryIndex=e;
         record.entry = entry;
         record.dispatchEntry = dispatchEntry;
         record.offRVA = dispatchRVAs.offRVA;
@@ -272,6 +287,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 }
 
 - (void)refresh {
+    @synchronized(self) {
     // M6.2.1 discovery cache: legacy UI layers still call refresh() as if it
     // were a getter. Keep those callers untouched for now, but make repeated
     // calls O(1) unless the dyld image set changed or an image-added event
@@ -361,6 +377,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         const struct mach_header_64 *mh = (const struct mach_header_64 *)_dyld_get_image_header(imageIndex);
         auto headerOwner=ZNCaptureLoadedImage((uintptr_t)mh);if(!headerOwner)continue;
         uintptr_t runtimeHeader=headerOwner->runtimeBase();
+        auto discoveryLease=ZNLeaseForHeader(runtimeHeader);if(!discoveryLease)continue;
+        headerOwner=discoveryLease->image;
         mh=(const struct mach_header_64 *)headerOwner->bytes();
         const uint8_t *lcBase = (const uint8_t *)(mh + 1);
         const uint8_t *lcEnd = lcBase + mh->sizeofcmds;
@@ -442,9 +460,11 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
                     uintptr_t end = start + (uintptr_t)seg->filesize;
                     uintptr_t cursor = (start + 7u) & ~(uintptr_t)7u;
                     fallbackBytes += (unsigned long long)seg->filesize;
-                    for (; cursor + sizeof(ZN44StaticHeader) <= end; cursor += 8) {
+                    znimage::ReadWindow scan(*headerOwner);
+                    for (; cursor<=end && sizeof(ZN44StaticHeader)<=end-cursor; cursor += 8) {
                         fallbackProbes++;
-                        const ZN44StaticHeader *header = (const ZN44StaticHeader *)cursor;
+                        ZN44StaticHeader candidate={};if(!scan.copy(cursor,&candidate,sizeof(candidate)))break;
+                        const ZN44StaticHeader *header=&candidate;
                         if (header->magic0 != ZN44_STATIC_MAGIC0) continue;
                         if (![self zn44_consumeHeader:header
                                              address:cursor
@@ -465,6 +485,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
     for (ZNStaticPatchRecord *r in self.records) if (r.siteKey.length) [previousKeys addObject:r.siteKey];
     for (NSString *key in previousKeys) if (![liveSiteKeys containsObject:key]) [self.ownerOrderBySite removeObjectForKey:key];
 
+    if(ZNCurrentImageGeneration()!=imageGeneration){self.discoveryDirty=YES;self.refreshInProgress=NO;return;}
     self.records = found;
     NSUInteger shared = 0;
     NSMutableDictionary<NSString *, NSNumber *> *counts = [NSMutableDictionary dictionary];
@@ -516,6 +537,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
                           (unsigned long)self.refreshCoalescedCount]);
 }
 
+}
+
 - (ZNStaticPatchRecord *)zn44_recordForPatchID:(uint32_t)patchID siteKey:(NSString *)siteKey {
     for (ZNStaticPatchRecord *candidate in self.records) {
         if ([candidate.siteKey isEqualToString:siteKey] && candidate.patchID == patchID) return candidate;
@@ -524,6 +547,9 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 }
 
 - (BOOL)setEnabled:(BOOL)enabled forRecord:(ZNStaticPatchRecord *)record error:(NSString **)error {
+    @synchronized(self) {
+    auto lease=record?ZNLeaseForHeader(record.imageBase,record.imageIncarnation):nullptr;
+    if(!lease){if(error)*error=@"Static image unloaded or incarnation changed";return NO;}
     if (!record || !record.entry || !record.dispatchEntry || !record.imageBase || !record.siteKey.length) {
         if (error) *error = @"Static Dispatch 记录无效";
         return NO;
@@ -535,7 +561,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         self.ownerOrderBySite[record.siteKey] = owners;
     }
     NSArray<NSNumber *> *previousOwners = [owners copy];
-    uintptr_t previousTarget = __atomic_load_n((uintptr_t *)&record.dispatchEntry->selectedTarget, __ATOMIC_ACQUIRE);
+    uint64_t previousTarget=0;if(!lease->load64(record.dispatchAddress,&previousTarget)){if(error)*error=@"Static target read lease failed";return NO;}
     NSNumber *ownerID = @(record.patchID);
 
     [owners removeObject:ownerID];
@@ -554,11 +580,11 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
         target = record.imageBase + (uintptr_t)selectedRecord.onRVA;
     }
 
-    __atomic_store_n((uintptr_t *)&record.dispatchEntry->selectedTarget, target, __ATOMIC_RELEASE);
-    uintptr_t readback = __atomic_load_n((uintptr_t *)&record.dispatchEntry->selectedTarget, __ATOMIC_ACQUIRE);
+    if(!lease->image->contains(target,4,VM_PROT_EXECUTE)||!lease->store(record.dispatchAddress,target,8)){[owners setArray:previousOwners];if(error)*error=@"Static target write lease failed";return NO;}
+    uint64_t readback=0;lease->load64(record.dispatchAddress,&readback);
     if (readback != target) {
         [owners setArray:previousOwners];
-        __atomic_store_n((uintptr_t *)&record.dispatchEntry->selectedTarget, previousTarget, __ATOMIC_RELEASE);
+        lease->store(record.dispatchAddress,previousTarget,8);
         if (error) *error = @"RW selectedTarget read-back 不一致";
         return NO;
     }
@@ -578,6 +604,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
                                           selected,
                                           record.physicalID]];
     return YES;
+}
+
 }
 
 - (NSArray<NSString *> *)diagnosticLines {

@@ -20,6 +20,7 @@ jobs:
         run: |
           python3 scripts/ui_source.py
           python3 scripts/check-cleanup.py
+          python3 iosruntimepatchmenu/tests/static_owned_metadata_contract.py
           python3 scripts/ui-dependencies.py
           python3 scripts/ui-install-graph.py
           python3 scripts/audit-compatibility.py

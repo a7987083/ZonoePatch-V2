@@ -29,3 +29,8 @@ public:
  bool load64(uintptr_t address,uint64_t *out){if(!out||(address&7)||!valid()||!image->contains(address,8,VM_PROT_READ))return false;*out=__atomic_load_n((const uint64_t *)address,__ATOMIC_ACQUIRE);return valid();}
  bool store(uintptr_t address,uint64_t value,size_t width){if((width!=4&&width!=8)||(address&(width-1))||!valid()||!image->contains(address,width,VM_PROT_READ|VM_PROT_WRITE))return false;if(width==8)__atomic_store_n((uint64_t *)address,value,__ATOMIC_RELEASE);else __atomic_store_n((uint32_t *)address,(uint32_t)value,__ATOMIC_RELEASE);return valid();}
 };
+inline std::string ZNImagePathForHeader(uintptr_t base){
+ for(uint32_t i=0;i<_dyld_image_count();++i){if((uintptr_t)_dyld_get_image_header(i)!=base)continue;const char *name=_dyld_get_image_name(i);if(!name)return {};std::string result;for(size_t n=0;n<4096;n++){char c=0;if(!ZNImageVMCopy(nullptr,(uintptr_t)name+n,&c,1))return {};if(!c)return result;result.push_back(c);}return {};}
+ return {};
+}
+inline std::unique_ptr<ZNImageOperationLease> ZNLeaseForHeader(uintptr_t base,uint64_t expected=0){auto path=ZNImagePathForHeader(base);return ZNImageOperationLease::acquire(base,path.c_str(),expected);}
