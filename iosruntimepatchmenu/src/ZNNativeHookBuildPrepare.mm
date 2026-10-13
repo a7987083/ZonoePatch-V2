@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #include "ZNLoadedImageApple.h"
 #import "ZNNativeHookBuildPrepare.h"
 
@@ -207,6 +208,7 @@ static NSDictionary<NSString *,id> *ZNM69ResolvePreparedDescriptor(
 }
 
 BOOL ZNBuildPrepareNativeHookDescriptorsV1(NSString **report, NSString **error) {
+    ZNRuntimeExecutionScope execution;
     ZNNativeHookStore *store=[ZNNativeHookStore sharedStore];
     NSArray<ZNNativeHookAction *> *actions=[store actionsSnapshot];
     if(!actions.count){
@@ -221,23 +223,8 @@ BOOL ZNBuildPrepareNativeHookDescriptorsV1(NSString **report, NSString **error) 
         return NO;
     }
 
-    void *handle=NULL;
-#ifdef RTLD_NOLOAD
-    if(resolver.unityPath.length)
-        handle=dlopen(resolver.unityPath.fileSystemRepresentation,RTLD_LAZY|RTLD_NOLOAD);
-#else
-    if(resolver.unityPath.length)
-        handle=dlopen(resolver.unityPath.fileSystemRepresentation,RTLD_LAZY);
-#endif
-    ZNM69MethodGetFlagsFn methodGetFlags=(ZNM69MethodGetFlagsFn)
-        (handle?dlsym(handle,"il2cpp_method_get_flags"):NULL);
-    if(!methodGetFlags)
-        methodGetFlags=(ZNM69MethodGetFlagsFn)dlsym(RTLD_DEFAULT,"il2cpp_method_get_flags");
-    if(!methodGetFlags){
-        if(handle)dlclose(handle);
-        if(error)*error=@"生成 Native Hook descriptor 时无法读取 il2cpp_method_get_flags";
-        return NO;
-    }
+    ZNM69MethodGetFlagsFn methodGetFlags=(ZNM69MethodGetFlagsFn)execution.resolve(resolver.unityPath.length?resolver.unityPath.fileSystemRepresentation:nullptr,"il2cpp_method_get_flags");
+    if(!methodGetFlags){if(error)*error=@"生成 Native Hook descriptor 时无法取得 flags execution owner";return NO;}
 
     NSMutableArray<NSDictionary<NSString *,id> *> *prepared=
         [NSMutableArray arrayWithCapacity:actions.count];
@@ -245,14 +232,12 @@ BOOL ZNBuildPrepareNativeHookDescriptorsV1(NSString **report, NSString **error) 
         NSString *local=nil;
         NSDictionary *descriptor=ZNM69ResolvePreparedDescriptor(action,resolver,methodGetFlags,&local);
         if(!descriptor){
-            if(handle)dlclose(handle);
             if(error)*error=local ?: [NSString stringWithFormat:@"%@：Prepared descriptor 失败",
                                       ZNM69Trim(action.title)];
             return NO;
         }
         [prepared addObject:descriptor];
     }
-    if(handle)dlclose(handle);
 
     // Commit only after every action prepared successfully, so a failed build
     // cannot leave a half-updated Native Hook store.

@@ -1,3 +1,4 @@
+#include "ZNRuntimeExecutionScope.h"
 #include "ZNLoadedImageApple.h"
 #import "ZNIL2CPPHybridFinder.h"
 #import "ZNIL2CPPResolver.h"
@@ -60,7 +61,6 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
 
 @implementation ZNIL2CPPHybridFinder {
     NSString *_unityPath;
-    void *_handle;
     ZN57DomainGetFn _domainGet;
     ZN57DomainGetAssembliesFn _domainGetAssemblies;
     ZN57AssemblyGetImageFn _assemblyGetImage;
@@ -109,10 +109,7 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
 }
 
 - (void *)resolveSymbol:(const char *)name {
-    if (!name) return NULL;
-    void *p = _handle ? dlsym(_handle, name) : NULL;
-    if (!p) p = dlsym(RTLD_DEFAULT, name);
-    return p;
+    return ZNResolveExecutionSymbol(_unityPath.length?_unityPath.fileSystemRepresentation:nullptr,name);
 }
 
 - (BOOL)refreshRuntimeAPI:(NSString **)error {
@@ -121,11 +118,6 @@ static BOOL ZN57FinderCaseEqual(NSString *lhs, NSString *rhs) {
         if (error) *error = @"UnityFramework 尚未加载";
         return NO;
     }
-#ifdef RTLD_NOLOAD
-    _handle = dlopen(_unityPath.fileSystemRepresentation, RTLD_LAZY | RTLD_NOLOAD);
-#else
-    _handle = dlopen(_unityPath.fileSystemRepresentation, RTLD_LAZY);
-#endif
     _domainGet = (ZN57DomainGetFn)[self resolveSymbol:"il2cpp_domain_get"];
     _domainGetAssemblies = (ZN57DomainGetAssembliesFn)[self resolveSymbol:"il2cpp_domain_get_assemblies"];
     _assemblyGetImage = (ZN57AssemblyGetImageFn)[self resolveSymbol:"il2cpp_assembly_get_image"];
@@ -528,6 +520,9 @@ done:
 }
 
 - (NSDictionary<NSString *, id> *)resolveExpression:(NSString *)expression error:(NSString **)error {
+    ZNRuntimeExecutionScope znExecution;
+    @synchronized(self) {
+
     self.lastError = @"";
     self.lastSearchStats = @{};
 
@@ -663,6 +658,7 @@ done:
         @"method": candidate[@"method"] ?: @"",
         @"argumentCount": candidate[@"argumentCount"] ?: @(-1),
     };
+    }
 }
 
 @end
