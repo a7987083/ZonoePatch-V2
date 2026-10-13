@@ -1,3 +1,4 @@
+#import "ZNImageGeneration.h"
 #import "ZNStaticDispatchRuntime.h"
 #import "ZNStaticPatchFormat.h"
 #import "ZNStaticRVAProtection.h"
@@ -43,6 +44,7 @@
 @property(nonatomic,assign) BOOL discoveryDirty;
 @property(nonatomic,assign) BOOL refreshInProgress;
 @property(nonatomic,assign) uint32_t lastScannedImageCount;
+@property(nonatomic,assign) uint64_t lastScannedImageGeneration;
 @property(nonatomic,assign) uint64_t snapshotGeneration;
 @property(nonatomic,assign) NSUInteger refreshCacheHitCount;
 @end
@@ -274,7 +276,8 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
     // calls O(1) unless the dyld image set changed or an image-added event
     // explicitly invalidated discovery.
     uint32_t imageCount = _dyld_image_count();
-    if (!self.discoveryDirty && self.lastScannedImageCount == imageCount) {
+    uint64_t imageGeneration=ZNCurrentImageGeneration();
+    if (!self.discoveryDirty && self.lastScannedImageCount == imageCount && self.lastScannedImageGeneration==imageGeneration) {
         self.refreshCacheHitCount += 1;
         if (self.refreshCacheHitCount <= 3 || (self.refreshCacheHitCount % 100) == 0) {
             ZNActivationTraceLog([NSString stringWithFormat:@"[static-dispatch-cache] HIT generation=%llu images=%u hits=%lu records=%lu",
@@ -469,6 +472,7 @@ static BOOL ZN44CurrentTargetValid(const ZN44StaticHeader *header,
 
     self.lastRefreshMilliseconds = (ZNActivationTraceNow() - refreshStart) * 1000.0;
     self.lastScannedImageCount = imageCount;
+    self.lastScannedImageGeneration=imageGeneration;
     self.snapshotGeneration += 1;
     self.discoveryDirty = NO;
     self.refreshInProgress = NO;

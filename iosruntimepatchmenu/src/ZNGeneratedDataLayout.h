@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "ZNStaticPatchFormat.h"
+#include "ZNCheckedByteView.h"
 
 // M6.8.4 Generated Data Layout V1.
 //
@@ -29,7 +30,9 @@ static inline int ZNGeneratedDataLayoutV1LocateRuntimeAction(
 {
     if (!section || sectionSize < sizeof(ZN44StaticHeader)) return 0;
 
-    const ZN44StaticHeader *header=(const ZN44StaticHeader *)section;
+    ZN44StaticHeader headerStorage;
+    if(!ZNByteViewRead(section,sectionSize,0,&headerStorage,sizeof(headerStorage)))return 0;
+    const ZN44StaticHeader *header=&headerStorage;
     if (header->magic0!=ZN44_STATIC_MAGIC0 ||
         header->magic1!=ZN44_STATIC_MAGIC1 ||
         header->version!=ZN44_STATIC_VERSION_V3 ||
@@ -40,13 +43,15 @@ static inline int ZNGeneratedDataLayoutV1LocateRuntimeAction(
 
     uint64_t entriesBytes=(uint64_t)header->count*header->entrySize;
     if (entriesBytes > UINT64_MAX-sizeof(ZN44StaticHeader)) return 0;
-    uint64_t descOffset=ZNGeneratedDataAlign8(sizeof(ZN44StaticHeader)+entriesBytes);
+    uint64_t descOffset=0;
+    if(!ZNCheckedAlign8(sizeof(ZN44StaticHeader)+entriesBytes,&descOffset))return 0;
     if (descOffset>sectionSize ||
         sectionSize-descOffset<sizeof(ZN44FeatureDescriptionHeader))
         return 0;
 
-    const ZN44FeatureDescriptionHeader *desc=
-        (const ZN44FeatureDescriptionHeader *)(section+descOffset);
+    ZN44FeatureDescriptionHeader descStorage;
+    if(!ZNByteViewRead(section,sectionSize,descOffset,&descStorage,sizeof(descStorage)))return 0;
+    const ZN44FeatureDescriptionHeader *desc=&descStorage;
     if (desc->magic0!=ZN44_FEATURE_DESC_MAGIC0 ||
         desc->magic1!=ZN44_FEATURE_DESC_MAGIC1 ||
         desc->count!=header->count ||
@@ -55,8 +60,10 @@ static inline int ZNGeneratedDataLayoutV1LocateRuntimeAction(
 
     uint64_t descEntriesBytes=(uint64_t)desc->count*desc->entrySize;
     if (descEntriesBytes > UINT64_MAX-sizeof(*desc)) return 0;
-    uint64_t actionOffset=ZNGeneratedDataAlign8(
-        descOffset+sizeof(*desc)+descEntriesBytes);
+    uint64_t actionOffset=0,descEnd=0;
+    if(!ZNCheckedAdd64(descOffset,sizeof(*desc),&descEnd) ||
+       !ZNCheckedAdd64(descEnd,descEntriesBytes,&descEnd) ||
+       !ZNCheckedAlign8(descEnd,&actionOffset))return 0;
     if (actionOffset>sectionSize) return 0;
 
     if (outOffset) *outOffset=actionOffset;
