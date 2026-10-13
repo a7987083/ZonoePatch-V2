@@ -28,3 +28,13 @@ for version in baseline current; do
 done
 cmp "$work/layout-baseline.bin" "$work/layout-current.bin"
 echo 'extracted production V3 owned-segment install baseline/current complete-byte equivalence PASS'
+git show "$baseline:iosruntimepatchmenu/src/ZNRuntimeOnlyBinaryBuilder.mm" > "$work/runtime-baseline.mm"
+for version in baseline current; do
+  source="$work/runtime-baseline.mm"
+  if [ "$version" = current ]; then source=iosruntimepatchmenu/src/ZNRuntimeOnlyBinaryBuilder.mm; fi
+  python3 scripts/extract-runtime-only-fixture.py "$source" "$work/runtime-$version-fixture.mm"
+  clang++ -std=c++17 -fobjc-arc -Wno-incomplete-implementation -framework Foundation -Iiosruntimepatchmenu/src "$work/runtime-$version-fixture.mm" -o "$work/runtime-$version-test"
+  "$work/runtime-$version-test" "$work/runtime-$version"
+done
+cmp "$work/runtime-baseline/output/fixture.dylib" "$work/runtime-current/output/fixture.dylib"
+echo 'extracted production runtime-only target generation baseline/current complete-byte equivalence PASS'
