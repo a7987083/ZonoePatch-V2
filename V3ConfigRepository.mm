@@ -22,7 +22,7 @@ static BOOL ZNValidHex(NSString *value,BOOL bytes) {
   if([s hasPrefix:@"0x"]||[s hasPrefix:@"0X"])s=[s substringFromIndex:2];
   if(!s.length||s.length>16)return NO;
  }
- NSCharacterSet *invalid=[NSCharacterSet.characterSetWithCharactersInString:@"0123456789abcdefABCDEF" invertedSet];
+ NSCharacterSet *invalid=[[NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"] invertedSet];
  return [s rangeOfCharacterFromSet:invalid].location==NSNotFound;
 }
 @implementation ZNV3ConfigRepository
