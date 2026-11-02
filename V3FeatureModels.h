@@ -17,11 +17,13 @@
 @interface ZNV3FeatureStore : NSObject
 @property(nonatomic,strong,readonly) NSMutableArray<ZNV3Feature *> *features;
 @property(nonatomic,strong) ZNV3Feature *draft;
+@property(nonatomic,strong,readonly) NSError *lastError;
+@property(nonatomic,assign,readonly) BOOL persistenceAvailable;
 @property(nonatomic,assign,readonly) NSUInteger editingIndex;
 - (void)editFeatureAtIndex:(NSUInteger)index;
 - (void)cancelDraft;
 - (void)beginDraftForModule:(NSString *)module;
-- (void)saveDraft;
-- (void)deleteFeatureAtIndex:(NSUInteger)index;
+- (BOOL)saveDraft;
+- (BOOL)deleteFeatureAtIndex:(NSUInteger)index;
 - (void)deleteRuleAtIndex:(NSUInteger)index;
 @end
