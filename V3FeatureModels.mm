@@ -11,10 +11,10 @@
 }
 @end
 @implementation ZNV3FeatureStore
-- (NSUInteger)editingIndex { return _editingIndex; }
+@synthesize editingIndex=_editingIndex;
 - (instancetype)init {
- _editingIndex=NSNotFound;
  if((self=[super init])) {
+ _editingIndex=NSNotFound;
  _features=[NSMutableArray arrayWithArray:@[
  [ZNV3Feature feature:@"无限生命" detail:@"示例 · 未执行补丁" module:@"主程序"],
  [ZNV3Feature feature:@"无限子弹" detail:@"示例 · 未执行补丁" module:@"UnityFramework"]]];
