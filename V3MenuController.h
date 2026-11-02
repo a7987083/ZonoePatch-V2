@@ -16,6 +16,17 @@
 @property(nonatomic,assign) NSInteger typeIndex;
 @property(nonatomic,copy) void (^closeBlock)(void);
 - (void)buildHookPage;
+- (void)add:(UIView *)view height:(CGFloat)height;
+- (UITextField *)field:(NSString *)hint value:(NSString *)value;
+- (void)renderFeatures;
+- (void)renderRules;
+- (void)showEditor;
+- (void)hideEditor;
+- (void)addRuleTap;
+- (void)removeRule:(UIButton *)sender;
+- (void)cycleType;
+- (void)preview;
+- (void)saveUI;
 - (void)categoryTap:(UIButton *)sender;
 - (void)closeTap;
 @end
