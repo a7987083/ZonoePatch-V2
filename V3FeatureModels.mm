@@ -1,4 +1,5 @@
 #import "V3FeatureModels.h"
+#import "V3ConfigRepository.h"
 @implementation ZNV3PatchRule
 + (instancetype)emptyRule {
  ZNV3PatchRule *r=[self new];r.identifier=NSUUID.UUID.UUIDString;r.offsetText=@"";r.patchText=@"";return r;
@@ -10,14 +11,26 @@
  f.rules=[NSMutableArray array];return f;
 }
 @end
-@implementation ZNV3FeatureStore
+@implementation ZNV3FeatureStore {
+ ZNV3ConfigRepository *_repository;
+ NSError *_lastError;
+ BOOL _persistenceAvailable;
+}
 @synthesize editingIndex=_editingIndex;
+- (NSError *)lastError {return _lastError;}
+- (BOOL)persistenceAvailable {return _persistenceAvailable;}
+- (BOOL)persist {
+ if(!_persistenceAvailable)return NO;
+ NSError *err=nil;BOOL ok=[_repository saveFeatures:_features error:&err];_lastError=err;
+ return ok;
+}
 - (instancetype)init {
  if((self=[super init])) {
  _editingIndex=NSNotFound;
- _features=[NSMutableArray arrayWithArray:@[
- [ZNV3Feature feature:@"无限生命" detail:@"示例 · 未执行补丁" module:@"主程序"],
- [ZNV3Feature feature:@"无限子弹" detail:@"示例 · 未执行补丁" module:@"UnityFramework"]]];
+ _repository=[ZNV3ConfigRepository new];
+ NSError *err=nil;NSArray *loaded=[_repository loadFeatures:&err];
+ _persistenceAvailable=(loaded!=nil);_lastError=err;
+ _features=[NSMutableArray arrayWithArray:loaded?:@[]];
  }return self;
 }
 - (void)beginDraftForModule:(NSString *)module {
@@ -38,15 +51,24 @@
  _editingIndex=index;self.draft=draft;
 }
 - (void)cancelDraft {self.draft=nil;_editingIndex=NSNotFound;}
-- (void)saveDraft {
- if(!self.draft)return;
- if(_editingIndex!=NSNotFound && _editingIndex<self.features.count)
-   self.features[_editingIndex]=self.draft;
- else [self.features addObject:self.draft];
- [self cancelDraft];
+- (BOOL)saveDraft {
+ if(!self.draft)return NO;
+ NSUInteger oldIndex=_editingIndex;
+ ZNV3Feature *old=oldIndex!=NSNotFound&&oldIndex<_features.count?_features[oldIndex]:nil;
+ if(old)[_features replaceObjectAtIndex:oldIndex withObject:self.draft];
+ else [_features addObject:self.draft];
+ if(![self persist]) {
+  if(old)[_features replaceObjectAtIndex:oldIndex withObject:old];
+  else [_features removeLastObject];
+  return NO;
+ }
+ [self cancelDraft];return YES;
 }
-- (void)deleteFeatureAtIndex:(NSUInteger)index {
- if(index<self.features.count)[self.features removeObjectAtIndex:index];
+- (BOOL)deleteFeatureAtIndex:(NSUInteger)index {
+ if(index>=_features.count)return NO;
+ ZNV3Feature *old=_features[index];[_features removeObjectAtIndex:index];
+ if(![self persist]){[_features insertObject:old atIndex:index];return NO;}
+ return YES;
 }
 - (void)deleteRuleAtIndex:(NSUInteger)index {
  if(self.draft.rules.count>1&&index<self.draft.rules.count)
