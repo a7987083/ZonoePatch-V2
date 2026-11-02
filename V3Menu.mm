@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "V3FeatureModels.h"
+#import "V3MenuController.h"
 
 static UIColor *ZNBlue(void) { return [UIColor colorWithRed:.10 green:.43 blue:.94 alpha:1]; }
 static UILabel *ZNLabel(NSString *s,CGFloat size,BOOL bold) {
@@ -12,7 +13,7 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  b.layer.cornerRadius=8;b.layer.borderColor=[UIColor colorWithWhite:.84 alpha:1].CGColor;b.layer.borderWidth=1;
  [b addTarget:target action:sel forControlEvents:UIControlEventTouchUpInside];return b;
 }
-@interface ZNV3MenuController : UIViewController <UITextFieldDelegate>
+@interface ZNV3MenuController ()
 @property(nonatomic,strong) UIScrollView *scroll;
 @property(nonatomic,strong) UIStackView *body;
 @property(nonatomic,strong) UIStackView *rules;
@@ -26,7 +27,6 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
 @property(nonatomic,assign) NSInteger ruleCount;
 @property(nonatomic,assign) NSInteger moduleIndex;
 @property(nonatomic,assign) NSInteger typeIndex;
-@property(nonatomic,copy) void(^closeBlock)(void);
 @end
 @implementation ZNV3MenuController
 - (void)loadView {self.view=[UIView new];self.view.backgroundColor=[UIColor colorWithWhite:.97 alpha:1];}
