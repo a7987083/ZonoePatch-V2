@@ -65,7 +65,14 @@
 }
 - (void)editFeature:(UIButton *)sender { [self editFeatureAtIndex:(NSUInteger)sender.tag]; }
 - (void)removeFeature:(UIButton *)sender {
- [self.store deleteFeatureAtIndex:(NSUInteger)sender.tag];[self renderFeatures];
+ if(![self.store deleteFeatureAtIndex:(NSUInteger)sender.tag]) {
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"删除失败"
+    message:self.store.lastError.localizedDescription?:@"配置保存不可用"
+    preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
+ [self renderFeatures];
 }
 - (void)cycleModule {
  self.moduleIndex=(self.moduleIndex+1)%2;
