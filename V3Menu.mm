@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import "V3FeatureModels.h"
 
 static UIColor *ZNBlue(void) { return [UIColor colorWithRed:.10 green:.43 blue:.94 alpha:1]; }
 static UILabel *ZNLabel(NSString *s,CGFloat size,BOOL bold) {
@@ -21,6 +22,7 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
 @property(nonatomic,strong) UIButton *moduleButton;
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIStackView *features;
+@property(nonatomic,strong) ZNV3FeatureStore *store;
 @property(nonatomic,assign) NSInteger ruleCount;
 @property(nonatomic,assign) NSInteger moduleIndex;
 @property(nonatomic,assign) NSInteger typeIndex;
@@ -58,6 +60,7 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  [self.body.topAnchor constraintEqualToAnchor:self.scroll.contentLayoutGuide.topAnchor constant:12],
  [self.body.bottomAnchor constraintEqualToAnchor:self.scroll.contentLayoutGuide.bottomAnchor constant:-20],
  [self.body.widthAnchor constraintEqualToAnchor:self.scroll.frameLayoutGuide.widthAnchor constant:-20]]];
+ self.store=[ZNV3FeatureStore new];
  [self buildHookPage];
 }
 - (void)add:(UIView *)v height:(CGFloat)h {
@@ -78,8 +81,7 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  [self add:ZNLabel(@"可选模块：主程序 / UnityFramework",11,NO) height:18];
  [self add:ZNLabel(@"当前功能（演示）",14,YES) height:24];
  self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=6;[self add:self.features height:0];
- [self appendFeature:@"无限生命" detail:@"示例 · 未执行补丁"];
- [self appendFeature:@"无限子弹" detail:@"示例 · 未执行补丁"];
+ [self renderFeatures];
  UIButton *newItem=ZNButton(@"＋ 增加功能",self,@selector(showEditor));newItem.tintColor=ZNBlue();[self add:newItem height:44];
  UIView *panel=[UIView new];panel.backgroundColor=UIColor.whiteColor;panel.layer.cornerRadius=10;panel.layer.borderWidth=1;panel.layer.borderColor=ZNBlue().CGColor;
  self.editor=panel;[self add:panel height:0];
@@ -101,55 +103,70 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));UIButton *test=ZNButton(@"预览",self,@selector(preview));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
  for(UIButton *button in @[cancel,test,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
  self.editor.hidden=YES;
- [self addRuleTap];
+
 }
-- (void)appendFeature:(NSString *)name detail:(NSString *)detail {
- UIStackView *row=[UIStackView new];
- row.axis=UILayoutConstraintAxisHorizontal;
- row.alignment=UIStackViewAlignmentCenter;
- row.spacing=6;
- row.layoutMargins=UIEdgeInsetsMake(7,8,7,5);
- row.layoutMarginsRelativeArrangement=YES;
- row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];
- row.layer.cornerRadius=7;
- UILabel *label=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",name,detail],13,NO);
- [label setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
- [row addArrangedSubview:label];
- UIButton *remove=ZNButton(@"删除",self,@selector(removeFeature:));
- remove.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",name];
- [remove.widthAnchor constraintEqualToConstant:55].active=YES;
- [remove.heightAnchor constraintEqualToConstant:34].active=YES;
- [row addArrangedSubview:remove];
- [row.heightAnchor constraintGreaterThanOrEqualToConstant:60].active=YES;
- [self.features addArrangedSubview:row];
+- (void)renderFeatures {
+ for(UIView *v in self.features.arrangedSubviews){[self.features removeArrangedSubview:v];[v removeFromSuperview];}
+ for(NSUInteger i=0;i<self.store.features.count;i++){
+ ZNV3Feature *f=self.store.features[i];
+ UIStackView *row=[UIStackView new];row.axis=UILayoutConstraintAxisHorizontal;
+ row.alignment=UIStackViewAlignmentCenter;row.spacing=6;
+ row.layoutMargins=UIEdgeInsetsMake(7,8,7,5);row.layoutMarginsRelativeArrangement=YES;
+ row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];row.layer.cornerRadius=7;
+ NSString *detail=f.rules.count?[NSString stringWithFormat:@"%@ · %lu 组规则 · UI 示例",f.module,(unsigned long)f.rules.count]:f.detail;
+ UILabel *l=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",f.name,detail],13,NO);
+ [l setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];[row addArrangedSubview:l];
+ UIButton *b=ZNButton(@"删除",self,@selector(removeFeature:));b.tag=(NSInteger)i;
+ b.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",f.name];
+ [b.widthAnchor constraintEqualToConstant:55].active=YES;[b.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:b];
+ [row.heightAnchor constraintGreaterThanOrEqualToConstant:60].active=YES;[self.features addArrangedSubview:row];
+ }
 }
 - (void)removeFeature:(UIButton *)sender {
- UIView *row=sender.superview;
- if(![self.features.arrangedSubviews containsObject:row])return;
- [self.features removeArrangedSubview:row];
- [row removeFromSuperview];
+ [self.store deleteFeatureAtIndex:(NSUInteger)sender.tag];[self renderFeatures];
 }
-
-- (void)addRuleTap {
- self.ruleCount++;
+- (void)renderRules {
+ for(UIView *v in self.rules.arrangedSubviews){[self.rules removeArrangedSubview:v];[v removeFromSuperview];}
+ for(NSUInteger i=0;i<self.store.draft.rules.count;i++){
+ ZNV3PatchRule *r=self.store.draft.rules[i];
  UIStackView *box=[UIStackView new];box.axis=UILayoutConstraintAxisVertical;box.spacing=4;
  box.layer.cornerRadius=7;box.backgroundColor=[UIColor colorWithWhite:.96 alpha:1];
- UIStackView *bar=[UIStackView new];bar.axis=UILayoutConstraintAxisHorizontal;bar.distribution=UIStackViewDistributionFillProportionally;
- UILabel *label=ZNLabel([NSString stringWithFormat:@"规则 %ld",(long)self.ruleCount],12,YES);
- UIButton *remove=ZNButton(@"删除",self,@selector(removeRule:));[bar addArrangedSubview:label];[bar addArrangedSubview:remove];
- [remove.widthAnchor constraintEqualToConstant:50].active=YES;[remove.heightAnchor constraintEqualToConstant:27].active=YES;
+ UIStackView *bar=[UIStackView new];bar.axis=UILayoutConstraintAxisHorizontal;
+ UILabel *l=ZNLabel([NSString stringWithFormat:@"规则 %lu",(unsigned long)i+1],12,YES);
+ UIButton *b=ZNButton(@"删除",self,@selector(removeRule:));b.tag=(NSInteger)i;
+ [bar addArrangedSubview:l];[bar addArrangedSubview:b];
+ [b.widthAnchor constraintEqualToConstant:50].active=YES;[b.heightAnchor constraintEqualToConstant:27].active=YES;
  [box addArrangedSubview:bar];
- [box addArrangedSubview:[self field:@"Offset，例如 0x105A3C" value:@""]];
- [box addArrangedSubview:[self field:@"Patch，例如 00 00 80 D2" value:@""]];
- [self.rules addArrangedSubview:box];
+ UITextField *offset=[self field:@"Offset，例如 0x105A3C" value:r.offsetText];offset.tag=1000+(NSInteger)i;
+ [offset addTarget:self action:@selector(ruleTextChanged:) forControlEvents:UIControlEventEditingChanged];
+ UITextField *patch=[self field:@"Patch，例如 00 00 80 D2" value:r.patchText];patch.tag=2000+(NSInteger)i;
+ [patch addTarget:self action:@selector(ruleTextChanged:) forControlEvents:UIControlEventEditingChanged];
+ [box addArrangedSubview:offset];[box addArrangedSubview:patch];[self.rules addArrangedSubview:box];
+ }
+}
+- (void)ruleTextChanged:(UITextField *)field {
+ NSUInteger index=(NSUInteger)(field.tag%1000);
+ if(index>=self.store.draft.rules.count)return;
+ ZNV3PatchRule *r=self.store.draft.rules[index];
+ if(field.tag>=2000)r.patchText=field.text?:@"";else r.offsetText=field.text?:@"";
+}
+- (void)addRuleTap {
+ if(!self.store.draft)return;
+ [self.store.draft.rules addObject:[ZNV3PatchRule emptyRule]];
+ [self renderRules];
 }
 - (void)removeRule:(UIButton *)sender {
- UIView *box=sender.superview.superview;
- if(self.rules.arrangedSubviews.count<=1)return;
- [self.rules removeArrangedSubview:box];[box removeFromSuperview];
+ [self.store deleteRuleAtIndex:(NSUInteger)sender.tag];[self renderRules];
 }
-- (void)showEditor {self.editor.hidden=NO;[self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];}
-- (void)hideEditor {self.editor.hidden=YES;[self.view endEditing:YES];}
+- (void)showEditor {
+ [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
+ self.nameField.text=@"";self.descField.text=@"";
+ self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
+ [self renderRules];self.editor.hidden=NO;
+ [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
+}
+- (void)hideEditor {self.editor.hidden=YES;self.store.draft=nil;[self.view endEditing:YES];}
+
 - (void)cycleModule {
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
@@ -165,9 +182,11 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
 }
 - (void)saveUI {
  NSString *name=self.nameField.text.length?self.nameField.text:@"未命名功能";
- NSString *module=self.moduleIndex==0?@"主程序":@"UnityFramework";
- [self appendFeature:name detail:[NSString stringWithFormat:@"%@ · %lu 组规则 · UI 示例",module,(unsigned long)self.rules.arrangedSubviews.count]];
- [self hideEditor];
+ self.store.draft.name=name;
+ self.store.draft.detail=self.descField.text?:@"";
+ self.store.draft.buttonType=self.typeIndex;
+ [self.store saveDraft];
+ [self renderFeatures];[self hideEditor];
 }
 - (void)categoryTap:(UIButton *)b {
  if(b.tag==0)return;
@@ -196,8 +215,8 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
     else w=[[UIWindow alloc] initWithFrame:host.bounds];
     w.windowLevel=UIWindowLevelAlert+2;w.backgroundColor=UIColor.clearColor;
     ZNV3MenuController *controller=[ZNV3MenuController new];
-    ZNV3MenuHost *owner=self;
-    controller.closeBlock=^{owner.window.hidden=YES;};
+    __weak ZNV3MenuHost *weakOwner=self;
+    controller.closeBlock=^{weakOwner.window.hidden=YES;};
     w.rootViewController=controller;
     self.window=w;self.controller=controller;
  }
