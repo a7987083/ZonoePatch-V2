@@ -1,4 +1,18 @@
 #import <UIKit/UIKit.h>
+#import "V3FeatureModels.h"
 @interface ZNV3MenuController : UIViewController <UITextFieldDelegate>
-@property(nonatomic,copy) void (^closeBlock)(void);
+@property(nonatomic,strong) UIScrollView *scroll;
+@property(nonatomic,strong) UIStackView *body;
+@property(nonatomic,strong) UIStackView *rules;
+@property(nonatomic,strong) UIView *editor;
+@property(nonatomic,strong) UITextField *nameField;
+@property(nonatomic,strong) UITextField *descField;
+@property(nonatomic,strong) UIButton *moduleButton;
+@property(nonatomic,strong) UIButton *typeButton;
+@property(nonatomic,strong) UIStackView *features;
+@property(nonatomic,strong) ZNV3FeatureStore *store;
+@property(nonatomic,assign) NSInteger ruleCount;
+@property(nonatomic,assign) NSInteger moduleIndex;
+@property(nonatomic,assign) NSInteger typeIndex;
+- (void)buildHookPage;
 @end
