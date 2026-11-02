@@ -22,6 +22,8 @@ jobs:
       - name: Install Theos
         run: |
           set -euo pipefail
+          brew install ldid
+          command -v ldid
           git clone https://github.com/theos/theos.git "$RUNNER_TEMP/theos"
           git -C "$RUNNER_TEMP/theos" checkout 304e0799973e8145f32e4ca2de6c747a84b758ce
           git -C "$RUNNER_TEMP/theos" submodule update --init --recursive
