@@ -1,5 +1,6 @@
 #import "V3MenuController.h"
 #import "V3UIComponents.h"
+#import "V3ModuleResolver.h"
 
 @implementation ZNV3MenuController (HookPage)
 - (void)add:(UIView *)v height:(CGFloat)h {
@@ -15,9 +16,10 @@
 }
 - (void)buildHookPage {
  [self add:ZNLabel(@"Hook 管理",18,YES) height:28];
- [self add:ZNLabel(@"目标模块（UI 演示，未执行识别）",12,NO) height:20];
+ [self add:ZNLabel(@"目标模块（运行时识别，仅诊断）",12,NO) height:20];
  self.moduleButton=ZNButton(@"主程序  ▾",self,@selector(cycleModule));[self add:self.moduleButton height:38];
- [self add:ZNLabel(@"可选模块：主程序 / UnityFramework",11,NO) height:18];
+ self.moduleStatus=ZNLabel(@"正在识别模块…",11,NO);[self add:self.moduleStatus height:38];
+ [self refreshModuleStatus];
  [self add:ZNLabel(@"当前功能（演示）",14,YES) height:24];
  self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=6;[self add:self.features height:0];
  [self renderFeatures];
@@ -74,9 +76,16 @@
  }
  [self renderFeatures];
 }
+- (void)refreshModuleStatus {
+ NSString *name=self.moduleIndex==0?@"主程序":@"UnityFramework";
+ ZNV3ModuleInfo *info=[ZNV3ModuleResolver resolveModule:name];
+ if(!info){self.moduleStatus.text=[NSString stringWithFormat:@"%@ · 未加载（仅诊断）",name];return;}
+ self.moduleStatus.text=[NSString stringWithFormat:@"%@ · 已加载 · Base 0x%llX · Slide 0x%llX",name,(unsigned long long)info.imageBase,(unsigned long long)(uint64_t)info.slide];
+}
 - (void)cycleModule {
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
+ [self refreshModuleStatus];
 }
 - (void)categoryTap:(UIButton *)b {
  if(b.tag==0)return;
