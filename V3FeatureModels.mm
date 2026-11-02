@@ -11,7 +11,9 @@
 }
 @end
 @implementation ZNV3FeatureStore
+- (NSUInteger)editingIndex { return _editingIndex; }
 - (instancetype)init {
+ _editingIndex=NSNotFound;
  if((self=[super init])) {
  _features=[NSMutableArray arrayWithArray:@[
  [ZNV3Feature feature:@"无限生命" detail:@"示例 · 未执行补丁" module:@"主程序"],
@@ -19,12 +21,29 @@
  }return self;
 }
 - (void)beginDraftForModule:(NSString *)module {
+ _editingIndex=NSNotFound;
  self.draft=[ZNV3Feature feature:@"" detail:@"" module:module];
  [self.draft.rules addObject:[ZNV3PatchRule emptyRule]];
 }
+- (void)editFeatureAtIndex:(NSUInteger)index {
+ if(index>=self.features.count)return;
+ ZNV3Feature *source=self.features[index];
+ ZNV3Feature *draft=[ZNV3Feature feature:source.name detail:source.detail module:source.module];
+ draft.identifier=source.identifier;draft.buttonType=source.buttonType;
+ for(ZNV3PatchRule *item in source.rules) {
+   ZNV3PatchRule *r=[ZNV3PatchRule emptyRule];r.identifier=item.identifier;
+   r.offsetText=item.offsetText;r.patchText=item.patchText;[draft.rules addObject:r];
+ }
+ if(draft.rules.count==0)[draft.rules addObject:[ZNV3PatchRule emptyRule]];
+ _editingIndex=index;self.draft=draft;
+}
+- (void)cancelDraft {self.draft=nil;_editingIndex=NSNotFound;}
 - (void)saveDraft {
  if(!self.draft)return;
- [self.features addObject:self.draft];self.draft=nil;
+ if(_editingIndex!=NSNotFound && _editingIndex<self.features.count)
+   self.features[_editingIndex]=self.draft;
+ else [self.features addObject:self.draft];
+ [self cancelDraft];
 }
 - (void)deleteFeatureAtIndex:(NSUInteger)index {
  if(index<self.features.count)[self.features removeObjectAtIndex:index];
