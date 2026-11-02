@@ -1,38 +1,14 @@
-#import <Foundation/Foundation.h>
-// UI-only in-memory models. Runtime actions are deliberately out of scope.
-@interface ZNV3PatchRule : NSObject
-@property(nonatomic,copy) NSString *identifier;
-@property(nonatomic,copy) NSString *offsetText;
-@property(nonatomic,copy) NSString *patchText;
-+ (instancetype)emptyRule;
-@end
+#import "V3FeatureModels.h"
 @implementation ZNV3PatchRule
 + (instancetype)emptyRule {
  ZNV3PatchRule *r=[self new];r.identifier=NSUUID.UUID.UUIDString;r.offsetText=@"";r.patchText=@"";return r;
 }
-@end
-@interface ZNV3Feature : NSObject
-@property(nonatomic,copy) NSString *identifier;
-@property(nonatomic,copy) NSString *name;
-@property(nonatomic,copy) NSString *detail;
-@property(nonatomic,copy) NSString *module;
-@property(nonatomic,assign) NSInteger buttonType;
-@property(nonatomic,strong) NSMutableArray<ZNV3PatchRule *> *rules;
-+ (instancetype)feature:(NSString *)name detail:(NSString *)detail module:(NSString *)module;
 @end
 @implementation ZNV3Feature
 + (instancetype)feature:(NSString *)name detail:(NSString *)detail module:(NSString *)module {
  ZNV3Feature *f=[self new];f.identifier=NSUUID.UUID.UUIDString;f.name=name;f.detail=detail;f.module=module;
  f.rules=[NSMutableArray array];return f;
 }
-@end
-@interface ZNV3FeatureStore : NSObject
-@property(nonatomic,strong,readonly) NSMutableArray<ZNV3Feature *> *features;
-@property(nonatomic,strong) ZNV3Feature *draft;
-- (void)beginDraftForModule:(NSString *)module;
-- (void)saveDraft;
-- (void)deleteFeatureAtIndex:(NSUInteger)index;
-- (void)deleteRuleAtIndex:(NSUInteger)index;
 @end
 @implementation ZNV3FeatureStore
 - (instancetype)init {
