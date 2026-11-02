@@ -8,6 +8,7 @@
 @property(nonatomic,strong) UITextField *nameField;
 @property(nonatomic,strong) UITextField *descField;
 @property(nonatomic,strong) UIButton *moduleButton;
+@property(nonatomic,strong) UILabel *moduleStatus;
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
@@ -21,6 +22,7 @@
 - (void)add:(UIView *)view height:(CGFloat)height;
 - (UITextField *)field:(NSString *)hint value:(NSString *)value;
 - (void)renderFeatures;
+- (void)refreshModuleStatus;
 - (void)categoryTap:(UIButton *)sender;
 - (void)closeTap;
 @end
