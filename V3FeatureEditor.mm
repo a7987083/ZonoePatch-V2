@@ -70,7 +70,13 @@
  self.store.draft.name=name;
  self.store.draft.detail=self.descField.text?:@"";
  self.store.draft.buttonType=self.typeIndex;
- [self.store saveDraft];
+ if(![self.store saveDraft]) {
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"配置保存失败"
+    message:self.store.lastError.localizedDescription?:@"配置不可写，请检查 App Support 文件权限"
+    preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
  [self renderFeatures];[self hideEditor];
 }
 @end
