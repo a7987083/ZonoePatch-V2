@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+extern void ZNV3ShowMenu(UIWindow *host);
 
 // H5GG-style architecture: attach the button to an existing application UIWindow.
 // No overlay UIWindow is created until the menu milestone.
@@ -144,15 +145,7 @@
         ZNFloatingHost *hostRef=self;
         self.icon.onTap=^{
             UIWindow *window=(UIWindow *)hostRef.icon.window;
-            UIViewController *presenter=window.rootViewController;
-            while (presenter.presentedViewController)
-                presenter=presenter.presentedViewController;
-            if (!presenter || !presenter.view.window) return;
-            UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"ZonoePatch V3"
-                message:@"悬浮图标响应成功" preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"确定"
-                style:UIAlertActionStyleDefault handler:nil]];
-            [presenter presentViewController:alert animated:YES completion:nil];
+            ZNV3ShowMenu(window);
         };
     }
     if (self.icon.superview!=host) [host addSubview:self.icon];
