@@ -14,5 +14,8 @@
 @property(nonatomic,assign) NSInteger ruleCount;
 @property(nonatomic,assign) NSInteger moduleIndex;
 @property(nonatomic,assign) NSInteger typeIndex;
+@property(nonatomic,copy) void (^closeBlock)(void);
 - (void)buildHookPage;
+- (void)categoryTap:(UIButton *)sender;
+- (void)closeTap;
 @end
