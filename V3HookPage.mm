@@ -55,12 +55,15 @@
  NSString *detail=f.rules.count?[NSString stringWithFormat:@"%@ · %lu 组规则 · UI 示例",f.module,(unsigned long)f.rules.count]:f.detail;
  UILabel *l=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",f.name,detail],13,NO);
  [l setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];[row addArrangedSubview:l];
+ UIButton *edit=ZNButton(@"编辑",self,@selector(editFeature:));edit.tag=(NSInteger)i;
+ [edit.widthAnchor constraintEqualToConstant:48].active=YES;[edit.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:edit];
  UIButton *b=ZNButton(@"删除",self,@selector(removeFeature:));b.tag=(NSInteger)i;
  b.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",f.name];
  [b.widthAnchor constraintEqualToConstant:55].active=YES;[b.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:b];
  [row.heightAnchor constraintGreaterThanOrEqualToConstant:60].active=YES;[self.features addArrangedSubview:row];
  }
 }
+- (void)editFeature:(UIButton *)sender { [self editFeatureAtIndex:(NSUInteger)sender.tag]; }
 - (void)removeFeature:(UIButton *)sender {
  [self.store deleteFeatureAtIndex:(NSUInteger)sender.tag];[self renderFeatures];
 }
