@@ -42,7 +42,19 @@
  [self renderRules];self.editor.hidden=NO;
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
-- (void)hideEditor {self.editor.hidden=YES;self.store.draft=nil;[self.view endEditing:YES];}
+- (void)editFeatureAtIndex:(NSUInteger)index {
+ [self.store editFeatureAtIndex:index];
+ ZNV3Feature *draft=self.store.draft;if(!draft)return;
+ self.nameField.text=draft.name;self.descField.text=draft.detail;
+ self.typeIndex=draft.buttonType;
+ [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
+ [self renderRules];self.editor.hidden=NO;
+ [self.view endEditing:YES];[self.scroll layoutIfNeeded];
+ [self.scroll scrollRectToVisible:self.editor.frame animated:YES];
+}
+- (void)hideEditor {
+ [self.view endEditing:YES];self.editor.hidden=YES;[self.store cancelDraft];
+}
 
 - (void)cycleType {
  self.typeIndex=(self.typeIndex+1)%3;
