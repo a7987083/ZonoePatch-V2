@@ -21,6 +21,10 @@
 - (void)add:(UIView *)view height:(CGFloat)height;
 - (UITextField *)field:(NSString *)hint value:(NSString *)value;
 - (void)renderFeatures;
+- (void)categoryTap:(UIButton *)sender;
+- (void)closeTap;
+@end
+@interface ZNV3MenuController (FeatureEditor)
 - (void)renderRules;
 - (void)showEditor;
 - (void)hideEditor;
@@ -29,6 +33,4 @@
 - (void)cycleType;
 - (void)preview;
 - (void)saveUI;
-- (void)categoryTap:(UIButton *)sender;
-- (void)closeTap;
 @end
