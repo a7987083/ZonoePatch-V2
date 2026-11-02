@@ -38,5 +38,29 @@
  [self.body.widthAnchor constraintEqualToAnchor:self.scroll.frameLayoutGuide.widthAnchor constant:-20]]];
  self.store=[ZNV3FeatureStore new];
  [self buildHookPage];
+ if(@available(iOS 15.0,*)) self.scroll.keyboardDismissMode=UIScrollViewKeyboardDismissModeInteractive;
+ [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardChanged:) name:UIKeyboardWillChangeFrameNotification object:nil];
+ [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardHidden:) name:UIKeyboardWillHideNotification object:nil];
+}
+- (void)dealloc {[[NSNotificationCenter defaultCenter] removeObserver:self];}
+- (void)keyboardHidden:(NSNotification *)note { (void)note; self.scroll.contentInset=UIEdgeInsetsZero;self.scroll.scrollIndicatorInsets=UIEdgeInsetsZero; }
+- (void)keyboardChanged:(NSNotification *)note {
+ if(!self.view.window)return;
+ NSValue *value=note.userInfo[UIKeyboardFrameEndUserInfoKey];if(!value)return;
+ CGRect kb=[self.view convertRect:value.CGRectValue fromView:nil];
+ CGRect hit=CGRectIntersection(self.scroll.frame,kb);
+ CGFloat inset=CGRectIsNull(hit)?0:MAX(0,CGRectGetHeight(hit));
+ self.scroll.contentInset=UIEdgeInsetsMake(0,0,inset,0);
+ self.scroll.scrollIndicatorInsets=self.scroll.contentInset;
+ UIView *first=[self activeFieldIn:self.editor];
+ if(first && !self.editor.hidden) {
+   CGRect rect=[first convertRect:first.bounds toView:self.scroll];
+   [self.scroll scrollRectToVisible:CGRectInset(rect,0,-14) animated:YES];
+ }
+}
+- (UIView *)activeFieldIn:(UIView *)view {
+ if([view isKindOfClass:UITextField.class] && view.isFirstResponder)return view;
+ for(UIView *child in view.subviews){UIView *found=[self activeFieldIn:child];if(found)return found;}
+ return nil;
 }
 @end
