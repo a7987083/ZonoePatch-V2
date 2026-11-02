@@ -15,6 +15,8 @@
 @property(nonatomic,assign) NSInteger moduleIndex;
 @property(nonatomic,assign) NSInteger typeIndex;
 @property(nonatomic,copy) void (^closeBlock)(void);
+@end
+@interface ZNV3MenuController (HookPage)
 - (void)buildHookPage;
 - (void)add:(UIView *)view height:(CGFloat)height;
 - (UITextField *)field:(NSString *)hint value:(NSString *)value;
