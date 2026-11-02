@@ -92,8 +92,6 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  self.nameField=[self field:@"功能名字" value:@""];[stack addArrangedSubview:self.nameField];
  [stack addArrangedSubview:ZNLabel(@"功能说明",12,YES)];
  self.descField=[self field:@"功能说明" value:@""];[stack addArrangedSubview:self.descField];
- [stack addArrangedSubview:ZNLabel(@"目标模块",12,YES)];
- UIButton *module=ZNButton(@"沿用顶部目标模块",self,@selector(cycleModule));[stack addArrangedSubview:module];[module.heightAnchor constraintEqualToConstant:34].active=YES;
  [stack addArrangedSubview:ZNLabel(@"Offset / Patch 规则（支持多组）",12,YES)];
  self.rules=[UIStackView new];self.rules.axis=UILayoutConstraintAxisVertical;self.rules.spacing=7;[stack addArrangedSubview:self.rules];
  UIButton *addRule=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));[stack addArrangedSubview:addRule];[addRule.heightAnchor constraintEqualToConstant:36].active=YES;
@@ -106,10 +104,32 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
  [self addRuleTap];
 }
 - (void)appendFeature:(NSString *)name detail:(NSString *)detail {
- UILabel *l=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",name,detail],13,NO);
- l.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];l.layer.cornerRadius=7;l.clipsToBounds=YES;
- [l.heightAnchor constraintGreaterThanOrEqualToConstant:56].active=YES;[self.features addArrangedSubview:l];
+ UIStackView *row=[UIStackView new];
+ row.axis=UILayoutConstraintAxisHorizontal;
+ row.alignment=UIStackViewAlignmentCenter;
+ row.spacing=6;
+ row.layoutMargins=UIEdgeInsetsMake(7,8,7,5);
+ row.layoutMarginsRelativeArrangement=YES;
+ row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];
+ row.layer.cornerRadius=7;
+ UILabel *label=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",name,detail],13,NO);
+ [label setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+ [row addArrangedSubview:label];
+ UIButton *remove=ZNButton(@"删除",self,@selector(removeFeature:));
+ remove.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",name];
+ [remove.widthAnchor constraintEqualToConstant:55].active=YES;
+ [remove.heightAnchor constraintEqualToConstant:34].active=YES;
+ [row addArrangedSubview:remove];
+ [row.heightAnchor constraintGreaterThanOrEqualToConstant:60].active=YES;
+ [self.features addArrangedSubview:row];
 }
+- (void)removeFeature:(UIButton *)sender {
+ UIView *row=sender.superview;
+ if(![self.features.arrangedSubviews containsObject:row])return;
+ [self.features removeArrangedSubview:row];
+ [row removeFromSuperview];
+}
+
 - (void)addRuleTap {
  self.ruleCount++;
  UIStackView *box=[UIStackView new];box.axis=UILayoutConstraintAxisVertical;box.spacing=4;
@@ -145,7 +165,8 @@ static UIButton *ZNButton(NSString *s,id target,SEL sel) {
 }
 - (void)saveUI {
  NSString *name=self.nameField.text.length?self.nameField.text:@"未命名功能";
- [self appendFeature:name detail:[NSString stringWithFormat:@"UI 会话示例 · %lu 组规则",(unsigned long)self.rules.arrangedSubviews.count]];
+ NSString *module=self.moduleIndex==0?@"主程序":@"UnityFramework";
+ [self appendFeature:name detail:[NSString stringWithFormat:@"%@ · %lu 组规则 · UI 示例",module,(unsigned long)self.rules.arrangedSubviews.count]];
  [self hideEditor];
 }
 - (void)categoryTap:(UIButton *)b {
