@@ -141,9 +141,9 @@
     if (!host) {self.icon.hidden=YES;return;}
     if (!self.icon) {
         self.icon=[ZNFloatingIcon new];
-        __weak typeof(self) weakSelf=self;
+        ZNFloatingHost *hostRef=self;
         self.icon.onTap=^{
-            UIWindow *window=(UIWindow *)weakSelf.icon.window;
+            UIWindow *window=(UIWindow *)hostRef.icon.window;
             UIViewController *presenter=window.rootViewController;
             while (presenter.presentedViewController)
                 presenter=presenter.presentedViewController;
