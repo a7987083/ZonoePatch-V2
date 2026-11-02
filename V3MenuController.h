@@ -27,6 +27,7 @@
 @interface ZNV3MenuController (FeatureEditor)
 - (void)renderRules;
 - (void)showEditor;
+- (void)editFeatureAtIndex:(NSUInteger)index;
 - (void)hideEditor;
 - (void)addRuleTap;
 - (void)removeRule:(UIButton *)sender;
