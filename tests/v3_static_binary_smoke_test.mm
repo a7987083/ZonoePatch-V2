@@ -78,6 +78,12 @@ static BOOL bindingMatches(NSString *path,NSString *expected) {
  if(dataFile==UINT64_MAX||dataFile>file.length||file.length-dataFile<sizeof(ZN44StaticHeader))return NO;
  ZN44StaticHeader header={};memcpy(&header,p+dataFile,sizeof(header));
  if(header.count!=1||header.entrySize!=sizeof(ZN44StaticEntry))return NO;
+ ZN44StaticEntry entry={};
+ if(file.length-dataFile<sizeof(header)+sizeof(entry))return NO;
+ memcpy(&entry,p+dataFile+sizeof(header),sizeof(entry));
+ if(entry.selectedTarget!=0||entry.offRVA==0||entry.onRVA==0||
+    entry.canonicalIndex!=0||!(entry.flags&ZN44_STATIC_ENTRY_FLAG_CANONICAL))
+  return NO;
  uint64_t descOff=(sizeof(header)+(uint64_t)header.count*sizeof(ZN44StaticEntry)+7)&~UINT64_C(7);
  uint64_t offset=dataFile+descOff;
  if(offset>file.length||file.length-offset<sizeof(ZN44FeatureDescriptionHeader)+sizeof(ZN44FeatureDescriptionEntry))return NO;
