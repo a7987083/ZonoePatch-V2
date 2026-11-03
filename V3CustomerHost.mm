@@ -29,6 +29,11 @@
  if(self.window&&!self.window.hidden){[self hide];return;}
  if(!host)return;
  if(self.window && self.window.windowScene!=host.windowScene){[self hide];self.window.rootViewController=nil;self.window=nil;self.controller=nil;}
+ // The game host determines layout orientation. The overlay must not rotate
+ // independently just because its root controller defaults to all orientations.
+ CGRect hostBounds=host.bounds;
+ UIInterfaceOrientationMask mask=CGRectGetWidth(hostBounds)>CGRectGetHeight(hostBounds)
+  ?UIInterfaceOrientationMaskLandscape:UIInterfaceOrientationMaskPortrait;
  BOOL creatingWindow=(self.window==nil);
  if(creatingWindow){
     UIWindow *w;
@@ -38,15 +43,17 @@
     ZNV3CustomerMenuController *controller=[ZNV3CustomerMenuController new];
     __weak ZNV3CustomerHost *weakOwner=self;
     controller.closeBlock=^{[weakOwner hide];};
+    controller.hostOrientationMask=mask;
     w.rootViewController=controller;
     self.window=w;self.controller=controller;
  }
  CGRect sceneBounds=host.bounds;
  if(@available(iOS 13.0,*))sceneBounds=host.windowScene.coordinateSpace.bounds;
- CGFloat width=MIN(280.0,MAX(180.0,CGRectGetWidth(sceneBounds)-24.0));
+ self.controller.hostOrientationMask=mask;
+ CGFloat width=MIN(220.0,MAX(160.0,CGRectGetWidth(sceneBounds)-24.0));
  NSUInteger count=[[ZNV3CustomerRuntime shared] discover].count;
- CGFloat contentHeight=145.0+64.0*MIN((NSUInteger)8,MAX((NSUInteger)1,count));
- CGFloat height=MIN(contentHeight,MAX(230.0,CGRectGetHeight(sceneBounds)-44.0));
+ CGFloat contentHeight=110.0+64.0*MIN((NSUInteger)8,MAX((NSUInteger)1,count));
+ CGFloat height=MIN(contentHeight,MAX(176.0,CGRectGetHeight(sceneBounds)-24.0));
  CGPoint origin=creatingWindow
   ?CGPointMake(CGRectGetMidX(sceneBounds)-width/2.0,CGRectGetMidY(sceneBounds)-height/2.0)
   :self.window.frame.origin;
