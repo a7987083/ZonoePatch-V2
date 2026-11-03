@@ -3,6 +3,7 @@
 #import "V3StaticRuleIdentity.h"
 #import "V3FeatureModels.h"
 #import "V3AddressResolver.h"
+#import "V3PatchCodec.h"
 #import "V3ModuleResolver.h"
 #import "ZNStaticPatchFormat.h"
 #import "ZNStaticRVAProtection.h"
