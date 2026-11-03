@@ -17,10 +17,17 @@ static NSString *ZNP6Hex(NSData *bytes) {
 @implementation ZNV3StaticBuildEntry
 - (instancetype)initWithRuleID:(NSString *)ruleID uuid:(NSString *)uuid path:(NSString *)path
  rva:(uint64_t)rva fileOffset:(uint64_t)fileOffset original:(NSData *)original patch:(NSData *)patch {
- if((self=[super init])){
-  _ruleID=[ruleID copy];_moduleUUID=[uuid copy];_sourcePath=[path copy];_rva=rva;
+ return [self initWithRuleID:ruleID featureKey:@"" featureName:@"" uuid:uuid path:path
+  rva:rva fileOffset:fileOffset original:original patch:patch];
+}
+- (instancetype)initWithRuleID:(NSString *)ruleID featureKey:(NSString *)featureKey featureName:(NSString *)featureName
+ uuid:(NSString *)uuid path:(NSString *)path rva:(uint64_t)rva fileOffset:(uint64_t)fileOffset original:(NSData *)original patch:(NSData *)patch {
+ if((self=[super init])) {
+  _ruleID=[ruleID copy];_featureKey=[featureKey copy];_featureName=[featureName copy];
+  _moduleUUID=[uuid copy];_sourcePath=[path copy];_rva=rva;
   _fileOffset=fileOffset;_originalBytes=[original copy];_patchBytes=[patch copy];
- }return self;
+ }
+ return self;
 }
 @end
 @implementation ZNV3StaticBuildPlan
