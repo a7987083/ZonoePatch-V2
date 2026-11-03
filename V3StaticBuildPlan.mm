@@ -25,7 +25,10 @@ static NSString *ZNP6Hex(NSData *bytes) {
 @end
 @implementation ZNV3StaticBuildPlan
 - (instancetype)initWithModule:(NSString *)module entries:(NSArray<ZNV3StaticBuildEntry *> *)entries {
- if((self=[super init])){_module=[module copy];_entries=[entries copy];
+ return [self initWithModule:module name:module entries:entries];
+}
+- (instancetype)initWithModule:(NSString *)module name:(NSString *)name entries:(NSArray<ZNV3StaticBuildEntry *> *)entries {
+ if((self=[super init])){_module=[module copy];_featureName=[name copy];_entries=[entries copy];
   _imageUUID=[entries.firstObject.moduleUUID copy];_sourcePath=[entries.firstObject.sourcePath copy];}
  return self;
 }
