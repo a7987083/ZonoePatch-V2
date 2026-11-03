@@ -5,6 +5,8 @@
 #import "../V3StaticBuildPlanner.h"
 #import "../V3StaticBinaryBuilder.h"
 #import "../ZNAdhocMachOSigner.h"
+#import "../ZNStaticPatchFormat.h"
+#import "../V3StaticRuleIdentity.h"
 #include <stdint.h>
 #include <string.h>
 static int failures=0;
@@ -57,6 +59,35 @@ static BOOL segments(NSString *path) {
  }
  return text&&data;
 }
+static BOOL bindingMatches(NSString *path,NSString *expected) {
+ NSData *file=[NSData dataWithContentsOfFile:path];
+ if(file.length<sizeof(struct mach_header_64))return NO;
+ const uint8_t *p=file.bytes;struct mach_header_64 mh={};
+ memcpy(&mh,p,sizeof(mh));
+ NSUInteger commandOffset=sizeof(mh);uint64_t dataFile=UINT64_MAX;
+ for(uint32_t i=0;i<mh.ncmds;i++){
+  if(commandOffset>file.length||file.length-commandOffset<sizeof(struct load_command))return NO;
+  struct load_command lc={};memcpy(&lc,p+commandOffset,sizeof(lc));
+  if(lc.cmdsize<sizeof(lc)||lc.cmdsize>file.length-commandOffset)return NO;
+  if(lc.cmd==LC_SEGMENT_64&&lc.cmdsize>=sizeof(struct segment_command_64)){
+   struct segment_command_64 seg={};memcpy(&seg,p+commandOffset,sizeof(seg));
+   if(!strncmp(seg.segname,"__ZNDATA",16))dataFile=seg.fileoff;
+  }
+  commandOffset+=lc.cmdsize;
+ }
+ if(dataFile==UINT64_MAX||dataFile>file.length||file.length-dataFile<sizeof(ZN44StaticHeader))return NO;
+ ZN44StaticHeader header={};memcpy(&header,p+dataFile,sizeof(header));
+ if(header.count!=1||header.entrySize!=sizeof(ZN44StaticEntry))return NO;
+ uint64_t descOff=(sizeof(header)+(uint64_t)header.count*sizeof(ZN44StaticEntry)+7)&~UINT64_C(7);
+ uint64_t offset=dataFile+descOff;
+ if(offset>file.length||file.length-offset<sizeof(ZN44FeatureDescriptionHeader)+sizeof(ZN44FeatureDescriptionEntry))return NO;
+ ZN44FeatureDescriptionHeader desc={};memcpy(&desc,p+offset,sizeof(desc));
+ if(desc.count!=1||desc.entrySize!=sizeof(ZN44FeatureDescriptionEntry))return NO;
+ ZN44FeatureDescriptionEntry value={};memcpy(&value,p+offset+sizeof(desc),sizeof(value));
+ if(value.length>ZN44_FEATURE_DESC_MAX_UTF8)return NO;
+ NSString *text=[[NSString alloc]initWithBytes:value.text length:value.length encoding:NSUTF8StringEncoding];
+ return [text isEqualToString:expected];
+}
 int main() {
  @autoreleasepool {
   NSUUID *uuid=[NSUUID UUID];
@@ -76,6 +107,11 @@ int main() {
   check(built,"V2 static builder produces Mach-O");
   if(built){
    check(segments(out),"generated Mach-O contains owned executable and data segments");
+   NSString *identity=ZNP6RuleBinding(uuid.UUIDString,@"fixture-rule",0x1000,
+      [NSData dataWithBytes:&patched length:4]);
+   check(bindingMatches(out,identity),"generated descriptor binds UUID, rule ID, RVA and Patch bytes");
+   check(!bindingMatches(out,ZNP6RuleBinding(uuid.UUIDString,@"fixture-rule",0x1000,
+      [NSData dataWithBytes:&NOP length:4])),"changed Patch cannot reuse old static descriptor");
    NSDictionary *signature=nil;
    BOOL signedOutput=ZNAdhocResignMachOAtPath(out,&signature,&err);
    if(!signedOutput)fprintf(stderr,"sign error: %s\n",err.UTF8String?:"none");
