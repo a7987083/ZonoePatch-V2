@@ -71,7 +71,7 @@
   UIView *panel=[UIView new];panel.backgroundColor=[UIColor colorWithRed:.94 green:.13 blue:.27 alpha:.78];
   panel.layer.cornerRadius=12;panel.layer.borderWidth=1;
   panel.layer.borderColor=[UIColor colorWithRed:1 green:.45 blue:.55 alpha:.48].CGColor;
-  UIStackView *row=[UIStackView new];row.axis=UILayoutConstraintAxisVertical;row.spacing=5;
+  UIStackView *row=[UIStackView new];row.axis=UILayoutConstraintAxisHorizontal;row.alignment=UIStackViewAlignmentCenter;row.spacing=8;
   row.translatesAutoresizingMaskIntoConstraints=NO;[panel addSubview:row];
   [NSLayoutConstraint activateConstraints:@[
     [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:10],
