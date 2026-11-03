@@ -43,6 +43,7 @@
  [self.store deleteRuleAtIndex:(NSUInteger)sender.tag];[self renderRules];[self refreshStaticBuildButton];
 }
 - (void)showEditor {
+ if(self.staticBuildRunning)return;
  [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
@@ -53,6 +54,7 @@
  [self.scroll scrollRectToVisible:CGRectInset(editorTop,0,-12) animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
+ if(self.staticBuildRunning)return;
  [self.store editFeatureAtIndex:index];
  ZNV3Feature *draft=self.store.draft;if(!draft)return;
  // Restore the persisted target when opening an existing feature; only an explicit module switch may change it.
@@ -155,23 +157,26 @@
   return;
  }
  self.staticBuildRunning=YES;
- [self refreshStaticBuildButton];
+ [self renderFeatures];
  __weak ZNV3MenuController *weakSelf=self;
  dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{
   NSError *buildError=nil;
   NSString *output=[ZNV3StaticBinaryExport generate:plan error:&buildError];
   NSString *detail=output?[NSString stringWithFormat:
-    @"文件：%@\\n\\n已重建 ad-hoc CodeDirectory。请替换至 IPA 并完成整包重签。预埋 Patch 初始 OFF，交由用户版菜单控制。",
-    output]:(buildError.localizedDescription?:@"无法生成 Mach-O");
+    @"功能：%@\\n文件：%@\\n\\n已重建 ad-hoc CodeDirectory。请替换至 IPA 并完成整包重签。预埋 Patch 初始 OFF，交由用户版菜单控制。",
+    plan.featureName,output]:(buildError.localizedDescription?:@"无法生成 Mach-O");
   dispatch_async(dispatch_get_main_queue(),^{
    ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
    strongSelf.staticBuildRunning=NO;
-   [strongSelf refreshStaticBuildButton];
+   [strongSelf renderFeatures];
    [strongSelf showPatchMessage:output?@"已生成完整 Mach-O":@"静态生成失败" detail:detail];
   });
  });
 }
 - (void)applyOrRestore {
+ if(self.staticBuildRunning){
+  [self showPatchMessage:@"静态构建进行中" detail:@"生成完成后再切换 Runtime Patch。"];return;
+ }
  [self.view endEditing:YES];
  ZNV3Feature *draft=self.store.draft;if(!draft)return;
  ZNV3PatchSession *session=[ZNV3PatchSession shared];
@@ -208,6 +213,9 @@
                     (error.localizedDescription?:session.lastDiagnostic)];
 }
 - (void)saveUI {
+ if(self.staticBuildRunning){
+  [self showPatchMessage:@"静态构建进行中" detail:@"生成完成后再保存修改。"];return;
+ }
  if(!self.store.draft)return;
  if([[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:self.store.draft.identifier]||
     [ZNV3StaticDispatchRuntime shared].recoveryFailed){
