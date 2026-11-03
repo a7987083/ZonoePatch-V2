@@ -51,6 +51,7 @@
  self.nameField.text=draft.name;self.descField.text=draft.detail;
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
+ [self refreshDraftModuleButton];
  [self renderRules];self.editor.hidden=NO;
  [self.view endEditing:YES];[self.scroll layoutIfNeeded];
  [self.scroll scrollRectToVisible:self.editor.frame animated:YES];
