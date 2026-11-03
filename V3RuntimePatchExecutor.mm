@@ -56,7 +56,12 @@ static NSError *E(NSInteger code,NSString *msg){return [NSError errorWithDomain:
   ZNV3PatchOperation *op=s[@"op"];NSData *before=s[@"before"];
   NSData *current=[self.backend readAt:op.address length:before.length error:nil];
   if([current isEqual:before])continue;
-  NSError *e=nil;BOOL ok=[self.backend writeAt:op.address bytes:before error:&e];
+  NSError *e=nil;
+  if(![self.backend validateOperation:op error:&e]){
+   [bad addObject:[NSString stringWithFormat:@"%@: identity changed before rollback (%@)",op.identifier,e.localizedDescription?:@"unknown"]];
+   continue;
+  }
+  BOOL ok=[self.backend writeAt:op.address bytes:before error:&e];
   NSData *after=[self.backend readAt:op.address length:before.length error:nil];
   if(!ok||![after isEqual:before])[bad addObject:[NSString stringWithFormat:@"%@: %@",op.identifier,e.localizedDescription?:@"readback mismatch"]];
  }
@@ -100,10 +105,12 @@ static NSError *E(NSInteger code,NSString *msg){return [NSError errorWithDomain:
    NSData *after=[self.backend readAt:op.address length:target.length error:nil];
    if(!wrote||![after isEqual:target]){
     NSString *detail=nil;BOOL restored=[self rollback:touched detail:&detail];
-    if(!restored)self.status=ZNV3PatchTransactionStatusRecoveryFailed;
-    return [self fail:restored?8:9 message:[NSString stringWithFormat:@"%@ failed: %@; %@",
+    // A failed RW->RX transition is not repaired by byte readback alone.
+    BOOL protectionUnknown=[e.domain isEqualToString:@"ZonoePatch.V3.BytesBackend"] && e.code==6;
+    if(!restored||protectionUnknown)self.status=ZNV3PatchTransactionStatusRecoveryFailed;
+    return [self fail:(restored&&!protectionUnknown)?8:9 message:[NSString stringWithFormat:@"%@ failed: %@; %@",
        op.identifier,e.localizedDescription?:@"readback mismatch",
-       restored?@"rollback verified": [NSString stringWithFormat:@"RECOVERY FAILED %@",detail?:@"unknown"]] error:error];
+       restored&&!protectionUnknown?@"rollback verified": [NSString stringWithFormat:@"RECOVERY FAILED (byte/protection state uncertain) %@",detail?:@""]] error:error];
    }
   }
   self.status=enabled?ZNV3PatchTransactionStatusEnabled:ZNV3PatchTransactionStatusDisabled;
