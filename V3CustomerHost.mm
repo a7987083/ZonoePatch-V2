@@ -46,6 +46,7 @@
  self.window.frame=CGRectMake(CGRectGetMidX(sceneBounds)-width/2.0,
                               CGRectGetMidY(sceneBounds)-height/2.0,width,height);
  self.window.hidden=NO;
+ [self.controller refreshFeatures];
 }
 @end
 
