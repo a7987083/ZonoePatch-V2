@@ -14,6 +14,11 @@
 
 @implementation ZNV3CustomerMenuController
 
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+ return self.hostOrientationMask?:UIInterfaceOrientationMaskPortrait;
+}
+- (BOOL)shouldAutorotate { return YES; }
+
 - (void)loadView {
  self.view=[UIView new];
  self.view.backgroundColor=[UIColor colorWithRed:.035 green:.045 blue:.115 alpha:.97];
