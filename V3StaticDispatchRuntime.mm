@@ -200,6 +200,7 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
 @property(nonatomic,strong) id<ZNV3StaticSlotBackend> backend;
 @property(nonatomic,copy) NSString *activeFeatureID;
 @property(nonatomic,strong) NSArray<ZNSTEntry *> *activeEntries;
+@property(nonatomic,copy) NSArray<NSNumber *> *activePreviousValues;
 @end
 @implementation ZNV3StaticDispatchRuntime
 + (instancetype)shared{
@@ -242,23 +243,34 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
     }
   }
   NSMutableArray *ops=[NSMutableArray arrayWithCapacity:entries.count];
+  NSMutableArray<NSNumber *> *previous=[NSMutableArray arrayWithCapacity:entries.count];
   for(ZNSTEntry *entry in entries) {
    uint64_t before=0;
    if(![self.backend readAt:entry.slot value:&before error:error])return NO;
    if(enabled){
+    [previous addObject:@(before)];
     if(before!=0&&before!=entry.offTarget){
      if(error)*error=ZNSTError(46,@"静态 Slot 已有未知活动目标，拒绝覆盖");return NO;
     }
     [ops addObject:[[ZNV3StaticSlotOperation alloc]initWithAddress:entry.slot expected:before desired:entry.onTarget]];
    }else{
     if(before!=entry.onTarget){if(error)*error=ZNSTError(47,@"静态 Slot 状态发生变化，拒绝盲目恢复");return NO;}
-    // zero is the V2 thunk's original-path fallback and the P6-B cold-boot default.
-    [ops addObject:[[ZNV3StaticSlotOperation alloc]initWithAddress:entry.slot expected:before desired:0]];
+    // Restore the exact prior OFF representation (0 or canonical OFF pointer).
+    // Both execute Original, but restoring exact values avoids changing external slot state.
+    if(self.activePreviousValues.count!=entries.count){
+     if(error)*error=ZNSTError(48,@"缺少原始静态 Slot 快照");return NO;
+    }
+    uint64_t oldValue=self.activePreviousValues[ops.count].unsignedLongLongValue;
+    if(oldValue!=0&&oldValue!=entry.offTarget){
+     if(error)*error=ZNSTError(49,@"原始 Slot 快照已无效");return NO;
+    }
+    [ops addObject:[[ZNV3StaticSlotOperation alloc]initWithAddress:entry.slot expected:before desired:oldValue]];
    }
   }
   if(![self.transaction apply:ops error:error])return NO;
   self.activeFeatureID=enabled?feature.identifier:nil;
   self.activeEntries=enabled?entries:nil;
+  self.activePreviousValues=enabled?[previous copy]:nil;
   return YES;
  }
 }
