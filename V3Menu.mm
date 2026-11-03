@@ -42,6 +42,11 @@
  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardChanged:) name:UIKeyboardWillChangeFrameNotification object:nil];
  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardHidden:) name:UIKeyboardWillHideNotification object:nil];
 }
+- (void)viewDidLayoutSubviews {
+ [super viewDidLayoutSubviews];
+ BOOL compact=self.view.bounds.size.width>0 && self.view.bounds.size.width<430;
+ if(self.features && self.featureRowsCompact!=compact)[self renderFeatures];
+}
 - (void)dealloc {[[NSNotificationCenter defaultCenter] removeObserver:self];}
 - (void)keyboardHidden:(NSNotification *)note { (void)note; self.scroll.contentInset=UIEdgeInsetsZero;self.scroll.scrollIndicatorInsets=UIEdgeInsetsZero; }
 - (void)keyboardChanged:(NSNotification *)note {
