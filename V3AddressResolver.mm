@@ -13,6 +13,7 @@ namespace {
 enum Kind { Auto, RVA, Preferred, Runtime, File };
 struct Segment {
  uint64_t vm, vs, off, fs;
+ uint32_t initprot;
  char name[17];
 };
 struct Candidate { Kind kind; uint64_t preferred, runtime, file; bool backed; const Segment *seg; };
@@ -43,7 +44,7 @@ static bool parse(NSString *value,Kind &kind,uint64_t &number) {
  if(errno||end==s.UTF8String||*end)return false;
  number=(uint64_t)n;return true;
 }
-static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase) {
+static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase,NSString * __strong &uuid) {
  struct mach_header_64 mh={};
  vm_size_t got=0;
  kern_return_t kr=vm_read_overwrite(mach_task_self(),(vm_address_t)base,sizeof(mh),(vm_address_t)&mh,&got);
@@ -65,9 +66,13 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
    struct segment_command_64 sc={};memcpy(&sc,commands.data()+position,sizeof(sc));
    uint64_t end=0;
    if(!add(sc.vmaddr,sc.vmsize,end)||!add(sc.fileoff,sc.filesize,end)||sc.filesize>sc.vmsize)return false;
-   Segment seg={sc.vmaddr,sc.vmsize,sc.fileoff,sc.filesize,{0}};
+   Segment seg={sc.vmaddr,sc.vmsize,sc.fileoff,sc.filesize,(uint32_t)sc.initprot,{0}};
    memcpy(seg.name,sc.segname,16);segs.push_back(seg);
    if(strncmp(sc.segname,SEG_TEXT,16)==0)textBase=sc.vmaddr;
+  } else if(lc.cmd==LC_UUID){
+   if(lc.cmdsize<sizeof(struct uuid_command))return false;
+   struct uuid_command uc={};memcpy(&uc,commands.data()+position,sizeof(uc));
+   uuid=[[NSUUID alloc] initWithUUIDBytes:uc.uuid].UUIDString;
   }
   position+=lc.cmdsize;
  }
@@ -77,9 +82,13 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
 @implementation ZNV3ResolvedAddress
 - (instancetype)initWithKind:(NSString *)kind segment:(NSString *)segment path:(NSString *)path
  rva:(uint64_t)rva preferred:(uint64_t)preferred runtime:(uint64_t)runtime
- fileOffset:(uint64_t)fileOffset fileBacked:(BOOL)fileBacked {
+ fileOffset:(uint64_t)fileOffset fileBacked:(BOOL)fileBacked
+ segmentVMAddress:(uint64_t)segmentVMAddress segmentFileOffset:(uint64_t)segmentFileOffset
+ segmentFileSize:(uint64_t)segmentFileSize protection:(uint32_t)protection uuid:(NSString *)uuid {
  if((self=[super init])){_kind=[kind copy];_segmentName=[segment copy];_imagePath=[path copy];
- _rva=rva;_preferredVA=preferred;_runtimeVA=runtime;_fileOffset=fileOffset;_fileBacked=fileBacked;}return self;
+ _rva=rva;_preferredVA=preferred;_runtimeVA=runtime;_fileOffset=fileOffset;_fileBacked=fileBacked;
+ _segmentVMAddress=segmentVMAddress;_segmentFileOffset=segmentFileOffset;
+ _segmentFileSize=segmentFileSize;_segmentInitialProtection=protection;_imageUUID=[uuid copy];}return self;
 }
 @end
 @implementation ZNV3AddressResolver
@@ -89,8 +98,8 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
  if(!parse(text,kind,input))message=@"Offset 格式无效：使用 0x105A3C 或 105A3C";
  ZNV3ModuleInfo *image=message?nil:[ZNV3ModuleResolver resolveModule:module];
  if(!message&&!image)message=[NSString stringWithFormat:@"模块未加载：%@",module];
- std::vector<Segment> segs;uint64_t base=UINT64_MAX;
- if(!message&&!snapshot((uint64_t)image.imageBase,segs,base))message=@"读取已加载 Mach-O 结构失败";
+ std::vector<Segment> segs;uint64_t base=UINT64_MAX;NSString *uuid=nil;
+ if(!message&&!snapshot((uint64_t)image.imageBase,segs,base,uuid))message=@"读取已加载 Mach-O 结构失败";
  std::vector<Candidate> found;
  if(!message){
   for(const Segment &seg:segs){
@@ -131,6 +140,8 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
  return [[ZNV3ResolvedAddress alloc] initWithKind:[NSString stringWithUTF8String:label(choice->kind)]
    segment:[NSString stringWithUTF8String:choice->seg->name] path:image.path
    rva:rva preferred:choice->preferred runtime:choice->runtime
-   fileOffset:choice->file fileBacked:choice->backed];
+   fileOffset:choice->file fileBacked:choice->backed
+   segmentVMAddress:choice->seg->vm segmentFileOffset:choice->seg->off
+   segmentFileSize:choice->seg->fs protection:choice->seg->initprot uuid:uuid?:@""];
 }
 @end
