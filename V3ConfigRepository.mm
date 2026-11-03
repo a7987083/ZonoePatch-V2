@@ -1,30 +1,18 @@
 #import "V3ConfigRepository.h"
 #import "V3FeatureModels.h"
 #import "V3AddressResolver.h"
+#import "V3PatchCodec.h"
 
 static NSString * const ZNErrorDomain=@"ZonoePatch.V3.Config";
 static NSError *ZNError(NSInteger code,NSString *description) {
  return [NSError errorWithDomain:ZNErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey:description}];
 }
-static BOOL ZNValidHex(NSString *value,BOOL bytes) {
- if(![value isKindOfClass:NSString.class])return NO;
- NSString *s=[value stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
- if(!s.length)return NO;
- if(bytes) {
-  NSMutableString *compact=[NSMutableString new];
-  for(NSUInteger i=0;i<s.length;i++){
-   unichar c=[s characterAtIndex:i];
-   if([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:c])continue;
-   [compact appendFormat:@"%C",c];
-  }
-  s=compact;
-  if([s hasPrefix:@"0x"]||[s hasPrefix:@"0X"])s=[s substringFromIndex:2];
-  if(!s.length||s.length%2 || s.length>8192)return NO;
- } else {
-  return [ZNV3AddressResolver validAddressText:s];
- }
- NSCharacterSet *invalid=[[NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"] invertedSet];
- return [s rangeOfCharacterFromSet:invalid].location==NSNotFound;
+// Keep storage and runtime input semantics identical. Blank rules are allowed only as empty pairs.
+static BOOL ZNValidRule(NSString *offset, NSString *patch) {
+ if(![offset isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class])return NO;
+ if(!offset.length&&!patch.length)return YES;
+ return [ZNV3AddressResolver validAddressText:offset] &&
+        [ZNV3PatchCodec isValidCodeText:patch];
 }
 @implementation ZNV3ConfigRepository
 - (NSURL *)fileURL:(NSError **)error {
@@ -67,7 +55,7 @@ static BOOL ZNValidHex(NSString *value,BOOL bytes) {
    NSDictionary *r=item;NSString *off=r[@"offset"],*patch=r[@"patch"],*rid=r[@"id"];
    if(![rid isKindOfClass:NSString.class]||rid.length>128||!rid.length||
       ![off isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class]||
-      ((off.length||patch.length)&&(!ZNValidHex(off,NO)||!ZNValidHex(patch,YES)))) {
+      !ZNValidRule(off,patch)) {
     if(error)*error=ZNError(8,@"Offset / Patch 校验失败");return nil;
    }
    ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];rule.identifier=rid;rule.offsetText=off;rule.patchText=patch;
@@ -89,8 +77,8 @@ static BOOL ZNValidHex(NSString *value,BOOL bytes) {
   NSMutableArray *rules=[NSMutableArray arrayWithCapacity:f.rules.count];
   for(ZNV3PatchRule *rule in f.rules){
    NSString *off=rule.offsetText?:@"",*patch=rule.patchText?:@"";
-   if((off.length||patch.length)&&(!ZNValidHex(off,NO)||!ZNValidHex(patch,YES))) {
-    if(error)*error=ZNError(11,@"Offset / Patch 格式错误（需要十六进制与完整字节）");return NO;
+   if(!ZNValidRule(off,patch)) {
+    if(error)*error=ZNError(11,@"Offset / Patch 格式错误：ARM64 Code Patch 需要 4–256 字节、4 字节对齐");return NO;
    }
    [rules addObject:@{@"id":rule.identifier?:@"",@"offset":off,@"patch":patch}];
   }
