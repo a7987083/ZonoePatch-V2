@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// No writes to executable pages, no reuse of the jailbroken Bytes Patch executor.
 @interface ZNV3StaticDispatchRuntime : NSObject
 @property(nonatomic,assign,readonly) BOOL recoveryFailed;
+@property(nonatomic,assign,readonly) BOOL hasActiveFeature;
 @property(nonatomic,copy,readonly) NSString *lastDiagnostic;
 + (instancetype)shared;
 - (BOOL)isEnabledForFeature:(NSString *)identifier;
