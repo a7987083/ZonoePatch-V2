@@ -28,15 +28,15 @@
 - (void)renderFeatures;
 - (void)selectFeature:(UIButton *)sender;
 - (void)toggleFeaturePatch:(UIButton *)sender;
-- (void)refreshStaticBuildButton;
-- (void)showPatchMessage:(NSString *)title detail:(NSString *)detail;
-- (BOOL)draftMatchesSavedPatch:(ZNV3Feature *)saved;
 - (void)refreshModuleStatus;
 - (void)categoryTap:(UIButton *)sender;
 - (void)closeTap;
 @end
 @interface ZNV3MenuController (FeatureEditor)
 - (void)renderRules;
+- (void)refreshStaticBuildButton;
+- (void)showPatchMessage:(NSString *)title detail:(NSString *)detail;
+- (BOOL)draftMatchesSavedPatch:(ZNV3Feature *)saved;
 - (void)showEditor;
 - (void)editFeatureAtIndex:(NSUInteger)index;
 - (void)hideEditor;
