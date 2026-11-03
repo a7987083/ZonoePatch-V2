@@ -80,8 +80,8 @@
   }
   ZNV3ResolvedAddress *r=validation.address;
   [lines addObject:[NSString stringWithFormat:
-    @"#%lu ✅ 只读预检通过 · %@\nRVA 0x%llX · Runtime 0x%llX\nFile 0x%llX · %@\nOriginal %@\nPatch %@",
-    (unsigned long)i+1,r.kind,(unsigned long long)r.rva,
+    @"#%lu ✅ 只读预检通过\nRVA 0x%llX · Runtime 0x%llX\nFile 0x%llX · %@\nOriginal %@\nPatch %@",
+    (unsigned long)i+1,(unsigned long long)r.rva,
     (unsigned long long)r.runtimeVA,(unsigned long long)r.fileOffset,
     r.segmentName,validation.originalHex,validation.patchHex]];
  }
