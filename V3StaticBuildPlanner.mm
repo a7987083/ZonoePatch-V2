@@ -9,6 +9,7 @@
 #import <mach/machine.h>
 #import <unistd.h>
 #include <stdint.h>
+#include <string.h>
 static NSError *ZNP6Error(NSInteger code,NSString *message){
  return [NSError errorWithDomain:@"ZonoePatch.V3.StaticBuild" code:code userInfo:@{NSLocalizedDescriptionKey:message}];
 }
