@@ -11,6 +11,7 @@ static void expect(BOOL ok,const char *msg){if(!ok){fprintf(stderr,"FAIL %s\n",m
 @property(nonatomic,assign) BOOL partialFailure;
 @property(nonatomic,assign) BOOL failRollback;
 @property(nonatomic,assign) BOOL rejectIdentity;
+@property(nonatomic,assign) BOOL failRestoreProtection;
 @end
 @implementation FakeBackend
 - (instancetype)init {if((self=[super init])){_memory=[NSMutableData dataWithLength:128];}return self;}
@@ -24,6 +25,12 @@ static void expect(BOOL ok,const char *msg){if(!ok){fprintf(stderr,"FAIL %s\n",m
 - (BOOL)writeAt:(uintptr_t)address bytes:(NSData *)bytes error:(NSError **)error{
  self.writeCount++;
  if(address>128||bytes.length>128-address)return NO;
+ if(self.failRestoreProtection && self.writeCount==1){
+  memcpy((uint8_t *)self.memory.mutableBytes+address,bytes.bytes,bytes.length);
+  if(error)*error=[NSError errorWithDomain:@"ZonoePatch.V3.BytesBackend" code:6
+    userInfo:@{NSLocalizedDescriptionKey:@"Failed to restore RX"}];
+  return NO;
+ }
  if(self.failRollback&&self.writeCount>=2)return NO;
  if(self.failOnWrite&&self.writeCount==self.failOnWrite){
   if(self.partialFailure)memcpy((uint8_t *)self.memory.mutableBytes+address,bytes.bytes,bytes.length);
@@ -86,6 +93,13 @@ int main(){
   expect(ex.status==ZNV3PatchTransactionStatusRecoveryFailed,"latch recovery failed");
   b.failRollback=NO;b.failOnWrite=0;
   expect(![ex setEnabled:YES operations:actions error:&err],"latch blocks further operations");
+  FakeBackend *critical=[FakeBackend new];reset(critical,8,24);
+  critical.failRestoreProtection=YES;
+  ZNV3RuntimePatchExecutor *criticalExec=[[ZNV3RuntimePatchExecutor alloc]initWithBackend:critical];
+  expect(![criticalExec setEnabled:YES operations:actions error:&err],"RX protection failure detected");
+  expect(criticalExec.status==ZNV3PatchTransactionStatusRecoveryFailed,
+    "unknown RX protection must latch even if byte rollback succeeded");
+
  }
  printf("Executor transaction tests %s (%d errors)\n",bad?"FAIL":"PASS",bad);
  return bad?1:0;
