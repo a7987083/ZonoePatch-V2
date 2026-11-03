@@ -12,6 +12,7 @@
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIButton *staticBuildButton;
+@property(nonatomic,strong) UIButton *staticToggleButton;
 @property(nonatomic,assign) BOOL staticBuildRunning;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
@@ -40,6 +41,8 @@
 - (void)applyOrRestore;
 - (void)staticBuildPreflight;
 - (void)generateStaticBinary;
+- (void)toggleStaticPatch;
+- (void)refreshStaticPatchButton;
 - (void)refreshPatchActionButton;
 - (void)saveUI;
 @end
