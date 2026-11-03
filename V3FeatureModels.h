@@ -35,6 +35,7 @@ typedef NS_ENUM(NSInteger, ZNV3NumericType) {
 @property(nonatomic,assign) BOOL requiresEnableSwitch;
 + (instancetype)defaults;
 - (BOOL)isValid;
+- (BOOL)isValidForFeatureType:(ZNV3FeatureType)featureType;
 @end
 
 @interface ZNV3PatchRule : NSObject
