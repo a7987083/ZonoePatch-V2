@@ -80,9 +80,6 @@
     [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-10]]];
   UILabel *name=ZNLabel([@"⚡ " stringByAppendingString:feature.title?:@""],14,YES);
   name.textColor=UIColor.whiteColor;[row addArrangedSubview:name];
-  UILabel *subtitle=ZNLabel([NSString stringWithFormat:@"%@ · %lu 组 Patch",
-    feature.imageName,(unsigned long)feature.ruleCount],11,NO);
-  subtitle.textColor=[UIColor colorWithWhite:1 alpha:.78];[row addArrangedSubview:subtitle];
   UIButton *button=ZNButton(feature.enabled?@"关闭（Original）":@"开启 Patch",self,@selector(toggleFeature:));
   button.tag=(NSInteger)i;button.enabled=!locked;
   [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
