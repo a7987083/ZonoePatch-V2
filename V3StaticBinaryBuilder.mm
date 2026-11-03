@@ -910,6 +910,16 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
          }
         }
         if(!uuidMatches){localError=@"暂存 Mach-O LC_UUID 与预检计划不一致";break;}
+        // Static Mach-O export cannot operate on encrypted on-disk code.
+        BOOL encrypted=NO;
+        for(const auto &command:checked.commands){
+         if(command.kind==LC_ENCRYPTION_INFO_64 && command.size>=sizeof(struct encryption_info_command_64)){
+          struct encryption_info_command_64 ec={};
+          memcpy(&ec,oldBase+command.offset,sizeof(ec));
+          if(ec.cryptid!=0){encrypted=YES;break;}
+         }
+        }
+        if(encrypted){localError=@"目标 Mach-O 的 LC_ENCRYPTION_INFO_64 cryptid 非零，静态生成需要已解密的文件";break;}
         if (rows.count > ZN44_STATIC_MAX_ENTRIES) { localError=@"Patch 数量超过 Static Dispatch 上限"; break; }
 
         logicals.reserve(rows.count);
