@@ -44,9 +44,11 @@
  [stack addArrangedSubview:ZNLabel(@"功能说明",12,YES)];
  self.descField=[self field:@"功能说明" value:@""];[stack addArrangedSubview:self.descField];
  [self.descField addTarget:self action:@selector(staticBuildInputChanged:) forControlEvents:UIControlEventEditingChanged];
- [stack addArrangedSubview:ZNLabel(@"Offset / Patch 规则（支持多组）",12,YES)];
+ self.rulesTitleLabel=ZNLabel(@"Offset / Patch 规则（支持多组）",12,YES);
+ [stack addArrangedSubview:self.rulesTitleLabel];
  self.rules=[UIStackView new];self.rules.axis=UILayoutConstraintAxisVertical;self.rules.spacing=7;[stack addArrangedSubview:self.rules];
- UIButton *addRule=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));[stack addArrangedSubview:addRule];[addRule.heightAnchor constraintEqualToConstant:36].active=YES;
+ self.addRuleButton=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));
+ [stack addArrangedSubview:self.addRuleButton];[self.addRuleButton.heightAnchor constraintEqualToConstant:36].active=YES;
  [stack addArrangedSubview:ZNLabel(@"按钮类型",12,YES)];
  self.typeButton=ZNButton(@"开关  ▾",self,@selector(cycleType));[stack addArrangedSubview:self.typeButton];[self.typeButton.heightAnchor constraintEqualToConstant:36].active=YES;
  // P10.2: numeric metadata editor (not yet connected to a runtime writer).
