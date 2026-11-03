@@ -1,5 +1,6 @@
 #import "V3ConfigRepository.h"
 #import "V3FeatureModels.h"
+#import "V3AddressResolver.h"
 
 static NSString * const ZNErrorDomain=@"ZonoePatch.V3.Config";
 static NSError *ZNError(NSInteger code,NSString *description) {
@@ -19,8 +20,7 @@ static BOOL ZNValidHex(NSString *value,BOOL bytes) {
   if(compact.length%2 || compact.length>8192)return NO;
   s=compact;
  } else {
-  if([s hasPrefix:@"0x"]||[s hasPrefix:@"0X"])s=[s substringFromIndex:2];
-  if(!s.length||s.length>16)return NO;
+  return [ZNV3AddressResolver validAddressText:s];
  }
  NSCharacterSet *invalid=[[NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"] invertedSet];
  return [s rangeOfCharacterFromSet:invalid].location==NSNotFound;
