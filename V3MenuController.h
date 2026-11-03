@@ -4,6 +4,8 @@
 @property(nonatomic,strong) UIScrollView *scroll;
 @property(nonatomic,strong) UIStackView *body;
 @property(nonatomic,strong) UIStackView *rules;
+@property(nonatomic,strong) UILabel *rulesTitleLabel;
+@property(nonatomic,strong) UIButton *addRuleButton;
 @property(nonatomic,strong) UIView *editor;
 @property(nonatomic,strong) UITextField *nameField;
 @property(nonatomic,strong) UITextField *descField;
