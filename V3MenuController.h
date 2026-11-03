@@ -36,6 +36,7 @@
 - (void)removeRule:(UIButton *)sender;
 - (void)cycleType;
 - (void)applyOrRestore;
+- (void)staticBuildPreflight;
 - (void)refreshPatchActionButton;
 - (void)saveUI;
 @end
