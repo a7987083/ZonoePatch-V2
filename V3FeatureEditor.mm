@@ -3,6 +3,7 @@
 #import "V3AddressResolver.h"
 #import "V3PatchValidator.h"
 #import "V3PatchSession.h"
+#import "V3StaticBuildPlanner.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -93,6 +94,24 @@
      ![a.patchText isEqualToString:b.patchText])return NO;
  }
  return YES;
+}
+- (void)staticBuildPreflight {
+ [self.view endEditing:YES];
+ ZNV3Feature *draft=self.store.draft;
+ NSUInteger index=self.store.editingIndex;
+ if(!draft || index==NSNotFound || index>=self.store.features.count ||
+    ![self draftMatchesSavedPatch:self.store.features[index]]) {
+  [self showPatchMessage:@"静态预检未执行" detail:@"请先保存当前规则，然后重新进入编辑器。"];return;
+ }
+ NSError *error=nil;
+ ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:self.store.features[index] error:&error];
+ if(!plan){
+  [self showPatchMessage:@"静态预检失败" detail:error.localizedDescription?:@"无法验证静态构建输入"];
+  return;
+ }
+ [self showPatchMessage:@"静态生成预检通过（只读）" detail:
+  [NSString stringWithFormat:@"目标：%@\\nUUID：%@\\n规则：%lu 组\\n文件：%@\\n\\n本阶段仅验证构建输入，不生成或修改 Mach-O。",
+   plan.module,plan.imageUUID,(unsigned long)plan.entries.count,plan.sourcePath]];
 }
 - (void)applyOrRestore {
  [self.view endEditing:YES];
