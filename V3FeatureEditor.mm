@@ -73,6 +73,7 @@
 - (void)cycleType {
  self.typeIndex=(self.typeIndex+1)%3;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
+ [self refreshStaticBuildButton];
 }
 - (void)refreshPatchActionButton {
  ZNV3Feature *draft=self.store.draft;
