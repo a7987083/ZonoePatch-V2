@@ -23,7 +23,14 @@ static BOOL ZNDecodeValueConfig(id object,ZNV3FeatureType type,ZNV3ValueConfig *
   NSArray *keys=type==ZNV3FeatureTypeNumberInput?@[@"valueType",@"minimum",@"maximum"]:@[@"valueType",@"minimum",@"maximum",@"step",@"defaultValue",@"requiresEnableSwitch"];
   for(NSString *key in keys)
    if(![d[key] isKindOfClass:NSNumber.class])return NO;
-  v.valueType=(ZNV3NumericType)[d[@"valueType"] integerValue];
+  NSInteger typeID=[d[@"valueType"] integerValue];
+  // Legacy P10.2 numeric config omitted schema marker: 0=Int32, 1=Float32.
+  if(!d[@"numericSchemaVersion"]){
+   if(typeID!=0&&typeID!=1)return NO;
+   typeID=(typeID==0)?ZNV3NumericTypeInt32:ZNV3NumericTypeFloat32;
+  }else if(![d[@"numericSchemaVersion"] isKindOfClass:NSNumber.class]||
+           [d[@"numericSchemaVersion"] integerValue]!=2)return NO;
+  v.valueType=(ZNV3NumericType)typeID;
   v.minimum=[d[@"minimum"] doubleValue];v.maximum=[d[@"maximum"] doubleValue];
   if(d[@"step"])v.step=[d[@"step"] doubleValue];
   if(d[@"defaultValue"])v.defaultValue=[d[@"defaultValue"] doubleValue];
@@ -34,8 +41,8 @@ static BOOL ZNDecodeValueConfig(id object,ZNV3FeatureType type,ZNV3ValueConfig *
 }
 static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type){
  if(type==ZNV3FeatureTypeNumberInput)
-  return @{@"valueType":@(v.valueType),@"minimum":@(v.minimum),@"maximum":@(v.maximum)};
- return @{@"valueType":@(v.valueType),@"minimum":@(v.minimum),
+  return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),@"minimum":@(v.minimum),@"maximum":@(v.maximum)};
+ return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),@"minimum":@(v.minimum),
           @"maximum":@(v.maximum),@"step":@(v.step),
           @"defaultValue":@(v.defaultValue),@"requiresEnableSwitch":@(v.requiresEnableSwitch)};
 }
@@ -78,12 +85,14 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
      ![rules isKindOfClass:NSArray.class]||rules.count>128) {
     [quarantine addObject:entry];continue;
   }
+  BOOL numeric=button.integerValue==ZNV3FeatureTypeSlider||button.integerValue==ZNV3FeatureTypeNumberInput;
   BOOL legacyInvalid=NO;
   for(id item in rules){
    if(![item isKindOfClass:NSDictionary.class]){legacyInvalid=YES;break;}
    NSDictionary *r=item;id off=r[@"offset"],patch=r[@"patch"],rid=r[@"id"];
    if(![rid isKindOfClass:NSString.class]||![(NSString *)rid length]||[(NSString *)rid length]>128||
-      ![off isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class]||!ZNValidRule(off,patch)){
+      ![off isKindOfClass:NSString.class]||
+      (numeric?![ZNV3AddressResolver validAddressText:off]:(![patch isKindOfClass:NSString.class]||!ZNValidRule(off,patch)))){
     legacyInvalid=YES;break;
    }
   }
@@ -99,7 +108,8 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
   if(valueConfig)f.valueConfig=valueConfig;
   for(NSDictionary *r in rules){
    ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];
-   rule.identifier=r[@"id"];rule.offsetText=r[@"offset"];rule.patchText=r[@"patch"];
+   rule.identifier=r[@"id"];rule.offsetText=r[@"offset"];
+   rule.patchText=numeric?@"":r[@"patch"];
    [f.rules addObject:rule];
   }
   [result addObject:f];
@@ -124,10 +134,11 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
   NSMutableArray *rules=[NSMutableArray arrayWithCapacity:f.rules.count];
   for(ZNV3PatchRule *rule in f.rules){
    NSString *off=rule.offsetText?:@"",*patch=rule.patchText?:@"";
-   if(!ZNValidRule(off,patch)) {
-    if(error)*error=ZNError(11,@"Offset / Patch 格式错误：ARM64 Code Patch 需要 4–256 字节、4 字节对齐");return NO;
+   if(numeric?![ZNV3AddressResolver validAddressText:off]:!ZNValidRule(off,patch)) {
+    if(error)*error=ZNError(11,numeric?@"数值类型需要合法的 Offset（Patch HEX 不适用）":@"Offset / Patch 格式错误：ARM64 Code Patch 需要 4–256 字节、4 字节对齐");return NO;
    }
-   [rules addObject:@{@"id":rule.identifier?:@"",@"offset":off,@"patch":patch}];
+   [rules addObject:numeric?@{@"id":rule.identifier?:@"",@"offset":off}:
+                         @{@"id":rule.identifier?:@"",@"offset":off,@"patch":patch}];
   }
   NSMutableDictionary *item=[@{@"id":f.identifier?:@"",@"name":f.name,@"detail":f.detail?:@"",
     @"module":f.module,@"buttonType":@(f.buttonType),@"rules":rules} mutableCopy];
