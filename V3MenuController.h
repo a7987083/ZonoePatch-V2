@@ -8,7 +8,6 @@
 @property(nonatomic,strong) UITextField *nameField;
 @property(nonatomic,strong) UITextField *descField;
 @property(nonatomic,strong) UIButton *moduleButton;
-@property(nonatomic,strong) UIButton *draftModuleButton;
 @property(nonatomic,strong) UILabel *moduleStatus;
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIStackView *features;
@@ -35,8 +34,6 @@
 - (void)addRuleTap;
 - (void)removeRule:(UIButton *)sender;
 - (void)cycleType;
-- (void)cycleDraftModule;
-- (void)refreshDraftModuleButton;
 - (void)preview;
 - (void)saveUI;
 @end
