@@ -1,6 +1,9 @@
 #import <Foundation/Foundation.h>
 NS_ASSUME_NONNULL_BEGIN
+@class ZNV3PatchOperation;
 @protocol ZNV3PatchMemoryBackend <NSObject>
+/// Mandatory identity gate. The iOS backend rechecks loaded Mach-O UUID and mapped segment.
+- (BOOL)validateOperation:(ZNV3PatchOperation *)operation error:(NSError **)error;
 - (nullable NSData *)readAt:(uintptr_t)address length:(NSUInteger)length error:(NSError **)error;
 - (BOOL)writeAt:(uintptr_t)address bytes:(NSData *)bytes error:(NSError **)error;
 @end
