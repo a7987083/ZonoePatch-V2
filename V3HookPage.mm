@@ -163,6 +163,8 @@
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
  self.selectedFeatureID=self.store.features[index].identifier;
+ [self.selectedFeatureIDs removeAllObjects];
+ [self.selectedFeatureIDs addObject:self.selectedFeatureID];
  [self editFeatureAtIndex:index];
  [self renderFeatures];
 }
@@ -205,7 +207,8 @@
  }
  if(self.store.draft && [self.store.draft.identifier isEqualToString:target.identifier])
   [self hideEditor];
- if([self.selectedFeatureID isEqualToString:target.identifier])self.selectedFeatureID=nil;
+ [self.selectedFeatureIDs removeObject:target.identifier];
+ if([self.selectedFeatureID isEqualToString:target.identifier])self.selectedFeatureID=self.selectedFeatureIDs.lastObject;
  [self renderFeatures];
 }
 - (void)refreshModuleStatus {
