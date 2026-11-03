@@ -48,7 +48,7 @@
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=ZNV3FeatureTypeToggle;
  [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
- [self renderRules];self.editor.hidden=NO;
+ [self renderRules];[self updateParameterControls];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.view layoutIfNeeded];
  CGRect editorTop=[self.nameField convertRect:self.nameField.bounds toView:self.scroll];
@@ -65,7 +65,7 @@
  self.nameField.text=draft.name;self.descField.text=draft.detail;
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
- [self renderRules];self.editor.hidden=NO;
+ [self renderRules];[self updateParameterControls];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.view endEditing:YES];[self.view layoutIfNeeded];
  CGRect editorTop=[self.nameField convertRect:self.nameField.bounds toView:self.scroll];
@@ -77,9 +77,52 @@
 }
 
 - (void)cycleType {
+ if(![self validateAndStoreNumericFields])return;
  self.typeIndex=(self.typeIndex+1)%(ZNV3FeatureTypeSlider+1);
  [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
- [self refreshStaticBuildButton];
+ [self updateParameterControls];
+ [self refreshPatchActionButton];[self refreshStaticBuildButton];
+}
+- (void)updateParameterControls {
+ BOOL numeric=self.typeIndex==ZNV3FeatureTypeNumberInput||
+              self.typeIndex==ZNV3FeatureTypeSlider;
+ self.parameterFields.hidden=!numeric;
+ if(!numeric||!self.store.draft)return;
+ ZNV3ValueConfig *v=self.store.draft.valueConfig?:[ZNV3ValueConfig defaults];
+ [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
+                     forState:UIControlStateNormal];
+ self.minimumField.text=[NSString stringWithFormat:@"%g",v.minimum];
+ self.maximumField.text=[NSString stringWithFormat:@"%g",v.maximum];
+ self.stepField.text=[NSString stringWithFormat:@"%g",v.step];
+ self.defaultField.text=[NSString stringWithFormat:@"%g",v.defaultValue];
+}
+- (void)cycleValueType {
+ if(!self.store.draft)return;
+ ZNV3ValueConfig *v=self.store.draft.valueConfig;
+ v.valueType=v.valueType==ZNV3NumericTypeInt32?ZNV3NumericTypeFloat32:ZNV3NumericTypeInt32;
+ [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
+                     forState:UIControlStateNormal];
+}
+- (BOOL)validateAndStoreNumericFields {
+ if(self.typeIndex!=ZNV3FeatureTypeNumberInput&&self.typeIndex!=ZNV3FeatureTypeSlider)return YES;
+ NSArray<UITextField *> *fields=@[self.minimumField,self.maximumField,self.stepField,self.defaultField];
+ double values[4]={};
+ for(NSUInteger i=0;i<4;i++){
+  NSString *text=fields[i].text?:@"";
+  NSScanner *scanner=[NSScanner scannerWithString:text];
+  scanner.locale=[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+  if(![scanner scanDouble:&values[i]]||!scanner.isAtEnd){
+   [self showPatchMessage:@"数值参数无效" detail:@"请输入完整的数字，不能含额外字符。"];return NO;
+  }
+ }
+ ZNV3ValueConfig *v=[self.store.draft.valueConfig copy]?:[ZNV3ValueConfig defaults];
+ v.minimum=values[0];v.maximum=values[1];v.step=values[2];v.defaultValue=values[3];
+ v.requiresEnableSwitch=YES;
+ if(![v isValid]){
+  [self showPatchMessage:@"数值范围无效"
+    detail:@"要求最小值小于最大值、步长大于零、默认值在范围内，且符合 Int32/Float32 边界。"];return NO;
+ }
+ self.store.draft.valueConfig=v;return YES;
 }
 - (void)refreshPatchActionButton {
  ZNV3Feature *draft=self.store.draft;
@@ -87,7 +130,7 @@
  BOOL blocked=session.status==ZNV3PatchTransactionStatusRecoveryFailed;
  BOOL active=draft && [session isActiveFeature:draft.identifier];
  [self.patchActionButton setTitle:blocked?@"故障锁定":(active?@"恢复 Original":@"应用 Patch") forState:UIControlStateNormal];
- self.patchActionButton.enabled=!blocked;
+ self.patchActionButton.enabled=!blocked && (!draft || draft.buttonType==ZNV3FeatureTypeToggle);
 }
 - (void)showPatchMessage:(NSString *)title detail:(NSString *)detail {
  UIAlertController *alert=[UIAlertController alertControllerWithTitle:title
@@ -112,7 +155,7 @@
  ZNV3Feature *selected=nil;
  for(ZNV3Feature *feature in self.store.features)
   if([feature.identifier isEqualToString:self.selectedFeatureID]){selected=feature;break;}
- ready=ready&&selected!=nil;
+ ready=ready&&selected!=nil&&selected.buttonType==ZNV3FeatureTypeToggle;
  if(ready && self.store.draft){
   NSUInteger idx=self.store.editingIndex;
   ready=idx!=NSNotFound && idx<self.store.features.count &&
@@ -185,6 +228,9 @@
  }
  [self.view endEditing:YES];
  ZNV3Feature *draft=self.store.draft;if(!draft)return;
+ if(draft.buttonType!=ZNV3FeatureTypeToggle){
+  [self showPatchMessage:@"该类型尚未接入执行器" detail:@"此阶段仅保存参数定义，不允许误执行二态 Patch。"];return;
+ }
  ZNV3PatchSession *session=[ZNV3PatchSession shared];
  if([session isActiveFeature:draft.identifier]){
   NSError *error=nil;
@@ -235,6 +281,7 @@
  self.store.draft.name=name;
  self.store.draft.detail=self.descField.text?:@"";
  self.store.draft.buttonType=(ZNV3FeatureType)self.typeIndex;
+ if(![self validateAndStoreNumericFields])return;
  NSString *savedIdentifier=[self.store.draft.identifier copy];
  if(![self.store saveDraft]) {
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"配置保存失败"
