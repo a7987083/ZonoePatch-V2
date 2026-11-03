@@ -11,6 +11,8 @@
 @property(nonatomic,copy) NSArray<NSString *> *renderedIdentifiers;
 @property(nonatomic,strong) NSMutableArray<UISwitch *> *renderedSwitches;
 @property(nonatomic,strong) UILabel *emptyMessage;
+@property(nonatomic,strong) UILabel *recoveryMessage;
+@property(nonatomic,assign) BOOL renderedLocked;
 @property(nonatomic,strong) CAGradientLayer *neonStroke;
 @property(nonatomic,strong) CAShapeLayer *neonMask;
 @end
@@ -93,6 +95,17 @@
  [stack addArrangedSubview:divider];
  [divider.heightAnchor constraintEqualToConstant:1].active=YES;
 
+ // A transaction rollback failure must remain visible even with feature rows.
+ UILabel *recovery=ZNLabel(@"静态 Patch 恢复失败，功能已锁定",11,YES);
+ recovery.textColor=[UIColor colorWithRed:1 green:.58 blue:.63 alpha:1];
+ recovery.textAlignment=NSTextAlignmentCenter;
+ recovery.numberOfLines=2;
+ recovery.lineBreakMode=NSLineBreakByTruncatingTail;
+ recovery.hidden=YES;
+ self.recoveryMessage=recovery;
+ [stack addArrangedSubview:recovery];
+ [recovery.heightAnchor constraintEqualToConstant:34].active=YES;
+
  UIScrollView *scroll=[UIScrollView new];
  scroll.alwaysBounceVertical=NO;
  scroll.showsVerticalScrollIndicator=NO;
@@ -169,6 +182,15 @@
  BOOL changed=![self.renderedIdentifiers isEqualToArray:identifiers];
  self.snapshot=[discovered mutableCopy];
  BOOL locked=[ZNV3CustomerRuntime shared].recoveryFailed;
+ BOOL lockPresentationChanged=(self.renderedLocked!=locked);
+ self.renderedLocked=locked;
+ self.recoveryMessage.hidden=!(locked && discovered.count>0);
+ if(locked && discovered.count){
+  NSString *detail=[ZNV3CustomerRuntime shared].lastDiagnostic;
+  self.recoveryMessage.text=detail.length?
+     [NSString stringWithFormat:@"恢复失败 · %@",detail]:
+     @"静态 Patch 恢复失败，功能已锁定";
+ }
  if(changed||!self.renderedSwitches){
   for(UIView *view in [self.features.arrangedSubviews copy]){
    [self.features removeArrangedSubview:view];[view removeFromSuperview];
@@ -248,6 +270,8 @@
   toggle.tag=(NSInteger)i;
   toggle.accessibilityLabel=feature.title;
  }
+ if((changed||lockPresentationChanged)&&self.layoutChangedBlock)
+  self.layoutChangedBlock();
 }
 
 - (void)toggleFeature:(UISwitch *)toggle {
