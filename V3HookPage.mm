@@ -185,7 +185,7 @@
  }
  if([[ZNV3PatchSession shared] isActiveFeature:target.identifier]){
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"功能正在应用 Patch"
-   message:@"请先进入编辑器恢复 Original，再删除该功能。" preferredStyle:UIAlertControllerStyleAlert];
+   message:@"请先点击当前功能列表中的「恢复」，再删除该功能。" preferredStyle:UIAlertControllerStyleAlert];
   [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
   [self presentViewController:alert animated:YES completion:nil];return;
  }
