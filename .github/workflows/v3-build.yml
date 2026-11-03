@@ -45,6 +45,13 @@ jobs:
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3StaticBuildPlan.mm tests/v3_static_build_planner_test.mm -o "$RUNNER_TEMP/v3_static_plan_test"
           "$RUNNER_TEMP/v3_static_plan_test"
+      - name: Test P6 Generated Mach-O and Signature
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
+            V3StaticBuildPlan.mm V3StaticBinaryBuilder.mm ZNAdhocMachOSigner.mm \
+            tests/v3_static_binary_smoke_test.mm -o "$RUNNER_TEMP/v3_static_binary_smoke"
+          "$RUNNER_TEMP/v3_static_binary_smoke"
       - name: Install Theos
         run: |
           set -euo pipefail
