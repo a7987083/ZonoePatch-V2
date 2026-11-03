@@ -1,6 +1,7 @@
 #import "V3MenuController.h"
 #import "V3UIComponents.h"
 #import "V3ModuleResolver.h"
+#import "V3PatchSession.h"
 
 @implementation ZNV3MenuController (HookPage)
 - (void)add:(UIView *)v height:(CGFloat)h {
@@ -41,8 +42,8 @@
  [stack addArrangedSubview:ZNLabel(@"按钮类型",12,YES)];
  self.typeButton=ZNButton(@"开关  ▾",self,@selector(cycleType));[stack addArrangedSubview:self.typeButton];[self.typeButton.heightAnchor constraintEqualToConstant:36].active=YES;
  UIStackView *actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=5;[stack addArrangedSubview:actions];
- UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));UIButton *test=ZNButton(@"预览",self,@selector(preview));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
- for(UIButton *button in @[cancel,test,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
+ UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));self.patchActionButton=ZNButton(@"应用 Patch",self,@selector(applyOrRestore));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
+ for(UIButton *button in @[cancel,self.patchActionButton,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
  self.editor.hidden=YES;
 
 }
@@ -67,6 +68,14 @@
 }
 - (void)editFeature:(UIButton *)sender { [self editFeatureAtIndex:(NSUInteger)sender.tag]; }
 - (void)removeFeature:(UIButton *)sender {
+ if((NSUInteger)sender.tag>=self.store.features.count)return;
+ ZNV3Feature *target=self.store.features[(NSUInteger)sender.tag];
+ if([[ZNV3PatchSession shared] isActiveFeature:target.identifier]){
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"功能正在应用 Patch"
+   message:@"请先进入编辑器恢复 Original，再删除该功能。" preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
  if(![self.store deleteFeatureAtIndex:(NSUInteger)sender.tag]) {
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"删除失败"
     message:self.store.lastError.localizedDescription?:@"配置保存不可用"
@@ -83,6 +92,7 @@
  self.moduleStatus.text=[NSString stringWithFormat:@"%@ · 已加载 · Base 0x%llX · Slide 0x%llX",name,(unsigned long long)info.imageBase,(unsigned long long)(uint64_t)info.slide];
 }
 - (void)cycleModule {
+ if(self.store.draft && [[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier])return;
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
  [self refreshModuleStatus];
