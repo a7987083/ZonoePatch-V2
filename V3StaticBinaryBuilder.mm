@@ -1183,8 +1183,16 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
                         entry.canonicalIndex=(uint32_t)physical.members.front();
                         entry.flags=(i==physical.members.front()?ZN44_STATIC_ENTRY_FLAG_CANONICAL:0u) |
                                     (physical.members.size()>1?ZN44_STATIC_ENTRY_FLAG_SHARED:0u);
-                        ZNV3CopyFixed(entry.title,sizeof(entry.title),plan.featureName);
-                        ZNV3CopyFixed(entry.group,sizeof(entry.group),target);
+                        if(plan.featureCount>1){
+                            NSString *key=logical.row.featureKey?:@"";
+                            if(!key.length){localError=@"P9 feature ownership key missing";break;}
+                            ZNV3CopyFixed(entry.title,sizeof(entry.title),logical.row.featureName);
+                            ZNV3CopyFixed(entry.group,sizeof(entry.group),
+                               [key substringToIndex:MIN((NSUInteger)23,key.length)]);
+                        }else{
+                            ZNV3CopyFixed(entry.title,sizeof(entry.title),plan.featureName);
+                            ZNV3CopyFixed(entry.group,sizeof(entry.group),target);
+                        }
                     }
 
                     uint64_t descOffset=ZNV3Align(sizeof(ZN44StaticHeader)+logicals.size()*sizeof(ZN44StaticEntry),8);
