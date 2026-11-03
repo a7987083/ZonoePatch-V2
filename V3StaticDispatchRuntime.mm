@@ -213,6 +213,7 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
   _transaction=[[ZNV3StaticSlotTransaction alloc]initWithBackend:_backend];}return self;
 }
 - (BOOL)recoveryFailed{return self.transaction.recoveryFailed;}
+- (BOOL)hasActiveFeature{@synchronized(self){return self.activeFeatureID.length>0;}}
 - (NSString *)lastDiagnostic{return self.transaction.lastDiagnostic;}
 - (BOOL)isEnabledForFeature:(NSString *)identifier {
  @synchronized(self){return identifier.length&&[self.activeFeatureID isEqualToString:identifier]&&
