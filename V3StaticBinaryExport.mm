@@ -11,6 +11,14 @@
 static NSError *P6Error(NSInteger code,NSString *reason){
  return [NSError errorWithDomain:@"ZonoePatch.V3.StaticBinaryExport" code:code userInfo:@{NSLocalizedDescriptionKey:reason?:@"Unknown error"}];
 }
+static NSData *P9FixedUTF8(NSString *value,NSUInteger capacity) {
+ NSData *source=[value dataUsingEncoding:NSUTF8StringEncoding];
+ if(!source.length||capacity==0)return [NSData data];
+ NSUInteger length=MIN(capacity-1,source.length);
+ while(length>0 && ![[NSString alloc]initWithBytes:source.bytes length:length encoding:NSUTF8StringEncoding])
+  length--;
+ return [source subdataWithRange:NSMakeRange(0,length)];
+}
 static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSString **reason) {
  NSData *data=[NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:nil];
  if(!data||data.length<sizeof(struct mach_header_64)){
@@ -75,10 +83,10 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
   NSString *owner=multi?[expected.featureKey substringToIndex:MIN((NSUInteger)23,expected.featureKey.length)]:nil;
   // The entry ABI uses fixed UTF-8 fields. Reproduce the builder's truncation
   // through bounded prefix checks rather than accepting an arbitrary title.
-  NSData *titleBytes=[title dataUsingEncoding:NSUTF8StringEncoding];
-  NSData *ownerBytes=[owner dataUsingEncoding:NSUTF8StringEncoding];
-  NSUInteger tlen=MIN(titleBytes.length,sizeof(row.title)-1);
-  NSUInteger olen=MIN(ownerBytes.length,sizeof(row.group)-1);
+  NSData *titleBytes=P9FixedUTF8(title,sizeof(row.title));
+  NSData *ownerBytes=P9FixedUTF8(owner,sizeof(row.group));
+  NSUInteger tlen=titleBytes.length;
+  NSUInteger olen=ownerBytes.length;
   if(row.patchID!=i+1||row.canonicalIndex!=i||row.physicalID!=i+1||
      !(row.flags&ZN44_STATIC_ENTRY_FLAG_CANONICAL)||
      row.selectedTarget!=0||!titleBytes.length||
