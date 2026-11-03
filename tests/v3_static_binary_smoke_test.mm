@@ -62,7 +62,7 @@ static BOOL segments(NSString *path) {
 static BOOL bindingMatches(NSString *path,NSString *expected) {
  NSData *file=[NSData dataWithContentsOfFile:path];
  if(file.length<sizeof(struct mach_header_64))return NO;
- const uint8_t *p=file.bytes;struct mach_header_64 mh={};
+ const uint8_t *p=(const uint8_t *)file.bytes;struct mach_header_64 mh={};
  memcpy(&mh,p,sizeof(mh));
  NSUInteger commandOffset=sizeof(mh);uint64_t dataFile=UINT64_MAX;
  for(uint32_t i=0;i<mh.ncmds;i++){
