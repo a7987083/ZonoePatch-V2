@@ -10,6 +10,9 @@
 @property(nonatomic,strong) NSMutableArray<ZNV3CustomerFeature *> *snapshot;
 @property(nonatomic,copy) NSArray<NSString *> *renderedIdentifiers;
 @property(nonatomic,strong) NSMutableArray<UISwitch *> *renderedSwitches;
+@property(nonatomic,strong) NSMutableArray<UILabel *> *renderedLabels;
+@property(nonatomic,assign,readwrite) NSUInteger presentedFeatureCount;
+@property(nonatomic,assign,readwrite) BOOL presentedRecoveryLocked;
 @property(nonatomic,strong) UILabel *emptyMessage;
 @property(nonatomic,strong) UILabel *recoveryMessage;
 @property(nonatomic,assign) BOOL renderedLocked;
@@ -50,7 +53,7 @@
  UIStackView *stack=[UIStackView new];
  stack.translatesAutoresizingMaskIntoConstraints=NO;
  stack.axis=UILayoutConstraintAxisVertical;stack.spacing=0;
- stack.layoutMargins=UIEdgeInsetsMake(3,10,5,10);
+ stack.layoutMargins=UIEdgeInsetsMake(ZNCustomerTopInset,10,ZNCustomerBottomInset,10);
  stack.layoutMarginsRelativeArrangement=YES;
  [self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
@@ -67,7 +70,7 @@
  drag.cancelsTouchesInView=NO;
  [header addGestureRecognizer:drag];
  [stack addArrangedSubview:header];
- [header.heightAnchor constraintEqualToConstant:40].active=YES;
+ [header.heightAnchor constraintEqualToConstant:ZNCustomerHeaderHeight].active=YES;
 
  UIImageView *icon=[[UIImageView alloc]initWithImage:[UIImage systemImageNamed:@"gamecontroller.fill"]];
  icon.tintColor=[UIColor colorWithRed:.91 green:.36 blue:1 alpha:1];
@@ -93,7 +96,7 @@
  UIView *divider=[UIView new];
  divider.backgroundColor=[UIColor colorWithRed:.62 green:.30 blue:.96 alpha:.62];
  [stack addArrangedSubview:divider];
- [divider.heightAnchor constraintEqualToConstant:1].active=YES;
+ [divider.heightAnchor constraintEqualToConstant:ZNCustomerDividerHeight].active=YES;
 
  // A transaction rollback failure must remain visible even with feature rows.
  UILabel *recovery=ZNLabel(@"静态 Patch 恢复失败，功能已锁定",11,YES);
@@ -104,7 +107,7 @@
  recovery.hidden=YES;
  self.recoveryMessage=recovery;
  [stack addArrangedSubview:recovery];
- [recovery.heightAnchor constraintEqualToConstant:34].active=YES;
+ [recovery.heightAnchor constraintEqualToConstant:ZNCustomerRecoveryHeight].active=YES;
 
  UIScrollView *scroll=[UIScrollView new];
  scroll.alwaysBounceVertical=NO;
@@ -162,6 +165,7 @@
  frame.origin.x=MAX(minX,MIN(maxX,frame.origin.x+delta.x));
  frame.origin.y=MAX(minY,MIN(maxY,frame.origin.y+delta.y));
  window.frame=frame;
+ if(self.windowMovedBlock)self.windowMovedBlock();
 }
 
 - (void)showError:(NSString *)message {
@@ -182,6 +186,8 @@
  BOOL changed=![self.renderedIdentifiers isEqualToArray:identifiers];
  self.snapshot=[discovered mutableCopy];
  BOOL locked=[ZNV3CustomerRuntime shared].recoveryFailed;
+ self.presentedFeatureCount=discovered.count;
+ self.presentedRecoveryLocked=locked;
  BOOL lockPresentationChanged=(self.renderedLocked!=locked);
  self.renderedLocked=locked;
  self.recoveryMessage.hidden=!(locked && discovered.count>0);
@@ -197,13 +203,14 @@
   }
   self.renderedIdentifiers=[identifiers copy];
   self.renderedSwitches=[NSMutableArray arrayWithCapacity:discovered.count];
+  self.renderedLabels=[NSMutableArray arrayWithCapacity:discovered.count];
   self.emptyMessage=nil;
   if(!discovered.count){
    UILabel *message=ZNLabel(@"暂无可用功能",13,NO);
    message.textAlignment=NSTextAlignmentCenter;
    message.textColor=[UIColor colorWithWhite:1 alpha:.75];
    [self.features addArrangedSubview:message];
-   [message.heightAnchor constraintEqualToConstant:66].active=YES;
+   [message.heightAnchor constraintEqualToConstant:ZNCustomerEmptyHeight].active=YES;
    self.emptyMessage=message;
   }
   for(NSUInteger i=0;i<discovered.count;i++){
@@ -212,7 +219,7 @@
    UIView *panel=[UIView new];
    panel.backgroundColor=UIColor.clearColor;
    [self.features addArrangedSubview:panel];
-   [panel.heightAnchor constraintEqualToConstant:44].active=YES;
+   [panel.heightAnchor constraintEqualToConstant:ZNCustomerRowHeight].active=YES;
 
    UIStackView *row=[UIStackView new];
    row.axis=UILayoutConstraintAxisHorizontal;
@@ -233,6 +240,7 @@
    [name setContentCompressionResistancePriority:UILayoutPriorityDefaultLow
       forAxis:UILayoutConstraintAxisHorizontal];
    [row addArrangedSubview:name];
+   [self.renderedLabels addObject:name];
 
    UISwitch *toggle=[UISwitch new];
    toggle.tag=(NSInteger)i;
@@ -264,6 +272,7 @@
  for(NSUInteger i=0;i<self.renderedSwitches.count && i<discovered.count;i++){
   UISwitch *toggle=self.renderedSwitches[i];
   ZNV3CustomerFeature *feature=discovered[i];
+  if(i<self.renderedLabels.count)self.renderedLabels[i].text=feature.title?:@"";
   // An external state change must update the existing control without animation.
   [toggle setOn:feature.enabled animated:NO];
   toggle.enabled=!locked;
