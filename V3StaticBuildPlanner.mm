@@ -68,6 +68,7 @@ static NSString *ZNP6DiskUUID(int fd) {
   close(fd);
   if(!ok){if(error)*error=ZNP6Error(9,@"Disk/loaded UUID or Original mismatch; no build may proceed");return nil;}
   [entries addObject:[[ZNV3StaticBuildEntry alloc]initWithRuleID:rule.identifier
+      featureKey:feature.identifier?:@"" featureName:feature.name?:@""
       uuid:address.imageUUID path:address.imagePath rva:address.rva
       fileOffset:address.fileOffset original:disk patch:v.patchBytes]];
  }
