@@ -39,7 +39,12 @@
     w.rootViewController=controller;
     self.window=w;self.controller=controller;
  }
- self.window.frame=host.bounds;
+ CGRect sceneBounds=host.bounds;
+ if(@available(iOS 13.0,*))sceneBounds=host.windowScene.coordinateSpace.bounds;
+ CGFloat width=MIN(350.0,MAX(250.0,CGRectGetWidth(sceneBounds)-24.0));
+ CGFloat height=MIN(475.0,MAX(270.0,CGRectGetHeight(sceneBounds)-44.0));
+ self.window.frame=CGRectMake(CGRectGetMidX(sceneBounds)-width/2.0,
+                              CGRectGetMidY(sceneBounds)-height/2.0,width,height);
  self.window.hidden=NO;
 }
 @end
