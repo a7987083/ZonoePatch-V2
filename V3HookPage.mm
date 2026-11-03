@@ -57,41 +57,62 @@
 
 }
 - (void)renderFeatures {
+ if(!self.features)return;
+ BOOL compact=self.view.bounds.size.width>0 && self.view.bounds.size.width<430;
+ self.featureRowsCompact=compact;
  for(UIView *v in self.features.arrangedSubviews){[self.features removeArrangedSubview:v];[v removeFromSuperview];}
  for(NSUInteger i=0;i<self.store.features.count;i++){
- ZNV3Feature *f=self.store.features[i];
- UIStackView *row=[UIStackView new];row.axis=UILayoutConstraintAxisHorizontal;
- row.alignment=UIStackViewAlignmentCenter;row.spacing=3;
- row.layoutMargins=UIEdgeInsetsMake(7,5,7,5);row.layoutMarginsRelativeArrangement=YES;
- row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];row.layer.cornerRadius=7;
- BOOL selected=[self.selectedFeatureID isEqualToString:f.identifier];
- UIButton *choice=ZNButton(selected?@"◉":@"◯",self,@selector(selectFeature:));choice.tag=(NSInteger)i;
- choice.accessibilityLabel=[NSString stringWithFormat:@"%@ %@",selected?@"已选中":@"选择",f.name];
- [choice.widthAnchor constraintEqualToConstant:25].active=YES;
- [choice.heightAnchor constraintEqualToConstant:34].active=YES;
- [row addArrangedSubview:choice];
- UILabel *l=ZNLabel(f.name,13,NO);
- l.numberOfLines=1;l.lineBreakMode=NSLineBreakByTruncatingTail;
- [l setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
- [l setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
- [row addArrangedSubview:l];
- BOOL active=[[ZNV3PatchSession shared] isActiveFeature:f.identifier];
- UIButton *toggle=ZNButton(active?@"恢复":@"启用",self,@selector(toggleFeaturePatch:));toggle.tag=(NSInteger)i;
- toggle.enabled=!self.staticBuildRunning &&
-  [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusRecoveryFailed;
- [toggle.widthAnchor constraintEqualToConstant:43].active=YES;
- [toggle.heightAnchor constraintEqualToConstant:34].active=YES;
- [row addArrangedSubview:toggle];
- UIButton *edit=ZNButton(@"编辑",self,@selector(editFeature:));edit.tag=(NSInteger)i;
- [edit.widthAnchor constraintEqualToConstant:43].active=YES;[edit.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:edit];
- UIButton *b=ZNButton(@"删除",self,@selector(removeFeature:));b.tag=(NSInteger)i;
- b.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",f.name];
- [b.widthAnchor constraintEqualToConstant:43].active=YES;[b.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:b];
- [row.heightAnchor constraintGreaterThanOrEqualToConstant:48].active=YES;[self.features addArrangedSubview:row];
+  ZNV3Feature *f=self.store.features[i];
+  UIStackView *row=[UIStackView new];row.axis=compact?UILayoutConstraintAxisVertical:UILayoutConstraintAxisHorizontal;
+  row.alignment=compact?UIStackViewAlignmentFill:UIStackViewAlignmentCenter;row.spacing=compact?5:3;
+  row.layoutMargins=UIEdgeInsetsMake(7,5,7,5);row.layoutMarginsRelativeArrangement=YES;
+  row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];row.layer.cornerRadius=7;
+  UIStackView *nameRow=row;
+  UIStackView *actions=row;
+  if(compact){
+   nameRow=[UIStackView new];nameRow.axis=UILayoutConstraintAxisHorizontal;
+   nameRow.alignment=UIStackViewAlignmentCenter;nameRow.spacing=5;[row addArrangedSubview:nameRow];
+   actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;
+   actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=6;
+   [row addArrangedSubview:actions];
+  }
+  BOOL selected=[self.selectedFeatureID isEqualToString:f.identifier];
+  UIButton *choice=ZNButton(selected?@"◉":@"◯",self,@selector(selectFeature:));choice.tag=(NSInteger)i;
+  choice.accessibilityLabel=[NSString stringWithFormat:@"%@ %@",selected?@"已选中":@"选择",f.name];
+  choice.enabled=!self.staticBuildRunning;
+  [choice.widthAnchor constraintEqualToConstant:25].active=YES;
+  [choice.heightAnchor constraintEqualToConstant:34].active=YES;
+  [nameRow addArrangedSubview:choice];
+  UILabel *label=ZNLabel(f.name,13,NO);
+  label.numberOfLines=1;label.lineBreakMode=NSLineBreakByTruncatingTail;
+  [label setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  [label setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  [nameRow addArrangedSubview:label];
+  BOOL active=[[ZNV3PatchSession shared] isActiveFeature:f.identifier];
+  UIButton *toggle=ZNButton(active?@"恢复":@"启用",self,@selector(toggleFeaturePatch:));toggle.tag=(NSInteger)i;
+  toggle.enabled=!self.staticBuildRunning &&
+    [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusRecoveryFailed;
+  [toggle.heightAnchor constraintEqualToConstant:34].active=YES;
+  if(!compact)[toggle.widthAnchor constraintEqualToConstant:43].active=YES;
+  [actions addArrangedSubview:toggle];
+  UIButton *edit=ZNButton(@"编辑",self,@selector(editFeature:));edit.tag=(NSInteger)i;
+  edit.enabled=!self.staticBuildRunning;
+  [edit.heightAnchor constraintEqualToConstant:34].active=YES;
+  if(!compact)[edit.widthAnchor constraintEqualToConstant:43].active=YES;
+  [actions addArrangedSubview:edit];
+  UIButton *remove=ZNButton(@"删除",self,@selector(removeFeature:));remove.tag=(NSInteger)i;
+  remove.enabled=!self.staticBuildRunning;
+  remove.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",f.name];
+  [remove.heightAnchor constraintEqualToConstant:34].active=YES;
+  if(!compact)[remove.widthAnchor constraintEqualToConstant:43].active=YES;
+  [actions addArrangedSubview:remove];
+  [row.heightAnchor constraintGreaterThanOrEqualToConstant:compact?88:48].active=YES;
+  [self.features addArrangedSubview:row];
  }
  [self refreshStaticBuildButton];
 }
 - (void)selectFeature:(UIButton *)sender {
+ if(self.staticBuildRunning)return;
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
  self.selectedFeatureID=self.store.features[index].identifier;
@@ -131,6 +152,7 @@
      (error.localizedDescription?:session.lastDiagnostic)];
 }
 - (void)editFeature:(UIButton *)sender {
+ if(self.staticBuildRunning)return;
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
  self.selectedFeatureID=self.store.features[index].identifier;
