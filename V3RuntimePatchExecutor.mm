@@ -28,7 +28,7 @@ static NSError *E(NSInteger code,NSString *msg){return [NSError errorWithDomain:
  for(ZNV3PatchOperation *op in ops){
   NSUInteger n=op.patchBytes.length;
   if(!op.identifier.length||!op.moduleUUID.length||!op.address||!n||n>256||(n&3)||(op.address&3)||
-     op.expectedBytes.length!=n||[ids containsObject:op.identifier]||n-1>UINTPTR_MAX-op.address)
+     op.expectedBytes.length!=n||[ids containsObject:op.identifier]||n>UINTPTR_MAX-op.address)
    return [self fail:2 message:@"Invalid identifier, UUID, alignment or byte count" error:error];
   [ids addObject:op.identifier];
  }
@@ -83,6 +83,12 @@ static NSError *E(NSInteger code,NSString *msg){return [NSError errorWithDomain:
   for(NSDictionary *step in plan){
    ZNV3PatchOperation *op=step[@"op"];NSData *before=step[@"before"],*target=step[@"target"];
    if([before isEqual:target])continue;
+   NSError *identityError=nil;
+   if(![self.backend validateOperation:op error:&identityError]){
+    NSString *detail=nil;BOOL restored=[self rollback:touched detail:&detail];
+    if(!restored)self.status=ZNV3PatchTransactionStatusRecoveryFailed;
+    return [self fail:restored?10:9 message:[NSString stringWithFormat:@"%@ identity changed: %@; %@",op.identifier,identityError.localizedDescription?:@"unknown",restored?@"rollback verified":detail?:@"recovery failed"] error:error];
+   }
    [touched addObject:step]; // a failed write can already have changed bytes
    NSError *e=nil;BOOL wrote=[self.backend writeAt:op.address bytes:target error:&e];
    NSData *after=[self.backend readAt:op.address length:target.length error:nil];
