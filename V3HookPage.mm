@@ -71,7 +71,8 @@
  self.minimumField=fields[0];self.maximumField=fields[1];
  self.stepField=fields[2];self.defaultField=fields[3];
  UILabel *note=ZNLabel(@"滑条：拖动只改变待生效值；打开开关才提交，关闭恢复原始状态。（执行后端待接入）",11,NO);
- note.numberOfLines=0;[self.parameterFields addArrangedSubview:note];
+ note.numberOfLines=0;self.sliderHintLabel=note;
+ [self.parameterFields addArrangedSubview:note];
  self.parameterFields.hidden=YES;
  UIStackView *actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=5;[stack addArrangedSubview:actions];
  UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));self.patchActionButton=ZNButton(@"应用 Patch",self,@selector(applyOrRestore));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
