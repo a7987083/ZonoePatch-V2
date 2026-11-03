@@ -89,6 +89,12 @@
   [self presentViewController:alert animated:YES completion:nil];return;
  }
  ZNV3Feature *target=self.store.features[(NSUInteger)sender.tag];
+ if([ZNV3StaticDispatchRuntime shared].recoveryFailed){
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"静态 Patch 故障锁定"
+     message:[ZNV3StaticDispatchRuntime shared].lastDiagnostic preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
  if([[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:target.identifier]){
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"静态 Patch 正在生效"
     message:@"请先关闭预埋静态 Patch，再删除功能。" preferredStyle:UIAlertControllerStyleAlert];
@@ -117,7 +123,8 @@
  self.moduleStatus.text=[NSString stringWithFormat:@"%@ · 已加载 · Base 0x%llX · Slide 0x%llX",name,(unsigned long long)info.imageBase,(unsigned long long)(uint64_t)info.slide];
 }
 - (void)cycleModule {
- if(self.store.draft && [[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier])return;
+ if(self.store.draft && ([[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier]||
+    [[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:self.store.draft.identifier]))return;
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
  [self refreshModuleStatus];
