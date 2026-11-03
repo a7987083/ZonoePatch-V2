@@ -11,6 +11,8 @@
 @property(nonatomic,strong) UILabel *moduleStatus;
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIButton *patchActionButton;
+@property(nonatomic,strong) UIButton *staticBuildButton;
+@property(nonatomic,assign) BOOL staticBuildRunning;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
 @property(nonatomic,assign) NSInteger ruleCount;
@@ -37,6 +39,7 @@
 - (void)cycleType;
 - (void)applyOrRestore;
 - (void)staticBuildPreflight;
+- (void)generateStaticBinary;
 - (void)refreshPatchActionButton;
 - (void)saveUI;
 @end
