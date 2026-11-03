@@ -72,6 +72,6 @@ static NSString *ZNP6DiskUUID(int fd) {
       fileOffset:address.fileOffset original:disk patch:v.patchBytes]];
  }
  if(![ZNV3StaticBuildPlan validateEntries:entries error:error])return nil;
- return [[ZNV3StaticBuildPlan alloc]initWithModule:feature.module entries:entries];
+ return [[ZNV3StaticBuildPlan alloc]initWithModule:feature.module name:feature.name.length?feature.name:feature.module entries:entries];
 }
 @end
