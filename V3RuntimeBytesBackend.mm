@@ -15,13 +15,13 @@ static NSError *ZNBytesError(NSInteger code,NSString *reason){
 }
 static BOOL ZNCheckRX(uintptr_t start,NSUInteger length,NSError **error){
  // All covered pages must be readable/executable and must not already be writable.
- mach_vm_address_t position=(mach_vm_address_t)start,limit=(mach_vm_address_t)start+length;
+ vm_address_t position=(vm_address_t)start,limit=(vm_address_t)start+length;
  while(position<limit){
-  mach_vm_address_t region=position;mach_vm_size_t regionSize=0;
+  vm_address_t region=position;vm_size_t regionSize=0;
   vm_region_basic_info_data_64_t info={};
   mach_msg_type_number_t count=VM_REGION_BASIC_INFO_COUNT_64;
   mach_port_t object=MACH_PORT_NULL;
-  kern_return_t kr=mach_vm_region(mach_task_self(),&region,&regionSize,
+  kern_return_t kr=vm_region_64(mach_task_self(),&region,&regionSize,
                       VM_REGION_BASIC_INFO_64,(vm_region_info_t)&info,&count,&object);
   if(object!=MACH_PORT_NULL)mach_port_deallocate(mach_task_self(),object);
   if(kr!=KERN_SUCCESS||region>position||!regionSize||regionSize>UINT64_MAX-region||
@@ -30,7 +30,7 @@ static BOOL ZNCheckRX(uintptr_t start,NSUInteger length,NSError **error){
    if(error)*error=ZNBytesError(2,@"Target must be mapped RX code pages; refused");
    return NO;
   }
-  mach_vm_address_t end=region+regionSize;
+  vm_address_t end=region+regionSize;
   position=end<limit?end:limit;
  }
  return YES;
