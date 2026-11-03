@@ -5,6 +5,7 @@
 #import "V3PatchSession.h"
 #import "V3StaticBuildPlanner.h"
 #import "V3StaticBinaryExport.h"
+#import "V3StaticDispatchRuntime.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -45,7 +46,7 @@
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
- [self refreshPatchActionButton];
+ [self refreshPatchActionButton];[self refreshStaticPatchButton];
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
@@ -59,6 +60,7 @@
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
+ [self refreshPatchActionButton];[self refreshStaticPatchButton];
  [self.view endEditing:YES];[self.scroll layoutIfNeeded];
  [self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
@@ -95,6 +97,36 @@
      ![a.patchText isEqualToString:b.patchText])return NO;
  }
  return YES;
+}
+- (void)refreshStaticPatchButton {
+ ZNV3StaticDispatchRuntime *runtime=[ZNV3StaticDispatchRuntime shared];
+ BOOL active=self.store.draft&&[runtime isEnabledForFeature:self.store.draft.identifier];
+ BOOL locked=runtime.recoveryFailed;
+ [self.staticToggleButton setTitle:locked?@"静态事务故障锁定":
+  (active?@"关闭预埋静态 Patch":@"启用预埋静态 Patch") forState:UIControlStateNormal];
+ self.staticToggleButton.enabled=!locked;
+}
+- (void)toggleStaticPatch {
+ [self.view endEditing:YES];
+ NSUInteger index=self.store.editingIndex;
+ if(index==NSNotFound||index>=self.store.features.count){
+  [self showPatchMessage:@"静态 Patch 未执行" detail:@"请先保存功能，再进入编辑器。"];return;
+ }
+ ZNV3Feature *saved=self.store.features[index];
+ ZNV3StaticDispatchRuntime *runtime=[ZNV3StaticDispatchRuntime shared];
+ BOOL active=[runtime isEnabledForFeature:saved.identifier];
+ if(!active && ![self draftMatchesSavedPatch:saved]){
+  [self showPatchMessage:@"规则已修改" detail:@"请先保存规则并重新生成预埋二进制，不能将新规则应用于旧二进制。"];return;
+ }
+ if(!active && [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled){
+  [self showPatchMessage:@"运行时 Patch 已启用" detail:@"先恢复越狱 Runtime Bytes Patch，再切换静态预埋 Patch。"];return;
+ }
+ NSError *error=nil;
+ BOOL ok=[runtime setEnabled:!active forFeature:saved error:&error];
+ [self refreshStaticPatchButton];
+ [self showPatchMessage:ok?(!active?@"预埋静态 Patch 已启用":@"预埋静态 Patch 已关闭"):@"预埋静态 Patch 操作失败"
+  detail:ok?@"已切换可写 selectedTarget Slot 并验证读回；不修改 RX 代码页。":
+   (error.localizedDescription?:runtime.lastDiagnostic)];
 }
 - (void)staticBuildPreflight {
  [self.view endEditing:YES];
@@ -177,6 +209,10 @@
 }
 - (void)saveUI {
  if(!self.store.draft)return;
+ if([[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:self.store.draft.identifier]||
+    [ZNV3StaticDispatchRuntime shared].recoveryFailed){
+  [self showPatchMessage:@"静态 Patch 活动或故障锁定" detail:@"请先关闭静态 Patch，且确认没有恢复故障，再保存修改。"];return;
+ }
  if([[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier]){
   [self showPatchMessage:@"禁止修改活动补丁" detail:@"请先恢复 Original，再保存功能修改。"];return;
  }
