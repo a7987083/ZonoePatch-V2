@@ -121,6 +121,32 @@ static NSUInteger staticEntryCount(NSString *path) {
  }
  return 0;
 }
+static BOOL p9Grouping(NSString *path) {
+ NSData *data=[NSData dataWithContentsOfFile:path];
+ if(data.length<sizeof(struct mach_header_64))return NO;
+ const uint8_t *bytes=(const uint8_t *)data.bytes;
+ struct mach_header_64 mh={};memcpy(&mh,bytes,sizeof(mh));
+ NSUInteger off=sizeof(mh);
+ for(uint32_t i=0;i<mh.ncmds;i++){
+  if(off>data.length||data.length-off<sizeof(struct load_command))return NO;
+  struct load_command lc={};memcpy(&lc,bytes+off,sizeof(lc));
+  if(lc.cmdsize<sizeof(lc)||lc.cmdsize>data.length-off)return NO;
+  if(lc.cmd==LC_SEGMENT_64 && lc.cmdsize>=sizeof(struct segment_command_64)){
+   struct segment_command_64 seg={};memcpy(&seg,bytes+off,sizeof(seg));
+   if(!strncmp(seg.segname,"__ZNDATA",16)){
+    if(seg.fileoff>data.length||data.length-seg.fileoff<sizeof(ZN44StaticHeader)+2*sizeof(ZN44StaticEntry))return NO;
+    ZN44StaticHeader table={};memcpy(&table,bytes+seg.fileoff,sizeof(table));
+    if(table.count!=2||!(table.flags&ZN44_STATIC_HEADER_FLAG_MULTI_FEATURE_V1))return NO;
+    ZN44StaticEntry rows[2]={};memcpy(rows,bytes+seg.fileoff+sizeof(table),sizeof(rows));
+    return !strncmp(rows[0].title,"Feature A",9)&&!strncmp(rows[1].title,"Feature B",9)&&
+     !strncmp(rows[0].group,"owner-a",7)&&!strncmp(rows[1].group,"owner-b",7)&&
+     rows[0].selectedTarget==0&&rows[1].selectedTarget==0;
+   }
+  }
+  off+=lc.cmdsize;
+ }
+ return NO;
+}
 int main() {
  @autoreleasepool {
   NSUUID *uuid=[NSUUID UUID];
