@@ -59,7 +59,7 @@ static BOOL segments(NSString *path) {
  }
  return text&&data;
 }
-static BOOL bindingMatches(NSString *path,NSString *expected) {
+static BOOL bindingMatches(NSString *path,NSString *expected,NSString *name) {
  NSData *file=[NSData dataWithContentsOfFile:path];
  if(file.length<sizeof(struct mach_header_64))return NO;
  const uint8_t *p=(const uint8_t *)file.bytes;struct mach_header_64 mh={};
@@ -81,6 +81,9 @@ static BOOL bindingMatches(NSString *path,NSString *expected) {
  ZN44StaticEntry entry={};
  if(file.length-dataFile<sizeof(header)+sizeof(entry))return NO;
  memcpy(&entry,p+dataFile+sizeof(header),sizeof(entry));
+ size_t titleLength=strnlen(entry.title,sizeof(entry.title));
+ NSString *title=[[NSString alloc]initWithBytes:entry.title length:titleLength encoding:NSUTF8StringEncoding];
+ if(!title.length||![name hasPrefix:title]||titleLength>sizeof(entry.title)-1)return NO;
  if(entry.selectedTarget!=0||entry.offRVA==0||entry.onRVA==0||
     entry.canonicalIndex!=0||!(entry.flags&ZN44_STATIC_ENTRY_FLAG_CANONICAL))
   return NO;
@@ -106,7 +109,8 @@ int main() {
   ZNV3StaticBuildEntry *entry=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"fixture-rule"
     uuid:uuid.UUIDString path:src rva:0x1000 fileOffset:0x1000
     original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
-  ZNV3StaticBuildPlan *plan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework" entries:@[entry]];
+  NSString *featureName=@"中文用户功能菜单名称超过四十八个字节仍能正常显示";
+   ZNV3StaticBuildPlan *plan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework" name:featureName entries:@[entry]];
   NSString *out=nil,*err=nil;NSDictionary *meta=nil;
   BOOL built=[ZNV3StaticBinaryBuilder buildPlan:plan inDirectory:root outputPath:&out metadata:&meta error:&err];
   if(!built)fprintf(stderr,"build error: %s\n",err.UTF8String?: "none");
@@ -115,9 +119,9 @@ int main() {
    check(segments(out),"generated Mach-O contains owned executable and data segments");
    NSString *identity=ZNP6RuleBinding(uuid.UUIDString,@"fixture-rule",0x1000,
       [NSData dataWithBytes:&patched length:4]);
-   check(bindingMatches(out,identity),"generated descriptor binds UUID, rule ID, RVA and Patch bytes");
+   check(bindingMatches(out,identity,featureName),"generated descriptor binds UUID, rule ID, RVA and Patch bytes");
    check(!bindingMatches(out,ZNP6RuleBinding(uuid.UUIDString,@"fixture-rule",0x1000,
-      [NSData dataWithBytes:&NOP length:4])),"changed Patch cannot reuse old static descriptor");
+      [NSData dataWithBytes:&NOP length:4]),featureName),"changed Patch cannot reuse old static descriptor");
    NSDictionary *signature=nil;
    BOOL signedOutput=ZNAdhocResignMachOAtPath(out,&signature,&err);
    if(!signedOutput)fprintf(stderr,"sign error: %s\n",err.UTF8String?:"none");
