@@ -37,6 +37,7 @@
  [self.body.bottomAnchor constraintEqualToAnchor:self.scroll.contentLayoutGuide.bottomAnchor constant:-20],
  [self.body.widthAnchor constraintEqualToAnchor:self.scroll.frameLayoutGuide.widthAnchor constant:-20]]];
  self.store=[ZNV3FeatureStore new];
+ self.selectedFeatureIDs=[NSMutableOrderedSet orderedSet];
  [self buildHookPage];
  if(@available(iOS 15.0,*)) self.scroll.keyboardDismissMode=UIScrollViewKeyboardDismissModeInteractive;
  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardChanged:) name:UIKeyboardWillChangeFrameNotification object:nil];
