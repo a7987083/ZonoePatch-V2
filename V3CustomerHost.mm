@@ -52,8 +52,9 @@
  self.controller.hostOrientationMask=mask;
  CGFloat width=MIN(220.0,MAX(160.0,CGRectGetWidth(sceneBounds)-24.0));
  NSUInteger count=[[ZNV3CustomerRuntime shared] discover].count;
- CGFloat contentHeight=110.0+64.0*MIN((NSUInteger)8,MAX((NSUInteger)1,count));
- CGFloat height=MIN(contentHeight,MAX(176.0,CGRectGetHeight(sceneBounds)-24.0));
+ // Compact reference layout: 42pt header, thin divider, 40pt per feature.
+ CGFloat contentHeight=58.0+40.0*MIN((NSUInteger)12,MAX((NSUInteger)1,count));
+ CGFloat height=MIN(contentHeight,MAX(98.0,CGRectGetHeight(sceneBounds)-24.0));
  CGPoint origin=creatingWindow
   ?CGPointMake(CGRectGetMidX(sceneBounds)-width/2.0,CGRectGetMidY(sceneBounds)-height/2.0)
   :self.window.frame.origin;
