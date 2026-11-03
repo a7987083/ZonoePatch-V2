@@ -78,14 +78,15 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
  uint64_t textVM=UINT64_MAX,dataVM=0,dataSize=0,codeVM=0,codeSize=0;
  uint64_t sectionVM=0,sectionSize=0;
  NSString *uuid=nil;
- NSUInteger pos=0,ownedCount=0,codeCount=0;
+ NSUInteger pos=0,ownedCount=0,codeCount=0,uuidCount=0;
+ BOOL commandsValid=YES;
  for(uint32_t i=0;i<mh.ncmds;i++){
-  if(pos>commands.size()||commands.size()-pos<sizeof(struct load_command))break;
+  if(pos>commands.size()||commands.size()-pos<sizeof(struct load_command)){commandsValid=NO;break;}
   struct load_command lc={};memcpy(&lc,commands.data()+pos,sizeof(lc));
-  if(lc.cmdsize<sizeof(lc)||lc.cmdsize>commands.size()-pos)break;
+  if(lc.cmdsize<sizeof(lc)||lc.cmdsize>commands.size()-pos){commandsValid=NO;break;}
   if(lc.cmd==LC_UUID&&lc.cmdsize>=sizeof(struct uuid_command)){
    struct uuid_command u={};memcpy(&u,commands.data()+pos,sizeof(u));
-   uuid=[[[NSUUID alloc]initWithUUIDBytes:u.uuid] UUIDString];
+   uuid=[[[NSUUID alloc]initWithUUIDBytes:u.uuid] UUIDString];uuidCount++;
   }
   if(lc.cmd==LC_SEGMENT_64&&lc.cmdsize>=sizeof(struct segment_command_64)){
    struct segment_command_64 seg={};memcpy(&seg,commands.data()+pos,sizeof(seg));
@@ -109,7 +110,7 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
   }
   pos+=lc.cmdsize;
  }
- if(!uuid.length||textVM==UINT64_MAX||ownedCount!=1||codeCount!=1||
+ if(!commandsValid||uuidCount!=1||!uuid.length||textVM==UINT64_MAX||ownedCount!=1||codeCount!=1||
     dataVM<textVM||codeVM<textVM||sectionVM<textVM||
     dataSize==0||codeSize==0||sectionSize<sizeof(ZN44StaticHeader)){
   if(error)*error=ZNSTError(23,@"没有找到唯一且完整的 P6 预埋描述符");return nil;
