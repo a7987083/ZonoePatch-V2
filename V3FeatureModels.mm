@@ -19,6 +19,7 @@
 @synthesize editingIndex=_editingIndex;
 - (NSError *)lastError {return _lastError;}
 - (BOOL)persistenceAvailable {return _persistenceAvailable;}
+- (NSUInteger)quarantinedFeatureCount {return _repository.quarantinedFeatureCount;}
 - (BOOL)persist {
  if(!_persistenceAvailable)return NO;
  NSError *err=nil;BOOL ok=[_repository saveFeatures:_features error:&err];_lastError=err;
