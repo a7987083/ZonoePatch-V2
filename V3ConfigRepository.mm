@@ -11,7 +11,7 @@ static NSError *ZNError(NSInteger code,NSString *description) {
 static BOOL ZNValidRule(NSString *offset, NSString *patch) {
  if(![offset isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class])return NO;
  if(!offset.length&&!patch.length)return YES;
- return [ZNV3AddressResolver validAddressText:offset] &&
+ return [ZNV3AddressResolver validAlignedCodeOffsetText:offset] &&
         [ZNV3PatchCodec isValidCodeText:patch];
 }
 @implementation ZNV3ConfigRepository
