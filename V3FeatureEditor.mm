@@ -46,7 +46,8 @@
  if(self.staticBuildRunning)return;
  [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
  self.nameField.text=@"";self.descField.text=@"";
- self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
+ self.typeIndex=ZNV3FeatureTypeToggle;
+ [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.view layoutIfNeeded];
@@ -63,7 +64,7 @@
  [self refreshModuleStatus];
  self.nameField.text=draft.name;self.descField.text=draft.detail;
  self.typeIndex=draft.buttonType;
- [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
+ [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.view endEditing:YES];[self.view layoutIfNeeded];
@@ -76,8 +77,8 @@
 }
 
 - (void)cycleType {
- self.typeIndex=(self.typeIndex+1)%3;
- [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
+ self.typeIndex=(self.typeIndex+1)%(ZNV3FeatureTypeSlider+1);
+ [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
  [self refreshStaticBuildButton];
 }
 - (void)refreshPatchActionButton {
