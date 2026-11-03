@@ -59,7 +59,10 @@
  NSArray<NSString *> *names=@[@"最小值",@"最大值",@"步长",@"默认值"];
  NSMutableArray<UITextField *> *fields=[NSMutableArray arrayWithCapacity:4];
  for(NSString *name in names){
-  [self.parameterFields addArrangedSubview:ZNLabel(name,12,YES)];
+  UILabel *nameLabel=ZNLabel(name,12,YES);
+  [self.parameterFields addArrangedSubview:nameLabel];
+  if([name isEqualToString:@"步长"])self.stepLabel=nameLabel;
+  if([name isEqualToString:@"默认值"])self.defaultLabel=nameLabel;
   UITextField *field=[self field:name value:@""];
   field.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
   [self.parameterFields addArrangedSubview:field];
