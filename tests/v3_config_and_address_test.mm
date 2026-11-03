@@ -25,6 +25,20 @@ int main(){
   rule.offsetText=@"0x39059D4";rule.patchText=@"0xFF";
   check(![repo saveFeatures:@[feature] error:&error],"reject unaligned byte length at save");
   rule.patchText=@"E9FF9F52";
+  // P10.1: type IDs 0/1/2 retain legacy meaning; 3 is Slider.
+  check(ZNV3FeatureTypeToggle==0 && ZNV3FeatureTypeAction==1 &&
+        ZNV3FeatureTypeNumberInput==2 && ZNV3FeatureTypeSlider==3,
+        "stable four-kind persisted type IDs");
+  for(NSInteger kind=ZNV3FeatureTypeToggle;kind<=ZNV3FeatureTypeSlider;kind++){
+   feature.buttonType=(ZNV3FeatureType)kind;
+   check([repo saveFeatures:@[feature] error:&error],"persist supported feature type");
+   NSArray<ZNV3Feature *> *roundtrip=[repo loadFeatures:&error];
+   check(roundtrip.count==1 && roundtrip[0].buttonType==kind,
+         "feature type survives v1 JSON reload");
+  }
+  feature.buttonType=(ZNV3FeatureType)4;
+  check(![repo saveFeatures:@[feature] error:&error],"reject unknown feature type");
+  feature.buttonType=ZNV3FeatureTypeToggle;
   check([repo saveFeatures:@[feature] error:&error],"valid pair persisted");
   NSArray<ZNV3Feature *> *loaded=[repo loadFeatures:&error];
   check(loaded.count==1,"persisted rules load");
