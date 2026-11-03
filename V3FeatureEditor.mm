@@ -4,6 +4,7 @@
 #import "V3PatchValidator.h"
 #import "V3PatchSession.h"
 #import "V3StaticBuildPlanner.h"
+#import "V3StaticBinaryExport.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -112,6 +113,36 @@
  [self showPatchMessage:@"静态生成预检通过（只读）" detail:
   [NSString stringWithFormat:@"目标：%@\nUUID：%@\n规则：%lu 组\n文件：%@\n\n本阶段仅验证构建输入，不生成或修改 Mach-O。",
    plan.module,plan.imageUUID,(unsigned long)plan.entries.count,plan.sourcePath]];
+}
+- (void)generateStaticBinary {
+ [self.view endEditing:YES];
+ if(self.staticBuildRunning)return;
+ NSUInteger index=self.store.editingIndex;
+ if(index==NSNotFound||index>=self.store.features.count||
+    ![self draftMatchesSavedPatch:self.store.features[index]]){
+  [self showPatchMessage:@"静态构建未执行" detail:@"请先保存规则，再重新进入编辑器。"];
+  return;
+ }
+ NSError *e=nil;
+ ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:self.store.features[index] error:&e];
+ if(!plan){[self showPatchMessage:@"静态构建预检失败" detail:e.localizedDescription?:@"目标 Mach-O 不匹配"];return;}
+ self.staticBuildRunning=YES;
+ self.staticBuildButton.enabled=NO;
+ [self.staticBuildButton setTitle:@"正在生成二进制…" forState:UIControlStateNormal];
+ __weak ZNV3MenuController *weakSelf=self;
+ dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0), ^{
+  NSError *buildError=nil;
+  NSString *out=[ZNV3StaticBinaryExport generate:plan error:&buildError];
+  NSString *detail=out?[NSString stringWithFormat:@"文件：%@\n\\n已重建 ad-hoc CodeDirectory。替换到 IPA 后仍须完成整包重签。预埋 Patch 默认 OFF；V3 静态 ON/OFF 控制器尚未接入。",out]:
+     (buildError.localizedDescription?:@"无法生成 Mach-O");
+  dispatch_async(dispatch_get_main_queue(), ^{
+   ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
+   strongSelf.staticBuildRunning=NO;
+   strongSelf.staticBuildButton.enabled=YES;
+   [strongSelf.staticBuildButton setTitle:@"生成预埋二进制（初始 OFF）" forState:UIControlStateNormal];
+   [strongSelf showPatchMessage:out?@"已生成完整 Mach-O":@"静态生成失败" detail:detail];
+  });
+ });
 }
 - (void)applyOrRestore {
  [self.view endEditing:YES];
