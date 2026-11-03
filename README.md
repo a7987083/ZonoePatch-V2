@@ -26,6 +26,17 @@ Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`
 
 The successful CI does **not** prove the installed target game loads, runs its OFF path correctly or can switch ON/OFF under live execution. See `KNOWN_ISSUES.md`.
 
+## Customer Menu (P7)
+
+The same branch builds two independent dylibs:
+
+- `ZonoePatchV3.dylib` — developer UI, persisted rule editor, static binary generator and runtime diagnostics.
+- `ZonoePatchCustomer.dylib` — minimal customer UI. Auto-discovers P6-C static-dispatch descriptors from already loaded signed Mach-O images, displays embedded feature names, and toggles RW `selectedTarget` slots. It does **not** link the builder, `features-v1.json`, patch editor, or RX bytes writer.
+
+For customer deployment, generate a **fresh** prepared Mach-O with the latest developer dylib, replace the app's corresponding binary, sign the complete package, and inject **only** the customer dylib. Do not load both menu dylibs simultaneously. See `P7_CUSTOMER_RUNTIME.md`.
+
+Customer runtime discovery and actual ON/OFF on a jailbroken iPhone remain **unverified**. CI only establishes compile, synthetic output, signer and fault-injection tests.
+
 ## Build
 
 Push to `ZonoePatch-V3` or dispatch `.github/workflows/v3-build.yml`. The workflow pins Theos and Xcode/SDK versions.
