@@ -40,8 +40,10 @@
  [stack addArrangedSubview:ZNLabel(@"新增功能",15,YES)];
  [stack addArrangedSubview:ZNLabel(@"功能名字",12,YES)];
  self.nameField=[self field:@"功能名字" value:@""];[stack addArrangedSubview:self.nameField];
+ [self.nameField addTarget:self action:@selector(staticBuildInputChanged:) forControlEvents:UIControlEventEditingChanged];
  [stack addArrangedSubview:ZNLabel(@"功能说明",12,YES)];
  self.descField=[self field:@"功能说明" value:@""];[stack addArrangedSubview:self.descField];
+ [self.descField addTarget:self action:@selector(staticBuildInputChanged:) forControlEvents:UIControlEventEditingChanged];
  [stack addArrangedSubview:ZNLabel(@"Offset / Patch 规则（支持多组）",12,YES)];
  self.rules=[UIStackView new];self.rules.axis=UILayoutConstraintAxisVertical;self.rules.spacing=7;[stack addArrangedSubview:self.rules];
  UIButton *addRule=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));[stack addArrangedSubview:addRule];[addRule.heightAnchor constraintEqualToConstant:36].active=YES;
@@ -178,6 +180,7 @@
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
  [self refreshModuleStatus];
+ [self refreshStaticBuildButton];
  if(self.store.draft)self.store.draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
 }
 - (void)categoryTap:(UIButton *)b {
