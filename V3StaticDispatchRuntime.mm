@@ -62,10 +62,6 @@ static BOOL ZNSTRegion(uintptr_t address,size_t size,vm_prot_t required) {
 @end
 @implementation ZNSTEntry @end
 
-static NSString *ZNSTFixed(const char *s,size_t count){
- size_t len=strnlen(s,count);
- return len?[[NSString alloc]initWithBytes:s length:len encoding:NSUTF8StringEncoding]:@"";
-}
 // Refuse unknown/unprepared images. Only a single owned __ZNDATA descriptor table is accepted.
 static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
  ZNV3ModuleInfo *image=[ZNV3ModuleResolver resolveModule:feature.module];
