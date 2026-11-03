@@ -12,8 +12,8 @@
 @property(nonatomic,strong) UIButton *typeButton;
 @property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIButton *staticBuildButton;
-@property(nonatomic,strong) UIButton *staticToggleButton;
 @property(nonatomic,assign) BOOL staticBuildRunning;
+@property(nonatomic,copy) NSString *selectedFeatureID;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
 @property(nonatomic,assign) NSInteger ruleCount;
@@ -26,6 +26,9 @@
 - (void)add:(UIView *)view height:(CGFloat)height;
 - (UITextField *)field:(NSString *)hint value:(NSString *)value;
 - (void)renderFeatures;
+- (void)selectFeature:(UIButton *)sender;
+- (void)toggleFeaturePatch:(UIButton *)sender;
+- (void)refreshStaticBuildButton;
 - (void)refreshModuleStatus;
 - (void)categoryTap:(UIButton *)sender;
 - (void)closeTap;
@@ -39,10 +42,7 @@
 - (void)removeRule:(UIButton *)sender;
 - (void)cycleType;
 - (void)applyOrRestore;
-- (void)staticBuildPreflight;
 - (void)generateStaticBinary;
-- (void)toggleStaticPatch;
-- (void)refreshStaticPatchButton;
 - (void)refreshPatchActionButton;
 - (void)saveUI;
 @end
