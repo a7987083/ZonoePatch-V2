@@ -150,7 +150,12 @@
   return;
  }
  NSError *error=nil;
- ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:selected error:&error];
+ NSMutableArray<ZNV3Feature *> *selectedFeatures=[NSMutableArray array];
+ for(ZNV3Feature *feature in self.store.features){
+  if([self.selectedFeatureIDs containsObject:feature.identifier])[selectedFeatures addObject:feature];
+ }
+ if(!selectedFeatures.count)[selectedFeatures addObject:selected];
+ ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeatures:selectedFeatures error:&error];
  if(!plan){
   [self showPatchMessage:@"静态构建预检失败"
     detail:error.localizedDescription?:@"目标 Mach-O 校验失败"];
