@@ -10,6 +10,7 @@
 @property(nonatomic,strong) UIButton *moduleButton;
 @property(nonatomic,strong) UILabel *moduleStatus;
 @property(nonatomic,strong) UIButton *typeButton;
+@property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
 @property(nonatomic,assign) NSInteger ruleCount;
@@ -34,6 +35,7 @@
 - (void)addRuleTap;
 - (void)removeRule:(UIButton *)sender;
 - (void)cycleType;
-- (void)preview;
+- (void)applyOrRestore;
+- (void)refreshPatchActionButton;
 - (void)saveUI;
 @end
