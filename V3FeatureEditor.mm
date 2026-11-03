@@ -110,7 +110,7 @@
   return;
  }
  [self showPatchMessage:@"静态生成预检通过（只读）" detail:
-  [NSString stringWithFormat:@"目标：%@\\nUUID：%@\\n规则：%lu 组\\n文件：%@\\n\\n本阶段仅验证构建输入，不生成或修改 Mach-O。",
+  [NSString stringWithFormat:@"目标：%@\nUUID：%@\n规则：%lu 组\n文件：%@\n\n本阶段仅验证构建输入，不生成或修改 Mach-O。",
    plan.module,plan.imageUUID,(unsigned long)plan.entries.count,plan.sourcePath]];
 }
 - (void)applyOrRestore {
