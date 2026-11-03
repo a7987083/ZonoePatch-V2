@@ -72,6 +72,12 @@
 - (void)editFeature:(UIButton *)sender { [self editFeatureAtIndex:(NSUInteger)sender.tag]; }
 - (void)removeFeature:(UIButton *)sender {
  if((NSUInteger)sender.tag>=self.store.features.count)return;
+ if([ZNV3PatchSession shared].status==ZNV3PatchTransactionStatusRecoveryFailed){
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"执行器故障锁定"
+   message:[ZNV3PatchSession shared].lastDiagnostic preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
  ZNV3Feature *target=self.store.features[(NSUInteger)sender.tag];
  if([[ZNV3PatchSession shared] isActiveFeature:target.identifier]){
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"功能正在应用 Patch"
