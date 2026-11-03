@@ -69,6 +69,28 @@ int main(){
   check(![repo saveFeatures:@[feature] error:&error],"reject fractional Int32 parameters");
   feature.valueConfig=[ZNV3ValueConfig defaults];
   check([repo saveFeatures:@[feature] error:&error],"restore valid slider parameter defaults");
+  // NumberInput has only typed min/max; no step/default/enable-gate in persisted JSON.
+  feature.buttonType=ZNV3FeatureTypeNumberInput;
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  feature.valueConfig.minimum=10;feature.valueConfig.maximum=20;
+  feature.valueConfig.defaultValue=0;feature.valueConfig.step=0;
+  check([repo saveFeatures:@[feature] error:&error],
+        "input accepts range independent of hidden default/step");
+  NSDictionary *inputDoc=[NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithContentsOfURL:[repo fileURL:&error]] options:0 error:&error];
+  NSDictionary *inputParameters=inputDoc[@"features"][0][@"parameters"];
+  check(inputParameters.count==3&&inputParameters[@"valueType"]&&
+        inputParameters[@"minimum"]&&inputParameters[@"maximum"]&&
+        !inputParameters[@"step"]&&!inputParameters[@"defaultValue"]&&
+        !inputParameters[@"requiresEnableSwitch"],
+        "input serializes exactly type/min/max");
+  NSArray<ZNV3Feature *> *inputLoaded=[repo loadFeatures:&error];
+  check(inputLoaded.count==1&&inputLoaded[0].valueConfig.minimum==10&&
+        inputLoaded[0].valueConfig.maximum==20,
+        "minimal input parameters roundtrip");
+  feature.valueConfig.minimum=21;
+  check(![repo saveFeatures:@[feature] error:&error],"input rejects inverted range");
+  feature.valueConfig=[ZNV3ValueConfig defaults];
   feature.buttonType=(ZNV3FeatureType)4;
   check(![repo saveFeatures:@[feature] error:&error],"reject unknown feature type");
   feature.buttonType=ZNV3FeatureTypeToggle;
