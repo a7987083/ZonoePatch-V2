@@ -29,7 +29,8 @@
  if(self.window&&!self.window.hidden){[self hide];return;}
  if(!host)return;
  if(self.window && self.window.windowScene!=host.windowScene){[self hide];self.window.rootViewController=nil;self.window=nil;self.controller=nil;}
- if(!self.window){
+ BOOL creatingWindow=(self.window==nil);
+ if(creatingWindow){
     UIWindow *w;
     if(@available(iOS 13.0,*))w=[[UIWindow alloc] initWithWindowScene:host.windowScene];
     else w=[[UIWindow alloc] initWithFrame:host.bounds];
@@ -42,12 +43,18 @@
  }
  CGRect sceneBounds=host.bounds;
  if(@available(iOS 13.0,*))sceneBounds=host.windowScene.coordinateSpace.bounds;
- CGFloat width=MIN(350.0,MAX(250.0,CGRectGetWidth(sceneBounds)-24.0));
+ CGFloat width=MIN(280.0,MAX(180.0,CGRectGetWidth(sceneBounds)-24.0));
  NSUInteger count=[[ZNV3CustomerRuntime shared] discover].count;
  CGFloat contentHeight=145.0+64.0*MIN((NSUInteger)8,MAX((NSUInteger)1,count));
  CGFloat height=MIN(contentHeight,MAX(230.0,CGRectGetHeight(sceneBounds)-44.0));
- self.window.frame=CGRectMake(CGRectGetMidX(sceneBounds)-width/2.0,
-                              CGRectGetMidY(sceneBounds)-height/2.0,width,height);
+ CGPoint origin=creatingWindow
+  ?CGPointMake(CGRectGetMidX(sceneBounds)-width/2.0,CGRectGetMidY(sceneBounds)-height/2.0)
+  :self.window.frame.origin;
+ CGFloat minX=CGRectGetMinX(sceneBounds)+8;
+ CGFloat minY=CGRectGetMinY(sceneBounds)+8;
+ origin.x=MAX(minX,MIN(origin.x,MAX(minX,CGRectGetMaxX(sceneBounds)-width-8)));
+ origin.y=MAX(minY,MIN(origin.y,MAX(minY,CGRectGetMaxY(sceneBounds)-height-8)));
+ self.window.frame=CGRectMake(origin.x,origin.y,width,height);
  self.window.hidden=NO;
  [self.controller refreshFeatures];
 }
