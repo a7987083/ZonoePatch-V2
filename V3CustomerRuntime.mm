@@ -149,7 +149,7 @@ static ZNV3CustomerFeature *ZNCCatalogImage(uint32_t imageIndex){
     !ZN55ValidateProtectedHeader(&header,entries.data()))return nil;
  NSMutableArray<ZNCCell *> *cells=[NSMutableArray arrayWithCapacity:header.count];
  NSUInteger active=0;
- NSString *title=ZNCString(entries[0].group,sizeof(entries[0].group));
+ NSString *title=ZNCString(entries[0].title,sizeof(entries[0].title));
  for(uint32_t i=0;i<header.count;i++){
   const ZN44StaticEntry &entry=entries[i];
   if(entry.patchID!=i+1||entry.canonicalIndex!=i||entry.physicalID!=i+1||
@@ -163,7 +163,7 @@ static ZNV3CustomerFeature *ZNCCatalogImage(uint32_t imageIndex){
    unichar c=[marker characterAtIndex:j];
    if(!((c>='0'&&c<='9')||(c>='A'&&c<='F')))return nil;
   }
-  if(![ZNCString(entry.group,sizeof(entry.group)) isEqualToString:title])return nil;
+  if(![ZNCString(entry.title,sizeof(entry.title)) isEqualToString:title])return nil;
   ZN55DecodedRVAs rvas={};
   if(!ZN55DecodeEntryRVAs(&header,&entry,i,&rvas)||
      rvas.onRVA>UINTPTR_MAX-mappedHeader||rvas.offRVA>UINTPTR_MAX-mappedHeader)return nil;
