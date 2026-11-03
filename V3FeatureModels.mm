@@ -6,31 +6,37 @@
 @implementation ZNV3ValueConfig
 + (instancetype)defaults {ZNV3ValueConfig *v=[self new];v.valueType=ZNV3NumericTypeInt32;v.minimum=0;v.maximum=100;v.step=1;v.defaultValue=0;v.requiresEnableSwitch=YES;return v;}
 - (id)copyWithZone:(NSZone *)zone {ZNV3ValueConfig *v=[[[self class] allocWithZone:zone]init];v.valueType=self.valueType;v.minimum=self.minimum;v.maximum=self.maximum;v.step=self.step;v.defaultValue=self.defaultValue;v.requiresEnableSwitch=self.requiresEnableSwitch;return v;}
-- (BOOL)isValidForFeatureType:(ZNV3FeatureType)featureType {
- if(featureType==ZNV3FeatureTypeSlider)return [self isValid];
- if(featureType!=ZNV3FeatureTypeNumberInput)return NO;
- if(self.valueType!=ZNV3NumericTypeInt32&&self.valueType!=ZNV3NumericTypeFloat32)return NO;
- if(!isfinite(self.minimum)||!isfinite(self.maximum)||self.minimum>=self.maximum)return NO;
- if(self.valueType==ZNV3NumericTypeInt32)
-  return self.minimum>=INT32_MIN&&self.maximum<=INT32_MAX&&
-         trunc(self.minimum)==self.minimum&&trunc(self.maximum)==self.maximum;
- return fabs(self.minimum)<=FLT_MAX&&fabs(self.maximum)<=FLT_MAX;
-}
-- (BOOL)isValid {
- if(self.valueType!=ZNV3NumericTypeInt32&&self.valueType!=ZNV3NumericTypeFloat32)return NO;
- if(!isfinite(self.minimum)||!isfinite(self.maximum)||!isfinite(self.step)||!isfinite(self.defaultValue)||
-    self.minimum>=self.maximum||self.step<=0||self.defaultValue<self.minimum||self.defaultValue>self.maximum||
-    !self.requiresEnableSwitch)return NO;
- if(self.valueType==ZNV3NumericTypeInt32){
-  for(NSNumber *number in @[@(self.minimum),@(self.maximum),@(self.step),@(self.defaultValue)]){
-   double v=number.doubleValue;
-   if(v<INT32_MIN||v>INT32_MAX||trunc(v)!=v)return NO;
-  }
- }else{
-  if(fabs(self.minimum)>FLT_MAX||fabs(self.maximum)>FLT_MAX||fabs(self.defaultValue)>FLT_MAX||self.step>FLT_MAX)return NO;
+// Current UI range model is double-based. Constrain 64-bit integer ranges to
+// exact IEEE-754 integers until a decimal-string codec is wired into P10.3.
+static BOOL ZNValidScalar(double value,ZNV3NumericType type) {
+ if(!isfinite(value)||!ZNV3NumericTypeIsValid(type))return NO;
+ if(type==ZNV3NumericTypeFloat32)return fabs(value)<=FLT_MAX;
+ if(type==ZNV3NumericTypeFloat64)return YES;
+ if(trunc(value)!=value)return NO;
+ switch(type){
+  case ZNV3NumericTypeInt8:return value>=INT8_MIN&&value<=INT8_MAX;
+  case ZNV3NumericTypeUInt8:return value>=0&&value<=UINT8_MAX;
+  case ZNV3NumericTypeInt16:return value>=INT16_MIN&&value<=INT16_MAX;
+  case ZNV3NumericTypeUInt16:return value>=0&&value<=UINT16_MAX;
+  case ZNV3NumericTypeInt32:return value>=INT32_MIN&&value<=INT32_MAX;
+  case ZNV3NumericTypeUInt32:return value>=0&&value<=UINT32_MAX;
+  case ZNV3NumericTypeInt64:return value>=-9007199254740991.0&&value<=9007199254740991.0;
+  case ZNV3NumericTypeUInt64:return value>=0&&value<=9007199254740991.0;
+  default:return NO;
  }
+}
+- (BOOL)isValidForFeatureType:(ZNV3FeatureType)featureType {
+ if(featureType!=ZNV3FeatureTypeSlider&&featureType!=ZNV3FeatureTypeNumberInput)return NO;
+ if(!ZNValidScalar(self.minimum,self.valueType)||!ZNValidScalar(self.maximum,self.valueType)||
+    self.minimum>=self.maximum)return NO;
+ if(featureType==ZNV3FeatureTypeNumberInput)return YES;
+ if(!ZNValidScalar(self.step,self.valueType)||!ZNValidScalar(self.defaultValue,self.valueType)||
+    self.step<=0||self.defaultValue<self.minimum||self.defaultValue>self.maximum||
+    !self.requiresEnableSwitch)return NO;
  return YES;
 }
+- (BOOL)isValid {return [self isValidForFeatureType:ZNV3FeatureTypeSlider];}
+
 @end
 
 @implementation ZNV3PatchRule
