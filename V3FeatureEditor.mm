@@ -47,8 +47,10 @@
 - (void)editFeatureAtIndex:(NSUInteger)index {
  [self.store editFeatureAtIndex:index];
  ZNV3Feature *draft=self.store.draft;if(!draft)return;
- // Top-level module picker is the single source for editing and preview.
- draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
+ // Restore the persisted target when opening an existing feature; only an explicit module switch may change it.
+ self.moduleIndex=[draft.module isEqualToString:@"UnityFramework"]?1:0;
+ [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
+ [self refreshModuleStatus];
  self.nameField.text=draft.name;self.descField.text=draft.detail;
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
