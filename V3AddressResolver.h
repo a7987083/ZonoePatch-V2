@@ -9,9 +9,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,assign,readonly) uint64_t runtimeVA;
 @property(nonatomic,assign,readonly) uint64_t fileOffset;
 @property(nonatomic,assign,readonly) BOOL fileBacked;
+@property(nonatomic,assign,readonly) uint64_t segmentVMAddress;
+@property(nonatomic,assign,readonly) uint64_t segmentFileOffset;
+@property(nonatomic,assign,readonly) uint64_t segmentFileSize;
+@property(nonatomic,assign,readonly) uint32_t segmentInitialProtection;
+@property(nonatomic,copy,readonly) NSString *imageUUID;
 - (instancetype)initWithKind:(NSString *)kind segment:(NSString *)segment path:(NSString *)path
  rva:(uint64_t)rva preferred:(uint64_t)preferred runtime:(uint64_t)runtime
- fileOffset:(uint64_t)fileOffset fileBacked:(BOOL)fileBacked;
+ fileOffset:(uint64_t)fileOffset fileBacked:(BOOL)fileBacked
+ segmentVMAddress:(uint64_t)segmentVMAddress segmentFileOffset:(uint64_t)segmentFileOffset
+ segmentFileSize:(uint64_t)segmentFileSize protection:(uint32_t)protection uuid:(NSString *)uuid;
 @end
 @interface ZNV3AddressResolver : NSObject
 + (nullable ZNV3ResolvedAddress *)resolve:(NSString *)text module:(NSString *)module
