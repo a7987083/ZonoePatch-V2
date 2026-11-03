@@ -21,6 +21,9 @@
  self.moduleButton=ZNButton(@"主程序  ▾",self,@selector(cycleModule));[self add:self.moduleButton height:38];
  self.moduleStatus=ZNLabel(@"正在识别模块…",11,NO);[self add:self.moduleStatus height:38];
  [self refreshModuleStatus];
+ if(self.store.quarantinedFeatureCount){
+  [self add:ZNLabel([NSString stringWithFormat:@"⚠️ %lu 个旧版功能格式不兼容：已原样保留在 JSON 中，未启用或覆盖。",(unsigned long)self.store.quarantinedFeatureCount],11,NO) height:38];
+ }
  [self add:ZNLabel(@"当前功能（演示）",14,YES) height:24];
  self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=6;[self add:self.features height:0];
  [self renderFeatures];
