@@ -23,6 +23,13 @@
 - No screenshot-based UI layout simulation or real-device rotation can be claimed from these tests.
 - P8 **device acceptance remains open** until the developer version is launched on a real target: test 320/375/430+ widths, keyboard appearance, orientation, app background/foreground, Scene transitions, row selection, save/cancel, Runtime ON/OFF, rejected concurrent build, and exported file compatibility with existing P7 customer runtime.
 
+## P8 follow-up audit — feature index shift regression
+
+- Found: deleting a feature preceding an open draft left `editingIndex` stale. A later save could replace the wrong feature or append a duplicate.
+- Fixed in `V3FeatureModels.mm`: decrement the edit index only after successful deletion persistence; rollback leaves it unchanged.
+- Added a regression to `tests/v3_config_and_address_test.mm` that edits feature B, deletes A, then saves and asserts B identity and name.
+- CI and device validation are required before marking the fix verified.
+
 ## Deferred technical debt (not silently addressed)
 
 - `Tweak.mm` is shared by Developer and Customer. It installs a 0.5-second polling `NSTimer` for floating-icon reattachment; the icon callback strongly captures the singleton host. Changing it risks the known-good customer path, so it is deferred to an independently verified shared-runtime change.
