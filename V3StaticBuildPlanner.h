@@ -17,10 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZNV3StaticBuildPlan : NSObject
 @property(nonatomic,copy,readonly) NSString *module;
+@property(nonatomic,copy,readonly) NSString *featureName;
 @property(nonatomic,copy,readonly) NSString *imageUUID;
 @property(nonatomic,copy,readonly) NSString *sourcePath;
 @property(nonatomic,copy,readonly) NSArray<ZNV3StaticBuildEntry *> *entries;
 - (instancetype)initWithModule:(NSString *)module entries:(NSArray<ZNV3StaticBuildEntry *> *)entries;
+- (instancetype)initWithModule:(NSString *)module name:(NSString *)name entries:(NSArray<ZNV3StaticBuildEntry *> *)entries;
 /// Enforces a single binary identity and disjoint file/instruction spans.
 + (BOOL)validateEntries:(NSArray<ZNV3StaticBuildEntry *> *)entries error:(NSError * _Nullable * _Nullable)error;
 /// Only for diagnostics/forward-compatible build input; not a patched binary.
