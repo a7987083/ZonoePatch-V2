@@ -32,21 +32,22 @@
  if(index>=self.store.draft.rules.count)return;
  ZNV3PatchRule *r=self.store.draft.rules[index];
  if(field.tag>=2000)r.patchText=field.text?:@"";else r.offsetText=field.text?:@"";
+ [self refreshStaticBuildButton];
 }
 - (void)addRuleTap {
  if(!self.store.draft)return;
  [self.store.draft.rules addObject:[ZNV3PatchRule emptyRule]];
- [self renderRules];
+ [self renderRules];[self refreshStaticBuildButton];
 }
 - (void)removeRule:(UIButton *)sender {
- [self.store deleteRuleAtIndex:(NSUInteger)sender.tag];[self renderRules];
+ [self.store deleteRuleAtIndex:(NSUInteger)sender.tag];[self renderRules];[self refreshStaticBuildButton];
 }
 - (void)showEditor {
  [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
- [self refreshPatchActionButton];[self refreshStaticPatchButton];
+ [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
@@ -60,12 +61,13 @@
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
- [self refreshPatchActionButton];[self refreshStaticPatchButton];
+ [self refreshPatchActionButton];[self refreshStaticBuildButton];
  [self.view endEditing:YES];[self.scroll layoutIfNeeded];
  [self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
 - (void)hideEditor {
  [self.view endEditing:YES];self.editor.hidden=YES;[self.store cancelDraft];
+ [self refreshStaticBuildButton];
 }
 
 - (void)cycleType {
@@ -98,81 +100,70 @@
  }
  return YES;
 }
-- (void)refreshStaticPatchButton {
- ZNV3StaticDispatchRuntime *runtime=[ZNV3StaticDispatchRuntime shared];
- BOOL active=self.store.draft&&[runtime isEnabledForFeature:self.store.draft.identifier];
- BOOL locked=runtime.recoveryFailed;
- [self.staticToggleButton setTitle:locked?@"静态事务故障锁定":
-  (active?@"关闭预埋静态 Patch":@"启用预埋静态 Patch") forState:UIControlStateNormal];
- self.staticToggleButton.enabled=!locked;
+- (void)refreshStaticBuildButton {
+ BOOL ready=self.selectedFeatureID.length>0 && !self.staticBuildRunning;
+ ZNV3Feature *selected=nil;
+ for(ZNV3Feature *feature in self.store.features)
+  if([feature.identifier isEqualToString:self.selectedFeatureID]){selected=feature;break;}
+ ready=ready&&selected!=nil;
+ if(ready && self.store.draft){
+  NSUInteger idx=self.store.editingIndex;
+  ready=idx!=NSNotFound && idx<self.store.features.count &&
+    [self.store.features[idx].identifier isEqualToString:self.selectedFeatureID] &&
+    [self draftMatchesSavedPatch:selected] &&
+    [self.nameField.text isEqualToString:selected.name] &&
+    [self.descField.text isEqualToString:selected.detail] &&
+    self.typeIndex==selected.buttonType;
+ }
+ if(ready && [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled)ready=NO;
+ if(ready && [ZNV3StaticDispatchRuntime shared].hasActiveFeature)ready=NO;
+ if(ready && [ZNV3StaticDispatchRuntime shared].recoveryFailed)ready=NO;
+ self.staticBuildButton.enabled=ready;
+ self.staticBuildButton.alpha=ready?1.0:0.48;
+ [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":@"生成预埋二进制（初始 OFF）"
+   forState:UIControlStateNormal];
 }
-- (void)toggleStaticPatch {
- [self.view endEditing:YES];
- NSUInteger index=self.store.editingIndex;
- if(index==NSNotFound||index>=self.store.features.count){
-  [self showPatchMessage:@"静态 Patch 未执行" detail:@"请先保存功能，再进入编辑器。"];return;
- }
- ZNV3Feature *saved=self.store.features[index];
- ZNV3StaticDispatchRuntime *runtime=[ZNV3StaticDispatchRuntime shared];
- BOOL active=[runtime isEnabledForFeature:saved.identifier];
- if(!active && ![self draftMatchesSavedPatch:saved]){
-  [self showPatchMessage:@"规则已修改" detail:@"请先保存规则并重新生成预埋二进制，不能将新规则应用于旧二进制。"];return;
- }
- if(!active && [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled){
-  [self showPatchMessage:@"运行时 Patch 已启用" detail:@"先恢复越狱 Runtime Bytes Patch，再切换静态预埋 Patch。"];return;
- }
- NSError *error=nil;
- BOOL ok=[runtime setEnabled:!active forFeature:saved error:&error];
- [self refreshStaticPatchButton];
- [self showPatchMessage:ok?(!active?@"预埋静态 Patch 已启用":@"预埋静态 Patch 已关闭"):@"预埋静态 Patch 操作失败"
-  detail:ok?@"已切换可写 selectedTarget Slot 并验证读回；不修改 RX 代码页。":
-   (error.localizedDescription?:runtime.lastDiagnostic)];
-}
-- (void)staticBuildPreflight {
- [self.view endEditing:YES];
- ZNV3Feature *draft=self.store.draft;
- NSUInteger index=self.store.editingIndex;
- if(!draft || index==NSNotFound || index>=self.store.features.count ||
-    ![self draftMatchesSavedPatch:self.store.features[index]]) {
-  [self showPatchMessage:@"静态预检未执行" detail:@"请先保存当前规则，然后重新进入编辑器。"];return;
- }
- NSError *error=nil;
- ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:self.store.features[index] error:&error];
- if(!plan){
-  [self showPatchMessage:@"静态预检失败" detail:error.localizedDescription?:@"无法验证静态构建输入"];
-  return;
- }
- [self showPatchMessage:@"静态生成预检通过（只读）" detail:
-  [NSString stringWithFormat:@"目标：%@\nUUID：%@\n规则：%lu 组\n文件：%@\n\n本阶段仅验证构建输入，不生成或修改 Mach-O。",
-   plan.module,plan.imageUUID,(unsigned long)plan.entries.count,plan.sourcePath]];
+- (void)staticBuildInputChanged:(UITextField *)sender {
+ (void)sender;
+ [self refreshStaticBuildButton];
 }
 - (void)generateStaticBinary {
  [self.view endEditing:YES];
  if(self.staticBuildRunning)return;
- NSUInteger index=self.store.editingIndex;
- if(index==NSNotFound||index>=self.store.features.count||
-    ![self draftMatchesSavedPatch:self.store.features[index]]){
-  [self showPatchMessage:@"静态构建未执行" detail:@"请先保存规则，再重新进入编辑器。"];
+ ZNV3Feature *selected=nil;
+ for(ZNV3Feature *feature in self.store.features)
+  if([feature.identifier isEqualToString:self.selectedFeatureID]){selected=feature;break;}
+ if(!selected){
+  [self showPatchMessage:@"未选择功能" detail:@"请先点选当前功能列表中的圆点。"];
+  [self refreshStaticBuildButton];return;
+ }
+ [self refreshStaticBuildButton];
+ if(!self.staticBuildButton.enabled){
+  [self showPatchMessage:@"静态构建未执行"
+    detail:@"请先保存或取消编辑，并确认已恢复当前 Runtime Patch。"];
   return;
  }
- NSError *e=nil;
- ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:self.store.features[index] error:&e];
- if(!plan){[self showPatchMessage:@"静态构建预检失败" detail:e.localizedDescription?:@"目标 Mach-O 不匹配"];return;}
+ NSError *error=nil;
+ ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeature:selected error:&error];
+ if(!plan){
+  [self showPatchMessage:@"静态构建预检失败"
+    detail:error.localizedDescription?:@"目标 Mach-O 校验失败"];
+  return;
+ }
  self.staticBuildRunning=YES;
- self.staticBuildButton.enabled=NO;
- [self.staticBuildButton setTitle:@"正在生成二进制…" forState:UIControlStateNormal];
+ [self refreshStaticBuildButton];
  __weak ZNV3MenuController *weakSelf=self;
- dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0), ^{
+ dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{
   NSError *buildError=nil;
-  NSString *out=[ZNV3StaticBinaryExport generate:plan error:&buildError];
-  NSString *detail=out?[NSString stringWithFormat:@"文件：%@\n\\n已重建 ad-hoc CodeDirectory。替换到 IPA 后仍须完成整包重签。预埋 Patch 默认 OFF；V3 静态 ON/OFF 控制器尚未接入。",out]:
-     (buildError.localizedDescription?:@"无法生成 Mach-O");
-  dispatch_async(dispatch_get_main_queue(), ^{
+  NSString *output=[ZNV3StaticBinaryExport generate:plan error:&buildError];
+  NSString *detail=output?[NSString stringWithFormat:
+    @"文件：%@\\n\\n已重建 ad-hoc CodeDirectory。请替换至 IPA 并完成整包重签。预埋 Patch 初始 OFF，交由用户版菜单控制。",
+    output]:(buildError.localizedDescription?:@"无法生成 Mach-O");
+  dispatch_async(dispatch_get_main_queue(),^{
    ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
    strongSelf.staticBuildRunning=NO;
-   strongSelf.staticBuildButton.enabled=YES;
-   [strongSelf.staticBuildButton setTitle:@"生成预埋二进制（初始 OFF）" forState:UIControlStateNormal];
-   [strongSelf showPatchMessage:out?@"已生成完整 Mach-O":@"静态生成失败" detail:detail];
+   [strongSelf refreshStaticBuildButton];
+   [strongSelf showPatchMessage:output?@"已生成完整 Mach-O":@"静态生成失败" detail:detail];
   });
  });
 }
@@ -233,6 +224,6 @@
   [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
   [self presentViewController:alert animated:YES completion:nil];return;
  }
- [self renderFeatures];[self hideEditor];
+ [self hideEditor];[self renderFeatures];
 }
 @end
