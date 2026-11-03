@@ -74,7 +74,12 @@ jobs:
           make FINALPACKAGE=1 2>&1 | tee build.log
           mkdir -p dist
           cp .theos/obj/ZonoePatchV3.dylib dist/ZonoePatch-V3-arm64.dylib
+          cp .theos/obj/ZonoePatchCustomer.dylib dist/ZonoePatch-Customer-arm64.dylib
           ldid -S dist/ZonoePatch-V3-arm64.dylib
+          ldid -S dist/ZonoePatch-Customer-arm64.dylib
+          ldid -h dist/ZonoePatch-Customer-arm64.dylib
+          file dist/ZonoePatch-Customer-arm64.dylib
+          xcrun lipo -info dist/ZonoePatch-Customer-arm64.dylib
           ldid -h dist/ZonoePatch-V3-arm64.dylib
           file dist/ZonoePatch-V3-arm64.dylib
           shasum -a 256 dist/ZonoePatch-V3-arm64.dylib > dist/SHA256.txt
