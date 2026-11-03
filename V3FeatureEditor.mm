@@ -88,6 +88,11 @@
  BOOL numeric=self.typeIndex==ZNV3FeatureTypeNumberInput||
               self.typeIndex==ZNV3FeatureTypeSlider;
  self.parameterFields.hidden=!numeric;
+ BOOL slider=self.typeIndex==ZNV3FeatureTypeSlider;
+ self.stepLabel.hidden=!slider;
+ self.stepField.hidden=!slider;
+ self.defaultLabel.hidden=!slider;
+ self.defaultField.hidden=!slider;
  if(!numeric||!self.store.draft)return;
  ZNV3ValueConfig *v=self.store.draft.valueConfig?:[ZNV3ValueConfig defaults];
  [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
@@ -106,9 +111,12 @@
 }
 - (BOOL)validateAndStoreNumericFields {
  if(self.typeIndex!=ZNV3FeatureTypeNumberInput&&self.typeIndex!=ZNV3FeatureTypeSlider)return YES;
- NSArray<UITextField *> *fields=@[self.minimumField,self.maximumField,self.stepField,self.defaultField];
+ BOOL slider=self.typeIndex==ZNV3FeatureTypeSlider;
+ NSArray<UITextField *> *fields=slider?
+   @[self.minimumField,self.maximumField,self.stepField,self.defaultField]:
+   @[self.minimumField,self.maximumField];
  double values[4]={};
- for(NSUInteger i=0;i<4;i++){
+ for(NSUInteger i=0;i<fields.count;i++){
   NSString *text=fields[i].text?:@"";
   NSScanner *scanner=[NSScanner scannerWithString:text];
   scanner.locale=[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
@@ -117,9 +125,10 @@
   }
  }
  ZNV3ValueConfig *v=[self.store.draft.valueConfig copy]?:[ZNV3ValueConfig defaults];
- v.minimum=values[0];v.maximum=values[1];v.step=values[2];v.defaultValue=values[3];
+ v.minimum=values[0];v.maximum=values[1];
+ if(slider){v.step=values[2];v.defaultValue=values[3];}
  v.requiresEnableSwitch=YES;
- if(![v isValid]){
+ if(![v isValidForFeatureType:(ZNV3FeatureType)self.typeIndex]){
   [self showPatchMessage:@"数值范围无效"
     detail:@"要求最小值小于最大值、步长大于零、默认值在范围内，且符合 Int32/Float32 边界。"];return NO;
  }
