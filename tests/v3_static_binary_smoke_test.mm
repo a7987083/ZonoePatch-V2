@@ -197,6 +197,39 @@ int main() {
    check(ZNAdhocResignMachOAtPath(multiOut,&signature,&err),"two-rule Mach-O signing");
    check([signature[@"verified"] boolValue],"two-rule signature verifies");
   }
+  // P9: two separately owned features share one signed Mach-O, not one UI switch.
+  ZNV3StaticBuildEntry *ownerA=[[ZNV3StaticBuildEntry alloc]
+    initWithRuleID:@"p9-a" featureKey:@"owner-a" featureName:@"Feature A"
+    uuid:uuid.UUIDString path:src rva:0x1000 fileOffset:0x1000
+    original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
+  ZNV3StaticBuildEntry *ownerB=[[ZNV3StaticBuildEntry alloc]
+    initWithRuleID:@"p9-b" featureKey:@"owner-b" featureName:@"Feature B"
+    uuid:uuid.UUIDString path:src rva:0x1020 fileOffset:0x1020
+    original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
+  NSString *p9dir=[root stringByAppendingPathComponent:@"p9"];
+  [fm createDirectoryAtPath:p9dir withIntermediateDirectories:YES attributes:nil error:nil];
+  ZNV3StaticBuildPlan *p9plan=[[ZNV3StaticBuildPlan alloc]
+    initWithModule:@"UnityFramework" name:@"P9 Multi-Feature"
+    featureCount:2 entries:@[ownerA,ownerB]];
+  NSString *p9out=nil;
+  BOOL p9built=[ZNV3StaticBinaryBuilder buildPlan:p9plan inDirectory:p9dir
+    outputPath:&p9out metadata:nil error:&err];
+  if(!p9built)fprintf(stderr,"P9 build: %s\n",err.UTF8String?:"none");
+  check(p9built,"P9 two independent features produce one Mach-O");
+  if(p9built){
+   check(p9Grouping(p9out),"P9 on-disk feature ownership and OFF slots");
+   NSDictionary *signature=nil;
+   check(ZNAdhocResignMachOAtPath(p9out,&signature,&err),"P9 Mach-O signing");
+   check([signature[@"verified"] boolValue],"P9 signed CodeDirectory verifies");
+  }
+  check(![ZNV3StaticBuildPlan validateEntries:@[ownerA,ownerA] error:nil],
+    "P9 duplicate rule rejected");
+  ZNV3StaticBuildEntry *overlap=[[ZNV3StaticBuildEntry alloc]
+    initWithRuleID:@"p9-overlap" featureKey:@"owner-b" featureName:@"Feature B"
+    uuid:uuid.UUIDString path:src rva:0x1000 fileOffset:0x1000
+    original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
+  check(![ZNV3StaticBuildPlan validateEntries:@[ownerA,overlap] error:nil],
+    "P9 overlapping ownership rejected before write");
   ZNV3StaticBuildEntry *wrong=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"bad"
    uuid:NSUUID.UUID.UUIDString path:src rva:0x1000 fileOffset:0x1000
    original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
