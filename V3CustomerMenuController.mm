@@ -64,7 +64,7 @@
  self.snapshot=[[[ZNV3CustomerRuntime shared] discover] mutableCopy];
  BOOL locked=[ZNV3CustomerRuntime shared].recoveryFailed;
  self.status.text=locked?@"静态事务回滚失败，已锁定":(
-   self.snapshot.count?[NSString stringWithFormat:@"发现 %lu 个预埋功能（默认 OFF）",(unsigned long)self.snapshot.count]:
+   self.snapshot.count?[NSString stringWithFormat:@"发现 %lu 个预埋功能",(unsigned long)self.snapshot.count]:
    @"未检测到 P6-C 预埋功能。请确认已安装生成后的 Mach-O。");
  for(NSUInteger i=0;i<self.snapshot.count;i++){
   ZNV3CustomerFeature *feature=self.snapshot[i];
@@ -79,13 +79,20 @@
     [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:10],
     [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-10]]];
   UILabel *name=ZNLabel([@"⚡ " stringByAppendingString:feature.title?:@""],14,YES);
-  name.textColor=UIColor.whiteColor;[row addArrangedSubview:name];
-  UIButton *button=ZNButton(feature.enabled?@"关闭（Original）":@"开启 Patch",self,@selector(toggleFeature:));
+  name.textColor=UIColor.whiteColor;name.numberOfLines=1;name.lineBreakMode=NSLineBreakByTruncatingTail;
+  [name setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  [row addArrangedSubview:name];
+  UIButton *button=ZNButton(feature.enabled?@"✓":@"",self,@selector(toggleFeature:));
   button.tag=(NSInteger)i;button.enabled=!locked;
+  button.accessibilityLabel=[NSString stringWithFormat:@"%@：%@",feature.title,feature.enabled?@"已开启":@"已关闭"];
   [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
   button.backgroundColor=feature.enabled?[UIColor colorWithRed:.24 green:.66 blue:.41 alpha:.9]:[UIColor colorWithRed:.45 green:.05 blue:.15 alpha:.8];
   button.layer.borderColor=[UIColor colorWithWhite:1 alpha:.4].CGColor;
-  [row addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;
+  button.layer.cornerRadius=9;
+  [row addArrangedSubview:button];
+  [button.widthAnchor constraintEqualToConstant:38].active=YES;
+  [button.heightAnchor constraintEqualToConstant:38].active=YES;
+  [panel.heightAnchor constraintEqualToConstant:58].active=YES;
   [self.features addArrangedSubview:panel];
  }
 }
