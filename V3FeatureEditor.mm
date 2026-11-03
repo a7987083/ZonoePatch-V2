@@ -234,7 +234,7 @@
  NSString *name=self.nameField.text.length?self.nameField.text:@"未命名功能";
  self.store.draft.name=name;
  self.store.draft.detail=self.descField.text?:@"";
- self.store.draft.buttonType=self.typeIndex;
+ self.store.draft.buttonType=(ZNV3FeatureType)self.typeIndex;
  NSString *savedIdentifier=[self.store.draft.identifier copy];
  if(![self.store saveDraft]) {
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"配置保存失败"
