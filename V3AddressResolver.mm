@@ -30,7 +30,7 @@ static bool parse(NSString *value,Kind &kind,uint64_t &number) {
  if(!s.length)return false;
  const char *prefixes[]={"rva:","va:","preferred:","preferredva:","runtime:","runtimeva:","file:","fileoff:","fileoffset:"};
  Kind kinds[]={RVA,Preferred,Preferred,Preferred,Runtime,Runtime,File,File,File};
- kind=RVA; // Unqualified offsets are RVAs by V3 menu contract.
+ kind=Auto; // V2-compatible auto detection; RVA wins when it is valid.
  for(size_t i=0;i<sizeof(kinds)/sizeof(kinds[0]);++i){
   NSString *prefix=[NSString stringWithUTF8String:prefixes[i]];
   if([s hasPrefix:prefix]){kind=kinds[i];s=[s substringFromIndex:prefix.length];break;}
@@ -115,10 +115,35 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
    }
   }
  }
- if(!message&&found.empty())message=@"地址无法映射到当前 Mach-O Segment";
+ if(!message&&found.empty()){
+  NSMutableArray<NSString *> *ranges=[NSMutableArray array];
+  for(const Segment &seg:segs){
+   if(!seg.vs||seg.vm<base)continue;
+   uint64_t lo=seg.vm-base,hi=0;
+   if(!add(lo,seg.vs-1,hi))continue;
+   [ranges addObject:[NSString stringWithFormat:@"%s RVA 0x%llX–0x%llX",
+     seg.name,(unsigned long long)lo,(unsigned long long)hi]];
+  }
+  message=[NSString stringWithFormat:
+   @"Offset 0x%llX 无法映射到 %@。已检查 RVA / VA / Runtime VA / File Offset。\\nSegment 范围：%@",
+   (unsigned long long)input,module,[ranges componentsJoinedByString:@"; "]];
+ }
  if(!message){
+  // Keep the normal V3 Offset convention: a valid RVA takes precedence.
+  // Otherwise, accept unambiguous alternative semantics as V2 does.
+  if(kind==Auto){
+   bool hasRVA=false;
+   for(const Candidate &c:found)if(c.kind==RVA){hasRVA=true;break;}
+   if(hasRVA){
+    std::vector<Candidate> onlyRVA;
+    for(const Candidate &c:found)if(c.kind==RVA)onlyRVA.push_back(c);
+    found.swap(onlyRVA);
+   }
+  }
   uint64_t addr=found.front().runtime;
-  for(const Candidate &c:found)if(c.runtime!=addr){message=@"地址存在歧义：请指定 rva:/va:/runtime:/file:";break;}
+  for(const Candidate &c:found)if(c.runtime!=addr){
+   message=@"地址语义有歧义：请明确使用 rva:/va:/runtime:/file:";break;
+  }
  }
  if(message){
   if(error)*error=[NSError errorWithDomain:@"ZonoePatch.V3.Address" code:1
