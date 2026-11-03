@@ -17,8 +17,9 @@ static BOOL ZNValidHex(NSString *value,BOOL bytes) {
    if([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:c])continue;
    [compact appendFormat:@"%C",c];
   }
-  if(compact.length%2 || compact.length>8192)return NO;
   s=compact;
+  if([s hasPrefix:@"0x"]||[s hasPrefix:@"0X"])s=[s substringFromIndex:2];
+  if(!s.length||s.length%2 || s.length>8192)return NO;
  } else {
   return [ZNV3AddressResolver validAddressText:s];
  }
