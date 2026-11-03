@@ -17,6 +17,7 @@
 @property(nonatomic,strong) UILabel *stepLabel;
 @property(nonatomic,strong) UITextField *stepField;
 @property(nonatomic,strong) UILabel *defaultLabel;
+@property(nonatomic,strong) UILabel *sliderHintLabel;
 @property(nonatomic,strong) UITextField *defaultField;
 @property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIButton *staticBuildButton;
