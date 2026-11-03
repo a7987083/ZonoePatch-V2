@@ -147,9 +147,13 @@ static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
     desc.count!=header.count||desc.entrySize!=sizeof(ZN44FeatureDescriptionEntry)||
     !ZNCRead(table+(uintptr_t)descOff+sizeof(desc),descs.data(),descs.size()*sizeof(ZN44FeatureDescriptionEntry))||
     !ZN55ValidateProtectedHeader(&header,entries.data()))return nil;
- NSMutableArray<ZNCCell *> *cells=[NSMutableArray arrayWithCapacity:header.count];
- NSUInteger active=0;
- NSString *title=ZNCString(entries[0].title,sizeof(entries[0].title));
+
+ BOOL multi=(header.flags&ZN44_STATIC_HEADER_FLAG_MULTI_FEATURE_V1)!=0;
+ NSMutableDictionary<NSString *,NSMutableArray<ZNCCell *> *> *groups=[NSMutableDictionary dictionary];
+ NSMutableDictionary<NSString *,NSString *> *titles=[NSMutableDictionary dictionary];
+ NSMutableDictionary<NSString *,NSNumber *> *activeCounts=[NSMutableDictionary dictionary];
+ NSMutableArray<NSString *> *order=[NSMutableArray array];
+ NSString *legacyTitle=ZNCString(entries[0].title,sizeof(entries[0].title));
  for(uint32_t i=0;i<header.count;i++){
   const ZN44StaticEntry &entry=entries[i];
   if(entry.patchID!=i+1||entry.canonicalIndex!=i||entry.physicalID!=i+1||
@@ -160,14 +164,17 @@ static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
      encoding:NSUTF8StringEncoding];
   if(d.patchID!=entry.patchID||d.length!=69||![marker hasPrefix:@"P6C1:"])return nil;
   for(NSUInteger j=5;j<marker.length;j++){
-   unichar c=[marker characterAtIndex:j];
-   if(!((c>='0'&&c<='9')||(c>='A'&&c<='F')))return nil;
+   unichar ch=[marker characterAtIndex:j];
+   if(!((ch>='0'&&ch<='9')||(ch>='A'&&ch<='F')))return nil;
   }
-  if(![ZNCString(entry.title,sizeof(entry.title)) isEqualToString:title])return nil;
+  NSString *title=ZNCString(entry.title,sizeof(entry.title));
+  NSString *key=multi?ZNCString(entry.group,sizeof(entry.group)):@"legacy";
+  if(!key.length||!title.length)return nil;
+  if(!multi && ![title isEqualToString:legacyTitle])return nil;
+  if(titles[key] && ![titles[key] isEqualToString:title])return nil;
   ZN55DecodedRVAs rvas={};
   if(!ZN55DecodeEntryRVAs(&header,&entry,i,&rvas)||
      rvas.onRVA>UINTPTR_MAX-mappedHeader||rvas.offRVA>UINTPTR_MAX-mappedHeader)return nil;
-  // RVA is relative to the image's __TEXT vmaddr, not an absolute preferred VA.
   uint64_t codeRVA=codeVM-textVM;
   if(codeVM<textVM||rvas.onRVA<codeRVA||rvas.offRVA<codeRVA||
      rvas.onRVA-codeRVA>=codeSize||rvas.offRVA-codeRVA>=codeSize)return nil;
@@ -177,17 +184,25 @@ static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
   if((slot&7u)||!ZNCRegion(slot,8,VM_PROT_READ|VM_PROT_WRITE))return nil;
   uint64_t value=0;
   if(!ZNCRead(slot,&value,8)||(value!=0&&value!=off&&value!=on))return nil;
-  if(value==on)active++;
-  ZNCCell *c=[ZNCCell new];c.slot=slot;c.onTarget=on;c.offTarget=off;[cells addObject:c];
+  if(!groups[key]){groups[key]=[NSMutableArray array];titles[key]=title;[order addObject:key];}
+  if(value==on)activeCounts[key]=@([activeCounts[key] unsignedIntegerValue]+1);
+  ZNCCell *cell=[ZNCCell new];cell.slot=slot;cell.onTarget=on;cell.offTarget=off;
+  [groups[key] addObject:cell];
  }
- if(active>0&&active!=header.count)return nil; // No ambiguous mixed states.
- ZNV3CustomerFeature *result=[ZNV3CustomerFeature new];
- result.imageName=rawName?[[NSString stringWithUTF8String:rawName] lastPathComponent]:@"Mach-O";
- result.imageUUID=uuid;
- result.identifier=[NSString stringWithFormat:@"%@:%p",uuid,(void *)mappedHeader];
- result.title=title.length?title:result.imageName;
- result.ruleCount=header.count;result.enabled=(active==header.count);
- result.header=mappedHeader;result.cells=cells;
+ NSMutableArray<ZNV3CustomerFeature *> *result=[NSMutableArray arrayWithCapacity:order.count];
+ for(NSString *key in order){
+  NSArray<ZNCCell *> *cells=[groups[key] copy];
+  NSUInteger active=[activeCounts[key] unsignedIntegerValue];
+  if(active>0 && active!=cells.count)return nil;
+  ZNV3CustomerFeature *feature=[ZNV3CustomerFeature new];
+  feature.imageName=rawName?[[NSString stringWithUTF8String:rawName] lastPathComponent]:@"Mach-O";
+  feature.imageUUID=uuid;
+  feature.identifier=multi?[NSString stringWithFormat:@"%@:%p:%@",uuid,(void *)mappedHeader,key]:
+    [NSString stringWithFormat:@"%@:%p",uuid,(void *)mappedHeader];
+  feature.title=titles[key];
+  feature.ruleCount=cells.count;feature.enabled=(active==cells.count);
+  feature.header=mappedHeader;feature.cells=cells;[result addObject:feature];
+ }
  return result;
 }
 
