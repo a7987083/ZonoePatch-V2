@@ -16,7 +16,7 @@
 }
 - (void)buildHookPage {
  [self add:ZNLabel(@"Hook 管理",18,YES) height:28];
- [self add:ZNLabel(@"模块浏览（仅诊断；功能目标在编辑器内设置）",12,NO) height:20];
+ [self add:ZNLabel(@"目标模块（新增 / 编辑 / 预检 / 保存共用）",12,NO) height:20];
  self.moduleButton=ZNButton(@"主程序  ▾",self,@selector(cycleModule));[self add:self.moduleButton height:38];
  self.moduleStatus=ZNLabel(@"正在识别模块…",11,NO);[self add:self.moduleStatus height:38];
  [self refreshModuleStatus];
@@ -35,10 +35,6 @@
  self.nameField=[self field:@"功能名字" value:@""];[stack addArrangedSubview:self.nameField];
  [stack addArrangedSubview:ZNLabel(@"功能说明",12,YES)];
  self.descField=[self field:@"功能说明" value:@""];[stack addArrangedSubview:self.descField];
- [stack addArrangedSubview:ZNLabel(@"当前功能的目标模块（预检与保存使用此值）",12,YES)];
- self.draftModuleButton=ZNButton(@"主程序  ▾",self,@selector(cycleDraftModule));
- [stack addArrangedSubview:self.draftModuleButton];
- [self.draftModuleButton.heightAnchor constraintEqualToConstant:36].active=YES;
  [stack addArrangedSubview:ZNLabel(@"Offset / Patch 规则（支持多组）",12,YES)];
  self.rules=[UIStackView new];self.rules.axis=UILayoutConstraintAxisVertical;self.rules.spacing=7;[stack addArrangedSubview:self.rules];
  UIButton *addRule=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));[stack addArrangedSubview:addRule];[addRule.heightAnchor constraintEqualToConstant:36].active=YES;
@@ -90,6 +86,7 @@
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
  [self refreshModuleStatus];
+ if(self.store.draft)self.store.draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
 }
 - (void)categoryTap:(UIButton *)b {
  if(b.tag==0)return;
