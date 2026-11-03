@@ -153,6 +153,9 @@
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
  ZNV3Feature *feature=self.store.features[index];
+ if(feature.buttonType!=ZNV3FeatureTypeToggle){
+  [self showPatchMessage:@"功能尚未接入执行器" detail:@"非开关功能目前仅支持保存参数配置。不能按旧二态 Patch 执行。"];return;
+ }
  ZNV3PatchSession *session=[ZNV3PatchSession shared];
  if(session.status==ZNV3PatchTransactionStatusRecoveryFailed){
   [self showPatchMessage:@"执行器已锁定" detail:session.lastDiagnostic];return;
