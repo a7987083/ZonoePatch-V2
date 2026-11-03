@@ -9,12 +9,14 @@
 @end
 @implementation ZNV3CustomerMenuController
 - (void)loadView{
- self.view=[UIView new];self.view.backgroundColor=[UIColor colorWithWhite:.97 alpha:1];
+ self.view=[UIView new];self.view.backgroundColor=[UIColor colorWithRed:.70 green:.08 blue:.18 alpha:.97];
+ self.view.layer.cornerRadius=20;self.view.layer.masksToBounds=YES;
+ self.view.layer.borderWidth=1;self.view.layer.borderColor=[UIColor colorWithRed:1 green:.40 blue:.50 alpha:.7].CGColor;
 }
 - (void)viewDidLoad{
  [super viewDidLoad];
  UIStackView *stack=[UIStackView new];stack.translatesAutoresizingMaskIntoConstraints=NO;
- stack.axis=UILayoutConstraintAxisVertical;stack.spacing=12;stack.layoutMargins=UIEdgeInsetsMake(14,14,14,14);
+ stack.axis=UILayoutConstraintAxisVertical;stack.spacing=10;stack.layoutMargins=UIEdgeInsetsMake(16,15,16,15);
  stack.layoutMarginsRelativeArrangement=YES;[self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
   [stack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
@@ -23,14 +25,16 @@
   [stack.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]]];
  UIStackView *bar=[UIStackView new];bar.axis=UILayoutConstraintAxisHorizontal;
  bar.distribution=UIStackViewDistributionEqualSpacing;bar.alignment=UIStackViewAlignmentCenter;
- [bar addArrangedSubview:ZNLabel(@"ZonoePatch · 用户版",18,YES)];
+ UILabel *heading=ZNLabel(@"⚡ ZonoePatch",19,YES);heading.textColor=UIColor.whiteColor;
+ [bar addArrangedSubview:heading];
  UIButton *close=ZNButton(@"✕",self,@selector(closeMenu));
  [bar addArrangedSubview:close];[stack addArrangedSubview:bar];
+ [close setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
  [close.widthAnchor constraintEqualToConstant:40].active=YES;
  self.status=ZNLabel(@"扫描已安装的预埋功能",12,NO);
- self.status.textColor=[UIColor darkGrayColor];[stack addArrangedSubview:self.status];
+ self.status.textColor=[UIColor colorWithWhite:1 alpha:.78];[stack addArrangedSubview:self.status];
  UIScrollView *scroll=[UIScrollView new];[stack addArrangedSubview:scroll];
- self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=9;
+ self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=5;
  self.features.translatesAutoresizingMaskIntoConstraints=NO;[scroll addSubview:self.features];
  [NSLayoutConstraint activateConstraints:@[
   [self.features.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor],
@@ -39,7 +43,8 @@
   [self.features.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor],
   [self.features.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor]]];
  UIButton *refresh=ZNButton(@"刷新预埋功能",self,@selector(refreshFeatures));
- [stack addArrangedSubview:refresh];[refresh.heightAnchor constraintEqualToConstant:40].active=YES;
+ [stack addArrangedSubview:refresh];[refresh.heightAnchor constraintEqualToConstant:38].active=YES;
+ [refresh setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
  [self refreshFeatures];
 }
 - (void)viewWillAppear:(BOOL)animated{
@@ -63,9 +68,9 @@
    @"未检测到 P6-C 预埋功能。请确认已安装生成后的 Mach-O。");
  for(NSUInteger i=0;i<self.snapshot.count;i++){
   ZNV3CustomerFeature *feature=self.snapshot[i];
-  UIView *panel=[UIView new];panel.backgroundColor=UIColor.whiteColor;
-  panel.layer.cornerRadius=9;panel.layer.borderWidth=1;
-  panel.layer.borderColor=[UIColor colorWithWhite:.84 alpha:1].CGColor;
+  UIView *panel=[UIView new];panel.backgroundColor=[UIColor colorWithRed:.94 green:.13 blue:.27 alpha:.78];
+  panel.layer.cornerRadius=12;panel.layer.borderWidth=1;
+  panel.layer.borderColor=[UIColor colorWithRed:1 green:.45 blue:.55 alpha:.48].CGColor;
   UIStackView *row=[UIStackView new];row.axis=UILayoutConstraintAxisVertical;row.spacing=5;
   row.translatesAutoresizingMaskIntoConstraints=NO;[panel addSubview:row];
   [NSLayoutConstraint activateConstraints:@[
@@ -73,11 +78,16 @@
     [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
     [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:10],
     [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-10]]];
-  [row addArrangedSubview:ZNLabel(feature.title,14,YES)];
-  [row addArrangedSubview:ZNLabel([NSString stringWithFormat:@"%@ · %lu 组预埋 Patch",
-    feature.imageName,(unsigned long)feature.ruleCount],11,NO)];
+  UILabel *name=ZNLabel([@"⚡ " stringByAppendingString:feature.title?:@""],14,YES);
+  name.textColor=UIColor.whiteColor;[row addArrangedSubview:name];
+  UILabel *subtitle=ZNLabel([NSString stringWithFormat:@"%@ · %lu 组 Patch",
+    feature.imageName,(unsigned long)feature.ruleCount],11,NO);
+  subtitle.textColor=[UIColor colorWithWhite:1 alpha:.78];[row addArrangedSubview:subtitle];
   UIButton *button=ZNButton(feature.enabled?@"关闭（Original）":@"开启 Patch",self,@selector(toggleFeature:));
   button.tag=(NSInteger)i;button.enabled=!locked;
+  [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
+  button.backgroundColor=feature.enabled?[UIColor colorWithRed:.24 green:.66 blue:.41 alpha:.9]:[UIColor colorWithRed:.45 green:.05 blue:.15 alpha:.8];
+  button.layer.borderColor=[UIColor colorWithWhite:1 alpha:.4].CGColor;
   [row addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;
   [self.features addArrangedSubview:panel];
  }
