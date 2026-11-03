@@ -62,6 +62,12 @@ int main(){
   expect(ex.status==ZNV3PatchTransactionStatusDisabled,"status OFF");
   expect(![ex setEnabled:NO operations:actions error:&err],"OFF without session denied");
   expect(![ex setEnabled:YES operations:@[op(@"a",8),op(@"overlap",8)] error:&err],"overlap rejected");
+  uint8_t original4[]={0x11,0x22,0x33,0x44};
+  NSData *same=[NSData dataWithBytes:original4 length:4];
+  ZNV3PatchOperation *noOp=[[ZNV3PatchOperation alloc]initWithIdentifier:@"noop" moduleUUID:@"test-uuid"
+     address:8 expected:same patch:same];
+  expect(![ex setEnabled:YES operations:@[noOp] error:&err],"reject no-op patch definition");
+
   ((uint8_t *)b.memory.mutableBytes)[8]=0x00;
   expect(![ex setEnabled:YES operations:actions error:&err],"expected mismatch blocks all");
   expect(original(b,24),"preflight did not modify second site");
