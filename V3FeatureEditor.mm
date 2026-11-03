@@ -1,6 +1,7 @@
 #import "V3MenuController.h"
 #import "V3UIComponents.h"
 #import "V3AddressResolver.h"
+#import "V3PatchValidator.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -70,14 +71,22 @@
   ZNV3PatchRule *rule=draft.rules[i];
   if(!rule.offsetText.length&&!rule.patchText.length)continue;
   NSError *error=nil;
-  ZNV3ResolvedAddress *r=[ZNV3AddressResolver resolve:rule.offsetText module:draft.module error:&error];
-  if(!r){[lines addObject:[NSString stringWithFormat:@"#%lu ❌ %@",(unsigned long)i+1,error.localizedDescription?:@"无法解析"]];continue;}
-  NSString *file=r.fileBacked?[NSString stringWithFormat:@"0x%llX",(unsigned long long)r.fileOffset]:@"无文件映射";
-  [lines addObject:[NSString stringWithFormat:@"#%lu %@ · %@\nRVA 0x%llX · Runtime 0x%llX\nFile %@",
-    (unsigned long)i+1,r.kind,r.segmentName,(unsigned long long)r.rva,(unsigned long long)r.runtimeVA,file]];
+  ZNV3PatchValidation *validation=[ZNV3PatchValidator validateOffset:rule.offsetText
+    patch:rule.patchText module:draft.module error:&error];
+  if(!validation){
+   [lines addObject:[NSString stringWithFormat:@"#%lu ❌ %@",
+     (unsigned long)i+1,error.localizedDescription?:@"验证失败"]];
+   continue;
+  }
+  ZNV3ResolvedAddress *r=validation.address;
+  [lines addObject:[NSString stringWithFormat:
+    @"#%lu ✅ 只读预检通过\nRVA 0x%llX · Runtime 0x%llX\\nFile 0x%llX · %@\\nOriginal %@\\nPatch %@",
+    (unsigned long)i+1,(unsigned long long)r.rva,
+    (unsigned long long)r.runtimeVA,(unsigned long long)r.fileOffset,
+    r.segmentName,validation.originalHex,validation.patchHex]];
  }
- UIAlertController *a=[UIAlertController alertControllerWithTitle:@"地址解析（只读）"
-  message:lines.count?[lines componentsJoinedByString:@"\n\n"]:@"请先输入 Offset / Patch。不会修改内存。"
+ UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Runtime Patch 预检（只读）"
+  message:lines.count?[lines componentsJoinedByString:@"\\n\\n"]:@"请先输入 Offset / Patch，不会修改内存。"
   preferredStyle:UIAlertControllerStyleAlert];
  [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
  [self presentViewController:a animated:YES completion:nil];
