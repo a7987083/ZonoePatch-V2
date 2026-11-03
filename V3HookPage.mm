@@ -47,6 +47,9 @@
  UIStackView *actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=5;[stack addArrangedSubview:actions];
  UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));self.patchActionButton=ZNButton(@"应用 Patch",self,@selector(applyOrRestore));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
  for(UIButton *button in @[cancel,self.patchActionButton,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
+ UIButton *staticPreflight=ZNButton(@"静态生成预检（只读）",self,@selector(staticBuildPreflight));
+ [stack addArrangedSubview:staticPreflight];
+ [staticPreflight.heightAnchor constraintEqualToConstant:38].active=YES;
  self.editor.hidden=YES;
 
 }
