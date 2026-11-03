@@ -209,8 +209,8 @@ static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
   NSMutableArray *found=[NSMutableArray array];
   uint32_t count=_dyld_image_count();
   for(uint32_t i=0;i<count;i++){
-   ZNV3CustomerFeature *f=ZNCCatalogImage(i);
-   if(f)[found addObject:f];
+   NSArray<ZNV3CustomerFeature *> *features=ZNCCatalogImage(i);
+   if(features.count)[found addObjectsFromArray:features];
   }
   return found;
  }
