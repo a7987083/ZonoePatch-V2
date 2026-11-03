@@ -48,7 +48,9 @@
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
- [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
+ [self.view layoutIfNeeded];
+ CGRect editorTop=[self.nameField convertRect:self.nameField.bounds toView:self.scroll];
+ [self.scroll scrollRectToVisible:CGRectInset(editorTop,0,-12) animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
  [self.store editFeatureAtIndex:index];
@@ -62,8 +64,9 @@
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
- [self.view endEditing:YES];[self.scroll layoutIfNeeded];
- [self.scroll scrollRectToVisible:self.editor.frame animated:YES];
+ [self.view endEditing:YES];[self.view layoutIfNeeded];
+ CGRect editorTop=[self.nameField convertRect:self.nameField.bounds toView:self.scroll];
+ [self.scroll scrollRectToVisible:CGRectInset(editorTop,0,-12) animated:YES];
 }
 - (void)hideEditor {
  [self.view endEditing:YES];self.editor.hidden=YES;[self.store cancelDraft];
