@@ -243,6 +243,8 @@
   [self presentViewController:alert animated:YES completion:nil];return;
  }
  self.selectedFeatureID=savedIdentifier;
+ [self.selectedFeatureIDs removeAllObjects];
+ [self.selectedFeatureIDs addObject:savedIdentifier];
  [self hideEditor];[self renderFeatures];
 }
 @end
