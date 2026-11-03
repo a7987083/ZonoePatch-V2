@@ -115,21 +115,12 @@
  if(![self draftMatchesSavedPatch:saved]){
   [self showPatchMessage:@"规则尚未保存" detail:@"模块或 Offset / Patch 已修改。请先保存，重新进入编辑器后再应用。"];return;
  }
- UIAlertController *confirm=[UIAlertController alertControllerWithTitle:@"应用 Runtime Bytes Patch？"
-  message:[NSString stringWithFormat:@"目标模块：%@\n将尝试写入已加载的 ARM64 可执行代码页。非越狱设备可能拒绝 mprotect；如失败会报告原因，不能保证系统不会终止进程。",saved.module]
-  preferredStyle:UIAlertControllerStyleAlert];
- [confirm addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
- __weak ZNV3MenuController *weakSelf=self;
- [confirm addAction:[UIAlertAction actionWithTitle:@"确认应用" style:UIAlertActionStyleDestructive handler:^(__unused UIAlertAction *action){
-  __strong ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
-  NSError *error=nil;
-  BOOL applied=[session applyFeature:saved error:&error];
-  [strongSelf refreshPatchActionButton];
-  [strongSelf showPatchMessage:applied?@"Patch 已应用":@"Patch 未应用"
-               detail:applied?@"目标字节已更新并通过读回验证。可通过「恢复 Original」撤销。":
-                  (error.localizedDescription?:session.lastDiagnostic)];
- }]];
- [self presentViewController:confirm animated:YES completion:nil];
+ NSError *error=nil;
+ BOOL applied=[session applyFeature:saved error:&error];
+ [self refreshPatchActionButton];
+ [self showPatchMessage:applied?@"Patch 已应用":@"Patch 未应用"
+                detail:applied?@"目标字节已更新并通过读回验证。可通过「恢复 Original」撤销。":
+                    (error.localizedDescription?:session.lastDiagnostic)];
 }
 - (void)saveUI {
  if(!self.store.draft)return;
