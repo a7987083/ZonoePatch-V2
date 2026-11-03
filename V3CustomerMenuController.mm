@@ -8,6 +8,8 @@
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) UIScrollView *featureScroll;
 @property(nonatomic,strong) NSMutableArray<ZNV3CustomerFeature *> *snapshot;
+@property(nonatomic,strong) CAGradientLayer *neonStroke;
+@property(nonatomic,strong) CAShapeLayer *neonMask;
 @end
 
 @implementation ZNV3CustomerMenuController
@@ -19,18 +21,31 @@
 
 - (void)loadView {
  self.view=[UIView new];
- self.view.backgroundColor=[UIColor colorWithRed:.86 green:.10 blue:.16 alpha:.96];
- self.view.layer.cornerRadius=9;
+ self.view.backgroundColor=[UIColor colorWithRed:.035 green:.045 blue:.12 alpha:.96];
+ self.view.layer.cornerRadius=14;
  self.view.layer.masksToBounds=YES;
 }
 
 - (void)viewDidLoad {
  [super viewDidLoad];
+ // Border is a layer of the existing menu, not an additional UIWindow or controller.
+ CAGradientLayer *neon=[CAGradientLayer layer];
+ neon.colors=@[(id)[UIColor colorWithRed:.92 green:.20 blue:1 alpha:1].CGColor,
+               (id)[UIColor colorWithRed:.20 green:.78 blue:1 alpha:1].CGColor,
+               (id)[UIColor colorWithRed:.65 green:.21 blue:1 alpha:1].CGColor];
+ neon.startPoint=CGPointMake(0,0);neon.endPoint=CGPointMake(1,1);
+ CAShapeLayer *mask=[CAShapeLayer layer];
+ mask.fillColor=UIColor.clearColor.CGColor;
+ mask.strokeColor=UIColor.whiteColor.CGColor;
+ mask.lineWidth=2.5;
+ neon.mask=mask;
+ [self.view.layer addSublayer:neon];
+ self.neonStroke=neon;self.neonMask=mask;
 
  UIStackView *stack=[UIStackView new];
  stack.translatesAutoresizingMaskIntoConstraints=NO;
  stack.axis=UILayoutConstraintAxisVertical;stack.spacing=0;
- stack.layoutMargins=UIEdgeInsetsMake(6,7,7,7);
+ stack.layoutMargins=UIEdgeInsetsMake(10,10,10,10);
  stack.layoutMarginsRelativeArrangement=YES;
  [self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
@@ -47,16 +62,16 @@
  drag.cancelsTouchesInView=NO;
  [header addGestureRecognizer:drag];
  [stack addArrangedSubview:header];
- [header.heightAnchor constraintEqualToConstant:42].active=YES;
+ [header.heightAnchor constraintEqualToConstant:54].active=YES;
 
  UIImageView *icon=[[UIImageView alloc]initWithImage:[UIImage systemImageNamed:@"gamecontroller.fill"]];
- icon.tintColor=[UIColor colorWithRed:1 green:.88 blue:.89 alpha:1];
+ icon.tintColor=[UIColor colorWithRed:.91 green:.36 blue:1 alpha:1];
  icon.contentMode=UIViewContentModeScaleAspectFit;
  [header addArrangedSubview:icon];
- [icon.widthAnchor constraintEqualToConstant:25].active=YES;
- [icon.heightAnchor constraintEqualToConstant:24].active=YES;
+ [icon.widthAnchor constraintEqualToConstant:32].active=YES;
+ [icon.heightAnchor constraintEqualToConstant:31].active=YES;
 
- UILabel *title=ZNLabel(@"ZonoePatch",12,YES);
+ UILabel *title=ZNLabel(@"ZonoePatch",17,YES);
  title.textColor=UIColor.whiteColor;title.numberOfLines=1;
  title.adjustsFontSizeToFitWidth=YES;title.minimumScaleFactor=.75;
  [header addArrangedSubview:title];
@@ -67,11 +82,11 @@
  close.accessibilityLabel=@"关闭菜单";
  [close addTarget:self action:@selector(closeMenu) forControlEvents:UIControlEventTouchUpInside];
  [header addArrangedSubview:close];
- [close.widthAnchor constraintEqualToConstant:28].active=YES;
- [close.heightAnchor constraintEqualToConstant:34].active=YES;
+ [close.widthAnchor constraintEqualToConstant:34].active=YES;
+ [close.heightAnchor constraintEqualToConstant:40].active=YES;
 
  UIView *divider=[UIView new];
- divider.backgroundColor=[UIColor colorWithWhite:1 alpha:.25];
+ divider.backgroundColor=[UIColor colorWithRed:.62 green:.30 blue:.96 alpha:.62];
  [stack addArrangedSubview:divider];
  [divider.heightAnchor constraintEqualToConstant:1].active=YES;
 
@@ -95,6 +110,16 @@
  [self refreshFeatures];
 }
 
+- (void)viewDidLayoutSubviews {
+ [super viewDidLayoutSubviews];
+ CGRect bounds=self.view.bounds;
+ [CATransaction begin];
+ [CATransaction setDisableActions:YES];
+ self.neonStroke.frame=bounds;
+ self.neonMask.frame=bounds;
+ self.neonMask.path=[UIBezierPath bezierPathWithRoundedRect:CGRectInset(bounds,1.5,1.5) cornerRadius:13].CGPath;
+ [CATransaction commit];
+}
 - (void)viewWillAppear:(BOOL)animated {
  [super viewWillAppear:animated];
  [self refreshFeatures];
@@ -147,24 +172,24 @@
  for(NSUInteger i=0;i<self.snapshot.count;i++) {
   ZNV3CustomerFeature *feature=self.snapshot[i];
   UIView *panel=[UIView new];
-  panel.backgroundColor=[UIColor colorWithRed:.92 green:.14 blue:.20 alpha:.98];
+  panel.backgroundColor=[UIColor colorWithRed:.075 green:.09 blue:.21 alpha:.98];
   panel.layer.borderWidth=0;
   [self.features addArrangedSubview:panel];
-  [panel.heightAnchor constraintEqualToConstant:40].active=YES;
+  [panel.heightAnchor constraintEqualToConstant:52].active=YES;
 
   UIStackView *row=[UIStackView new];
   row.axis=UILayoutConstraintAxisHorizontal;
   row.alignment=UIStackViewAlignmentCenter;
-  row.spacing=5;
+  row.spacing=8;
   row.translatesAutoresizingMaskIntoConstraints=NO;
   [panel addSubview:row];
   [NSLayoutConstraint activateConstraints:@[
-   [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:7],
-   [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-5],
-   [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:4],
-   [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-4]]];
+   [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:12],
+   [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
+   [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:6],
+   [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-6]]];
 
-  UILabel *name=ZNLabel(feature.title?:@"",11,NO);
+  UILabel *name=ZNLabel(feature.title?:@"",15,NO);
   name.textColor=UIColor.whiteColor;
   name.numberOfLines=1;name.lineBreakMode=NSLineBreakByTruncatingTail;
   [name setContentCompressionResistancePriority:UILayoutPriorityDefaultLow
@@ -175,15 +200,15 @@
   toggle.on=feature.enabled;
   toggle.tag=(NSInteger)i;
   toggle.enabled=!locked;
-  toggle.onTintColor=[UIColor colorWithRed:1 green:.40 blue:.52 alpha:1];
-  toggle.transform=CGAffineTransformMakeScale(.72,.72);
+  toggle.onTintColor=[UIColor colorWithRed:.73 green:.20 blue:1 alpha:1];
+  toggle.transform=CGAffineTransformMakeScale(.88,.88);
   toggle.tintColor=[UIColor colorWithRed:.40 green:.42 blue:.63 alpha:1];
   toggle.thumbTintColor=UIColor.whiteColor;
   toggle.accessibilityLabel=feature.title;
   [toggle addTarget:self action:@selector(toggleFeature:) forControlEvents:UIControlEventValueChanged];
   [row addArrangedSubview:toggle];
   UIView *line=[UIView new];
-  line.backgroundColor=[UIColor colorWithWhite:1 alpha:.22];
+  line.backgroundColor=[UIColor colorWithRed:.56 green:.29 blue:.86 alpha:.54];
   line.translatesAutoresizingMaskIntoConstraints=NO;
   [panel addSubview:line];
   [NSLayoutConstraint activateConstraints:@[
