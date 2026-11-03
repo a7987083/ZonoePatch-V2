@@ -39,6 +39,14 @@ jobs:
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3RuntimePatchExecutor.mm tests/v3_runtime_executor_test.mm -o "$RUNNER_TEMP/v3_executor_test"
           "$RUNNER_TEMP/v3_executor_test"
+      - name: Test Static Build Plan
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
+            V3StaticBuildPlanner.mm tests/v3_static_build_planner_test.mm -o "$RUNNER_TEMP/v3_static_plan_test" \
+            -Wl,-U,_OBJC_CLASS_$_ZNV3PatchSession \
+            -Wl,-U,_OBJC_CLASS_$_ZNV3PatchValidator
+          "$RUNNER_TEMP/v3_static_plan_test"
       - name: Install Theos
         run: |
           set -euo pipefail
