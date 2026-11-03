@@ -682,7 +682,14 @@ static void ZNV3CopyFixed(char *destination, size_t capacity, NSString *string) 
     memset(destination, 0, capacity);
     NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
     if (!data.length || !capacity) return;
-    memcpy(destination, data.bytes, std::min(capacity - 1, (size_t)data.length));
+    size_t length=std::min(capacity-1,(size_t)data.length);
+    // Never cut a Chinese/multibyte feature title inside a UTF-8 sequence.
+    while(length>0){
+        NSData *prefix=[NSData dataWithBytes:data.bytes length:length];
+        if([[NSString alloc] initWithData:prefix encoding:NSUTF8StringEncoding])break;
+        length--;
+    }
+    if(length)memcpy(destination,data.bytes,length);
 }
 
 static NSData *ZNV3ComposedVariant(const ZNV3Physical &physical, const ZNV3Logical &logical) {
