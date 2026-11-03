@@ -14,6 +14,7 @@
 @property(nonatomic,strong) UIButton *staticBuildButton;
 @property(nonatomic,assign) BOOL staticBuildRunning;
 @property(nonatomic,copy) NSString *selectedFeatureID;
+@property(nonatomic,assign) BOOL featureRowsCompact;
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) ZNV3FeatureStore *store;
 @property(nonatomic,assign) NSInteger ruleCount;
