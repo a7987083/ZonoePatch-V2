@@ -1,7 +1,6 @@
 #import "V3RuntimeBytesBackend.h"
 #import "V3AddressResolver.h"
 #import <mach/mach.h>
-#import <mach/mach_vm.h>
 #import <mach/vm_region.h>
 #import <libkern/OSCacheControl.h>
 #import <sys/mman.h>
