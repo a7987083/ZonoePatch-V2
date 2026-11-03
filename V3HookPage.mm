@@ -18,14 +18,16 @@
 }
 - (void)buildHookPage {
  [self add:ZNLabel(@"Hook 管理",18,YES) height:28];
- [self add:ZNLabel(@"目标模块（新增 / 编辑 / 预检 / 保存共用）",12,NO) height:20];
+ [self add:ZNLabel(@"目标模块（新增 / 编辑 / 保存）",12,NO) height:20];
  self.moduleButton=ZNButton(@"主程序  ▾",self,@selector(cycleModule));[self add:self.moduleButton height:38];
  self.moduleStatus=ZNLabel(@"正在识别模块…",11,NO);[self add:self.moduleStatus height:38];
  [self refreshModuleStatus];
  if(self.store.quarantinedFeatureCount){
   [self add:ZNLabel([NSString stringWithFormat:@"⚠️ %lu 个旧版功能格式不兼容：已原样保留在 JSON 中，未启用或覆盖。",(unsigned long)self.store.quarantinedFeatureCount],11,NO) height:38];
  }
- [self add:ZNLabel(@"当前功能（演示）",14,YES) height:24];
+ self.staticBuildButton=ZNButton(@"生成预埋二进制（初始 OFF）",self,@selector(generateStaticBinary));
+ [self add:self.staticBuildButton height:42];
+ [self add:ZNLabel(@"当前功能",14,YES) height:24];
  self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=6;[self add:self.features height:0];
  [self renderFeatures];
  UIButton *newItem=ZNButton(@"＋ 增加功能",self,@selector(showEditor));newItem.tintColor=ZNBlue();[self add:newItem height:44];
@@ -48,15 +50,7 @@
  UIStackView *actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=5;[stack addArrangedSubview:actions];
  UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));self.patchActionButton=ZNButton(@"应用 Patch",self,@selector(applyOrRestore));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
  for(UIButton *button in @[cancel,self.patchActionButton,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
- UIButton *staticPreflight=ZNButton(@"静态生成预检（只读）",self,@selector(staticBuildPreflight));
- [stack addArrangedSubview:staticPreflight];
- [staticPreflight.heightAnchor constraintEqualToConstant:38].active=YES;
- self.staticBuildButton=ZNButton(@"生成预埋二进制（初始 OFF）",self,@selector(generateStaticBinary));
- [stack addArrangedSubview:self.staticBuildButton];
- [self.staticBuildButton.heightAnchor constraintEqualToConstant:38].active=YES;
- self.staticToggleButton=ZNButton(@"启用预埋静态 Patch",self,@selector(toggleStaticPatch));
- [stack addArrangedSubview:self.staticToggleButton];
- [self.staticToggleButton.heightAnchor constraintEqualToConstant:38].active=YES;
+
  self.editor.hidden=YES;
 
 }
@@ -68,18 +62,73 @@
  row.alignment=UIStackViewAlignmentCenter;row.spacing=6;
  row.layoutMargins=UIEdgeInsetsMake(7,8,7,5);row.layoutMarginsRelativeArrangement=YES;
  row.backgroundColor=[UIColor colorWithWhite:.95 alpha:1];row.layer.cornerRadius=7;
- NSString *detail=f.rules.count?[NSString stringWithFormat:@"%@ · %lu 组规则 · UI 示例",f.module,(unsigned long)f.rules.count]:f.detail;
- UILabel *l=ZNLabel([NSString stringWithFormat:@"◯  %@\n     %@",f.name,detail],13,NO);
- [l setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];[row addArrangedSubview:l];
+ BOOL selected=[self.selectedFeatureID isEqualToString:f.identifier];
+ UIButton *choice=ZNButton(selected?@"◉":@"◯",self,@selector(selectFeature:));choice.tag=(NSInteger)i;
+ choice.accessibilityLabel=[NSString stringWithFormat:@"%@ %@",selected?@"已选中":@"选择",f.name];
+ [choice.widthAnchor constraintEqualToConstant:30].active=YES;
+ [choice.heightAnchor constraintEqualToConstant:34].active=YES;
+ [row addArrangedSubview:choice];
+ UILabel *l=ZNLabel(f.name,13,NO);
+ [l setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+ [row addArrangedSubview:l];
+ BOOL active=[[ZNV3PatchSession shared] isActiveFeature:f.identifier];
+ UIButton *toggle=ZNButton(active?@"恢复":@"启用",self,@selector(toggleFeaturePatch:));toggle.tag=(NSInteger)i;
+ toggle.enabled=[ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusRecoveryFailed;
+ [toggle.widthAnchor constraintEqualToConstant:48].active=YES;
+ [toggle.heightAnchor constraintEqualToConstant:34].active=YES;
+ [row addArrangedSubview:toggle];
  UIButton *edit=ZNButton(@"编辑",self,@selector(editFeature:));edit.tag=(NSInteger)i;
  [edit.widthAnchor constraintEqualToConstant:48].active=YES;[edit.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:edit];
  UIButton *b=ZNButton(@"删除",self,@selector(removeFeature:));b.tag=(NSInteger)i;
  b.accessibilityLabel=[NSString stringWithFormat:@"删除功能 %@",f.name];
  [b.widthAnchor constraintEqualToConstant:55].active=YES;[b.heightAnchor constraintEqualToConstant:34].active=YES;[row addArrangedSubview:b];
- [row.heightAnchor constraintGreaterThanOrEqualToConstant:60].active=YES;[self.features addArrangedSubview:row];
+ [row.heightAnchor constraintGreaterThanOrEqualToConstant:48].active=YES;[self.features addArrangedSubview:row];
  }
+ [self refreshStaticBuildButton];
 }
-- (void)editFeature:(UIButton *)sender { [self editFeatureAtIndex:(NSUInteger)sender.tag]; }
+- (void)selectFeature:(UIButton *)sender {
+ NSUInteger index=(NSUInteger)sender.tag;
+ if(index>=self.store.features.count)return;
+ self.selectedFeatureID=self.store.features[index].identifier;
+ [self renderFeatures];
+}
+- (void)toggleFeaturePatch:(UIButton *)sender {
+ NSUInteger index=(NSUInteger)sender.tag;
+ if(index>=self.store.features.count)return;
+ ZNV3Feature *feature=self.store.features[index];
+ ZNV3PatchSession *session=[ZNV3PatchSession shared];
+ if(session.status==ZNV3PatchTransactionStatusRecoveryFailed){
+  [self showPatchMessage:@"执行器已锁定" detail:session.lastDiagnostic];return;
+ }
+ BOOL active=[session isActiveFeature:feature.identifier];
+ if(!active){
+  if([ZNV3StaticDispatchRuntime shared].hasActiveFeature ||
+     [ZNV3StaticDispatchRuntime shared].recoveryFailed){
+   [self showPatchMessage:@"静态 Patch 已启用或故障锁定"
+       detail:@"请先在用户端关闭静态 Patch，不能与 Runtime Bytes Patch 混用。"];return;
+  }
+  if(self.store.draft && self.store.editingIndex==index &&
+     ![self draftMatchesSavedPatch:feature]){
+   [self showPatchMessage:@"功能存在未保存规则"
+       detail:@"请先保存或取消编辑，再启用这个功能。"];return;
+  }
+ }
+ NSError *error=nil;
+ BOOL ok=active?[session restoreFeature:feature.identifier error:&error]:
+                [session applyFeature:feature error:&error];
+ [self renderFeatures];
+ [self refreshPatchActionButton];
+ [self showPatchMessage:ok?(active?@"Original 已恢复":@"Patch 已启用"):(active?@"恢复失败":@"启用失败")
+   detail:ok?(active?@"原始字节已恢复并通过读回校验。":@"目标字节已更新并通过读回校验。"):
+     (error.localizedDescription?:session.lastDiagnostic)];
+}
+- (void)editFeature:(UIButton *)sender {
+ NSUInteger index=(NSUInteger)sender.tag;
+ if(index>=self.store.features.count)return;
+ self.selectedFeatureID=self.store.features[index].identifier;
+ [self editFeatureAtIndex:index];
+ [self renderFeatures];
+}
 - (void)removeFeature:(UIButton *)sender {
  if((NSUInteger)sender.tag>=self.store.features.count)return;
  if([ZNV3PatchSession shared].status==ZNV3PatchTransactionStatusRecoveryFailed){
@@ -114,6 +163,7 @@
   [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
   [self presentViewController:alert animated:YES completion:nil];return;
  }
+ if([self.selectedFeatureID isEqualToString:target.identifier])self.selectedFeatureID=nil;
  [self renderFeatures];
 }
 - (void)refreshModuleStatus {
