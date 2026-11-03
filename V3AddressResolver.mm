@@ -30,7 +30,7 @@ static bool parse(NSString *value,Kind &kind,uint64_t &number) {
  if(!s.length)return false;
  const char *prefixes[]={"rva:","va:","preferred:","preferredva:","runtime:","runtimeva:","file:","fileoff:","fileoffset:"};
  Kind kinds[]={RVA,Preferred,Preferred,Preferred,Runtime,Runtime,File,File,File};
- kind=Auto;
+ kind=RVA; // Unqualified offsets are RVAs by V3 menu contract.
  for(size_t i=0;i<sizeof(kinds)/sizeof(kinds[0]);++i){
   NSString *prefix=[NSString stringWithUTF8String:prefixes[i]];
   if([s hasPrefix:prefix]){kind=kinds[i];s=[s substringFromIndex:prefix.length];break;}
@@ -86,7 +86,7 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
 + (BOOL)validAddressText:(NSString *)text {Kind kind=Auto;uint64_t n=0;return parse(text,kind,n);}
 + (ZNV3ResolvedAddress *)resolve:(NSString *)text module:(NSString *)module error:(NSError **)error {
  NSString *message=nil;Kind kind=Auto;uint64_t input=0;
- if(!parse(text,kind,input))message=@"Offset 无效：使用十六进制，可指定 rva:/va:/runtime:/file:";
+ if(!parse(text,kind,input))message=@"Offset 格式无效：使用 0x105A3C 或 105A3C";
  ZNV3ModuleInfo *image=message?nil:[ZNV3ModuleResolver resolveModule:module];
  if(!message&&!image)message=[NSString stringWithFormat:@"模块未加载：%@",module];
  std::vector<Segment> segs;uint64_t base=UINT64_MAX;
