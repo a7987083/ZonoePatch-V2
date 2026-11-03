@@ -45,6 +45,13 @@ static NSString *ZNP6DiskUUID(int fd) {
  if(!feature||![@[@"主程序",@"UnityFramework"] containsObject:feature.module]){
   if(error)*error=ZNP6Error(5,@"Invalid feature module");return nil;
  }
+ // P10.1 is a type-contract milestone, not a typed execution backend.
+ // Never export Action/NumberInput/Slider as a misleading two-state switch.
+ if(feature.buttonType!=ZNV3FeatureTypeToggle){
+  if(error)*error=ZNP6Error(13,[NSString stringWithFormat:
+   @"%@ 的静态执行协议尚未实现；P10.1 仅支持开关构建",ZNV3FeatureTypeTitle(feature.buttonType)]);
+  return nil;
+ }
  NSMutableArray *entries=[NSMutableArray array];
  for(ZNV3PatchRule *rule in feature.rules){
   if(!rule.offsetText.length&&!rule.patchText.length)continue;
