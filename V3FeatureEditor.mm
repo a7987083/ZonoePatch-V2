@@ -119,9 +119,9 @@
   message:[NSString stringWithFormat:@"目标模块：%@\n将尝试写入已加载的 ARM64 可执行代码页。非越狱设备可能拒绝 mprotect；如失败会报告原因，不能保证系统不会终止进程。",saved.module]
   preferredStyle:UIAlertControllerStyleAlert];
  [confirm addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
- __weak typeof(self) weakSelf=self;
+ __weak ZNV3MenuController *weakSelf=self;
  [confirm addAction:[UIAlertAction actionWithTitle:@"确认应用" style:UIAlertActionStyleDestructive handler:^(__unused UIAlertAction *action){
-  __strong typeof(weakSelf) strongSelf=weakSelf;if(!strongSelf)return;
+  __strong ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
   NSError *error=nil;
   BOOL applied=[session applyFeature:saved error:&error];
   [strongSelf refreshPatchActionButton];
