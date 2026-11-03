@@ -5,6 +5,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// Immutable, read-only plan. Producing a plan never modifies Mach-O or runtime memory.
 @interface ZNV3StaticBuildEntry : NSObject
 @property(nonatomic,copy,readonly) NSString *ruleID;
+@property(nonatomic,copy,readonly) NSString *featureKey;
+@property(nonatomic,copy,readonly) NSString *featureName;
 @property(nonatomic,copy,readonly) NSString *moduleUUID;
 @property(nonatomic,copy,readonly) NSString *sourcePath;
 @property(nonatomic,assign,readonly) uint64_t rva;
