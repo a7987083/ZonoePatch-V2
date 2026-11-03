@@ -88,6 +88,28 @@ int main() {
   ZNV3StaticBuildPlan *badPlan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework" entries:@[wrong]];
   check(![ZNV3StaticBinaryBuilder buildPlan:badPlan inDirectory:root outputPath:nil metadata:nil error:&err],
    "mismatched source UUID refuses write");
+  ZNV3StaticBuildEntry *wrongOriginal=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"bad-original"
+   uuid:uuid.UUIDString path:src rva:0x1000 fileOffset:0x1000
+   original:[NSData dataWithBytes:&patched length:4] patch:[NSData dataWithBytes:&NOP length:4]];
+  ZNV3StaticBuildPlan *wrongPlan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework" entries:@[wrongOriginal]];
+  check(![ZNV3StaticBinaryBuilder buildPlan:wrongPlan inDirectory:root outputPath:nil metadata:nil error:&err],
+   "changed source Original refuses build");
+  NSMutableData *encrypted=[fixture(uuid) mutableCopy];
+  struct mach_header_64 eh={};memcpy(&eh,encrypted.mutableBytes,sizeof(eh));
+  size_t newCommand=sizeof(struct mach_header_64)+eh.sizeofcmds;
+  eh.ncmds++;eh.sizeofcmds+=sizeof(struct encryption_info_command_64);
+  memcpy(encrypted.mutableBytes,&eh,sizeof(eh));
+  struct encryption_info_command_64 crypt={};crypt.cmd=LC_ENCRYPTION_INFO_64;
+  crypt.cmdsize=sizeof(crypt);crypt.cryptid=1;
+  memcpy((uint8_t *)encrypted.mutableBytes+newCommand,&crypt,sizeof(crypt));
+  NSString *encryptedPath=[root stringByAppendingPathComponent:@"encrypted-fixture"];
+  check([encrypted writeToFile:encryptedPath atomically:YES],"encrypted fixture write");
+  ZNV3StaticBuildEntry *encryptedRow=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"encrypted"
+   uuid:uuid.UUIDString path:encryptedPath rva:0x1000 fileOffset:0x1000
+   original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
+  ZNV3StaticBuildPlan *encryptedPlan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework" entries:@[encryptedRow]];
+  check(![ZNV3StaticBinaryBuilder buildPlan:encryptedPlan inDirectory:root outputPath:nil metadata:nil error:&err],
+   "encrypted Mach-O must fail closed");
   [fm removeItemAtPath:root error:nil];
  }
  printf("P6 generated binary smoke: %s (%d failures)\n",failures?"FAIL":"PASS",failures);
