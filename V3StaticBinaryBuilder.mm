@@ -2,6 +2,7 @@
 #include "ZNMachOFile.h"
 #import "V3StaticBinaryBuilder.h"
 #import "V3StaticBuildPlanner.h"
+#import "V3StaticRuleIdentity.h"
 #import "ZNStaticPatchFormat.h"
 #import "ZNStaticPayloadProtectionV2.h"
 #import <mach-o/loader.h>
@@ -1189,7 +1190,8 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
                     for(size_t i=0;i<logicals.size();i++){
                         ZN44FeatureDescriptionEntry &descEntry=descEntries[i];
                         descEntry.patchID=(uint32_t)i+1u;
-                        NSData *utf8=[logicals[i].row.ruleID dataUsingEncoding:NSUTF8StringEncoding]?:[NSData data];
+                        NSString *identity=ZNP6RuleBinding(logicals[i].row.moduleUUID,logicals[i].row.ruleID,logicals[i].rva,logicals[i].enabled);
+                        NSData *utf8=[identity dataUsingEncoding:NSUTF8StringEncoding]?:[NSData data];
                         NSUInteger length=MIN((NSUInteger)ZN44_FEATURE_DESC_MAX_UTF8,utf8.length);
                         while(length>0){
                             NSData *candidate=[utf8 subdataWithRange:NSMakeRange(0,length)];
