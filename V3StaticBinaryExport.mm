@@ -3,6 +3,7 @@
 #import "V3StaticBuildPlanner.h"
 #import "V3PatchSession.h"
 #import "ZNAdhocMachOSigner.h"
+#import "ZNStaticPatchFormat.h"
 #import <mach-o/loader.h>
 #import <sys/stat.h>
 #include <string.h>
@@ -23,6 +24,7 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
  }
  NSUInteger commandOffset=sizeof(mh);
  BOOL haveText=NO,haveData=NO,uuidMatches=NO;
+ uint64_t tableOffset=UINT64_MAX,tableSize=0;
  for(uint32_t i=0;i<mh.ncmds;i++){
   if(commandOffset>data.length||data.length-commandOffset<sizeof(struct load_command)){
    if(reason)*reason=@"生成结果 Load Command 越界";return NO;
@@ -34,7 +36,9 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
   if(lc.cmd==LC_SEGMENT_64&&lc.cmdsize>=sizeof(struct segment_command_64)){
    struct segment_command_64 seg={};memcpy(&seg,p+commandOffset,sizeof(seg));
    if(!strncmp(seg.segname,"__ZNTEXT",16))haveText=YES;
-   if(!strncmp(seg.segname,"__ZNDATA",16))haveData=YES;
+   if(!strncmp(seg.segname,"__ZNDATA",16)){
+    haveData=YES;tableOffset=seg.fileoff;tableSize=seg.filesize;
+   }
   }
   if(lc.cmd==LC_UUID&&lc.cmdsize>=sizeof(struct uuid_command)){
    struct uuid_command uuid={};memcpy(&uuid,p+commandOffset,sizeof(uuid));
@@ -44,6 +48,50 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
  }
  if(!uuidMatches||!haveText||!haveData){
   if(reason)*reason=@"生成结果 UUID 或独立 Static Dispatch Segment 缺失";return NO;
+ }
+ // P9 acceptance: do not report success merely because the segments exist.
+ // Verify every emitted row against the immutable selected BuildPlan.
+ const uint64_t needed=sizeof(ZN44StaticHeader)+(uint64_t)plan.entries.count*sizeof(ZN44StaticEntry);
+ if(tableOffset==UINT64_MAX||tableOffset>data.length||
+    tableSize<needed||tableSize>data.length-tableOffset){
+  if(reason)*reason=@"生成结果 Static Dispatch Table 越界";return NO;
+ }
+ ZN44StaticHeader header={};
+ memcpy(&header,p+(NSUInteger)tableOffset,sizeof(header));
+ BOOL multi=plan.featureCount>1;
+ if(header.magic0!=ZN44_STATIC_MAGIC0||header.magic1!=ZN44_STATIC_MAGIC1||
+    header.version!=ZN44_STATIC_VERSION_V2||
+    header.entrySize!=sizeof(ZN44StaticEntry)||
+    header.count!=plan.entries.count||
+    ((header.flags&ZN44_STATIC_HEADER_FLAG_MULTI_FEATURE_V1)!=0)!=multi){
+  if(reason)*reason=@"生成规则数量或多功能标记与选中功能不一致";return NO;
+ }
+ NSMutableSet<NSString *> *owners=[NSMutableSet set];
+ for(NSUInteger i=0;i<plan.entries.count;i++){
+  ZN44StaticEntry row={};
+  memcpy(&row,p+(NSUInteger)tableOffset+sizeof(header)+i*sizeof(row),sizeof(row));
+  ZNV3StaticBuildEntry *expected=plan.entries[i];
+  NSString *title=multi?expected.featureName:plan.featureName;
+  NSString *owner=multi?[expected.featureKey substringToIndex:MIN((NSUInteger)23,expected.featureKey.length)]:nil;
+  // The entry ABI uses fixed UTF-8 fields. Reproduce the builder's truncation
+  // through bounded prefix checks rather than accepting an arbitrary title.
+  NSData *titleBytes=[title dataUsingEncoding:NSUTF8StringEncoding];
+  NSData *ownerBytes=[owner dataUsingEncoding:NSUTF8StringEncoding];
+  NSUInteger tlen=MIN(titleBytes.length,sizeof(row.title)-1);
+  NSUInteger olen=MIN(ownerBytes.length,sizeof(row.group)-1);
+  if(row.patchID!=i+1||row.canonicalIndex!=i||row.physicalID!=i+1||
+     !(row.flags&ZN44_STATIC_ENTRY_FLAG_CANONICAL)||
+     row.selectedTarget!=0||!titleBytes.length||
+     memcmp(row.title,titleBytes.bytes,tlen)!=0||row.title[tlen]!=0||
+     (multi&&(!ownerBytes.length||memcmp(row.group,ownerBytes.bytes,olen)!=0||
+      row.group[olen]!=0))){
+   if(reason)*reason=[NSString stringWithFormat:@"第 %lu 条规则的功能归属或 OFF 状态与构建计划不一致",(unsigned long)(i+1)];
+   return NO;
+  }
+  if(multi)[owners addObject:[NSString stringWithUTF8String:row.group]?:@""];
+ }
+ if(multi&&owners.count!=plan.featureCount){
+  if(reason)*reason=@"生成结果功能组数量与选中数量不一致";return NO;
  }
  return YES;
 }
@@ -85,7 +133,9 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
   NSDictionary *report=@{
    @"schema":@"com.zonoe.v3.static-binary-export",@"version":@1,
    @"binaryGenerated":@YES,@"sourceUUID":plan.imageUUID,
-   @"module":plan.module,@"ruleCount":@(plan.entries.count),
+   @"module":plan.module,@"featureCount":@(plan.featureCount),
+   @"selectedFeatures":[[plan manifest] objectForKey:@"rules"]?:@[],
+   @"ruleCount":@(plan.entries.count),
    @"output":name,@"builder":safeMetadata,
    @"signature":signature?:@{},@"finalPackageResignRequired":@YES,
    @"runtimeExecutableWrites":@NO
