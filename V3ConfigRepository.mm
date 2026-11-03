@@ -64,7 +64,7 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
   }
   if(legacyInvalid){[quarantine addObject:entry];continue;}
   ZNV3Feature *f=[ZNV3Feature feature:name detail:detail module:module];
-  f.identifier=uid;f.buttonType=button.integerValue;
+  f.identifier=uid;f.buttonType=(ZNV3FeatureType)button.integerValue;
   for(NSDictionary *r in rules){
    ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];
    rule.identifier=r[@"id"];rule.offsetText=r[@"offset"];rule.patchText=r[@"patch"];
