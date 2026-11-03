@@ -79,7 +79,7 @@ int main(){
   NSDictionary *inputDoc=[NSJSONSerialization JSONObjectWithData:
       [NSData dataWithContentsOfURL:[[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"]] options:0 error:&error];
   NSDictionary *inputParameters=inputDoc[@"features"][0][@"parameters"];
-  check(inputParameters.count==3&&inputParameters[@"valueType"]&&
+  check(inputParameters.count==4&&inputParameters[@"numericSchemaVersion"]&&inputParameters[@"valueType"]&&
         inputParameters[@"minimum"]&&inputParameters[@"maximum"]&&
         !inputParameters[@"step"]&&!inputParameters[@"defaultValue"]&&
         !inputParameters[@"requiresEnableSwitch"],
@@ -90,6 +90,34 @@ int main(){
         "minimal input parameters roundtrip");
   feature.valueConfig.minimum=21;
   check(![repo saveFeatures:@[feature] error:&error],"input rejects inverted range");
+  // Numeric rules persist Offset only, without an executable code Patch.
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  feature.buttonType=ZNV3FeatureTypeNumberInput;
+  rule.offsetText=@"0x39059D5";rule.patchText=@"E9FF9F52";
+  check([repo saveFeatures:@[feature] error:&error],
+        "number input accepts byte-unaligned typed Offset and ignores stale Patch");
+  NSDictionary *numericDoc=[NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithContentsOfURL:[[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"]] options:0 error:&error];
+  check(numericDoc[@"features"][0][@"rules"][0][@"patch"]==nil,
+        "numeric Offset-only JSON omits Patch field");
+  NSArray<ZNV3Feature *> *numericLoaded=[repo loadFeatures:&error];
+  check(numericLoaded.count==1&&
+        [numericLoaded[0].rules.firstObject.patchText isEqualToString:@""],
+        "numeric rules reload without any Patch bytes");
+  rule.offsetText=@"not-an-offset";
+  check(![repo saveFeatures:@[feature] error:&error],"reject invalid numeric Offset");
+  rule.offsetText=@"0x39059D4";
+  for(NSInteger type=ZNV3NumericTypeInt8;type<=ZNV3NumericTypeFloat64;type++){
+   feature.valueConfig=[ZNV3ValueConfig defaults];
+   feature.valueConfig.valueType=(ZNV3NumericType)type;
+   check([repo saveFeatures:@[feature] error:&error],"ten numeric types persist");
+  }
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  feature.valueConfig.valueType=ZNV3NumericTypeUInt8;feature.valueConfig.minimum=-1;
+  check(![repo saveFeatures:@[feature] error:&error],"reject unsigned negative range");
+  feature.valueConfig.valueType=ZNV3NumericTypeInt64;
+  feature.valueConfig.minimum=0;feature.valueConfig.maximum=9007199254740992.0;
+  check(![repo saveFeatures:@[feature] error:&error],"reject integer beyond precise double range");
   feature.valueConfig=[ZNV3ValueConfig defaults];
   feature.buttonType=(ZNV3FeatureType)4;
   check(![repo saveFeatures:@[feature] error:&error],"reject unknown feature type");
