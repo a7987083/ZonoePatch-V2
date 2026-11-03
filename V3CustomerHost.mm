@@ -1,4 +1,5 @@
 #import "V3CustomerMenuController.h"
+#import "V3CustomerRuntime.h"
 
 @interface ZNV3CustomerHost : NSObject
 @property(nonatomic,strong) UIWindow *window;
@@ -42,7 +43,9 @@
  CGRect sceneBounds=host.bounds;
  if(@available(iOS 13.0,*))sceneBounds=host.windowScene.coordinateSpace.bounds;
  CGFloat width=MIN(350.0,MAX(250.0,CGRectGetWidth(sceneBounds)-24.0));
- CGFloat height=MIN(475.0,MAX(270.0,CGRectGetHeight(sceneBounds)-44.0));
+ NSUInteger count=[[ZNV3CustomerRuntime shared] discover].count;
+ CGFloat contentHeight=145.0+64.0*MIN((NSUInteger)8,MAX((NSUInteger)1,count));
+ CGFloat height=MIN(contentHeight,MAX(230.0,CGRectGetHeight(sceneBounds)-44.0));
  self.window.frame=CGRectMake(CGRectGetMidX(sceneBounds)-width/2.0,
                               CGRectGetMidY(sceneBounds)-height/2.0,width,height);
  self.window.hidden=NO;
