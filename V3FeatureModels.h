@@ -19,6 +19,7 @@
 @property(nonatomic,strong) ZNV3Feature *draft;
 @property(nonatomic,strong,readonly) NSError *lastError;
 @property(nonatomic,assign,readonly) BOOL persistenceAvailable;
+@property(nonatomic,assign,readonly) NSUInteger quarantinedFeatureCount;
 @property(nonatomic,assign,readonly) NSUInteger editingIndex;
 - (void)editFeatureAtIndex:(NSUInteger)index;
 - (void)cancelDraft;
