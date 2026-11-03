@@ -39,6 +39,28 @@ int main(){
   check(!store.draft,"cancel discards draft");
   NSURL *appSupport=[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
   NSURL *file=[[appSupport URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
+  // Legacy P3 oversized patch is quarantined but its JSON stays intact on subsequent writes.
+  NSDictionary *legacyRule=@{@"id":@"old-rule",@"offset":@"0x39059D4",
+    @"patch":[@"" stringByPaddingToLength:520 withString:@"AA" startingAtIndex:0]};
+  NSDictionary *legacyFeature=@{@"id":@"legacy",@"name":@"old",@"detail":@"historical",
+    @"module":@"UnityFramework",@"buttonType":@0,@"rules":@[legacyRule]};
+  NSDictionary *validRule=@{@"id":@"good-rule",@"offset":@"0x39059D4",@"patch":@"E9FF9F52"};
+  NSDictionary *validFeature=@{@"id":@"good",@"name":@"working",@"detail":@"valid",
+    @"module":@"UnityFramework",@"buttonType":@0,@"rules":@[validRule]};
+  NSData *legacyJSON=[NSJSONSerialization dataWithJSONObject:@{@"schemaVersion":@1,
+      @"features":@[validFeature,legacyFeature]} options:0 error:nil];
+  check([legacyJSON writeToURL:file options:NSDataWritingAtomic error:nil],"legacy fixture written");
+  ZNV3ConfigRepository *legacyRepo=[ZNV3ConfigRepository new];
+  NSArray *good=[legacyRepo loadFeatures:&error];
+  check(good.count==1 && legacyRepo.quarantinedFeatureCount==1,"legacy quarantine keeps good features");
+  check([legacyRepo saveFeatures:good error:&error],"save good features without dropping legacy entries");
+  NSData *roundtrip=[NSData dataWithContentsOfURL:file];
+  NSDictionary *reloaded=[NSJSONSerialization JSONObjectWithData:roundtrip options:0 error:nil];
+  NSArray *entries=reloaded[@"features"];
+  BOOL legacyStillThere=NO;
+  for(NSDictionary *entry in entries)if([entry[@"id"] isEqual:@"legacy"] &&
+    [entry[@"rules"][0][@"patch"] isEqual:legacyRule[@"patch"]])legacyStillThere=YES;
+  check(entries.count==2&&legacyStillThere,"incompatible JSON preserved verbatim");
   [[NSFileManager defaultManager] removeItemAtURL:file error:nil];
  }
  printf("V3 Address/Store regression: %s (%d failures)\n",failures?"FAIL":"PASS",failures);
