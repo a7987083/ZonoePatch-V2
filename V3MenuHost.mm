@@ -13,14 +13,22 @@
 - (instancetype)init {
  if((self=[super init])) {
  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEvent:) name:UIApplicationDidEnterBackgroundNotification object:nil];
- if(@available(iOS 13.0,*)) [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEvent:) name:UISceneDidDisconnectNotification object:nil];
+ if(@available(iOS 13.0,*)) {
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEvent:) name:UISceneDidDisconnectNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEvent:) name:UISceneWillDeactivateNotification object:nil];
+ }
  }return self;
 }
 - (void)appEvent:(NSNotification *)note {
  if(![NSThread isMainThread]) { dispatch_async(dispatch_get_main_queue(), ^{[self appEvent:note];});return; }
  if([note.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) { [self hide];return; }
  if(@available(iOS 13.0,*)) {
-  if([note.object isKindOfClass:UIWindowScene.class] && self.window.windowScene==note.object) { [self hide];self.window.rootViewController=nil;self.window=nil;self.controller=nil; }
+  if([note.object isKindOfClass:UIWindowScene.class] && self.window.windowScene==note.object) {
+   [self hide];
+   if([note.name isEqualToString:UISceneDidDisconnectNotification]){
+    self.window.rootViewController=nil;self.window=nil;self.controller=nil;
+   }
+  }
  }
 }
 - (void)hide { [self.controller.view endEditing:YES];self.window.hidden=YES; }
@@ -39,7 +47,10 @@
     w.rootViewController=controller;
     self.window=w;self.controller=controller;
  }
- self.window.frame=host.bounds;
+ // Host UIWindow bounds are not guaranteed to match the full scene coordinate space.
+ // The customer menu remains unchanged; this is developer-menu-only lifecycle handling.
+ if(@available(iOS 13.0,*))self.window.frame=host.windowScene.coordinateSpace.bounds;
+ else self.window.frame=host.bounds;
  self.window.hidden=NO;
 }
 @end
