@@ -29,6 +29,8 @@
 - (void)selectFeature:(UIButton *)sender;
 - (void)toggleFeaturePatch:(UIButton *)sender;
 - (void)refreshStaticBuildButton;
+- (void)showPatchMessage:(NSString *)title detail:(NSString *)detail;
+- (BOOL)draftMatchesSavedPatch:(ZNV3Feature *)saved;
 - (void)refreshModuleStatus;
 - (void)categoryTap:(UIButton *)sender;
 - (void)closeTap;
@@ -44,5 +46,6 @@
 - (void)applyOrRestore;
 - (void)generateStaticBinary;
 - (void)refreshPatchActionButton;
+- (void)staticBuildInputChanged:(UITextField *)sender;
 - (void)saveUI;
 @end
