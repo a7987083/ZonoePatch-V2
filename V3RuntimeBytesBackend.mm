@@ -1,5 +1,7 @@
 #import "V3RuntimeBytesBackend.h"
+#import "V3AddressResolver.h"
 #import <mach/mach.h>
+#import <mach/mach_vm.h>
 #import <mach/vm_region.h>
 #import <libkern/OSCacheControl.h>
 #import <sys/mman.h>
@@ -34,6 +36,34 @@ static BOOL ZNCheckRX(uintptr_t start,NSUInteger length,NSError **error){
  return YES;
 }
 @implementation ZNV3RuntimeBytesBackend
+- (BOOL)validateOperation:(ZNV3PatchOperation *)operation error:(NSError **)error {
+ if(!operation.moduleUUID.length||!operation.patchBytes.length||!operation.address){
+  if(error)*error=ZNBytesError(7,@"Missing executable target identity");return NO;
+ }
+ NSUInteger n=operation.patchBytes.length;
+ if(n>UINTPTR_MAX-operation.address){
+  if(error)*error=ZNBytesError(7,@"Patch range overflow");return NO;
+ }
+ NSString *firstText=[NSString stringWithFormat:@"runtime:0x%llX",(unsigned long long)operation.address];
+ NSString *lastText=[NSString stringWithFormat:@"runtime:0x%llX",(unsigned long long)(operation.address+n-1)];
+ for(NSString *module in @[@"主程序",@"UnityFramework"]){
+  ZNV3ResolvedAddress *first=[ZNV3AddressResolver resolve:firstText module:module error:nil];
+  if(!first)continue;
+  ZNV3ResolvedAddress *last=[ZNV3AddressResolver resolve:lastText module:module error:nil];
+  BOOL same=last&&first.fileBacked&&last.fileBacked&&
+    first.segmentVMAddress==last.segmentVMAddress&&
+    first.segmentFileOffset==last.segmentFileOffset&&
+    last.fileOffset==first.fileOffset+n-1&&
+    [first.imageUUID isEqualToString:operation.moduleUUID]&&
+    [last.imageUUID isEqualToString:operation.moduleUUID]&&
+    (first.segmentInitialProtection & 5u)==5u;
+  if(same)return YES;
+  if(error)*error=ZNBytesError(7,[NSString stringWithFormat:@"%@ identity/segment/UUID mismatch",module]);
+  return NO;
+ }
+ if(error)*error=ZNBytesError(7,@"Runtime address is not inside allowed loaded Mach-O code segment");
+ return NO;
+}
 - (NSData *)readAt:(uintptr_t)address length:(NSUInteger)length error:(NSError **)error{
  if(!address||!length||length>256||length-1>UINTPTR_MAX-address){
   if(error)*error=ZNBytesError(1,@"Invalid read range");return nil;
