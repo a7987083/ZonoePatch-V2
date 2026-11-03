@@ -41,6 +41,7 @@
  [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
+ [self refreshDraftModuleButton];
  [self renderRules];self.editor.hidden=NO;
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
@@ -58,6 +59,17 @@
  [self.view endEditing:YES];self.editor.hidden=YES;[self.store cancelDraft];
 }
 
+- (void)refreshDraftModuleButton {
+ NSString *target=self.store.draft.module?:@"（未选择）";
+ [self.draftModuleButton setTitle:[NSString stringWithFormat:@"%@  ▾",target]
+                         forState:UIControlStateNormal];
+}
+- (void)cycleDraftModule {
+ ZNV3Feature *draft=self.store.draft;
+ if(!draft)return;
+ draft.module=[draft.module isEqualToString:@"主程序"]?@"UnityFramework":@"主程序";
+ [self refreshDraftModuleButton];
+}
 - (void)cycleType {
  self.typeIndex=(self.typeIndex+1)%3;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
@@ -85,7 +97,7 @@
     (unsigned long long)r.runtimeVA,(unsigned long long)r.fileOffset,
     r.segmentName,validation.originalHex,validation.patchHex]];
  }
- UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Runtime Patch 预检（只读）"
+ UIAlertController *a=[UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"预检目标：%@",draft.module]
   message:lines.count?[lines componentsJoinedByString:@"\n\n"]:@"请先输入 Offset / Patch，不会修改内存。"
   preferredStyle:UIAlertControllerStyleAlert];
  [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
