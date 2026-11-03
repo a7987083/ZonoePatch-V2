@@ -41,7 +41,7 @@
  UIStackView *stack=[UIStackView new];
  stack.translatesAutoresizingMaskIntoConstraints=NO;
  stack.axis=UILayoutConstraintAxisVertical;stack.spacing=12;
- stack.layoutMargins=UIEdgeInsetsMake(18,18,18,18);
+ stack.layoutMargins=UIEdgeInsetsMake(14,12,14,12);
  stack.layoutMarginsRelativeArrangement=YES;
  [self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
@@ -52,16 +52,20 @@
 
  UIStackView *header=[UIStackView new];
  header.axis=UILayoutConstraintAxisHorizontal;
- header.alignment=UIStackViewAlignmentCenter;header.spacing=12;
+ header.alignment=UIStackViewAlignmentCenter;header.spacing=8;
+ UIPanGestureRecognizer *drag=[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(dragHeader:)];
+ drag.maximumNumberOfTouches=1;
+ drag.cancelsTouchesInView=NO;
+ [header addGestureRecognizer:drag];
  [stack addArrangedSubview:header];
- [header.heightAnchor constraintEqualToConstant:62].active=YES;
+ [header.heightAnchor constraintEqualToConstant:54].active=YES;
 
  UIImageView *icon=[[UIImageView alloc]initWithImage:[UIImage systemImageNamed:@"gamecontroller.fill"]];
  icon.tintColor=[UIColor colorWithRed:1 green:.45 blue:.97 alpha:1];
  icon.contentMode=UIViewContentModeScaleAspectFit;
  [header addArrangedSubview:icon];
- [icon.widthAnchor constraintEqualToConstant:46].active=YES;
- [icon.heightAnchor constraintEqualToConstant:40].active=YES;
+ [icon.widthAnchor constraintEqualToConstant:36].active=YES;
+ [icon.heightAnchor constraintEqualToConstant:34].active=YES;
 
  UILabel *title=ZNLabel(@"ZonoePatch",17,YES);
  title.textColor=UIColor.whiteColor;title.numberOfLines=1;
@@ -121,6 +125,27 @@
 
 - (void)closeMenu {if(self.closeBlock)self.closeBlock();}
 
+- (void)dragHeader:(UIPanGestureRecognizer *)gesture {
+ UIWindow *window=self.view.window;
+ if(!window)return;
+ if(gesture.state!=UIGestureRecognizerStateBegan &&
+    gesture.state!=UIGestureRecognizerStateChanged)return;
+ CGPoint delta=[gesture translationInView:self.view];
+ [gesture setTranslation:CGPointZero inView:self.view];
+ CGRect limits=UIScreen.mainScreen.bounds;
+ if(@available(iOS 13.0,*)){
+  if(window.windowScene)limits=window.windowScene.coordinateSpace.bounds;
+ }
+ CGRect frame=window.frame;
+ CGFloat minX=CGRectGetMinX(limits)+8;
+ CGFloat minY=CGRectGetMinY(limits)+8;
+ CGFloat maxX=MAX(minX,CGRectGetMaxX(limits)-CGRectGetWidth(frame)-8);
+ CGFloat maxY=MAX(minY,CGRectGetMaxY(limits)-CGRectGetHeight(frame)-8);
+ frame.origin.x=MAX(minX,MIN(maxX,frame.origin.x+delta.x));
+ frame.origin.y=MAX(minY,MIN(maxY,frame.origin.y+delta.y));
+ window.frame=frame;
+}
+
 - (void)showError:(NSString *)message {
  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"功能切换失败"
   message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -142,12 +167,6 @@
   [self.features addArrangedSubview:message];
   [message.heightAnchor constraintEqualToConstant:66].active=YES;
  }
- NSArray<NSString *> *symbols=@[@"bolt.fill",@"crown.fill",@"ticket.fill",@"gift.fill"];
- NSArray<UIColor *> *iconColors=@[
-  [UIColor colorWithRed:1 green:.74 blue:.18 alpha:1],
-  [UIColor colorWithRed:1 green:.81 blue:.30 alpha:1],
-  [UIColor colorWithRed:1 green:.39 blue:.72 alpha:1],
-  [UIColor colorWithRed:.93 green:.38 blue:1 alpha:1]];
  for(NSUInteger i=0;i<self.snapshot.count;i++) {
   ZNV3CustomerFeature *feature=self.snapshot[i];
   UIView *panel=[UIView new];
@@ -161,22 +180,14 @@
   UIStackView *row=[UIStackView new];
   row.axis=UILayoutConstraintAxisHorizontal;
   row.alignment=UIStackViewAlignmentCenter;
-  row.spacing=10;
+  row.spacing=8;
   row.translatesAutoresizingMaskIntoConstraints=NO;
   [panel addSubview:row];
   [NSLayoutConstraint activateConstraints:@[
-   [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:12],
-   [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-11],
+   [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:10],
+   [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
    [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:7],
    [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-7]]];
-
-  NSUInteger style=i%symbols.count;
-  UIImageView *glyph=[[UIImageView alloc]initWithImage:[UIImage systemImageNamed:symbols[style]]];
-  glyph.contentMode=UIViewContentModeScaleAspectFit;
-  glyph.tintColor=iconColors[style];
-  [row addArrangedSubview:glyph];
-  [glyph.widthAnchor constraintEqualToConstant:26].active=YES;
-  [glyph.heightAnchor constraintEqualToConstant:25].active=YES;
 
   UILabel *name=ZNLabel(feature.title?:@"",14,NO);
   name.textColor=UIColor.whiteColor;
