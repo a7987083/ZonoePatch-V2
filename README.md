@@ -1,4 +1,4 @@
-# ZonoePatch V3 — iOS arm64 UIKit + Read-only Patch Preflight
+# ZonoePatch V3 — iOS arm64 UIKit + Runtime Bytes Patch
 
 Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`.
 
@@ -10,14 +10,14 @@ Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`
 - Explicit RVA / Preferred VA / Runtime VA / File Offset resolution from loaded Mach-O segments. Unprefixed hexadecimal offsets are interpreted as RVA.
 - Shared ARM64 HEX codec for saved rules and runtime preflight (4–256 bytes, multiple of 4). Hex input accepts optional `0x` and whitespace.
 - **Read-only** runtime preflight: live Original-byte read, mapped file span, executable segment protection and Mach-O `LC_UUID` checks.
-- P5.2 **isolated** Runtime Patch Executor: multi-action preflight, byte conflict checks, bounded code spans, per-write verification, rollback, explicit `RecoveryFailed` latch. Independent backend interface plus experimental RX→RW→RX Bytes writer. This is **not yet wired to the menu**, and is not proof of device support.
+- P5.2 **isolated** Runtime Patch Executor: multi-action preflight, byte conflict checks, bounded code spans, per-write verification, rollback, explicit `RecoveryFailed` latch. Independent backend interface plus experimental RX→RW→RX Bytes writer. This backend is wired to the edit screen from P5.3, but success on non-jailbreak devices is **not verified**.
 - CI: macOS host codec/address/config/**executor fault-injection** regression executables, iOS arm64 build, `ldid -S` and SHA256 artifact.
 
 ## Not implemented / not verified
 
-- User-facing Runtime Patch activation from the menu, Inline Hook, static Mach-O patch output. The P5.2 backend exists but is not enabled from UI.
-- Full iPhone device regression for the latest preflight changes.
-- Durable Patch Definition binding to a saved Mach-O UUID (UUID is read at preflight but not persisted).
+- Inline Hook and static Mach-O patch output. P5.3 adds a confirmed **Apply Patch / Restore Original** action for saved features only. The edit button is not a runtime hook and cannot guarantee RX code-page write permissions.
+- Full iPhone device regression for actual applying/restoring bytes, code-signing and concurrent execution.
+- Durable Patch Definition binding to a saved Mach-O UUID (UUID is read at preflight but not persisted). The current process session requires on-disk Original equality before first write, retains a single active transaction, and does not persist ON state.
 
 The successful CI does **not** prove the target game is patchable or compatible with non-jailbreak executable-page restrictions. See `KNOWN_ISSUES.md`.
 
