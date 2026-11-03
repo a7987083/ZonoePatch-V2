@@ -174,7 +174,7 @@
  if([session isActiveFeature:draft.identifier]){
   NSError *error=nil;
   BOOL restored=[session restoreFeature:draft.identifier error:&error];
-  [self refreshPatchActionButton];
+  [self refreshPatchActionButton];[self renderFeatures];
   [self showPatchMessage:restored?@"Original 已恢复":@"恢复失败"
                 detail:restored?@"原始字节已写回并通过读回校验。":
                    (error.localizedDescription?:session.lastDiagnostic)];
@@ -198,7 +198,7 @@
  }
  NSError *error=nil;
  BOOL applied=[session applyFeature:saved error:&error];
- [self refreshPatchActionButton];
+ [self refreshPatchActionButton];[self renderFeatures];
  [self showPatchMessage:applied?@"Patch 已应用":@"Patch 未应用"
                 detail:applied?@"目标字节已更新并通过读回验证。可通过「恢复 Original」撤销。":
                     (error.localizedDescription?:session.lastDiagnostic)];
@@ -217,6 +217,7 @@
  self.store.draft.name=name;
  self.store.draft.detail=self.descField.text?:@"";
  self.store.draft.buttonType=self.typeIndex;
+ NSString *savedIdentifier=[self.store.draft.identifier copy];
  if(![self.store saveDraft]) {
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"配置保存失败"
     message:self.store.lastError.localizedDescription?:@"配置不可写，请检查 App Support 文件权限"
@@ -224,6 +225,7 @@
   [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
   [self presentViewController:alert animated:YES completion:nil];return;
  }
+ self.selectedFeatureID=savedIdentifier;
  [self hideEditor];[self renderFeatures];
 }
 @end
