@@ -20,6 +20,23 @@ static inline NSString *ZNV3FeatureTypeTitle(NSInteger type) {
  }
 }
 
+// P10.2 typed numeric configuration; Slider commits only on OFF -> ON.
+typedef NS_ENUM(NSInteger, ZNV3NumericType) {
+ ZNV3NumericTypeInt32 = 0,
+ ZNV3NumericTypeFloat32 = 1,
+};
+@interface ZNV3ValueConfig : NSObject <NSCopying>
+@property(nonatomic,assign) ZNV3NumericType valueType;
+@property(nonatomic,assign) double minimum;
+@property(nonatomic,assign) double maximum;
+@property(nonatomic,assign) double step;
+@property(nonatomic,assign) double defaultValue;
+// Slider is always gated; dragging only updates a pending value.
+@property(nonatomic,assign) BOOL requiresEnableSwitch;
++ (instancetype)defaults;
+- (BOOL)isValid;
+@end
+
 @interface ZNV3PatchRule : NSObject
 @property(nonatomic,copy) NSString *identifier;
 @property(nonatomic,copy) NSString *offsetText;
@@ -32,6 +49,7 @@ static inline NSString *ZNV3FeatureTypeTitle(NSInteger type) {
 @property(nonatomic,copy) NSString *detail;
 @property(nonatomic,copy) NSString *module;
 @property(nonatomic,assign) ZNV3FeatureType buttonType;
+@property(nonatomic,strong) ZNV3ValueConfig *valueConfig;
 @property(nonatomic,strong) NSMutableArray<ZNV3PatchRule *> *rules;
 + (instancetype)feature:(NSString *)name detail:(NSString *)detail module:(NSString *)module;
 @end
