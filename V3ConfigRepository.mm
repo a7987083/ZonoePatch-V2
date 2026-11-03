@@ -49,7 +49,7 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
      ![detail isKindOfClass:NSString.class]||detail.length>1024||
      ![module isKindOfClass:NSString.class]||![@[@"主程序",@"UnityFramework"] containsObject:module]||
      ![uid isKindOfClass:NSString.class]||uid.length>128||!uid.length||
-     ![button isKindOfClass:NSNumber.class]||button.integerValue<0||button.integerValue>2||
+     ![button isKindOfClass:NSNumber.class]||!ZNV3FeatureTypeIsValid(button.integerValue)||
      ![rules isKindOfClass:NSArray.class]||rules.count>128) {
     [quarantine addObject:entry];continue;
   }
@@ -81,7 +81,7 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
  for(ZNV3Feature *f in features){
   if(!f.name.length||f.name.length>128||f.detail.length>1024||
      ![@[@"主程序",@"UnityFramework"] containsObject:f.module]||
-     f.buttonType<0||f.buttonType>2||f.rules.count>128) {
+     !ZNV3FeatureTypeIsValid(f.buttonType)||f.rules.count>128) {
    if(error)*error=ZNError(10,@"功能字段校验失败");return NO;
   }
   NSMutableArray *rules=[NSMutableArray arrayWithCapacity:f.rules.count];
