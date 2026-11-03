@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,copy,readonly) NSData *patchBytes;
 - (instancetype)initWithRuleID:(NSString *)ruleID uuid:(NSString *)uuid path:(NSString *)path
  rva:(uint64_t)rva fileOffset:(uint64_t)fileOffset original:(NSData *)original patch:(NSData *)patch;
+- (instancetype)initWithRuleID:(NSString *)ruleID featureKey:(NSString *)featureKey featureName:(NSString *)featureName
+ uuid:(NSString *)uuid path:(NSString *)path rva:(uint64_t)rva fileOffset:(uint64_t)fileOffset original:(NSData *)original patch:(NSData *)patch;
 @end
 
 @interface ZNV3StaticBuildPlan : NSObject
