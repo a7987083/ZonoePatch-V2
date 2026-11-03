@@ -73,11 +73,11 @@
   ZNV3ResolvedAddress *r=[ZNV3AddressResolver resolve:rule.offsetText module:draft.module error:&error];
   if(!r){[lines addObject:[NSString stringWithFormat:@"#%lu ❌ %@",(unsigned long)i+1,error.localizedDescription?:@"无法解析"]];continue;}
   NSString *file=r.fileBacked?[NSString stringWithFormat:@"0x%llX",(unsigned long long)r.fileOffset]:@"无文件映射";
-  [lines addObject:[NSString stringWithFormat:@"#%lu %@ · %@\\nRVA 0x%llX · Runtime 0x%llX\\nFile %@",
+  [lines addObject:[NSString stringWithFormat:@"#%lu %@ · %@\nRVA 0x%llX · Runtime 0x%llX\nFile %@",
     (unsigned long)i+1,r.kind,r.segmentName,(unsigned long long)r.rva,(unsigned long long)r.runtimeVA,file]];
  }
  UIAlertController *a=[UIAlertController alertControllerWithTitle:@"地址解析（只读）"
-  message:lines.count?[lines componentsJoinedByString:@"\\n\\n"]:@"请先输入 Offset / Patch。不会修改内存。"
+  message:lines.count?[lines componentsJoinedByString:@"\n\n"]:@"请先输入 Offset / Patch。不会修改内存。"
   preferredStyle:UIAlertControllerStyleAlert];
  [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
  [self presentViewController:a animated:YES completion:nil];
