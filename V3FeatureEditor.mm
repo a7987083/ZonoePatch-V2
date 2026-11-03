@@ -200,7 +200,7 @@
  if(![self draftMatchesSavedPatch:saved]){
   [self showPatchMessage:@"规则尚未保存" detail:@"模块或 Offset / Patch 已修改。请先保存，重新进入编辑器后再应用。"];return;
  }
- if([[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:saved.identifier]||
+ if([ZNV3StaticDispatchRuntime shared].hasActiveFeature||
     [ZNV3StaticDispatchRuntime shared].recoveryFailed){
   [self showPatchMessage:@"静态 Patch 已启用或故障锁定"
         detail:@"请先关闭静态预埋 Patch，再使用越狱 Runtime Bytes Patch。"];return;
