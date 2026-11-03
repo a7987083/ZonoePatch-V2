@@ -10,11 +10,12 @@ Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`
 - Explicit RVA / Preferred VA / Runtime VA / File Offset resolution from loaded Mach-O segments. Unprefixed hexadecimal offsets are interpreted as RVA.
 - Shared ARM64 HEX codec for saved rules and runtime preflight (4–256 bytes, multiple of 4). Hex input accepts optional `0x` and whitespace.
 - **Read-only** runtime preflight: live Original-byte read, mapped file span, executable segment protection and Mach-O `LC_UUID` checks.
-- CI: macOS host codec/address/config regression executables, iOS arm64 build, `ldid -S` and SHA256 artifact.
+- P5.2 **isolated** Runtime Patch Executor: multi-action preflight, byte conflict checks, bounded code spans, per-write verification, rollback, explicit `RecoveryFailed` latch. Independent backend interface plus experimental RX→RW→RX Bytes writer. This is **not yet wired to the menu**, and is not proof of device support.
+- CI: macOS host codec/address/config/**executor fault-injection** regression executables, iOS arm64 build, `ldid -S` and SHA256 artifact.
 
 ## Not implemented / not verified
 
-- Runtime memory writes, Code Patch activation/rollback, Inline Hook, static Mach-O patch output.
+- User-facing Runtime Patch activation from the menu, Inline Hook, static Mach-O patch output. The P5.2 backend exists but is not enabled from UI.
 - Full iPhone device regression for the latest preflight changes.
 - Durable Patch Definition binding to a saved Mach-O UUID (UUID is read at preflight but not persisted).
 
