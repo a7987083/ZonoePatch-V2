@@ -1175,8 +1175,8 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
                         entry.canonicalIndex=(uint32_t)physical.members.front();
                         entry.flags=(i==physical.members.front()?ZN44_STATIC_ENTRY_FLAG_CANONICAL:0u) |
                                     (physical.members.size()>1?ZN44_STATIC_ENTRY_FLAG_SHARED:0u);
-                        ZNV3CopyFixed(entry.title,sizeof(entry.title),[NSString stringWithFormat:@"%@ #%lu",plan.featureName,(unsigned long)(i+1)]);
-                        ZNV3CopyFixed(entry.group,sizeof(entry.group),plan.featureName);
+                        ZNV3CopyFixed(entry.title,sizeof(entry.title),plan.featureName);
+                        ZNV3CopyFixed(entry.group,sizeof(entry.group),target);
                     }
 
                     uint64_t descOffset=ZNV3Align(sizeof(ZN44StaticHeader)+logicals.size()*sizeof(ZN44StaticEntry),8);
