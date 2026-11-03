@@ -2,6 +2,7 @@
 #import "V3UIComponents.h"
 #import "V3AddressResolver.h"
 #import "V3PatchValidator.h"
+#import "V3PatchSession.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -42,6 +43,7 @@
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
  [self renderRules];self.editor.hidden=NO;
+ [self refreshPatchActionButton];
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
@@ -66,38 +68,74 @@
  self.typeIndex=(self.typeIndex+1)%3;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
 }
-- (void)preview {
- [self.view endEditing:YES];
+- (void)refreshPatchActionButton {
  ZNV3Feature *draft=self.store.draft;
- if(!draft)return;
- draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
- NSMutableArray<NSString *> *lines=[NSMutableArray array];
- for(NSUInteger i=0;i<draft.rules.count;i++){
-  ZNV3PatchRule *rule=draft.rules[i];
-  if(!rule.offsetText.length&&!rule.patchText.length)continue;
-  NSError *error=nil;
-  ZNV3PatchValidation *validation=[ZNV3PatchValidator validateOffset:rule.offsetText
-    patch:rule.patchText module:draft.module error:&error];
-  if(!validation){
-   [lines addObject:[NSString stringWithFormat:@"#%lu ❌ %@",
-     (unsigned long)i+1,error.localizedDescription?:@"验证失败"]];
-   continue;
-  }
-  ZNV3ResolvedAddress *r=validation.address;
-  [lines addObject:[NSString stringWithFormat:
-    @"#%lu ✅ 只读预检通过\nRVA 0x%llX · Runtime 0x%llX\nFile 0x%llX · %@\nOriginal %@\nPatch %@",
-    (unsigned long)i+1,(unsigned long long)r.rva,
-    (unsigned long long)r.runtimeVA,(unsigned long long)r.fileOffset,
-    r.segmentName,validation.originalHex,validation.patchHex]];
+ BOOL active=draft && [[ZNV3PatchSession shared] isActiveFeature:draft.identifier];
+ [self.patchActionButton setTitle:active?@"恢复 Original":@"应用 Patch" forState:UIControlStateNormal];
+}
+- (void)showPatchMessage:(NSString *)title detail:(NSString *)detail {
+ UIAlertController *alert=[UIAlertController alertControllerWithTitle:title
+   message:detail preferredStyle:UIAlertControllerStyleAlert];
+ [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+ [self presentViewController:alert animated:YES completion:nil];
+}
+- (BOOL)draftMatchesSavedPatch:(ZNV3Feature *)saved {
+ ZNV3Feature *draft=self.store.draft;
+ if(!saved||!draft||![saved.identifier isEqualToString:draft.identifier]||
+    ![saved.module isEqualToString:draft.module]||saved.rules.count!=draft.rules.count)return NO;
+ for(NSUInteger i=0;i<saved.rules.count;i++){
+  ZNV3PatchRule *a=saved.rules[i],*b=draft.rules[i];
+  if(![a.identifier isEqualToString:b.identifier]||
+     ![a.offsetText isEqualToString:b.offsetText]||
+     ![a.patchText isEqualToString:b.patchText])return NO;
  }
- UIAlertController *a=[UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"预检目标：%@",draft.module]
-  message:lines.count?[lines componentsJoinedByString:@"\n\n"]:@"请先输入 Offset / Patch，不会修改内存。"
+ return YES;
+}
+- (void)applyOrRestore {
+ [self.view endEditing:YES];
+ ZNV3Feature *draft=self.store.draft;if(!draft)return;
+ ZNV3PatchSession *session=[ZNV3PatchSession shared];
+ if([session isActiveFeature:draft.identifier]){
+  NSError *error=nil;
+  BOOL restored=[session restoreFeature:draft.identifier error:&error];
+  [self refreshPatchActionButton];
+  [self showPatchMessage:restored?@"Original 已恢复":@"恢复失败"
+                detail:restored?@"原始字节已写回并通过读回校验。":
+                   (error.localizedDescription?:session.lastDiagnostic)];
+  return;
+ }
+ if(session.status==ZNV3PatchTransactionStatusRecoveryFailed){
+  [self showPatchMessage:@"执行器已锁定" detail:session.lastDiagnostic];return;
+ }
+ NSUInteger index=self.store.editingIndex;
+ if(index==NSNotFound||index>=self.store.features.count){
+  [self showPatchMessage:@"请先保存功能" detail:@"应用 Patch 仅支持已经保存的功能；保存后重新进入编辑器。"];return;
+ }
+ ZNV3Feature *saved=self.store.features[index];
+ if(![self draftMatchesSavedPatch:saved]){
+  [self showPatchMessage:@"规则尚未保存" detail:@"模块或 Offset / Patch 已修改。请先保存，重新进入编辑器后再应用。"];return;
+ }
+ UIAlertController *confirm=[UIAlertController alertControllerWithTitle:@"应用 Runtime Bytes Patch？"
+  message:[NSString stringWithFormat:@"目标模块：%@\n将尝试写入已加载的 ARM64 可执行代码页。非越狱设备可能拒绝 mprotect；如失败会报告原因，不能保证系统不会终止进程。",saved.module]
   preferredStyle:UIAlertControllerStyleAlert];
- [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
- [self presentViewController:a animated:YES completion:nil];
+ [confirm addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+ __weak typeof(self) weakSelf=self;
+ [confirm addAction:[UIAlertAction actionWithTitle:@"确认应用" style:UIAlertActionStyleDestructive handler:^(__unused UIAlertAction *action){
+  __strong typeof(weakSelf) strongSelf=weakSelf;if(!strongSelf)return;
+  NSError *error=nil;
+  BOOL applied=[session applyFeature:saved error:&error];
+  [strongSelf refreshPatchActionButton];
+  [strongSelf showPatchMessage:applied?@"Patch 已应用":@"Patch 未应用"
+               detail:applied?@"目标字节已更新并通过读回验证。可通过「恢复 Original」撤销。":
+                  (error.localizedDescription?:session.lastDiagnostic)];
+ }]];
+ [self presentViewController:confirm animated:YES completion:nil];
 }
 - (void)saveUI {
  if(!self.store.draft)return;
+ if([[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier]){
+  [self showPatchMessage:@"禁止修改活动补丁" detail:@"请先恢复 Original，再保存功能修改。"];return;
+ }
  self.store.draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
  NSString *name=self.nameField.text.length?self.nameField.text:@"未命名功能";
  self.store.draft.name=name;
