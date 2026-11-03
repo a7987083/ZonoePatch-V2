@@ -93,6 +93,9 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
 @end
 @implementation ZNV3AddressResolver
 + (BOOL)validAddressText:(NSString *)text {Kind kind=Auto;uint64_t n=0;return parse(text,kind,n);}
++ (BOOL)validAlignedCodeOffsetText:(NSString *)text {
+ Kind kind=Auto;uint64_t n=0;return parse(text,kind,n) && ((n & 3ULL)==0);
+}
 + (ZNV3ResolvedAddress *)resolve:(NSString *)text module:(NSString *)module error:(NSError **)error {
  NSString *message=nil;Kind kind=Auto;uint64_t input=0;
  if(!parse(text,kind,input))message=@"Offset 格式无效：使用 0x105A3C 或 105A3C";
