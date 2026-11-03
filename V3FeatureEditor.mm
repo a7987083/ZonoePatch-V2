@@ -41,13 +41,14 @@
  [self.store beginDraftForModule:self.moduleIndex==0?@"主程序":@"UnityFramework"];
  self.nameField.text=@"";self.descField.text=@"";
  self.typeIndex=0;[self.typeButton setTitle:@"开关  ▾" forState:UIControlStateNormal];
- [self refreshDraftModuleButton];
  [self renderRules];self.editor.hidden=NO;
  [self.scroll layoutIfNeeded];[self.scroll scrollRectToVisible:self.editor.frame animated:YES];
 }
 - (void)editFeatureAtIndex:(NSUInteger)index {
  [self.store editFeatureAtIndex:index];
  ZNV3Feature *draft=self.store.draft;if(!draft)return;
+ // Top-level module picker is the single source for editing and preview.
+ draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
  self.nameField.text=draft.name;self.descField.text=draft.detail;
  self.typeIndex=draft.buttonType;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[MIN(2,MAX(0,self.typeIndex))] forState:UIControlStateNormal];
@@ -60,17 +61,6 @@
  [self.view endEditing:YES];self.editor.hidden=YES;[self.store cancelDraft];
 }
 
-- (void)refreshDraftModuleButton {
- NSString *target=self.store.draft.module?:@"（未选择）";
- [self.draftModuleButton setTitle:[NSString stringWithFormat:@"%@  ▾",target]
-                         forState:UIControlStateNormal];
-}
-- (void)cycleDraftModule {
- ZNV3Feature *draft=self.store.draft;
- if(!draft)return;
- draft.module=[draft.module isEqualToString:@"主程序"]?@"UnityFramework":@"主程序";
- [self refreshDraftModuleButton];
-}
 - (void)cycleType {
  self.typeIndex=(self.typeIndex+1)%3;
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
@@ -79,6 +69,7 @@
  [self.view endEditing:YES];
  ZNV3Feature *draft=self.store.draft;
  if(!draft)return;
+ draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
  NSMutableArray<NSString *> *lines=[NSMutableArray array];
  for(NSUInteger i=0;i<draft.rules.count;i++){
   ZNV3PatchRule *rule=draft.rules[i];
@@ -105,6 +96,8 @@
  [self presentViewController:a animated:YES completion:nil];
 }
 - (void)saveUI {
+ if(!self.store.draft)return;
+ self.store.draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
  NSString *name=self.nameField.text.length?self.nameField.text:@"未命名功能";
  self.store.draft.name=name;
  self.store.draft.detail=self.descField.text?:@"";
