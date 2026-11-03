@@ -14,7 +14,11 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
  return [ZNV3AddressResolver validAlignedCodeOffsetText:offset] &&
         [ZNV3PatchCodec isValidCodeText:patch];
 }
+@interface ZNV3ConfigRepository ()
+@property(nonatomic,copy) NSArray *quarantinedEntries;
+@end
 @implementation ZNV3ConfigRepository
+- (NSUInteger)quarantinedFeatureCount {return self.quarantinedEntries.count;}
 - (NSURL *)fileURL:(NSError **)error {
  NSURL *dir=[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
  if(!dir) {if(error)*error=ZNError(1,@"App Support 路径不可用");return nil;}
@@ -35,8 +39,9 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
  NSArray *entries=doc[@"features"];
  if(![entries isKindOfClass:NSArray.class]||entries.count>1000){if(error)*error=ZNError(4,@"功能列表格式错误");return nil;}
  NSMutableArray *result=[NSMutableArray arrayWithCapacity:entries.count];
+ NSMutableArray *quarantine=[NSMutableArray array];
  for(id entry in entries){
-  if(![entry isKindOfClass:NSDictionary.class]){if(error)*error=ZNError(5,@"功能格式错误");return nil;}
+  if(![entry isKindOfClass:NSDictionary.class]){[quarantine addObject:entry];continue;}
   NSDictionary *d=entry;
   NSString *name=d[@"name"],*detail=d[@"detail"],*module=d[@"module"],*uid=d[@"id"];
   NSNumber *button=d[@"buttonType"];NSArray *rules=d[@"rules"];
@@ -46,27 +51,32 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
      ![uid isKindOfClass:NSString.class]||uid.length>128||!uid.length||
      ![button isKindOfClass:NSNumber.class]||button.integerValue<0||button.integerValue>2||
      ![rules isKindOfClass:NSArray.class]||rules.count>128) {
-    if(error)*error=ZNError(6,@"功能字段校验失败");return nil;
+    [quarantine addObject:entry];continue;
   }
+  BOOL legacyInvalid=NO;
+  for(id item in rules){
+   if(![item isKindOfClass:NSDictionary.class]){legacyInvalid=YES;break;}
+   NSDictionary *r=item;id off=r[@"offset"],patch=r[@"patch"],rid=r[@"id"];
+   if(![rid isKindOfClass:NSString.class]||![(NSString *)rid length]||[(NSString *)rid length]>128||
+      ![off isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class]||!ZNValidRule(off,patch)){
+    legacyInvalid=YES;break;
+   }
+  }
+  if(legacyInvalid){[quarantine addObject:entry];continue;}
   ZNV3Feature *f=[ZNV3Feature feature:name detail:detail module:module];
   f.identifier=uid;f.buttonType=button.integerValue;
-  for(id item in rules){
-   if(![item isKindOfClass:NSDictionary.class]){if(error)*error=ZNError(7,@"规则格式错误");return nil;}
-   NSDictionary *r=item;NSString *off=r[@"offset"],*patch=r[@"patch"],*rid=r[@"id"];
-   if(![rid isKindOfClass:NSString.class]||rid.length>128||!rid.length||
-      ![off isKindOfClass:NSString.class]||![patch isKindOfClass:NSString.class]||
-      !ZNValidRule(off,patch)) {
-    if(error)*error=ZNError(8,@"Offset / Patch 校验失败");return nil;
-   }
-   ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];rule.identifier=rid;rule.offsetText=off;rule.patchText=patch;
+  for(NSDictionary *r in rules){
+   ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];
+   rule.identifier=r[@"id"];rule.offsetText=r[@"offset"];rule.patchText=r[@"patch"];
    [f.rules addObject:rule];
   }
   [result addObject:f];
  }
+ self.quarantinedEntries=[quarantine copy];
  return result;
 }
 - (BOOL)saveFeatures:(NSArray<ZNV3Feature *> *)features error:(NSError **)error {
- if(features.count>1000){if(error)*error=ZNError(9,@"功能数量超限");return NO;}
+ if(features.count>1000||self.quarantinedEntries.count>1000-features.count){if(error)*error=ZNError(9,@"功能数量超限");return NO;}
  NSMutableArray *items=[NSMutableArray arrayWithCapacity:features.count];
  for(ZNV3Feature *f in features){
   if(!f.name.length||f.name.length>128||f.detail.length>1024||
@@ -85,6 +95,8 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
   [items addObject:@{@"id":f.identifier?:@"",@"name":f.name,@"detail":f.detail?:@"",
     @"module":f.module,@"buttonType":@(f.buttonType),@"rules":rules}];
  }
+ // Preserve legacy entries verbatim; never silently drop incompatible features on save.
+ [items addObjectsFromArray:self.quarantinedEntries?:@[]];
  NSDictionary *doc=@{@"schemaVersion":@1,@"features":items};
  NSData *data=[NSJSONSerialization dataWithJSONObject:doc options:NSJSONWritingPrettyPrinted error:error];if(!data)return NO;
  NSURL *url=[self fileURL:error];if(!url)return NO;
