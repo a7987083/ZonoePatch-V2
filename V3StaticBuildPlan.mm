@@ -35,7 +35,10 @@ static NSString *ZNP6Hex(NSData *bytes) {
  return [self initWithModule:module name:module entries:entries];
 }
 - (instancetype)initWithModule:(NSString *)module name:(NSString *)name entries:(NSArray<ZNV3StaticBuildEntry *> *)entries {
- if((self=[super init])){_module=[module copy];_featureName=[name copy];_entries=[entries copy];
+ return [self initWithModule:module name:name featureCount:1 entries:entries];
+}
+- (instancetype)initWithModule:(NSString *)module name:(NSString *)name featureCount:(NSUInteger)count entries:(NSArray<ZNV3StaticBuildEntry *> *)entries {
+ if((self=[super init])){_module=[module copy];_featureName=[name copy];_featureCount=count;_entries=[entries copy];
   _imageUUID=[entries.firstObject.moduleUUID copy];_sourcePath=[entries.firstObject.sourcePath copy];}
  return self;
 }
