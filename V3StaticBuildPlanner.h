@@ -39,5 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// Loaded Mach-O is cross-checked against on-disk content; no write is performed.
 + (nullable ZNV3StaticBuildPlan *)planForFeature:(ZNV3Feature *)feature
  error:(NSError * _Nullable * _Nullable)error;
++ (nullable ZNV3StaticBuildPlan *)planForFeatures:(NSArray<ZNV3Feature *> *)features
+ error:(NSError * _Nullable * _Nullable)error;
 @end
 NS_ASSUME_NONNULL_END
