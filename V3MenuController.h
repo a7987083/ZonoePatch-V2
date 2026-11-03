@@ -10,6 +10,12 @@
 @property(nonatomic,strong) UIButton *moduleButton;
 @property(nonatomic,strong) UILabel *moduleStatus;
 @property(nonatomic,strong) UIButton *typeButton;
+@property(nonatomic,strong) UIStackView *parameterFields;
+@property(nonatomic,strong) UIButton *valueTypeButton;
+@property(nonatomic,strong) UITextField *minimumField;
+@property(nonatomic,strong) UITextField *maximumField;
+@property(nonatomic,strong) UITextField *stepField;
+@property(nonatomic,strong) UITextField *defaultField;
 @property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIButton *staticBuildButton;
 @property(nonatomic,assign) BOOL staticBuildRunning;
@@ -45,6 +51,8 @@
 - (void)addRuleTap;
 - (void)removeRule:(UIButton *)sender;
 - (void)cycleType;
+- (void)cycleValueType;
+- (void)updateParameterControls;
 - (void)applyOrRestore;
 - (void)generateStaticBinary;
 - (void)refreshPatchActionButton;
