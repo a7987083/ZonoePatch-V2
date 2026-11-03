@@ -1,5 +1,6 @@
 #import "V3PatchValidator.h"
 #import "V3AddressResolver.h"
+#import "V3PatchCodec.h"
 #import <mach/mach.h>
 #include <stdint.h>
 #include <limits.h>
@@ -22,33 +23,7 @@ static NSString *ZNVPHex(NSData *data) {
 @end
 @implementation ZNV3PatchValidator
 + (NSData *)parsePatchBytes:(NSString *)text error:(NSError **)error {
- NSString *input=[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
- NSMutableString *hex=[NSMutableString string];
- NSCharacterSet *space=NSCharacterSet.whitespaceAndNewlineCharacterSet;
- for(NSUInteger i=0;i<input.length;i++){unichar c=[input characterAtIndex:i];
-  if([space characterIsMember:c])continue;
-  [hex appendFormat:@"%C",c];
- }
- if([hex hasPrefix:@"0x"]||[hex hasPrefix:@"0X"])[hex deleteCharactersInRange:NSMakeRange(0,2)];
- if(!hex.length||hex.length%2||hex.length>512){
-  if(error)*error=ZNVPError(1,@"Patch 必须是 1–256 字节的完整十六进制字节序列");
-  return nil;
- }
- NSCharacterSet *invalid=[[NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"] invertedSet];
- if([hex rangeOfCharacterFromSet:invalid].location!=NSNotFound){
-  if(error)*error=ZNVPError(2,@"Patch 包含非法十六进制字符");
-  return nil;
- }
- NSMutableData *bytes=[NSMutableData dataWithLength:hex.length/2];
- uint8_t *out=(uint8_t *)bytes.mutableBytes;
- for(NSUInteger i=0;i<hex.length;i+=2){
-  unsigned int hi=0,lo=0;
-  unichar a=[hex characterAtIndex:i],b=[hex characterAtIndex:i+1];
-  hi=(a<='9'?(unsigned)(a-'0'):(unsigned)((a|32)-'a'+10));
-  lo=(b<='9'?(unsigned)(b-'0'):(unsigned)((b|32)-'a'+10));
-  out[i/2]=(uint8_t)((hi<<4)|lo);
- }
- return bytes;
+ return [ZNV3PatchCodec codeBytesFromText:text error:error];
 }
 + (ZNV3PatchValidation *)validateOffset:(NSString *)offset patch:(NSString *)patch
  module:(NSString *)module error:(NSError **)error {
