@@ -1063,6 +1063,7 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
                     header->count=(uint32_t)logicals.size();
                     header->entrySize=sizeof(ZN44StaticEntry);
                     header->flags |= ZN44_STATIC_HEADER_FLAG_PAYLOAD_PROTECTION_V2 | ZN44_STATIC_HEADER_FLAG_GENERATED_LAYOUT_V1;
+                    if(plan.featureCount>1)header->flags |= ZN44_STATIC_HEADER_FLAG_MULTI_FEATURE_V1;
                     ZN44StaticEntry *entries=(ZN44StaticEntry *)(header+1);
                     std::vector<uint64_t> onRVAs(logicals.size(),0);
 
