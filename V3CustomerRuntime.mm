@@ -79,7 +79,7 @@ static NSString *ZNCString(const char *bytes,size_t len){
 
 // P6-C generator emits one static table per image and one physical site per logical entry.
 // Reject foreign/legacy tables and shared-site formats instead of guessing ownership.
-static ZNV3CustomerFeature *ZNCCatalogImage(uint32_t imageIndex){
+static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
  const struct mach_header *raw=_dyld_get_image_header(imageIndex);
  const char *rawName=_dyld_get_image_name(imageIndex);
  if(!raw||raw->magic!=MH_MAGIC_64||raw->cputype!=CPU_TYPE_ARM64)return nil;
