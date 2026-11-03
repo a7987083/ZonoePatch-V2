@@ -97,6 +97,30 @@ static BOOL bindingMatches(NSString *path,NSString *expected,NSString *name) {
  NSString *text=[[NSString alloc]initWithBytes:value.text length:value.length encoding:NSUTF8StringEncoding];
  return [text isEqualToString:expected];
 }
+static NSUInteger staticEntryCount(NSString *path) {
+ NSData *data=[NSData dataWithContentsOfFile:path];
+ if(data.length<sizeof(struct mach_header_64))return 0;
+ const uint8_t *bytes=(const uint8_t *)data.bytes;
+ struct mach_header_64 header={};memcpy(&header,bytes,sizeof(header));
+ NSUInteger off=sizeof(header);
+ for(uint32_t i=0;i<header.ncmds;i++) {
+  if(off>data.length||data.length-off<sizeof(struct load_command))return 0;
+  struct load_command lc={};memcpy(&lc,bytes+off,sizeof(lc));
+  if(lc.cmdsize<sizeof(lc)||lc.cmdsize>data.length-off)return 0;
+  if(lc.cmd==LC_SEGMENT_64&&lc.cmdsize>=sizeof(struct segment_command_64)){
+   struct segment_command_64 segment={};memcpy(&segment,bytes+off,sizeof(segment));
+   if(!strncmp(segment.segname,"__ZNDATA",16)){
+    if(segment.fileoff>data.length||data.length-segment.fileoff<sizeof(ZN44StaticHeader))return 0;
+    ZN44StaticHeader table={};memcpy(&table,bytes+segment.fileoff,sizeof(table));
+    if(table.magic0!=ZN44_STATIC_MAGIC0||table.magic1!=ZN44_STATIC_MAGIC1||
+       table.entrySize!=sizeof(ZN44StaticEntry)||table.count>128)return 0;
+    return table.count;
+   }
+  }
+  off+=lc.cmdsize;
+ }
+ return 0;
+}
 int main() {
  @autoreleasepool {
   NSUUID *uuid=[NSUUID UUID];
@@ -127,6 +151,25 @@ int main() {
    if(!signedOutput)fprintf(stderr,"sign error: %s\n",err.UTF8String?:"none");
    check(signedOutput,"generated CodeDirectory rebuilt and verified");
    check([signature[@"verified"] boolValue],"CodeDirectory page hashes read back");
+  }
+  // P8: one feature with two independent rules must produce two static dispatch entries.
+  ZNV3StaticBuildEntry *second=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"fixture-second"
+    uuid:uuid.UUIDString path:src rva:0x1020 fileOffset:0x1020
+    original:[NSData dataWithBytes:&NOP length:4] patch:[NSData dataWithBytes:&patched length:4]];
+  NSString *multiDir=[root stringByAppendingPathComponent:@"multi"];
+  [fm createDirectoryAtPath:multiDir withIntermediateDirectories:YES attributes:nil error:nil];
+  ZNV3StaticBuildPlan *multiPlan=[[ZNV3StaticBuildPlan alloc]initWithModule:@"UnityFramework"
+    name:@"多组静态生成回归" entries:@[entry,second]];
+  NSString *multiOut=nil;NSDictionary *multiMetadata=nil;
+  BOOL multiBuilt=[ZNV3StaticBinaryBuilder buildPlan:multiPlan inDirectory:multiDir
+    outputPath:&multiOut metadata:&multiMetadata error:&err];
+  if(!multiBuilt)fprintf(stderr,"multi build error: %s\\n",err.UTF8String?:"none");
+  check(multiBuilt,"two-rule saved feature generates a Mach-O");
+  if(multiBuilt){
+   check(staticEntryCount(multiOut)==2,"both independent dispatch entries retained");
+   NSDictionary *signature=nil;
+   check(ZNAdhocResignMachOAtPath(multiOut,&signature,&err),"two-rule Mach-O signing");
+   check([signature[@"verified"] boolValue],"two-rule signature verifies");
   }
   ZNV3StaticBuildEntry *wrong=[[ZNV3StaticBuildEntry alloc]initWithRuleID:@"bad"
    uuid:NSUUID.UUID.UUIDString path:src rva:0x1000 fileOffset:0x1000
