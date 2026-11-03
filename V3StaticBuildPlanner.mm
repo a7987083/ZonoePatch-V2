@@ -75,4 +75,30 @@ static NSString *ZNP6DiskUUID(int fd) {
  if(![ZNV3StaticBuildPlan validateEntries:entries error:error])return nil;
  return [[ZNV3StaticBuildPlan alloc]initWithModule:feature.module name:feature.name.length?feature.name:feature.module entries:entries];
 }
++ (ZNV3StaticBuildPlan *)planForFeatures:(NSArray<ZNV3Feature *> *)features error:(NSError **)error {
+ if(features.count==1)return [self planForFeature:features.firstObject error:error];
+ if(features.count<2||features.count>128){
+  if(error)*error=ZNP6Error(10,@"P9 requires 2–128 features");return nil;
+ }
+ NSMutableArray<ZNV3StaticBuildEntry *> *merged=[NSMutableArray array];
+ NSMutableSet<NSString *> *keys=[NSMutableSet set];
+ NSString *module=features.firstObject.module;
+ for(ZNV3Feature *feature in features){
+  if(!feature.identifier.length||![feature.module isEqualToString:module]){
+   if(error)*error=ZNP6Error(11,@"P9 multi-feature selection must share one Mach-O module");return nil;
+  }
+  NSString *key=[feature.identifier substringToIndex:MIN((NSUInteger)23,feature.identifier.length)];
+  if([keys containsObject:key]){
+   if(error)*error=ZNP6Error(12,@"P9 duplicate feature ownership key");return nil;
+  }
+  [keys addObject:key];
+  ZNV3StaticBuildPlan *part=[self planForFeature:feature error:error];
+  if(!part)return nil;
+  [merged addObjectsFromArray:part.entries];
+ }
+ if(![ZNV3StaticBuildPlan validateEntries:merged error:error])return nil;
+ return [[ZNV3StaticBuildPlan alloc]initWithModule:module name:@"P9 Multi-Feature"
+   featureCount:features.count entries:merged];
+}
+
 @end
