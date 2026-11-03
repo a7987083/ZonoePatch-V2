@@ -52,6 +52,12 @@ jobs:
             V3StaticBuildPlan.mm V3StaticBinaryBuilder.mm ZNAdhocMachOSigner.mm \
             tests/v3_static_binary_smoke_test.mm -o "$RUNNER_TEMP/v3_static_binary_smoke"
           "$RUNNER_TEMP/v3_static_binary_smoke"
+      - name: Test P6 Static Slot Transactions
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
+            V3StaticSlotTransaction.mm tests/v3_static_slot_transaction_test.mm -o "$RUNNER_TEMP/v3_static_slot_tx"
+          "$RUNNER_TEMP/v3_static_slot_tx"
       - name: Install Theos
         run: |
           set -euo pipefail
