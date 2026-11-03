@@ -77,7 +77,7 @@ int main(){
   check([repo saveFeatures:@[feature] error:&error],
         "input accepts range independent of hidden default/step");
   NSDictionary *inputDoc=[NSJSONSerialization JSONObjectWithData:
-      [NSData dataWithContentsOfURL:[repo fileURL:&error]] options:0 error:&error];
+      [NSData dataWithContentsOfURL:[[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"]] options:0 error:&error];
   NSDictionary *inputParameters=inputDoc[@"features"][0][@"parameters"];
   check(inputParameters.count==3&&inputParameters[@"valueType"]&&
         inputParameters[@"minimum"]&&inputParameters[@"maximum"]&&
