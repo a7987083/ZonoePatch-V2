@@ -48,7 +48,7 @@
  UIStackView *stack=[UIStackView new];
  stack.translatesAutoresizingMaskIntoConstraints=NO;
  stack.axis=UILayoutConstraintAxisVertical;stack.spacing=0;
- stack.layoutMargins=UIEdgeInsetsMake(10,10,10,10);
+ stack.layoutMargins=UIEdgeInsetsMake(3,10,5,10);
  stack.layoutMarginsRelativeArrangement=YES;
  [self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
@@ -65,14 +65,14 @@
  drag.cancelsTouchesInView=NO;
  [header addGestureRecognizer:drag];
  [stack addArrangedSubview:header];
- [header.heightAnchor constraintEqualToConstant:54].active=YES;
+ [header.heightAnchor constraintEqualToConstant:40].active=YES;
 
  UIImageView *icon=[[UIImageView alloc]initWithImage:[UIImage systemImageNamed:@"gamecontroller.fill"]];
  icon.tintColor=[UIColor colorWithRed:.91 green:.36 blue:1 alpha:1];
  icon.contentMode=UIViewContentModeScaleAspectFit;
  [header addArrangedSubview:icon];
- [icon.widthAnchor constraintEqualToConstant:32].active=YES;
- [icon.heightAnchor constraintEqualToConstant:31].active=YES;
+ [icon.widthAnchor constraintEqualToConstant:28].active=YES;
+ [icon.heightAnchor constraintEqualToConstant:26].active=YES;
 
  UILabel *title=ZNLabel(@"ZonoePatch",17,YES);
  title.textColor=UIColor.whiteColor;title.numberOfLines=1;
@@ -86,7 +86,7 @@
  [close addTarget:self action:@selector(closeMenu) forControlEvents:UIControlEventTouchUpInside];
  [header addArrangedSubview:close];
  [close.widthAnchor constraintEqualToConstant:34].active=YES;
- [close.heightAnchor constraintEqualToConstant:40].active=YES;
+ [close.heightAnchor constraintEqualToConstant:32].active=YES;
 
  UIView *divider=[UIView new];
  divider.backgroundColor=[UIColor colorWithRed:.62 green:.30 blue:.96 alpha:.62];
@@ -190,7 +190,7 @@
    UIView *panel=[UIView new];
    panel.backgroundColor=UIColor.clearColor;
    [self.features addArrangedSubview:panel];
-   [panel.heightAnchor constraintEqualToConstant:52].active=YES;
+   [panel.heightAnchor constraintEqualToConstant:44].active=YES;
 
    UIStackView *row=[UIStackView new];
    row.axis=UILayoutConstraintAxisHorizontal;
@@ -201,8 +201,8 @@
    [NSLayoutConstraint activateConstraints:@[
     [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:12],
     [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
-    [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:6],
-    [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-6]]];
+    [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:3],
+    [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-3]]];
 
    UILabel *name=ZNLabel(feature.title?:@"",15,NO);
    name.textColor=UIColor.whiteColor;
