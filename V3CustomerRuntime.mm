@@ -89,7 +89,7 @@ static ZNV3CustomerFeature *ZNCCatalogImage(uint32_t imageIndex){
     h.ncmds==0||h.ncmds>4096||h.sizeofcmds==0||h.sizeofcmds>1024*1024)return nil;
  std::vector<uint8_t> commands(h.sizeofcmds);
  if(mappedHeader>UINTPTR_MAX-sizeof(h)||!ZNCRead(mappedHeader+sizeof(h),commands.data(),commands.size()))return nil;
- uint64_t textVM=UINT64_MAX,codeVM=0,codeSize=0,dataVM=0,dataSize=0,sectionVM=0,sectionSize=0;
+ uint64_t textVM=UINT64_MAX,codeVM=0,codeSize=0,dataSize=0,sectionVM=0,sectionSize=0;
  NSString *uuid=nil;NSUInteger offset=0,codeCount=0,dataCount=0,uuidCount=0;
  for(uint32_t i=0;i<h.ncmds;i++){
   if(offset>commands.size()||commands.size()-offset<sizeof(struct load_command))return nil;
@@ -109,7 +109,7 @@ static ZNV3CustomerFeature *ZNCCatalogImage(uint32_t imageIndex){
     if((seg.initprot&(VM_PROT_READ|VM_PROT_EXECUTE))!=(VM_PROT_READ|VM_PROT_EXECUTE))return nil;
    }
    if(!strncmp(seg.segname,"__ZNDATA",16)){
-    dataCount++;dataVM=seg.vmaddr;dataSize=seg.vmsize;
+    dataCount++;dataSize=seg.vmsize;
     if((seg.initprot&(VM_PROT_READ|VM_PROT_WRITE))!=(VM_PROT_READ|VM_PROT_WRITE)||
         seg.nsects!=1||lc.cmdsize<sizeof(seg)+sizeof(struct section_64))return nil;
     struct section_64 sec={};memcpy(&sec,commands.data()+offset+sizeof(seg),sizeof(sec));
