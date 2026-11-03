@@ -24,5 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable ZNV3ResolvedAddress *)resolve:(NSString *)text module:(NSString *)module
  error:(NSError * _Nullable * _Nullable)error;
 + (BOOL)validAddressText:(NSString *)text;
++ (BOOL)validAlignedCodeOffsetText:(NSString *)text;
 @end
 NS_ASSUME_NONNULL_END
