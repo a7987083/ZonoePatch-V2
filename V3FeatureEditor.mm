@@ -70,8 +70,11 @@
 }
 - (void)refreshPatchActionButton {
  ZNV3Feature *draft=self.store.draft;
- BOOL active=draft && [[ZNV3PatchSession shared] isActiveFeature:draft.identifier];
- [self.patchActionButton setTitle:active?@"恢复 Original":@"应用 Patch" forState:UIControlStateNormal];
+ ZNV3PatchSession *session=[ZNV3PatchSession shared];
+ BOOL blocked=session.status==ZNV3PatchTransactionStatusRecoveryFailed;
+ BOOL active=draft && [session isActiveFeature:draft.identifier];
+ [self.patchActionButton setTitle:blocked?@"故障锁定":(active?@"恢复 Original":@"应用 Patch") forState:UIControlStateNormal];
+ self.patchActionButton.enabled=!blocked;
 }
 - (void)showPatchMessage:(NSString *)title detail:(NSString *)detail {
  UIAlertController *alert=[UIAlertController alertControllerWithTitle:title
