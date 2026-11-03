@@ -76,7 +76,8 @@
    actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=6;
    [row addArrangedSubview:actions];
   }
-  BOOL selected=[self.selectedFeatureID isEqualToString:f.identifier];
+  BOOL selected=[self.selectedFeatureIDs containsObject:f.identifier] ||
+   (!self.selectedFeatureIDs.count && [self.selectedFeatureID isEqualToString:f.identifier]);
   UIButton *choice=ZNButton(selected?@"◉":@"◯",self,@selector(selectFeature:));choice.tag=(NSInteger)i;
   choice.accessibilityLabel=[NSString stringWithFormat:@"%@ %@",selected?@"已选中":@"选择",f.name];
   choice.enabled=!self.staticBuildRunning;
@@ -115,7 +116,13 @@
  if(self.staticBuildRunning)return;
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
- self.selectedFeatureID=self.store.features[index].identifier;
+ NSString *identifier=self.store.features[index].identifier;
+ if([self.selectedFeatureIDs containsObject:identifier]){
+  [self.selectedFeatureIDs removeObject:identifier];
+ }else{
+  [self.selectedFeatureIDs addObject:identifier];
+ }
+ self.selectedFeatureID=self.selectedFeatureIDs.lastObject;
  [self renderFeatures];
 }
 - (void)toggleFeaturePatch:(UIButton *)sender {
