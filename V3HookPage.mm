@@ -2,6 +2,7 @@
 #import "V3UIComponents.h"
 #import "V3ModuleResolver.h"
 #import "V3PatchSession.h"
+#import "V3StaticDispatchRuntime.h"
 
 @implementation ZNV3MenuController (HookPage)
 - (void)add:(UIView *)v height:(CGFloat)h {
@@ -53,6 +54,9 @@
  self.staticBuildButton=ZNButton(@"生成预埋二进制（初始 OFF）",self,@selector(generateStaticBinary));
  [stack addArrangedSubview:self.staticBuildButton];
  [self.staticBuildButton.heightAnchor constraintEqualToConstant:38].active=YES;
+ self.staticToggleButton=ZNButton(@"启用预埋静态 Patch",self,@selector(toggleStaticPatch));
+ [stack addArrangedSubview:self.staticToggleButton];
+ [self.staticToggleButton.heightAnchor constraintEqualToConstant:38].active=YES;
  self.editor.hidden=YES;
 
 }
@@ -85,6 +89,12 @@
   [self presentViewController:alert animated:YES completion:nil];return;
  }
  ZNV3Feature *target=self.store.features[(NSUInteger)sender.tag];
+ if([[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:target.identifier]){
+  UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"静态 Patch 正在生效"
+    message:@"请先关闭预埋静态 Patch，再删除功能。" preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];return;
+ }
  if([[ZNV3PatchSession shared] isActiveFeature:target.identifier]){
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"功能正在应用 Patch"
    message:@"请先进入编辑器恢复 Original，再删除该功能。" preferredStyle:UIAlertControllerStyleAlert];
