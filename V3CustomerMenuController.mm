@@ -54,10 +54,10 @@
  stack.layoutMarginsRelativeArrangement=YES;
  [self.view addSubview:stack];
  [NSLayoutConstraint activateConstraints:@[
-  [stack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-  [stack.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-  [stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-  [stack.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]]];
+  [stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+  [stack.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+  [stack.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+  [stack.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]]];
 
  UIStackView *header=[UIStackView new];
  header.axis=UILayoutConstraintAxisHorizontal;
