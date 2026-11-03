@@ -97,11 +97,6 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
    if(!seg.vs||seg.vm<base)continue;
    uint64_t rvaStart=seg.vm-base,rtStart=0;
    if(!add((uint64_t)image.imageBase,rvaStart,rtStart))continue;
-   uint64_t delta=0;bool match=false;
-   if(kind==RVA||kind==Auto){if(contains(rvaStart,seg.vs,input)){delta=input-rvaStart;match=true;}}
-   if(kind==Preferred||kind==Auto){if(contains(seg.vm,seg.vs,input)){delta=input-seg.vm;match=true;}}
-   if(kind==Runtime||kind==Auto){if(contains(rtStart,seg.vs,input)){delta=input-rtStart;match=true;}}
-   if(kind==File||kind==Auto){if(contains(seg.off,seg.fs,input)){delta=input-seg.off;match=true;}}
    // Each source interpretation is a distinct candidate; never silently prioritize an ambiguous mapping.
    Kind all[]={RVA,Preferred,Runtime,File};
    for(Kind k:all){
@@ -118,7 +113,6 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
     bool backed=d<seg.fs;if(backed&&!add(seg.off,d,fo))continue;
     found.push_back({k,pref,rt,fo,backed,&seg});
    }
-   (void)delta;(void)match;
   }
  }
  if(!message&&found.empty())message=@"地址无法映射到当前 Mach-O Segment";
