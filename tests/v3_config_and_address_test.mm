@@ -36,6 +36,39 @@ int main(){
    check(roundtrip.count==1 && roundtrip[0].buttonType==kind,
          "feature type survives v1 JSON reload");
   }
+  // P10.2: pending Slider parameters survive JSON and draft copies.
+  feature.buttonType=ZNV3FeatureTypeSlider;
+  feature.valueConfig.valueType=ZNV3NumericTypeFloat32;
+  feature.valueConfig.minimum=1.5;feature.valueConfig.maximum=9.5;
+  feature.valueConfig.step=0.5;feature.valueConfig.defaultValue=3.5;
+  feature.valueConfig.requiresEnableSwitch=YES;
+  check([repo saveFeatures:@[feature] error:&error],"slider parameter persisted");
+  NSArray<ZNV3Feature *> *sliderLoaded=[repo loadFeatures:&error];
+  check(sliderLoaded.count==1 &&
+        sliderLoaded[0].buttonType==ZNV3FeatureTypeSlider &&
+        sliderLoaded[0].valueConfig.requiresEnableSwitch &&
+        sliderLoaded[0].valueConfig.valueType==ZNV3NumericTypeFloat32 &&
+        sliderLoaded[0].valueConfig.minimum==1.5 &&
+        sliderLoaded[0].valueConfig.step==0.5 &&
+        sliderLoaded[0].valueConfig.defaultValue==3.5,
+        "slider pending value and enable gate roundtrip");
+  ZNV3ValueConfig *copied=[sliderLoaded.firstObject.valueConfig copy];
+  copied.defaultValue=6.0;
+  check(sliderLoaded.firstObject.valueConfig.defaultValue==3.5,
+        "value configuration deep copy");
+  feature.valueConfig.requiresEnableSwitch=NO;
+  check(![repo saveFeatures:@[feature] error:&error],"slider rejects missing enable gate");
+  feature.valueConfig.requiresEnableSwitch=YES;
+  feature.valueConfig.minimum=10;feature.valueConfig.maximum=9;
+  check(![repo saveFeatures:@[feature] error:&error],"reject inverted numeric range");
+  feature.valueConfig.minimum=1.5;feature.valueConfig.maximum=9.5;
+  feature.valueConfig.step=0;
+  check(![repo saveFeatures:@[feature] error:&error],"reject zero numeric step");
+  feature.valueConfig.step=0.5;
+  feature.valueConfig.valueType=ZNV3NumericTypeInt32;
+  check(![repo saveFeatures:@[feature] error:&error],"reject fractional Int32 parameters");
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  check([repo saveFeatures:@[feature] error:&error],"restore valid slider parameter defaults");
   feature.buttonType=(ZNV3FeatureType)4;
   check(![repo saveFeatures:@[feature] error:&error],"reject unknown feature type");
   feature.buttonType=ZNV3FeatureTypeToggle;
