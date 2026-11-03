@@ -10,9 +10,13 @@ static void expect(BOOL ok,const char *msg){if(!ok){fprintf(stderr,"FAIL %s\n",m
 @property(nonatomic,assign) NSInteger failOnWrite;
 @property(nonatomic,assign) BOOL partialFailure;
 @property(nonatomic,assign) BOOL failRollback;
+@property(nonatomic,assign) BOOL rejectIdentity;
 @end
 @implementation FakeBackend
 - (instancetype)init {if((self=[super init])){_memory=[NSMutableData dataWithLength:128];}return self;}
+- (BOOL)validateOperation:(ZNV3PatchOperation *)operation error:(NSError **)error{
+ (void)operation;(void)error;return !self.rejectIdentity;
+}
 - (NSData *)readAt:(uintptr_t)address length:(NSUInteger)length error:(NSError **)error{
  if(address>128||length>128-address){if(error)*error=[NSError errorWithDomain:@"fake" code:1 userInfo:nil];return nil;}
  return [self.memory subdataWithRange:NSMakeRange(address,length)];
@@ -62,6 +66,10 @@ int main(){
   expect(![ex setEnabled:YES operations:actions error:&err],"expected mismatch blocks all");
   expect(original(b,24),"preflight did not modify second site");
   reset(b,8,24);
+  b.rejectIdentity=YES;
+  expect(![ex setEnabled:YES operations:actions error:&err],"identity failure blocks writes");
+  expect(original(b,8)&&original(b,24),"identity failure does not mutate memory");
+  b.rejectIdentity=NO;
   b.writeCount=0;b.failOnWrite=2;b.partialFailure=YES;
   expect(![ex setEnabled:YES operations:actions error:&err],"partial write failure detected");
   expect(original(b,8)&&original(b,24),"failed write and prior site restored");
