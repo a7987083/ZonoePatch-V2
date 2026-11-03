@@ -80,13 +80,13 @@
   }
   ZNV3ResolvedAddress *r=validation.address;
   [lines addObject:[NSString stringWithFormat:
-    @"#%lu ✅ 只读预检通过\nRVA 0x%llX · Runtime 0x%llX\\nFile 0x%llX · %@\\nOriginal %@\\nPatch %@",
+    @"#%lu ✅ 只读预检通过\nRVA 0x%llX · Runtime 0x%llX\nFile 0x%llX · %@\nOriginal %@\nPatch %@",
     (unsigned long)i+1,(unsigned long long)r.rva,
     (unsigned long long)r.runtimeVA,(unsigned long long)r.fileOffset,
     r.segmentName,validation.originalHex,validation.patchHex]];
  }
  UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Runtime Patch 预检（只读）"
-  message:lines.count?[lines componentsJoinedByString:@"\\n\\n"]:@"请先输入 Offset / Patch，不会修改内存。"
+  message:lines.count?[lines componentsJoinedByString:@"\n\n"]:@"请先输入 Offset / Patch，不会修改内存。"
   preferredStyle:UIAlertControllerStyleAlert];
  [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
  [self presentViewController:a animated:YES completion:nil];
