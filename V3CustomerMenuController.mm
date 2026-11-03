@@ -8,6 +8,9 @@
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) UIScrollView *featureScroll;
 @property(nonatomic,strong) NSMutableArray<ZNV3CustomerFeature *> *snapshot;
+@property(nonatomic,copy) NSArray<NSString *> *renderedIdentifiers;
+@property(nonatomic,strong) NSMutableArray<UISwitch *> *renderedSwitches;
+@property(nonatomic,strong) UILabel *emptyMessage;
 @property(nonatomic,strong) CAGradientLayer *neonStroke;
 @property(nonatomic,strong) CAShapeLayer *neonMask;
 @end
@@ -157,65 +160,93 @@
 
 - (void)refreshFeatures {
  if(!self.isViewLoaded||!self.features)return;
- for(UIView *view in [self.features.arrangedSubviews copy]) {
-  [self.features removeArrangedSubview:view];[view removeFromSuperview];
- }
- self.snapshot=[[[ZNV3CustomerRuntime shared] discover] mutableCopy];
+ // Revalidate the loaded catalog and live ON/OFF bits, but retain row views
+ // while their identities/order are unchanged. A new image may appear via dlopen.
+ NSArray<ZNV3CustomerFeature *> *discovered=[[ZNV3CustomerRuntime shared] discover];
+ NSMutableArray<NSString *> *identifiers=[NSMutableArray arrayWithCapacity:discovered.count];
+ for(ZNV3CustomerFeature *feature in discovered)
+  [identifiers addObject:feature.identifier?:@""];
+ BOOL changed=![self.renderedIdentifiers isEqualToArray:identifiers];
+ self.snapshot=[discovered mutableCopy];
  BOOL locked=[ZNV3CustomerRuntime shared].recoveryFailed;
- if(!self.snapshot.count||locked) {
-  UILabel *message=ZNLabel(locked?@"静态 Patch 恢复失败，开关已锁定":@"暂无可用功能",13,NO);
-  message.textAlignment=NSTextAlignmentCenter;
-  message.textColor=[UIColor colorWithWhite:1 alpha:.75];
-  [self.features addArrangedSubview:message];
-  [message.heightAnchor constraintEqualToConstant:66].active=YES;
+ if(changed||!self.renderedSwitches){
+  for(UIView *view in [self.features.arrangedSubviews copy]){
+   [self.features removeArrangedSubview:view];[view removeFromSuperview];
+  }
+  self.renderedIdentifiers=[identifiers copy];
+  self.renderedSwitches=[NSMutableArray arrayWithCapacity:discovered.count];
+  self.emptyMessage=nil;
+  if(!discovered.count){
+   UILabel *message=ZNLabel(@"暂无可用功能",13,NO);
+   message.textAlignment=NSTextAlignmentCenter;
+   message.textColor=[UIColor colorWithWhite:1 alpha:.75];
+   [self.features addArrangedSubview:message];
+   [message.heightAnchor constraintEqualToConstant:66].active=YES;
+   self.emptyMessage=message;
+  }
+  for(NSUInteger i=0;i<discovered.count;i++){
+   ZNV3CustomerFeature *feature=discovered[i];
+   // One continuous background; panels exist for layout only, not separate cards.
+   UIView *panel=[UIView new];
+   panel.backgroundColor=UIColor.clearColor;
+   [self.features addArrangedSubview:panel];
+   [panel.heightAnchor constraintEqualToConstant:52].active=YES;
+
+   UIStackView *row=[UIStackView new];
+   row.axis=UILayoutConstraintAxisHorizontal;
+   row.alignment=UIStackViewAlignmentCenter;
+   row.spacing=8;
+   row.translatesAutoresizingMaskIntoConstraints=NO;
+   [panel addSubview:row];
+   [NSLayoutConstraint activateConstraints:@[
+    [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:12],
+    [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
+    [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:6],
+    [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-6]]];
+
+   UILabel *name=ZNLabel(feature.title?:@"",15,NO);
+   name.textColor=UIColor.whiteColor;
+   name.numberOfLines=1;
+   name.lineBreakMode=NSLineBreakByTruncatingTail;
+   [name setContentCompressionResistancePriority:UILayoutPriorityDefaultLow
+      forAxis:UILayoutConstraintAxisHorizontal];
+   [row addArrangedSubview:name];
+
+   UISwitch *toggle=[UISwitch new];
+   toggle.tag=(NSInteger)i;
+   toggle.onTintColor=[UIColor colorWithRed:.73 green:.20 blue:1 alpha:1];
+   toggle.transform=CGAffineTransformMakeScale(.88,.88);
+   toggle.tintColor=[UIColor colorWithRed:.40 green:.42 blue:.63 alpha:1];
+   toggle.thumbTintColor=UIColor.whiteColor;
+   toggle.accessibilityLabel=feature.title;
+   [toggle addTarget:self action:@selector(toggleFeature:) forControlEvents:UIControlEventValueChanged];
+   [row addArrangedSubview:toggle];
+   [self.renderedSwitches addObject:toggle];
+
+   // Only between rows: do not draw a redundant bottom separator.
+   if(i+1<discovered.count){
+    UIView *line=[UIView new];
+    line.backgroundColor=[UIColor colorWithRed:.56 green:.29 blue:.86 alpha:.54];
+    line.translatesAutoresizingMaskIntoConstraints=NO;
+    [panel addSubview:line];
+    [NSLayoutConstraint activateConstraints:@[
+     [line.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor],
+     [line.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor],
+     [line.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor],
+     [line.heightAnchor constraintEqualToConstant:.5]]];
+   }
+  }
  }
- for(NSUInteger i=0;i<self.snapshot.count;i++) {
-  ZNV3CustomerFeature *feature=self.snapshot[i];
-  UIView *panel=[UIView new];
-  panel.backgroundColor=[UIColor colorWithRed:.075 green:.09 blue:.21 alpha:.98];
-  panel.layer.borderWidth=0;
-  [self.features addArrangedSubview:panel];
-  [panel.heightAnchor constraintEqualToConstant:52].active=YES;
-
-  UIStackView *row=[UIStackView new];
-  row.axis=UILayoutConstraintAxisHorizontal;
-  row.alignment=UIStackViewAlignmentCenter;
-  row.spacing=8;
-  row.translatesAutoresizingMaskIntoConstraints=NO;
-  [panel addSubview:row];
-  [NSLayoutConstraint activateConstraints:@[
-   [row.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:12],
-   [row.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-10],
-   [row.topAnchor constraintEqualToAnchor:panel.topAnchor constant:6],
-   [row.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-6]]];
-
-  UILabel *name=ZNLabel(feature.title?:@"",15,NO);
-  name.textColor=UIColor.whiteColor;
-  name.numberOfLines=1;name.lineBreakMode=NSLineBreakByTruncatingTail;
-  [name setContentCompressionResistancePriority:UILayoutPriorityDefaultLow
-    forAxis:UILayoutConstraintAxisHorizontal];
-  [row addArrangedSubview:name];
-
-  UISwitch *toggle=[UISwitch new];
-  toggle.on=feature.enabled;
-  toggle.tag=(NSInteger)i;
+ if(self.emptyMessage)
+  self.emptyMessage.text=locked?@"静态 Patch 恢复失败，开关已锁定":@"暂无可用功能";
+ for(NSUInteger i=0;i<self.renderedSwitches.count && i<discovered.count;i++){
+  UISwitch *toggle=self.renderedSwitches[i];
+  ZNV3CustomerFeature *feature=discovered[i];
+  // An external state change must update the existing control without animation.
+  [toggle setOn:feature.enabled animated:NO];
   toggle.enabled=!locked;
-  toggle.onTintColor=[UIColor colorWithRed:.73 green:.20 blue:1 alpha:1];
-  toggle.transform=CGAffineTransformMakeScale(.88,.88);
-  toggle.tintColor=[UIColor colorWithRed:.40 green:.42 blue:.63 alpha:1];
-  toggle.thumbTintColor=UIColor.whiteColor;
+  toggle.tag=(NSInteger)i;
   toggle.accessibilityLabel=feature.title;
-  [toggle addTarget:self action:@selector(toggleFeature:) forControlEvents:UIControlEventValueChanged];
-  [row addArrangedSubview:toggle];
-  UIView *line=[UIView new];
-  line.backgroundColor=[UIColor colorWithRed:.56 green:.29 blue:.86 alpha:.54];
-  line.translatesAutoresizingMaskIntoConstraints=NO;
-  [panel addSubview:line];
-  [NSLayoutConstraint activateConstraints:@[
-   [line.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor],
-   [line.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor],
-   [line.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor],
-   [line.heightAnchor constraintEqualToConstant:.5]]];
  }
 }
 
