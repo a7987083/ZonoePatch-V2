@@ -20,7 +20,16 @@
 - `V3StaticBinaryExport.mm`: staged generated output and `build_report.json` published via unique atomic directory rename after signing and format validation.
 - Editor now offers `生成预埋二进制（初始 OFF）`; output under `Documents/ZonoePatchOutput/P6-<UUID>/` for the saved feature being edited.
 - CI `Test P6 Generated Mach-O and Signature` constructs a synthetic thin ARM64 Mach-O, builds actual `__ZNTEXT`/`__ZNDATA`, verifies re-sign, and rejects mismatched UUID/Original and encrypted source.
-- **Static runtime activation is NOT yet wired** to V3 menu. Generated image defaults to OFF. Real target Mach-O installation, launch, and patch ON/OFF remain device-pending.
+- **P6-C static runtime switch is now wired** to V3 menu. Generated image defaults OFF; menu enables/disables per-feature RW selectedTarget slots, not executable pages. Real target Mach-O installation, launch, and patch ON/OFF remain device-pending.
+
+## P6-C implementation and scope
+
+- `V3StaticRuleIdentity.h` establishes a new `P6C1:` SHA-256 binding over image UUID, saved rule UUID, RVA and exact patch bytes, stored in the existing V2 feature-description field. **Regenerate P6-B outputs** to acquire P6-C bindings; an old installed image must fail closed rather than use guessed identities.
+- `V3StaticDispatchRuntime.mm` resolves the exact loaded Mach-O and its unique owned `__ZNDATA`/`__ZNTEXT`, checks magic, ABI, metadata identity, execute and RW protections, then switches only aligned 8-byte `selectedTarget` slots.
+- `V3StaticSlotTransaction.mm` provides preflight of all slots, write/readback, reverse rollback and permanent latch on rollback failure. CI uses an injected backend for multi-slot success/failure tests.
+- ON/OFF is exposed as a separate editor control; Runtime Bytes Patch remains independent and mixed switching on the same saved feature is rejected.
+- **Scope:** One active feature / installed binary per process, multiple rules per feature. No shared-site owner stack or cross-feature concurrency yet. A group of separate 8-byte stores is transactional with rollback but is not a simultaneous atomic switch across game threads.
+- **Hardware:** No target jailbreak device or actual game executable was available for P6-C. UI and image/runtime behavior are therefore unverified on device.
 
 ## V2 true implementation dependencies
 
@@ -35,7 +44,7 @@ Primary builder `iosruntimepatchmenu/src/ZNStaticBinaryBuilderV3.mm` is 1321 lin
 1. **Implemented:** Adapt an immutable V3 build input to the old builder's logical/physical site model; V2's mutable workspace and global runtime state are excluded.
 2. **Implemented, host smoke passed:** Port bounded thin ARM64 Mach-O parser and owned `__ZNTEXT`/`__ZNDATA` allocation. Reject insufficient LC header slack; no use of arbitrary gaps or moving original `__TEXT`.
 3. **Algorithm ported; real-device pending:** PC-relative ARM64 instruction relocation, including conditional/test branches and range-limited far veneers; verify OFF path semantic equivalence and ON path.
-4. **Descriptor generation ported; runtime activation pending:** Separate static-dispatch runtime activation and deterministic conflict handling across multiple saved V3 features.
+4. **P6-C single-feature runtime implemented, multi-feature pending:** Existing V2 descriptor ABI is decoded for each installed image; static selectedTarget switching is guarded by rule identity and rollback. Shared site owner stack across multiple saved features is deferred.
 5. Stage output in an owned temporary directory, re-open and re-verify source UUID/size/Expected bytes, commit atomically on success; source TOCTOU check is mandatory.
 6. **Implemented, host smoke passed:** Rebuild ad-hoc CodeDirectory before exporting; final installation/package signing stays external.
 7. CI fixture tests for successful generation plus negative inputs (truncated Mach-O, wrong UUID, insufficient header slack, overlap, unsupported opcode, interrupted publish, corrupted signature).
