@@ -14,6 +14,27 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
  return [ZNV3AddressResolver validAlignedCodeOffsetText:offset] &&
         [ZNV3PatchCodec isValidCodeText:patch];
 }
+// Legacy schema v1 permits numeric features without a parameter section.
+static BOOL ZNDecodeValueConfig(id object,ZNV3ValueConfig **out) {
+ ZNV3ValueConfig *v=[ZNV3ValueConfig defaults];
+ if(object){
+  if(![object isKindOfClass:NSDictionary.class])return NO;
+  NSDictionary *d=object;
+  for(NSString *key in @[@"valueType",@"minimum",@"maximum",@"step",@"defaultValue",@"requiresEnableSwitch"])
+   if(![d[key] isKindOfClass:NSNumber.class])return NO;
+  v.valueType=(ZNV3NumericType)[d[@"valueType"] integerValue];
+  v.minimum=[d[@"minimum"] doubleValue];v.maximum=[d[@"maximum"] doubleValue];
+  v.step=[d[@"step"] doubleValue];v.defaultValue=[d[@"defaultValue"] doubleValue];
+  v.requiresEnableSwitch=[d[@"requiresEnableSwitch"] boolValue];
+ }
+ if(![v isValid])return NO;
+ *out=v;return YES;
+}
+static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v){
+ return @{@"valueType":@(v.valueType),@"minimum":@(v.minimum),
+          @"maximum":@(v.maximum),@"step":@(v.step),
+          @"defaultValue":@(v.defaultValue),@"requiresEnableSwitch":@(v.requiresEnableSwitch)};
+}
 @interface ZNV3ConfigRepository ()
 @property(nonatomic,copy) NSArray *quarantinedEntries;
 @end
@@ -63,8 +84,15 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
    }
   }
   if(legacyInvalid){[quarantine addObject:entry];continue;}
+  ZNV3ValueConfig *valueConfig=nil;
+  if((button.integerValue==ZNV3FeatureTypeSlider ||
+      button.integerValue==ZNV3FeatureTypeNumberInput) &&
+     !ZNDecodeValueConfig(d[@"parameters"],&valueConfig)){
+   [quarantine addObject:entry];continue;
+  }
   ZNV3Feature *f=[ZNV3Feature feature:name detail:detail module:module];
   f.identifier=uid;f.buttonType=(ZNV3FeatureType)button.integerValue;
+  if(valueConfig)f.valueConfig=valueConfig;
   for(NSDictionary *r in rules){
    ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];
    rule.identifier=r[@"id"];rule.offsetText=r[@"offset"];rule.patchText=r[@"patch"];
@@ -84,6 +112,11 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
      !ZNV3FeatureTypeIsValid(f.buttonType)||f.rules.count>128) {
    if(error)*error=ZNError(10,@"功能字段校验失败");return NO;
   }
+  BOOL numeric=f.buttonType==ZNV3FeatureTypeNumberInput||f.buttonType==ZNV3FeatureTypeSlider;
+  if(numeric && (![f.valueConfig isValid] ||
+      (f.buttonType==ZNV3FeatureTypeSlider && !f.valueConfig.requiresEnableSwitch))){
+   if(error)*error=ZNError(12,@"数值参数范围或 Slider 开关模式无效");return NO;
+  }
   NSMutableArray *rules=[NSMutableArray arrayWithCapacity:f.rules.count];
   for(ZNV3PatchRule *rule in f.rules){
    NSString *off=rule.offsetText?:@"",*patch=rule.patchText?:@"";
@@ -92,8 +125,10 @@ static BOOL ZNValidRule(NSString *offset, NSString *patch) {
    }
    [rules addObject:@{@"id":rule.identifier?:@"",@"offset":off,@"patch":patch}];
   }
-  [items addObject:@{@"id":f.identifier?:@"",@"name":f.name,@"detail":f.detail?:@"",
-    @"module":f.module,@"buttonType":@(f.buttonType),@"rules":rules}];
+  NSMutableDictionary *item=[@{@"id":f.identifier?:@"",@"name":f.name,@"detail":f.detail?:@"",
+    @"module":f.module,@"buttonType":@(f.buttonType),@"rules":rules} mutableCopy];
+  if(numeric)item[@"parameters"]=ZNEncodeValueConfig(f.valueConfig);
+  [items addObject:item];
  }
  // Preserve legacy entries verbatim; never silently drop incompatible features on save.
  [items addObjectsFromArray:self.quarantinedEntries?:@[]];
