@@ -21,10 +21,30 @@ static inline NSString *ZNV3FeatureTypeTitle(NSInteger type) {
 }
 
 // P10.2 typed numeric configuration; Slider commits only on OFF -> ON.
+// P10.2.2 numeric schema v2: previous v1 IDs are migrated by ConfigRepository.
 typedef NS_ENUM(NSInteger, ZNV3NumericType) {
- ZNV3NumericTypeInt32 = 0,
- ZNV3NumericTypeFloat32 = 1,
+ ZNV3NumericTypeInt8 = 0,
+ ZNV3NumericTypeUInt8 = 1,
+ ZNV3NumericTypeInt16 = 2,
+ ZNV3NumericTypeUInt16 = 3,
+ ZNV3NumericTypeInt32 = 4,
+ ZNV3NumericTypeUInt32 = 5,
+ ZNV3NumericTypeInt64 = 6,
+ ZNV3NumericTypeUInt64 = 7,
+ ZNV3NumericTypeFloat32 = 8,
+ ZNV3NumericTypeFloat64 = 9,
 };
+static inline BOOL ZNV3NumericTypeIsValid(NSInteger t) {return t>=0&&t<=9;}
+static inline NSString *ZNV3NumericTypeName(NSInteger t) {
+ switch(t) {
+  case 0:return @"Int8"; case 1:return @"UInt8";
+  case 2:return @"Int16"; case 3:return @"UInt16";
+  case 4:return @"Int32"; case 5:return @"UInt32";
+  case 6:return @"Int64"; case 7:return @"UInt64";
+  case 8:return @"Float32"; case 9:return @"Float64";
+  default:return @"未知类型";
+ }
+}
 @interface ZNV3ValueConfig : NSObject <NSCopying>
 @property(nonatomic,assign) ZNV3NumericType valueType;
 @property(nonatomic,assign) double minimum;
