@@ -37,6 +37,23 @@ int main(){
   check([store.draft.module isEqualToString:@"UnityFramework"],"edit draft retains stored module");
   [store cancelDraft];
   check(!store.draft,"cancel discards draft");
+  // P8: deleting a row before an open editor must not redirect save to another feature.
+  ZNV3Feature *second=[ZNV3Feature feature:@"second" detail:@"index regression" module:@"UnityFramework"];
+  ZNV3PatchRule *secondRule=[ZNV3PatchRule emptyRule];
+  secondRule.offsetText=@"0x39059D4";secondRule.patchText=@"E9FF9F52";
+  [second.rules addObject:secondRule];
+  check([repo saveFeatures:@[feature,second] error:&error],"two-feature fixture persisted");
+  ZNV3FeatureStore *shiftStore=[ZNV3FeatureStore new];
+  [shiftStore editFeatureAtIndex:1];
+  NSString *draftID=[shiftStore.draft.identifier copy];
+  check([shiftStore deleteFeatureAtIndex:0],"delete row preceding edited feature");
+  check(shiftStore.editingIndex==0,"editing index follows remaining feature");
+  shiftStore.draft.name=@"second-edited";
+  check([shiftStore saveDraft],"save edited feature after preceding delete");
+  check(shiftStore.features.count==1 &&
+    [shiftStore.features[0].identifier isEqualToString:draftID] &&
+    [shiftStore.features[0].name isEqualToString:@"second-edited"],
+    "save preserves intended feature identity after delete");
   NSURL *appSupport=[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
   NSURL *file=[[appSupport URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
   // Legacy P3 oversized patch is quarantined but its JSON stays intact on subsequent writes.
