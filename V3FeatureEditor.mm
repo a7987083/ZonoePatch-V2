@@ -79,6 +79,7 @@
 - (void)cycleType {
  if(![self validateAndStoreNumericFields])return;
  self.typeIndex=(self.typeIndex+1)%(ZNV3FeatureTypeSlider+1);
+ if(self.store.draft)self.store.draft.buttonType=(ZNV3FeatureType)self.typeIndex;
  [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
  [self updateParameterControls];
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
