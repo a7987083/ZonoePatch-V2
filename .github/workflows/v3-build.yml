@@ -33,6 +33,12 @@ jobs:
             V3ConfigRepository.mm V3FeatureModels.mm \
             tests/v3_config_and_address_test.mm -o "$RUNNER_TEMP/v3_address_config_test"
           "$RUNNER_TEMP/v3_address_config_test"
+      - name: Test Executor Transactions
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
+            V3RuntimePatchExecutor.mm tests/v3_runtime_executor_test.mm -o "$RUNNER_TEMP/v3_executor_test"
+          "$RUNNER_TEMP/v3_executor_test"
       - name: Install Theos
         run: |
           set -euo pipefail
