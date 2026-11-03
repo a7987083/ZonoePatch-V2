@@ -165,6 +165,8 @@
   [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
   [self presentViewController:alert animated:YES completion:nil];return;
  }
+ if(self.store.draft && [self.store.draft.identifier isEqualToString:target.identifier])
+  [self hideEditor];
  if([self.selectedFeatureID isEqualToString:target.identifier])self.selectedFeatureID=nil;
  [self renderFeatures];
 }
@@ -180,8 +182,8 @@
  self.moduleIndex=(self.moduleIndex+1)%2;
  [self.moduleButton setTitle:self.moduleIndex==0?@"主程序  ▾":@"UnityFramework  ▾" forState:UIControlStateNormal];
  [self refreshModuleStatus];
- [self refreshStaticBuildButton];
  if(self.store.draft)self.store.draft.module=self.moduleIndex==0?@"主程序":@"UnityFramework";
+ [self refreshStaticBuildButton];
 }
 - (void)categoryTap:(UIButton *)b {
  if(b.tag==0)return;
