@@ -1,5 +1,6 @@
 #import "V3MenuController.h"
 #import "V3UIComponents.h"
+#import "V3AddressResolver.h"
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
@@ -61,7 +62,23 @@
  [self.typeButton setTitle:(@[@"开关  ▾",@"点击按钮  ▾",@"输入框  ▾"])[self.typeIndex] forState:UIControlStateNormal];
 }
 - (void)preview {
- UIAlertController *a=[UIAlertController alertControllerWithTitle:@"UI 预览" message:@"这里只演示表单，不执行任何 Patch / Hook。" preferredStyle:UIAlertControllerStyleAlert];
+ [self.view endEditing:YES];
+ ZNV3Feature *draft=self.store.draft;
+ if(!draft)return;
+ NSMutableArray<NSString *> *lines=[NSMutableArray array];
+ for(NSUInteger i=0;i<draft.rules.count;i++){
+  ZNV3PatchRule *rule=draft.rules[i];
+  if(!rule.offsetText.length&&!rule.patchText.length)continue;
+  NSError *error=nil;
+  ZNV3ResolvedAddress *r=[ZNV3AddressResolver resolve:rule.offsetText module:draft.module error:&error];
+  if(!r){[lines addObject:[NSString stringWithFormat:@"#%lu ❌ %@",(unsigned long)i+1,error.localizedDescription?:@"无法解析"]];continue;}
+  NSString *file=r.fileBacked?[NSString stringWithFormat:@"0x%llX",(unsigned long long)r.fileOffset]:@"无文件映射";
+  [lines addObject:[NSString stringWithFormat:@"#%lu %@ · %@\\nRVA 0x%llX · Runtime 0x%llX\\nFile %@",
+    (unsigned long)i+1,r.kind,r.segmentName,(unsigned long long)r.rva,(unsigned long long)r.runtimeVA,file]];
+ }
+ UIAlertController *a=[UIAlertController alertControllerWithTitle:@"地址解析（只读）"
+  message:lines.count?[lines componentsJoinedByString:@"\\n\\n"]:@"请先输入 Offset / Patch。不会修改内存。"
+  preferredStyle:UIAlertControllerStyleAlert];
  [a addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
  [self presentViewController:a animated:YES completion:nil];
 }
