@@ -77,13 +77,15 @@ static NSString *ZNP6Hex(NSData *bytes) {
 - (NSDictionary *)manifest {
  NSMutableArray *rules=[NSMutableArray arrayWithCapacity:self.entries.count];
  for(ZNV3StaticBuildEntry *e in self.entries) {
-  [rules addObject:@{@"ruleID":e.ruleID,@"rva":[NSString stringWithFormat:@"0x%llX",(unsigned long long)e.rva],
+  [rules addObject:@{@"ruleID":e.ruleID,@"featureKey":e.featureKey?:@"",
+    @"featureName":e.featureName?:@"",
+    @"rva":[NSString stringWithFormat:@"0x%llX",(unsigned long long)e.rva],
     @"fileOffset":[NSString stringWithFormat:@"0x%llX",(unsigned long long)e.fileOffset],
     @"original":ZNP6Hex(e.originalBytes),@"patch":ZNP6Hex(e.patchBytes)}];
  }
  return @{@"schema":@"com.zonoe.v3.static-build-plan",@"version":@1,
   @"module":self.module?:@"",@"imageUUID":self.imageUUID?:@"",
-  @"sourcePath":self.sourcePath?:@"",@"rules":rules,
+  @"sourcePath":self.sourcePath?:@"",@"featureCount":@(self.featureCount),@"rules":rules,
   @"status":@"PREFLIGHT_ONLY",@"binaryGenerated":@NO};
 }
 @end
