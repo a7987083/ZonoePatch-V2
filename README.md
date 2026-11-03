@@ -13,17 +13,18 @@ Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`
 - P5.2 **isolated** Runtime Patch Executor: multi-action preflight, byte conflict checks, bounded code spans, per-write verification, rollback, explicit `RecoveryFailed` latch. Independent backend interface plus experimental RX→RW→RX Bytes writer. This backend is wired to the edit screen from P5.3, but success on non-jailbreak devices is **not verified**.
 - CI: macOS host codec/address/config/**executor fault-injection**/static-build-plan/**generated Mach-O + signer** regression executables, iOS arm64 build, `ldid -S` and SHA256 artifact.
 
-- P6-A read-only static build plan: validates file-backed spans, disk/loaded UUID and Original equality, disjoint RVA/file ranges; emits a schema-stable diagnostic manifest (`binaryGenerated=false`). The P6-B builder now emits a signed standalone Mach-O through the separate export action.
+- P6-A read-only static build plan: validates file-backed spans, disk/loaded UUID and Original equality, disjoint RVA/file ranges; emits a schema-stable diagnostic manifest (`binaryGenerated=false`). P6-B/P6-C exports a standalone ad-hoc-signed Mach-O through the separate export action.
 
 ## Not implemented / not verified
 
-- Runtime ON/OFF control of the pre-embedded static binary is not wired to V3. The generated file is not automatically installed; package signing and actual target-device launch remain unverified.
+- P6-C Static Dispatch runtime is wired to its own `启用预埋静态 Patch / 关闭预埋静态 Patch` control. It writes only the preinstalled RW `selectedTarget` slots after verifying a SHA-256 binding of the Mach-O UUID, saved rule ID, exact RVA and Patch bytes. The loaded game behavior is **not device verified**. The generated file is not automatically installed and still requires final IPA re-signing.
+- P6-C intentionally supports one active saved feature per process (with up to 128 non-overlapping rules). Multiple independent features/variants sharing physical sites and concurrent activation are not implemented. Each 8-byte pointer write is atomic, not a global atomic switch across all sites.
 
 - P6-B generates a complete thin ARM64 Mach-O using V2's owned `__ZNTEXT` + `__ZNDATA` static dispatch layout, relocation and ad-hoc signature rebuilding. Use the saved feature's `生成预埋二进制（初始 OFF）` action; it exports under Documents/ZonoePatchOutput. The embedded variant defaults OFF. P5.3 adds a confirmed **Apply Patch / Restore Original** action for saved features only. The edit button is not a runtime hook and cannot guarantee RX code-page write permissions.
-- Full iPhone device regression for actual applying/restoring bytes, code-signing and concurrent execution.
+- Full iPhone device regression for Runtime Bytes Patch, P6-C cold-boot OFF / ON / OFF, image identity and startup, code-signing, and concurrent execution.
 - Durable Patch Definition binding to a saved Mach-O UUID (UUID is read at preflight but not persisted). The current process session requires on-disk Original equality before first write, retains a single active transaction, and does not persist ON state.
 
-The successful CI does **not** prove the target game is patchable or compatible with non-jailbreak executable-page restrictions. See `KNOWN_ISSUES.md`.
+The successful CI does **not** prove the installed target game loads, runs its OFF path correctly or can switch ON/OFF under live execution. See `KNOWN_ISSUES.md`.
 
 ## Build
 
