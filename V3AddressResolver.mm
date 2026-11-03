@@ -125,7 +125,7 @@ static bool snapshot(uint64_t base,std::vector<Segment> &segs,uint64_t &textBase
      seg.name,(unsigned long long)lo,(unsigned long long)hi]];
   }
   message=[NSString stringWithFormat:
-   @"Offset 0x%llX 无法映射到 %@。已检查 RVA / VA / Runtime VA / File Offset。\\nSegment 范围：%@",
+   @"Offset 0x%llX 无法映射到 %@。已检查 RVA / VA / Runtime VA / File Offset。\nSegment 范围：%@",
    (unsigned long long)input,module,[ranges componentsJoinedByString:@"; "]];
  }
  if(!message){
