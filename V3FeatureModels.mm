@@ -69,6 +69,8 @@
  if(index>=_features.count)return NO;
  ZNV3Feature *old=_features[index];[_features removeObjectAtIndex:index];
  if(![self persist]){[_features insertObject:old atIndex:index];return NO;}
+ // Deleting a preceding row shifts the live draft target by one slot.
+ if(_editingIndex!=NSNotFound && index<_editingIndex) _editingIndex--;
  return YES;
 }
 - (void)deleteRuleAtIndex:(NSUInteger)index {
