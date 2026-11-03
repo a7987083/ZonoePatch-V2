@@ -77,7 +77,8 @@
  [row addArrangedSubview:l];
  BOOL active=[[ZNV3PatchSession shared] isActiveFeature:f.identifier];
  UIButton *toggle=ZNButton(active?@"恢复":@"启用",self,@selector(toggleFeaturePatch:));toggle.tag=(NSInteger)i;
- toggle.enabled=[ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusRecoveryFailed;
+ toggle.enabled=!self.staticBuildRunning &&
+  [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusRecoveryFailed;
  [toggle.widthAnchor constraintEqualToConstant:43].active=YES;
  [toggle.heightAnchor constraintEqualToConstant:34].active=YES;
  [row addArrangedSubview:toggle];
@@ -97,6 +98,9 @@
  [self renderFeatures];
 }
 - (void)toggleFeaturePatch:(UIButton *)sender {
+ if(self.staticBuildRunning){
+  [self showPatchMessage:@"构建进行中" detail:@"静态生成期间不能改变 Runtime Patch 状态。"];return;
+ }
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
  ZNV3Feature *feature=self.store.features[index];
@@ -134,6 +138,9 @@
  [self renderFeatures];
 }
 - (void)removeFeature:(UIButton *)sender {
+ if(self.staticBuildRunning){
+  [self showPatchMessage:@"构建进行中" detail:@"静态生成完成后再删除功能。"];return;
+ }
  if((NSUInteger)sender.tag>=self.store.features.count)return;
  if([ZNV3PatchSession shared].status==ZNV3PatchTransactionStatusRecoveryFailed){
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"执行器故障锁定"
@@ -179,6 +186,7 @@
  self.moduleStatus.text=[NSString stringWithFormat:@"%@ · 已加载 · Base 0x%llX · Slide 0x%llX",name,(unsigned long long)info.imageBase,(unsigned long long)(uint64_t)info.slide];
 }
 - (void)cycleModule {
+ if(self.staticBuildRunning)return;
  if(self.store.draft && ([[ZNV3PatchSession shared] isActiveFeature:self.store.draft.identifier]||
     [[ZNV3StaticDispatchRuntime shared] isEnabledForFeature:self.store.draft.identifier]))return;
  self.moduleIndex=(self.moduleIndex+1)%2;
