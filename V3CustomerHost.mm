@@ -45,7 +45,7 @@
  }return self;
 }
 - (void)appEvent:(NSNotification *)note {
- if(!NSThread.isMainThread){
+ if(![NSThread isMainThread]){
   dispatch_async(dispatch_get_main_queue(),^{[self appEvent:note];});return;
  }
  if([note.name isEqualToString:UIApplicationDidEnterBackgroundNotification]){
@@ -73,7 +73,7 @@
  return host.bounds;
 }
 - (void)updateLayout {
- if(!NSThread.isMainThread){
+ if(![NSThread isMainThread]){
   dispatch_async(dispatch_get_main_queue(),^{[self updateLayout];});return;
  }
  UIWindow *host=self.sourceWindow;
@@ -116,7 +116,7 @@
  if(!CGSizeEqualToSize(self.lastSceneSize,now))[self updateLayout];
 }
 - (void)toggleFromWindow:(UIWindow *)host {
- if(!NSThread.isMainThread){
+ if(![NSThread isMainThread]){
   dispatch_async(dispatch_get_main_queue(),^{[self toggleFromWindow:host];});return;
  }
  if(self.window && !self.window.hidden){[self hide];return;}
