@@ -2,6 +2,7 @@
 #import "V3AddressResolver.h"
 #import "V3PatchCodec.h"
 #import <mach/mach.h>
+#import <mach/vm_prot.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -35,6 +36,14 @@ static NSString *ZNVPHex(NSData *data) {
   if(error)*error=ZNVPError(3,@"ARM64 Code Patch 的 Offset 和字节长度必须按 4 字节对齐");
   return nil;
  }
+ if(!start.imageUUID.length){
+  if(error)*error=ZNVPError(10,@"当前 Mach-O 缺少 LC_UUID，无法绑定补丁到目标二进制版本");
+  return nil;
+ }
+ if((start.segmentInitialProtection & (VM_PROT_READ|VM_PROT_EXECUTE))!=(VM_PROT_READ|VM_PROT_EXECUTE)){
+  if(error)*error=ZNVPError(11,@"目标 Segment 不是可读、可执行代码区域（R-X），拒绝 Code Patch 预检");
+  return nil;
+ }
  if(!start.fileBacked){
   if(error)*error=ZNVPError(4,@"目标地址不对应文件内容，无法用于后续静态构建");
   return nil;
@@ -48,7 +57,9 @@ static NSString *ZNVPHex(NSData *data) {
  // within one contiguous Mach-O segment, not merely its first instruction.
  NSString *lastOffset=[NSString stringWithFormat:@"rva:0x%llX",(unsigned long long)(start.rva+count-1)];
  ZNV3ResolvedAddress *last=[ZNV3AddressResolver resolve:lastOffset module:module error:&e];
- if(!last||!last.fileBacked||![last.segmentName isEqualToString:start.segmentName]||
+ if(!last||!last.fileBacked||last.segmentVMAddress!=start.segmentVMAddress||
+    last.segmentFileOffset!=start.segmentFileOffset||
+    ![last.imageUUID isEqualToString:start.imageUUID]||
     last.fileOffset!=start.fileOffset+count-1||
     last.runtimeVA!=start.runtimeVA+count-1||
     ![last.imagePath isEqualToString:start.imagePath]){
