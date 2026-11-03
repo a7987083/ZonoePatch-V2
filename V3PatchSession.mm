@@ -57,6 +57,10 @@ static BOOL ZNVerifyOriginalOnDisk(ZNV3PatchValidation *validation, NSError **er
 }
 - (BOOL)applyFeature:(ZNV3Feature *)feature error:(NSError **)error {
  @synchronized(self) {
+  if(!feature||feature.buttonType!=ZNV3FeatureTypeToggle){
+   if(error)*error=ZNSessionError(8,@"只有开关类型允许使用旧 Bytes Patch 执行器；数值类型尚未接入");
+   return NO;
+  }
   if(self.status!=ZNV3PatchTransactionStatusDisabled){
    if(error)*error=ZNSessionError(4,self.status==ZNV3PatchTransactionStatusRecoveryFailed?
      @"前次回滚失败，已锁定运行时写入":@"已有其他功能的 Patch 生效，请先恢复");
