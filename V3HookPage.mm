@@ -49,6 +49,27 @@
  UIButton *addRule=ZNButton(@"＋ 添加一组 Offset / Patch",self,@selector(addRuleTap));[stack addArrangedSubview:addRule];[addRule.heightAnchor constraintEqualToConstant:36].active=YES;
  [stack addArrangedSubview:ZNLabel(@"按钮类型",12,YES)];
  self.typeButton=ZNButton(@"开关  ▾",self,@selector(cycleType));[stack addArrangedSubview:self.typeButton];[self.typeButton.heightAnchor constraintEqualToConstant:36].active=YES;
+ // P10.2: numeric metadata editor (not yet connected to a runtime writer).
+ self.parameterFields=[UIStackView new];self.parameterFields.axis=UILayoutConstraintAxisVertical;
+ self.parameterFields.spacing=6;[stack addArrangedSubview:self.parameterFields];
+ [self.parameterFields addArrangedSubview:ZNLabel(@"数值数据类型",12,YES)];
+ self.valueTypeButton=ZNButton(@"Int32  ▾",self,@selector(cycleValueType));
+ [self.parameterFields addArrangedSubview:self.valueTypeButton];
+ [self.valueTypeButton.heightAnchor constraintEqualToConstant:34].active=YES;
+ NSArray<NSString *> *names=@[@"最小值",@"最大值",@"步长",@"默认值"];
+ NSMutableArray<UITextField *> *fields=[NSMutableArray arrayWithCapacity:4];
+ for(NSString *name in names){
+  [self.parameterFields addArrangedSubview:ZNLabel(name,12,YES)];
+  UITextField *field=[self field:name value:@""];
+  field.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+  [self.parameterFields addArrangedSubview:field];
+  [fields addObject:field];
+ }
+ self.minimumField=fields[0];self.maximumField=fields[1];
+ self.stepField=fields[2];self.defaultField=fields[3];
+ UILabel *note=ZNLabel(@"滑条：拖动只改变待生效值；打开开关才提交，关闭恢复原始状态。（执行后端待接入）",11,NO);
+ note.numberOfLines=0;[self.parameterFields addArrangedSubview:note];
+ self.parameterFields.hidden=YES;
  UIStackView *actions=[UIStackView new];actions.axis=UILayoutConstraintAxisHorizontal;actions.distribution=UIStackViewDistributionFillEqually;actions.spacing=5;[stack addArrangedSubview:actions];
  UIButton *cancel=ZNButton(@"取消",self,@selector(hideEditor));self.patchActionButton=ZNButton(@"应用 Patch",self,@selector(applyOrRestore));UIButton *save=ZNButton(@"保存",self,@selector(saveUI));
  for(UIButton *button in @[cancel,self.patchActionButton,save]){[actions addArrangedSubview:button];[button.heightAnchor constraintEqualToConstant:38].active=YES;}
