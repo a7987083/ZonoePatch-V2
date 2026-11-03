@@ -50,6 +50,9 @@
  UIButton *staticPreflight=ZNButton(@"静态生成预检（只读）",self,@selector(staticBuildPreflight));
  [stack addArrangedSubview:staticPreflight];
  [staticPreflight.heightAnchor constraintEqualToConstant:38].active=YES;
+ self.staticBuildButton=ZNButton(@"生成预埋二进制（初始 OFF）",self,@selector(generateStaticBinary));
+ [stack addArrangedSubview:self.staticBuildButton];
+ [self.staticBuildButton.heightAnchor constraintEqualToConstant:38].active=YES;
  self.editor.hidden=YES;
 
 }
