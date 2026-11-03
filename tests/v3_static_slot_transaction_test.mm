@@ -47,5 +47,5 @@ int main() {@autoreleasepool{
  check(![lt apply:@[a,b] error:&e]&&before==latch.writes,"recovery lock blocks writes");
  FakeStaticRW *dup=[FakeStaticRW new];ZNV3StaticSlotTransaction *dt=[[ZNV3StaticSlotTransaction alloc]initWithBackend:dup];
  check(![dt apply:@[a,a] error:&e]&&dup.writes==0,"duplicate slot rejected without writes");
- }}printf("P6 Static Slot Transactions: %s (%d failures)\n",failed?"FAIL":"PASS",failed);return failed?1:0;
+ }printf("P6 Static Slot Transactions: %s (%d failures)\n",failed?"FAIL":"PASS",failed);return failed?1:0;
 }
