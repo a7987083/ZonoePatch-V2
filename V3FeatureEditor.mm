@@ -9,6 +9,10 @@
 
 @implementation ZNV3MenuController (FeatureEditor)
 - (void)renderRules {
+ BOOL numeric=self.typeIndex==ZNV3FeatureTypeNumberInput||self.typeIndex==ZNV3FeatureTypeSlider;
+ self.rulesTitleLabel.text=numeric?@"数值 Offset（无需 Patch HEX）":@"Offset / Patch 规则（支持多组）";
+ [self.addRuleButton setTitle:numeric?@"＋ 添加 Offset":@"＋ 添加一组 Offset / Patch"
+                   forState:UIControlStateNormal];
  for(UIView *v in self.rules.arrangedSubviews){[self.rules removeArrangedSubview:v];[v removeFromSuperview];}
  for(NSUInteger i=0;i<self.store.draft.rules.count;i++){
  ZNV3PatchRule *r=self.store.draft.rules[i];
@@ -22,9 +26,13 @@
  [box addArrangedSubview:bar];
  UITextField *offset=[self field:@"Offset，例如 0x105A3C" value:r.offsetText];offset.tag=1000+(NSInteger)i;
  [offset addTarget:self action:@selector(ruleTextChanged:) forControlEvents:UIControlEventEditingChanged];
- UITextField *patch=[self field:@"Patch，例如 0x000080D2" value:r.patchText];patch.tag=2000+(NSInteger)i;
- [patch addTarget:self action:@selector(ruleTextChanged:) forControlEvents:UIControlEventEditingChanged];
- [box addArrangedSubview:offset];[box addArrangedSubview:patch];[self.rules addArrangedSubview:box];
+ [box addArrangedSubview:offset];
+ if(!numeric) {
+  UITextField *patch=[self field:@"Patch，例如 0x000080D2" value:r.patchText];patch.tag=2000+(NSInteger)i;
+  [patch addTarget:self action:@selector(ruleTextChanged:) forControlEvents:UIControlEventEditingChanged];
+  [box addArrangedSubview:patch];
+ }
+ [self.rules addArrangedSubview:box];
  }
 }
 - (void)ruleTextChanged:(UITextField *)field {
@@ -81,7 +89,7 @@
  self.typeIndex=(self.typeIndex+1)%(ZNV3FeatureTypeSlider+1);
  if(self.store.draft)self.store.draft.buttonType=(ZNV3FeatureType)self.typeIndex;
  [self.typeButton setTitle:[ZNV3FeatureTypeTitle(self.typeIndex) stringByAppendingString:@"  ▾"] forState:UIControlStateNormal];
- [self updateParameterControls];
+ [self renderRules];[self updateParameterControls];
  [self refreshPatchActionButton];[self refreshStaticBuildButton];
 }
 - (void)updateParameterControls {
@@ -96,7 +104,7 @@
  self.sliderHintLabel.hidden=!slider;
  if(!numeric||!self.store.draft)return;
  ZNV3ValueConfig *v=self.store.draft.valueConfig?:[ZNV3ValueConfig defaults];
- [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
+ [self.valueTypeButton setTitle:[ZNV3NumericTypeName(v.valueType) stringByAppendingString:@"  ▾"]
                      forState:UIControlStateNormal];
  self.minimumField.text=[NSString stringWithFormat:@"%g",v.minimum];
  self.maximumField.text=[NSString stringWithFormat:@"%g",v.maximum];
@@ -106,8 +114,8 @@
 - (void)cycleValueType {
  if(!self.store.draft)return;
  ZNV3ValueConfig *v=self.store.draft.valueConfig;
- v.valueType=v.valueType==ZNV3NumericTypeInt32?ZNV3NumericTypeFloat32:ZNV3NumericTypeInt32;
- [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
+ v.valueType=(ZNV3NumericType)((v.valueType+1)%10);
+ [self.valueTypeButton setTitle:[ZNV3NumericTypeName(v.valueType) stringByAppendingString:@"  ▾"]
                      forState:UIControlStateNormal];
 }
 - (BOOL)validateAndStoreNumericFields {
@@ -131,7 +139,8 @@
  v.requiresEnableSwitch=YES;
  if(![v isValidForFeatureType:(ZNV3FeatureType)self.typeIndex]){
   [self showPatchMessage:@"数值范围无效"
-    detail:@"要求最小值小于最大值、步长大于零、默认值在范围内，且符合 Int32/Float32 边界。"];return NO;
+    detail:slider?@"滑条需要有效的范围、步长与默认值；64 位整数当前限精确范围 ±(2^53−1)。":
+                  @"输入框需要有效的最小值和最大值；64 位整数当前限精确范围 ±(2^53−1)。"];return NO;
  }
  self.store.draft.valueConfig=v;return YES;
 }
