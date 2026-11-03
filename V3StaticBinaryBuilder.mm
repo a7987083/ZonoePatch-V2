@@ -898,6 +898,18 @@ static BOOL ZNV3BuildTarget(ZNV3StaticBuildPlan *plan,
 
     do {
         if (!ZNV3Parse(oldBase,(size_t)oldFileSize,segments,layout,&localError)) break;
+        // A mutable source file must be bound to exactly the UUID accepted by preflight.
+        BOOL uuidMatches=NO;
+        znmacho::File checked;const char *why=nullptr;
+        if(znmacho::parse(oldBase,oldFileSize,checked,&why)){
+         for(const auto &command:checked.commands)if(command.kind==LC_UUID&&command.size>=sizeof(struct uuid_command)){
+          struct uuid_command u={};memcpy(&u,oldBase+command.offset,sizeof(u));
+          NSString *uuid=[[[NSUUID alloc]initWithUUIDBytes:u.uuid] UUIDString];
+          uuidMatches=[uuid isEqualToString:plan.imageUUID];
+          break;
+         }
+        }
+        if(!uuidMatches){localError=@"暂存 Mach-O LC_UUID 与预检计划不一致";break;}
         if (rows.count > ZN44_STATIC_MAX_ENTRIES) { localError=@"Patch 数量超过 Static Dispatch 上限"; break; }
 
         logicals.reserve(rows.count);
