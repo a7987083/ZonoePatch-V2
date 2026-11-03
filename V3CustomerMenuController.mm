@@ -61,7 +61,7 @@
  icon.contentMode=UIViewContentModeScaleAspectFit;
  [header addArrangedSubview:icon];
  [icon.widthAnchor constraintEqualToConstant:46].active=YES;
- [icon.heightAnchor constraintEqualToConstant:40].active=YES];
+ [icon.heightAnchor constraintEqualToConstant:40].active=YES;
 
  UILabel *title=ZNLabel(@"ZonoePatch",17,YES);
  title.textColor=UIColor.whiteColor;title.numberOfLines=1;
@@ -75,12 +75,12 @@
  [close addTarget:self action:@selector(closeMenu) forControlEvents:UIControlEventTouchUpInside];
  [header addArrangedSubview:close];
  [close.widthAnchor constraintEqualToConstant:38].active=YES;
- [close.heightAnchor constraintEqualToConstant:42].active=YES];
+ [close.heightAnchor constraintEqualToConstant:42].active=YES;
 
  UIView *divider=[UIView new];
  divider.backgroundColor=[UIColor colorWithRed:.55 green:.22 blue:.94 alpha:.8];
  [stack addArrangedSubview:divider];
- [divider.heightAnchor constraintEqualToConstant:1].active=YES];
+ [divider.heightAnchor constraintEqualToConstant:1].active=YES;
 
  UIScrollView *scroll=[UIScrollView new];
  scroll.alwaysBounceVertical=NO;
@@ -176,7 +176,7 @@
   glyph.tintColor=iconColors[style];
   [row addArrangedSubview:glyph];
   [glyph.widthAnchor constraintEqualToConstant:26].active=YES;
-  [glyph.heightAnchor constraintEqualToConstant:25].active=YES];
+  [glyph.heightAnchor constraintEqualToConstant:25].active=YES;
 
   UILabel *name=ZNLabel(feature.title?:@"",14,NO);
   name.textColor=UIColor.whiteColor;
