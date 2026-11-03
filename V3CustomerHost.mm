@@ -50,11 +50,12 @@
  CGRect sceneBounds=host.bounds;
  if(@available(iOS 13.0,*))sceneBounds=host.windowScene.coordinateSpace.bounds;
  self.controller.hostOrientationMask=mask;
- CGFloat width=MIN(220.0,MAX(160.0,CGRectGetWidth(sceneBounds)-24.0));
+ // Restore a readable card: about three quarters of a typical portrait game viewport.
+ CGFloat width=MIN(300.0,MAX(210.0,CGRectGetWidth(sceneBounds)-28.0));
  NSUInteger count=[[ZNV3CustomerRuntime shared] discover].count;
- // Compact reference layout: 42pt header, thin divider, 40pt per feature.
- CGFloat contentHeight=58.0+40.0*MIN((NSUInteger)12,MAX((NSUInteger)1,count));
- CGFloat height=MIN(contentHeight,MAX(98.0,CGRectGetHeight(sceneBounds)-24.0));
+ // 54pt header, 52pt per feature and 20pt combined vertical margins.
+ CGFloat contentHeight=76.0+52.0*MIN((NSUInteger)12,MAX((NSUInteger)1,count));
+ CGFloat height=MIN(contentHeight,MAX(130.0,CGRectGetHeight(sceneBounds)-24.0));
  CGPoint origin=creatingWindow
   ?CGPointMake(CGRectGetMidX(sceneBounds)-width/2.0,CGRectGetMidY(sceneBounds)-height/2.0)
   :self.window.frame.origin;
