@@ -9,7 +9,7 @@ static void check(BOOL yes,const char *msg){if(!yes){fprintf(stderr,"FAIL: %s\n"
 @property(nonatomic,assign) BOOL failRollback;
 @end
 @implementation FakeStaticRW
-- (instancetype)init {if((self=[super init]))_cells=[@{@(0x1000):@(0),@(0x2000):@(0)} mutableCopy];return self;}
+- (instancetype)init {if((self=[super init]))_cells=[@{@(0x1000):@(0),@(0x2000):@(0),@(0x3000):@(0)} mutableCopy];return self;}
 - (BOOL)readAt:(uintptr_t)addr value:(uint64_t *)out error:(NSError **)err {
  NSNumber *v=self.cells[@(addr)];if(!v)return NO;*out=v.unsignedLongLongValue;return YES;
 }
@@ -45,7 +45,41 @@ int main() {@autoreleasepool{
  check(lt.recoveryFailed,"rollback failure latches");
  NSUInteger before=latch.writes;
  check(![lt apply:@[a,b] error:&e]&&before==latch.writes,"recovery lock blocks writes");
- FakeStaticRW *dup=[FakeStaticRW new];ZNV3StaticSlotTransaction *dt=[[ZNV3StaticSlotTransaction alloc]initWithBackend:dup];
+ // P9.2: two feature groups: A owns two slots, B owns one.
+ // Switching B must not touch A; a failed A transaction must roll back A only.
+ FakeStaticRW *groups=[FakeStaticRW new];
+ ZNV3StaticSlotTransaction *gt=[[ZNV3StaticSlotTransaction alloc]initWithBackend:groups];
+ ZNV3StaticSlotOperation *bOnly=[[ZNV3StaticSlotOperation alloc]
+   initWithAddress:0x3000 expected:0 desired:0xB300];
+ check([gt apply:@[bOnly] error:&e],"P9 B can be enabled independently");
+ check([groups.cells[@(0x1000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x2000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x3000)] unsignedLongLongValue]==0xB300,
+       "P9 enabling B leaves A unchanged");
+ groups.writes=0;groups.failNthWrite=2;
+ check(![gt apply:@[a,b] error:&e],"P9 fault in A second slot rejects A");
+ check([groups.cells[@(0x1000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x2000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x3000)] unsignedLongLongValue]==0xB300,
+       "P9 A rollback preserves active B");
+ check(!gt.recoveryFailed,"P9 recovered A failure does not latch B");
+ groups.failNthWrite=0;
+ check([gt apply:@[a,b] error:&e],"P9 enable A alongside active B");
+ check([groups.cells[@(0x1000)] unsignedLongLongValue]==0xA100 &&
+       [groups.cells[@(0x2000)] unsignedLongLongValue]==0xA200 &&
+       [groups.cells[@(0x3000)] unsignedLongLongValue]==0xB300,
+       "P9 A and B both independently ON");
+ check([gt apply:@[undoA,undoB] error:&e],"P9 disable A without changing B");
+ check([groups.cells[@(0x1000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x2000)] unsignedLongLongValue]==0 &&
+       [groups.cells[@(0x3000)] unsignedLongLongValue]==0xB300,
+       "P9 B still ON after A OFF");
+ ZNV3StaticSlotOperation *bOff=[[ZNV3StaticSlotOperation alloc]
+   initWithAddress:0x3000 expected:0xB300 desired:0];
+ check([gt apply:@[bOff] error:&e],"P9 disable B independently");
+ check([groups.cells[@(0x3000)] unsignedLongLongValue]==0,
+       "P9 independent group restore returns to OFF");
+  FakeStaticRW *dup=[FakeStaticRW new];ZNV3StaticSlotTransaction *dt=[[ZNV3StaticSlotTransaction alloc]initWithBackend:dup];
  check(![dt apply:@[a,a] error:&e]&&dup.writes==0,"duplicate slot rejected without writes");
  }printf("P6 Static Slot Transactions: %s (%d failures)\n",failed?"FAIL":"PASS",failed);return failed?1:0;
 }
