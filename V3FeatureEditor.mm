@@ -93,6 +93,7 @@
  self.stepField.hidden=!slider;
  self.defaultLabel.hidden=!slider;
  self.defaultField.hidden=!slider;
+ self.sliderHintLabel.hidden=!slider;
  if(!numeric||!self.store.draft)return;
  ZNV3ValueConfig *v=self.store.draft.valueConfig?:[ZNV3ValueConfig defaults];
  [self.valueTypeButton setTitle:(v.valueType==ZNV3NumericTypeFloat32?@"Float32  ▾":@"Int32  ▾")
