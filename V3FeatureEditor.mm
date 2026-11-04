@@ -166,7 +166,10 @@
  ZNV3Feature *selected=nil;
  for(ZNV3Feature *feature in self.store.features)
   if([feature.identifier isEqualToString:self.selectedFeatureID]){selected=feature;break;}
- ready=ready&&selected!=nil&&selected.buttonType==ZNV3FeatureTypeToggle;
+ BOOL numeric=selected&&(selected.buttonType==ZNV3FeatureTypeNumberInput||
+                           selected.buttonType==ZNV3FeatureTypeSlider);
+ ready=ready&&selected&&(selected.buttonType==ZNV3FeatureTypeToggle||numeric);
+ if(ready&&numeric&&self.selectedFeatureIDs.count>1)ready=NO;
  if(ready && self.store.draft){
   NSUInteger idx=self.store.editingIndex;
   ready=idx!=NSNotFound && idx<self.store.features.count &&
@@ -181,7 +184,7 @@
  if(ready && [ZNV3StaticDispatchRuntime shared].recoveryFailed)ready=NO;
  self.staticBuildButton.enabled=ready;
  self.staticBuildButton.alpha=ready?1.0:0.48;
- [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":@"生成预埋二进制（初始 OFF）"
+ [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":(numeric?@"生成数值元数据二进制":@"生成预埋二进制（初始 OFF）")
    forState:UIControlStateNormal];
 }
 - (void)staticBuildInputChanged:(UITextField *)sender {
@@ -210,6 +213,37 @@
   if([self.selectedFeatureIDs containsObject:feature.identifier])[selectedFeatures addObject:feature];
  }
  if(!selectedFeatures.count)[selectedFeatures addObject:selected];
+ if(selected.buttonType==ZNV3FeatureTypeNumberInput||selected.buttonType==ZNV3FeatureTypeSlider){
+  if(selectedFeatures.count!=1){
+   [self showPatchMessage:@"数值功能只支持单独生成"
+         detail:@"当前数值描述符协议每个 Mach-O 仅支持一个输入框或滑条功能。"];
+   return;
+  }
+  NSData *descriptor=[ZNV3StaticBuildPlanner typedDescriptorForFeature:selected error:&error];
+  if(!descriptor){
+   [self showPatchMessage:@"数值目标预检失败"
+         detail:error.localizedDescription?:@"仅接受属于 RW 数据段的类型化 Offset。"];
+   return;
+  }
+  self.staticBuildRunning=YES;
+  [self renderFeatures];
+  __weak ZNV3MenuController *weakSelf=self;
+  dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{
+   NSError *buildError=nil;
+   NSString *output=[ZNV3StaticBinaryExport generateTypedMetadataForFeature:selected error:&buildError];
+   NSString *detail=output?[NSString stringWithFormat:
+     @"功能：%@\n文件：%@\n\n已预埋只读数值描述符并重建签名。仅适用于已验证的 RW 数据 Offset；不包含代码 Hook。替换进 IPA 并整包重签后，由新版 Customer 的数值控件执行写入及恢复。",
+     selected.name,output]:(buildError.localizedDescription?:@"无法生成数值二进制");
+   dispatch_async(dispatch_get_main_queue(),^{
+    ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
+    strongSelf.staticBuildRunning=NO;
+    [strongSelf renderFeatures];
+    [strongSelf showPatchMessage:output?@"已生成数值元数据 Mach-O":@"数值构建失败"
+                         detail:detail];
+   });
+  });
+  return;
+ }
  ZNV3StaticBuildPlan *plan=[ZNV3StaticBuildPlanner planForFeatures:selectedFeatures error:&error];
  if(!plan){
   [self showPatchMessage:@"静态构建预检失败"
