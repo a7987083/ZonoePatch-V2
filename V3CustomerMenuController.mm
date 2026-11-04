@@ -337,7 +337,7 @@
   slider.enabled=!locked;
   slider.tag=(NSInteger)i;
   if(slider.hidden)continue;
-  double min=feature.minimum.doubleValue,max=feature.maximum.doubleValue;
+  double min=feature.minimum.doubleValue;
   double step=feature.step.doubleValue;
   double number=pending.doubleValue;
   double index=step>0?(number-min)/step:0;
