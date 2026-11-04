@@ -1,6 +1,7 @@
 #import "V3CustomerRuntime.h"
 #import "V3StaticSlotTransaction.h"
 #import "ZNStaticPatchFormat.h"
+#import "ZNStaticEntryVisibility.hpp"
 #import "ZNStaticRVAProtection.h"
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
@@ -184,6 +185,9 @@ static NSArray<ZNV3CustomerFeature *> *ZNCCatalogImage(uint32_t imageIndex){
   if((slot&7u)||!ZNCRegion(slot,8,VM_PROT_READ|VM_PROT_WRITE))return nil;
   uint64_t value=0;
   if(!ZNCRead(slot,&value,8)||(value!=0&&value!=off&&value!=on))return nil;
+  // Do not surface code-numeric P9 implementation slots as ordinary toggles.
+  // A future numeric controller must validate ZCB1 before controlling these.
+  if(!ZNCustomerP9EntryVisibleAsToggle(entry))continue;
   if(!groups[key]){groups[key]=[NSMutableArray array];titles[key]=title;[order addObject:key];}
   if(value==on)activeCounts[key]=@([activeCounts[key] unsignedIntegerValue]+1);
   ZNCCell *cell=[ZNCCell new];cell.slot=slot;cell.onTarget=on;cell.offTarget=off;

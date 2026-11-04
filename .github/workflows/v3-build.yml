@@ -54,6 +54,13 @@ jobs:
             ZNCodeCellBinding.cpp tests/zn_code_cell_binding_test.cpp \
             -o "$RUNNER_TEMP/zn_code_cell_binding"
           "$RUNNER_TEMP/zn_code_cell_binding"
+      - name: Test P10.7.5 Customer P9 Numeric Slot Isolation
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            tests/zn_static_entry_visibility_test.cpp \
+            -o "$RUNNER_TEMP/zn_static_entry_visibility"
+          "$RUNNER_TEMP/zn_static_entry_visibility"
       - name: Test P10.6.1 Unified BuildPlan Contract
         run: |
           set -euo pipefail
