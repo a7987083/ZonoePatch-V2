@@ -55,3 +55,9 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - Current Developer recognizes limited code candidates (FMOV S/D, MOVZ/MOVN + MOVK) and provides a more precise rejection explanation. **No R-X numeric site is yet accepted for binary generation.**
 - LDR literal encoding is tested on synthetic assembler instructions but *no Value Cell has been inserted into a real Mach-O*. Customer input and slider cannot control R-X code through this version; existing RW numeric path and P9 toggle behavior remain unchanged.
 - Relocation, inbound branch targets, selectedTarget dispatch, cell placement relative to __ZNTEXT, readback and post-signing integrity require next-stage integration tests and device verification.
+
+## P10.7.4 staging-only numeric code emitter (2026-11-04)
+
+- Added generated-Mach-O staging helper and synthetic Float32 slider + Int32 input + P9 toggle smoke. It verifies byte-identical OFF variants, LDR ON variants, distinct writable cells, ZNM2 names/IDs/RVAs and signature readback. The helper is NOT invoked by production Developer or Customer UI; only synthetic test coverage is claimed.
+- Must establish a persistent, versioned ownership link between each code-cell ZNM2 numeric feature and its P9 selectedTarget dispatch slot; otherwise modifying a cell while the code dispatch is OFF has no observable effect. Avoid displaying internal synthetic code entries as ordinary P9 toggles.
+- Production must reserve Value Cell capacity before owned segment construction, validate all indirect control flow and nontrivial MOVK chains, and restore code dispatch to Original OFF when disabling numeric controls. Until implemented and device-verified, R-X slider/input generation remains unsupported.
