@@ -62,7 +62,7 @@ int main() {@autoreleasepool{
  check(!raceTx.recoveryFailed,"race with recoverable rollback does not lock");
  // Failure while rolling back a race must fail closed.
  FakeStaticRW *raceLatch=[FakeStaticRW new];raceLatch.interfereAt=0x2000;
- raceLatch.interferenceValue=0xDEAD;raceLatch.failRollback=YES;
+ raceLatch.interferenceValue=0xDEAD;raceLatch.failNthWrite=2;
  ZNV3StaticSlotTransaction *raceLatchTx=[[ZNV3StaticSlotTransaction alloc]
    initWithBackend:raceLatch];
  check(![raceLatchTx apply:@[a,b] error:&e],"intervening race with failed rollback rejected");
