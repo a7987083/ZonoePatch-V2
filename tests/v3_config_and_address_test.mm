@@ -118,6 +118,47 @@ int main(){
   feature.valueConfig.valueType=ZNV3NumericTypeInt64;
   feature.valueConfig.minimum=0;feature.valueConfig.maximum=9007199254740992.0;
   check(![repo saveFeatures:@[feature] error:&error],"reject integer beyond precise double range");
+  // P10.3 schema v3: preserve complete UInt64 / Int64 decimal precision.
+  feature.buttonType=ZNV3FeatureTypeNumberInput;
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  feature.valueConfig.valueType=ZNV3NumericTypeUInt64;
+  feature.valueConfig.minimumText=@"0";
+  feature.valueConfig.maximumText=@"18446744073709551615";
+  check([repo saveFeatures:@[feature] error:&error],
+        "persist full precision UInt64 input range");
+  NSArray<ZNV3Feature *> *preciseLoaded=[repo loadFeatures:&error];
+  check(preciseLoaded.count==1 &&
+        [preciseLoaded[0].valueConfig.maximumText isEqualToString:@"18446744073709551615"],
+        "load full precision UInt64 without double conversion");
+  NSDictionary *preciseDoc=[NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithContentsOfURL:[[[[NSFileManager defaultManager]
+        URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject
+        URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"]]
+      options:0 error:&error];
+  NSDictionary *preciseParams=preciseDoc[@"features"][0][@"parameters"];
+  check([preciseParams[@"numericSchemaVersion"] isEqual:@3] &&
+        [preciseParams[@"maximum"] isKindOfClass:NSString.class],
+        "schema v3 serializes precise numeric text");
+  feature.valueConfig.maximumText=@"18446744073709551616";
+  check(![repo saveFeatures:@[feature] error:&error],"reject overflowed UInt64 exact range");
+  feature.buttonType=ZNV3FeatureTypeSlider;
+  feature.valueConfig=[ZNV3ValueConfig defaults];
+  feature.valueConfig.valueType=ZNV3NumericTypeInt64;
+  feature.valueConfig.minimumText=@"-9223372036854775808";
+  feature.valueConfig.maximumText=@"9223372036854775807";
+  feature.valueConfig.stepText=@"1";
+  feature.valueConfig.defaultText=@"0";
+  check([repo saveFeatures:@[feature] error:&error],
+        "persist exact Int64 slider parameters");
+  NSArray<ZNV3Feature *> *sliderExactLoaded=[repo loadFeatures:&error];
+  check(sliderExactLoaded.count==1 &&
+        [sliderExactLoaded[0].valueConfig.minimumText isEqualToString:@"-9223372036854775808"] &&
+        [sliderExactLoaded[0].valueConfig.maximumText isEqualToString:@"9223372036854775807"],
+        "roundtrip full precision Int64 slider range");
+  feature.valueConfig.defaultText=@"9223372036854775808";
+  check(![repo saveFeatures:@[feature] error:&error],
+        "reject slider default beyond exact Int64");
+  feature.valueConfig=[ZNV3ValueConfig defaults];
   // Existing P10.2 configurations used 0=Int32 / 1=Float32 without schema version.
   NSURL *migrationDir=[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
       inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"ZonoePatchV3"];
