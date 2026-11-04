@@ -51,6 +51,12 @@ static inline NSString *ZNV3NumericTypeName(NSInteger t) {
 @property(nonatomic,assign) double maximum;
 @property(nonatomic,assign) double step;
 @property(nonatomic,assign) double defaultValue;
+// Numeric schema v3: exact decimal literals are authoritative when present.
+// Legacy double values remain as a compatibility fallback only.
+@property(nonatomic,copy) NSString *minimumText;
+@property(nonatomic,copy) NSString *maximumText;
+@property(nonatomic,copy) NSString *stepText;
+@property(nonatomic,copy) NSString *defaultText;
 // Slider is always gated; dragging only updates a pending value.
 @property(nonatomic,assign) BOOL requiresEnableSwitch;
 + (instancetype)defaults;
