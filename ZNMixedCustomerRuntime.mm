@@ -48,6 +48,10 @@ static NSString *ZNMString(const std::string &s){
 @property(nonatomic,copy,readwrite) NSString *imageName;
 @property(nonatomic,assign,readwrite) NSUInteger numericType;
 @property(nonatomic,assign,readwrite) NSUInteger featureKind;
+@property(nonatomic,copy,readwrite) NSString *minimum;
+@property(nonatomic,copy,readwrite) NSString *maximum;
+@property(nonatomic,copy,readwrite) NSString *step;
+@property(nonatomic,copy,readwrite) NSString *defaultValue;
 @property(nonatomic,assign,readwrite) NSUInteger ruleCount;
 @property(nonatomic,assign,readwrite,getter=isEnabled) BOOL enabled;
 @property(nonatomic,assign) uintptr_t imageHeader;
@@ -142,6 +146,10 @@ static NSArray<ZNMixedCustomerFeature *> *ZNMCatalog(uint32_t imageIndex){
   f.descriptor=bytes;f.featureIndex=i;
   f.numericType=static_cast<uint8_t>(entry.type);
   f.featureKind=static_cast<uint8_t>(entry.kind);f.ruleCount=entry.count;
+  const auto &first=package.records[entry.start];
+  f.minimum=ZNMString(first.minimum);f.maximum=ZNMString(first.maximum);
+  f.step=ZNMString(first.step);f.defaultValue=ZNMString(first.defaultValue);
+  if(!f.minimum.length||!f.maximum.length)return nil;
   [found addObject:f];
  }
  return found;

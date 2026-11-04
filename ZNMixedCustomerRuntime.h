@@ -7,6 +7,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,copy,readonly) NSString *imageName;
 @property(nonatomic,assign,readonly) NSUInteger numericType;
 @property(nonatomic,assign,readonly) NSUInteger featureKind;
+@property(nonatomic,copy,readonly) NSString *minimum;
+@property(nonatomic,copy,readonly) NSString *maximum;
+@property(nonatomic,copy,readonly) NSString *step;
+@property(nonatomic,copy,readonly) NSString *defaultValue;
 @property(nonatomic,assign,readonly) NSUInteger ruleCount;
 @property(nonatomic,assign,readonly,getter=isEnabled) BOOL enabled;
 @end

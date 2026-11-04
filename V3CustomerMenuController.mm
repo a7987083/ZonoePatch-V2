@@ -1,6 +1,7 @@
 #import "V3CustomerMenuController.h"
 #import "V3CustomerRuntime.h"
 #import "ZNTypedCustomerRuntime.h"
+#import "ZNMixedCustomerRuntime.h"
 #include <cmath>
 #include <cerrno>
 #include <cstdlib>
@@ -8,11 +9,24 @@
 #import <QuartzCore/QuartzCore.h>
 
 // P9 Customer: one controller, one scene window, no stacked overlay or shadow menu.
+@protocol ZNCustomerNumericUIFeature <NSObject>
+@property(nonatomic,copy,readonly) NSString *identifier;
+@property(nonatomic,copy,readonly) NSString *title;
+@property(nonatomic,copy,readonly) NSString *minimum;
+@property(nonatomic,copy,readonly) NSString *maximum;
+@property(nonatomic,copy,readonly) NSString *step;
+@property(nonatomic,copy,readonly) NSString *defaultValue;
+@property(nonatomic,assign,readonly) NSUInteger numericType;
+@property(nonatomic,assign,readonly) NSUInteger featureKind;
+@property(nonatomic,assign,readonly) NSUInteger ruleCount;
+@property(nonatomic,assign,readonly,getter=isEnabled) BOOL enabled;
+@end
+
 @interface ZNV3CustomerMenuController ()
 @property(nonatomic,strong) UIStackView *features;
 @property(nonatomic,strong) UIScrollView *featureScroll;
 @property(nonatomic,strong) NSMutableArray<ZNV3CustomerFeature *> *snapshot;
-@property(nonatomic,strong) NSArray<ZNTypedCustomerFeature *> *typedSnapshot;
+@property(nonatomic,strong) NSArray<id<ZNCustomerNumericUIFeature>> *typedSnapshot;
 @property(nonatomic,strong) NSMutableArray<UISwitch *> *typedSwitches;
 @property(nonatomic,strong) NSMutableArray<UIButton *> *typedButtons;
 @property(nonatomic,strong) NSMutableArray<UITextField *> *typedInputs;
@@ -192,18 +206,23 @@
  // Revalidate the loaded catalog and live ON/OFF bits, but retain row views
  // while their identities/order are unchanged. A new image may appear via dlopen.
  NSArray<ZNV3CustomerFeature *> *discovered=[[ZNV3CustomerRuntime shared] discover];
- NSArray<ZNTypedCustomerFeature *> *typed=[[ZNTypedCustomerRuntime shared] discover];
+ NSMutableArray<id<ZNCustomerNumericUIFeature>> *typed=[NSMutableArray array];
+ [typed addObjectsFromArray:(NSArray *)[[ZNTypedCustomerRuntime shared] discover]];
+ [typed addObjectsFromArray:(NSArray *)[[ZNMixedCustomerRuntime shared] discover]];
  if(!self.pendingTypedValues)self.pendingTypedValues=[NSMutableDictionary dictionary];
  NSMutableArray<NSString *> *identifiers=[NSMutableArray arrayWithCapacity:discovered.count];
  for(ZNV3CustomerFeature *feature in discovered)
   [identifiers addObject:feature.identifier?:@""];
- for(ZNTypedCustomerFeature *feature in typed)
-  [identifiers addObject:feature.identifier?:@""];
+ for(id<ZNCustomerNumericUIFeature> feature in typed) {
+  NSString *prefix=[(id)feature isKindOfClass:ZNMixedCustomerFeature.class]?@"ZNM2:":@"ZNT1:";
+  [identifiers addObject:[prefix stringByAppendingString:feature.identifier?:@""]];
+ }
  BOOL changed=![self.renderedIdentifiers isEqualToArray:identifiers];
  self.snapshot=[discovered mutableCopy];
  self.typedSnapshot=typed;
  BOOL locked=[ZNV3CustomerRuntime shared].recoveryFailed||
-             [ZNTypedCustomerRuntime shared].recoveryFailed;
+             [ZNTypedCustomerRuntime shared].recoveryFailed||
+             [ZNMixedCustomerRuntime shared].recoveryFailed;
  self.presentedFeatureCount=discovered.count;
  self.presentedTypedFeatureCount=typed.count;
  self.presentedRecoveryLocked=locked;
@@ -213,6 +232,8 @@
  if(locked && (discovered.count+typed.count)){
   NSString *detail=[ZNV3CustomerRuntime shared].recoveryFailed?
        [ZNV3CustomerRuntime shared].lastDiagnostic:
+       [ZNMixedCustomerRuntime shared].recoveryFailed?
+       [ZNMixedCustomerRuntime shared].lastDiagnostic:
        [ZNTypedCustomerRuntime shared].lastDiagnostic;
   self.recoveryMessage.text=detail.length?
      [NSString stringWithFormat:@"恢复失败 · %@",detail]:
@@ -293,7 +314,7 @@
    }
   }
   for(NSUInteger i=0;i<typed.count;i++){
-   ZNTypedCustomerFeature *feature=typed[i];
+   id<ZNCustomerNumericUIFeature> feature=typed[i];
    [self appendTypedRow:feature index:i];
   }
  }
@@ -310,13 +331,14 @@
   toggle.accessibilityLabel=feature.title;
  }
  for(NSUInteger i=0;i<typed.count;i++){
-  ZNTypedCustomerFeature *feature=typed[i];
+  id<ZNCustomerNumericUIFeature> feature=typed[i];
   if(i>=self.typedInputs.count||i>=self.typedButtons.count||
      i>=self.typedSwitches.count||i>=self.typedSliders.count)break;
-  NSString *pending=self.pendingTypedValues[feature.identifier];
+  NSString *cacheID=self.renderedIdentifiers[discovered.count+i];
+  NSString *pending=self.pendingTypedValues[cacheID];
   if(!pending){
    pending=feature.defaultValue.length?feature.defaultValue:feature.minimum;
-   self.pendingTypedValues[feature.identifier]=pending?:@"";
+   self.pendingTypedValues[cacheID]=pending?:@"";
   }
   UISwitch *toggle=self.typedSwitches[i];
   UIButton *button=self.typedButtons[i];
@@ -348,7 +370,7 @@
   self.layoutChangedBlock();
 }
 
-static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimum,
+static BOOL ZNTUISliderSupported(id<ZNCustomerNumericUIFeature> feature, double *minimum,
                                  double *increment, float *steps){
  // UISlider is float-based. Cap discrete positions and reject any large
  // integer or high precision Float64 range that would silently round values.
@@ -371,7 +393,7 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  *minimum=lo;*increment=delta;*steps=(float)floor(count);
  return *steps>=1;
 }
-- (void)appendTypedRow:(ZNTypedCustomerFeature *)feature index:(NSUInteger)index {
+- (void)appendTypedRow:(id<ZNCustomerNumericUIFeature>)feature index:(NSUInteger)index {
  UIView *panel=[UIView new];panel.backgroundColor=UIColor.clearColor;
  [self.features addArrangedSubview:panel];
  [panel.heightAnchor constraintEqualToConstant:ZNCustomerTypedRowHeight].active=YES;
@@ -474,49 +496,58 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
 - (void)typedFieldChanged:(UITextField *)field {
  NSUInteger i=(NSUInteger)field.tag;
  if(i>=self.typedSnapshot.count)return;
- ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
+ id<ZNCustomerNumericUIFeature> feature=self.typedSnapshot[i];
  if(feature.enabled)return;
- self.pendingTypedValues[feature.identifier]=field.text?:@"";
+ self.pendingTypedValues[self.renderedIdentifiers[self.snapshot.count+i]]=field.text?:@"";
  if(i<self.typedValueLabels.count)self.typedValueLabels[i].text=field.text;
 }
 - (void)typedSliderChanged:(UISlider *)slider {
  NSUInteger i=(NSUInteger)slider.tag;
  if(i>=self.typedSnapshot.count)return;
- ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
+ id<ZNCustomerNumericUIFeature> feature=self.typedSnapshot[i];
  double minimum=0,step=0;float steps=0;
  if(!ZNTUISliderSupported(feature,&minimum,&step,&steps))return;
  double target=minimum+round(slider.value)*step;
  NSString *pending=nil;
  if(feature.numericType<=5)pending=[NSString stringWithFormat:@"%.0f",target];
  else pending=[NSString stringWithFormat:@"%.9g",target];
- self.pendingTypedValues[feature.identifier]=pending;
+ self.pendingTypedValues[self.renderedIdentifiers[self.snapshot.count+i]]=pending;
  self.typedValueLabels[i].text=pending;
  // Editing pending value does not trigger runtime writes, even when enabled.
  if(!feature.enabled)self.typedInputs[i].text=pending;
 }
+- (BOOL)applyNumeric:(id<ZNCustomerNumericUIFeature>)feature
+                 text:(NSString *)text restore:(BOOL)restore error:(NSError **)error {
+ if([(id)feature isKindOfClass:ZNMixedCustomerFeature.class]) {
+  ZNMixedCustomerFeature *mixed=(ZNMixedCustomerFeature *)(id)feature;
+  return restore?[[ZNMixedCustomerRuntime shared] restoreFeature:mixed error:error]:
+                 [[ZNMixedCustomerRuntime shared] applyValue:text feature:mixed error:error];
+ }
+ ZNTypedCustomerFeature *legacy=(ZNTypedCustomerFeature *)(id)feature;
+ return restore?[[ZNTypedCustomerRuntime shared] restoreFeature:legacy error:error]:
+                [[ZNTypedCustomerRuntime shared] applyValue:text feature:legacy error:error];
+}
 - (void)typedButtonTapped:(UIButton *)button {
  NSUInteger i=(NSUInteger)button.tag;
  if(i>=self.typedSnapshot.count)return;
- ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
+ id<ZNCustomerNumericUIFeature> feature=self.typedSnapshot[i];
+ NSString *cacheID=self.renderedIdentifiers[self.snapshot.count+i];
  NSError *error=nil;
- BOOL ok=feature.enabled?
-   [[ZNTypedCustomerRuntime shared] restoreFeature:feature error:&error]:
-   [[ZNTypedCustomerRuntime shared] applyValue:
-     (self.pendingTypedValues[feature.identifier]?:@"") feature:feature error:&error];
+ BOOL ok=[self applyNumeric:feature text:self.pendingTypedValues[cacheID]?:@""
+                  restore:feature.enabled error:&error];
  [self refreshFeatures];
- if(!ok)[self showError:error.localizedDescription?:[ZNTypedCustomerRuntime shared].lastDiagnostic];
+ if(!ok)[self showError:error.localizedDescription?:@"数值操作失败"];
 }
 - (void)typedSwitchChanged:(UISwitch *)toggle {
  NSUInteger i=(NSUInteger)toggle.tag;
  if(i>=self.typedSnapshot.count)return;
- ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
+ id<ZNCustomerNumericUIFeature> feature=self.typedSnapshot[i];
+ NSString *cacheID=self.renderedIdentifiers[self.snapshot.count+i];
  NSError *error=nil;
- BOOL ok=toggle.isOn?
-   [[ZNTypedCustomerRuntime shared] applyValue:
-      (self.pendingTypedValues[feature.identifier]?:@"") feature:feature error:&error]:
-   [[ZNTypedCustomerRuntime shared] restoreFeature:feature error:&error];
+ BOOL ok=[self applyNumeric:feature text:self.pendingTypedValues[cacheID]?:@""
+                  restore:!toggle.isOn error:&error];
  [self refreshFeatures];
- if(!ok)[self showError:error.localizedDescription?:[ZNTypedCustomerRuntime shared].lastDiagnostic];
+ if(!ok)[self showError:error.localizedDescription?:@"数值操作失败"];
 }
 
 - (void)toggleFeature:(UISwitch *)toggle {
