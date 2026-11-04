@@ -136,6 +136,28 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
   if(package.records.size()+records.size()>128){
    if(error)*error=P6Error(35,@"数值规则总数超过 128");return nil;
   }
+  // Detect any drift between global ownership preflight and this second read.
+  NSDictionary *expectedFeature=nil;
+  for(NSDictionary *item in preflight[@"features"]?:@[])
+   if([item[@"featureID"] isEqualToString:f.identifier]){expectedFeature=item;break;}
+  NSArray *expectedRules=expectedFeature[@"rules"];
+  if(expectedRules.count!=records.size()){
+   if(error)*error=P6Error(38,@"二次读取的数值规则数量不一致");return nil;
+  }
+  for(NSUInteger i=0;i<records.size();i++){
+   ZNV3ResolvedAddress *address=[ZNV3AddressResolver resolve:f.rules[i].offsetText
+                                                        module:f.module error:&e];
+   NSDictionary *rule=expectedRules[i];
+   NSString *rva=[NSString stringWithFormat:@"0x%llX",(unsigned long long)records[i].rva];
+   NSString *file=[NSString stringWithFormat:@"0x%llX",(unsigned long long)address.fileOffset];
+   if(!address||![address.imageUUID isEqualToString:staticPlan.imageUUID]||
+      ![address.imagePath isEqualToString:staticPlan.sourcePath]||
+      address.rva!=records[i].rva||
+      ![rule[@"rva"] isEqualToString:rva]||![rule[@"fileOffset"] isEqualToString:file]||
+      [rule[@"width"] unsignedLongLongValue]!=ZNValueCodec::width(records[i].type)){
+    if(error)*error=P6Error(39,@"二次读取的数值 RVA、位宽或映像身份发生变化");return nil;
+   }
+  }
   ZNMixedDescriptor::Feature owner;
   owner.id=std::string(f.identifier.UTF8String);
   owner.name=std::string(f.name.UTF8String);
