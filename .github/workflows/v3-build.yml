@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3AddressResolver.mm V3ModuleResolver.mm V3PatchCodec.mm \
-            V3ConfigRepository.mm V3FeatureModels.mm \
+            V3ConfigRepository.mm V3FeatureModels.mm ZNValueCodec.cpp ZNTypedDescriptor.cpp \
             tests/v3_config_and_address_test.mm -o "$RUNNER_TEMP/v3_address_config_test"
           "$RUNNER_TEMP/v3_address_config_test"
       - name: Test Executor Transactions
