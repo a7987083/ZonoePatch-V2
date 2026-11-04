@@ -9,3 +9,9 @@
 - **Build status:** CI Run `41861120081` was queued when this handoff was prepared, not yet verified compiled.
 - **Real device:** not tested. **Mixed Builder:** intentionally unchanged/unsupported. **No merge to P10.8.**
 - **Next:** verify CI first failure/build/artifact; next independently remediate version-pinned Mach-O UUID persistence and active numeric transaction updates. Do not combine with R-X code-cell feature development.
+
+## D07 continuation
+- UUID persistence commit `4482d1d6`; additional malformed JSON test `c5a61be5`; Developer static slot gate `795bf7af`.
+- Newly saved Feature ID is pinned in `V3FeatureEditor.mm` to actual loaded Mach-O UUID, stored by `V3ConfigRepository.mm`, carried in draft by `V3FeatureModels.mm`.
+- Missing/mismatched saved UUID fails closed in `V3PatchSession.mm`, `V3StaticBuildPlanner.mm`, and `V3StaticDispatchRuntime.mm`.
+- The branch's Actions for D07 may still be queued. Recheck newest HEAD's Actions build/test before concluding D07 done. No iPhone execution or image version-switch test has been performed.
