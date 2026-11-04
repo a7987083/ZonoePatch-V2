@@ -43,3 +43,9 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - **Recovery protection:** `ZNMixedValue::Coordinator` retains ownership on a failed rollback and globally latches writes/restores. On external third-party memory changes, `Transaction::restore` refuses overwriting and retains ownership; manual inspection may be required.
 - **Concurrency:** Individual scalar atomic writes do not provide global multi-address atomic commit. UI runtime calls are serialized by `@synchronized`; external game threads remain uncontrolled.
 - **Format separation:** Legacy ZNT1 and P9 are unchanged. ZNM2 carries independently named numeric features and is accepted only through the new runtime.
+
+## P10.6.4 Developer UI (2026-11-04)
+
+- **DEVICE PENDING:** Mixed P9+ZNM2 Developer export is now reachable via multi-selection UI, but host CI only compiles the UIKit path and tests synthetic Mach-O fixtures; no on-device mixed output has yet been produced or exercised.
+- **NUMERIC UI PENDING:** Customer ZNM2 controls are not rendered yet. Mixed output numeric features are metadata-only until the Customer UI and runtime integration is validated.
+- **SELECTION CONSTRAINT:** Same Mach-O, at least one Toggle and one Input/Slider, no active patch and no unsaved edit. Pure multiple-numeric builds are deliberately rejected pending an explicit numeric-only protocol decision.

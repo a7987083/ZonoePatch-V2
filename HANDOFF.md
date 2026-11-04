@@ -43,3 +43,12 @@
 - Host CI `Test P10.6.3 Mixed Numeric Ownership and Recovery` performs fake-backend two-feature isolation, overlapping-span rejection, partial-write rollback, failed-rollback global lock and snapshot preservation; `Test P10.6.3 ZNM2 Customer API` confirms forged request rejection and no false lock. Existing typed transaction tests cover external-write detection. Synthetic tests cannot emulate actual dyld-loaded generated Mach-O or game runtime.
 - Build verification: consult the latest `ZonoePatch-V3` workflow; do not infer from committed code. No real-device verification.
 - Next: integrate new runtime with Customer UI only after explicit ZNM2 catalog verification on an actual target image; strengthen dynamic fault injection for mixed catalog, test cold boot, repeated ON/OFF and Original snapshot on target device. Then P10.6.4 UI and keyboard layout.
+
+## P10.6.4 — Developer mixed-export UI wiring (2026-11-04)
+
+- Source commit `2e687c0e67a6264d2a2c0342dc44c47323a078b0`; CI `41830592913` completed successfully (tests, both arm64 dylibs, uploaded artifact).
+- `V3HookPage.mm` now preserves multi-selection across Toggle, NumberInput and Slider; it no longer resets selection when a numeric feature is picked.
+- `V3FeatureEditor.mm` dynamically offers mixed export only for at least one Toggle plus one Numeric, same Mach-O module, no draft in progress and no active Runtime/Static Patch. Calls existing `V3StaticBinaryExport.generateMixedMetadataForFeatures` asynchronously. The preflight still validates UUID, RVA/file spans and numeric RW constraints. Legacy Toggle-only and single Numeric paths remain distinct.
+- Explicit limitation: two-or-more purely numeric features without a Toggle remain unsupported by the exporter, and mixed Customer numeric controls are not yet connected to visible Customer UI. The mixed image contains executable P9 toggle state and metadata-only ZNM2 numeric features; do not claim full playable mixed features.
+- Device work: install Developer dylib on a test IPA; save one Toggle and one Numeric in the **same** Mach-O, select both, generate, inspect `P10-Mixed-Metadata-*/build_report.json` and verify signed output before IPA re-sign. Test 1 Toggle+1 Input+1 Slider; reject differing modules and overlapping spans. Customer visible numeric controls still pending.
+- CI cannot validate UIKit layout/keyboard, actual dyld-loaded target identity or final IPA installation. Those remain device pending.
