@@ -38,6 +38,15 @@ jobs:
             ZNValueCodec.cpp ZNTypedDescriptor.cpp tests/zn_typed_descriptor_test.cpp \
             -o "$RUNNER_TEMP/zn_typed_descriptor_test"
           "$RUNNER_TEMP/zn_typed_descriptor_test"
+      - name: Test Typed Mach-O Metadata
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -Wall -Wextra \
+            -framework Foundation -framework CommonCrypto \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedMachOBuilder.mm \
+            ZNAdhocMachOSigner.mm tests/zn_typed_macho_embed_test.mm \
+            -o "$RUNNER_TEMP/zn_typed_macho_embed"
+          "$RUNNER_TEMP/zn_typed_macho_embed"
       - name: Test Address and Configuration
         run: |
           set -euo pipefail
