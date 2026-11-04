@@ -10,6 +10,11 @@
 #import <unistd.h>
 #include <stdint.h>
 #include <string.h>
+#import "ZNTypedDescriptor.hpp"
+#import <mach/vm_prot.h>
+#include <vector>
+#include <string>
+
 static NSError *ZNP6Error(NSInteger code,NSString *message){
  return [NSError errorWithDomain:@"ZonoePatch.V3.StaticBuild" code:code userInfo:@{NSLocalizedDescriptionKey:message}];
 }
@@ -37,6 +42,79 @@ static NSString *ZNP6DiskUUID(int fd) {
  return nil;
 }
 @implementation ZNV3StaticBuildPlanner
++ (NSData *)typedDescriptorForFeature:(ZNV3Feature *)feature error:(NSError **)error {
+ if([ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled){
+  if(error)*error=ZNP6Error(14,@"先恢复 Runtime Patch，再执行数值预检");
+  return nil;
+ }
+ BOOL numeric=feature.buttonType==ZNV3FeatureTypeNumberInput||feature.buttonType==ZNV3FeatureTypeSlider;
+ if(!feature||!numeric||![@[@"主程序",@"UnityFramework"] containsObject:feature.module]||
+    ![feature.valueConfig isValidForFeatureType:feature.buttonType]){
+  if(error)*error=ZNP6Error(15,@"参数或功能类型无效：Typed Descriptor 只支持输入框与滑条");
+  return nil;
+ }
+ ZNV3ValueConfig *config=feature.valueConfig;
+ auto type=static_cast<ZNValueCodec::Type>(config.valueType);
+ const size_t width=ZNValueCodec::width(type);
+ if(!width||!feature.rules.count||feature.rules.count>128){
+  if(error)*error=ZNP6Error(16,@"数值类型或规则数量无效");return nil;
+ }
+ // P10.3 preflight still consumes the legacy double range model. Int64/UInt64
+ // full precision requires a later exact-string UI/JSON migration.
+ NSString *min=[NSString stringWithFormat:@"%.17g",config.minimum];
+ NSString *max=[NSString stringWithFormat:@"%.17g",config.maximum];
+ NSString *step=[NSString stringWithFormat:@"%.17g",config.step];
+ NSString *def=[NSString stringWithFormat:@"%.17g",config.defaultValue];
+ std::vector<ZNTypedDescriptor::Record> records;
+ NSString *sourceUUID=nil,*sourcePath=nil;
+ for(ZNV3PatchRule *rule in feature.rules){
+  NSError *resolveError=nil;
+  ZNV3ResolvedAddress *addr=[ZNV3AddressResolver resolve:rule.offsetText module:feature.module error:&resolveError];
+  if(!addr){
+   if(error)*error=resolveError?:ZNP6Error(17,@"数值 Offset 无法解析");return nil;
+  }
+  if(!addr.fileBacked||!(addr.segmentInitialProtection & VM_PROT_READ)||
+     !(addr.segmentInitialProtection & VM_PROT_WRITE)||
+     !addr.imageUUID.length||!addr.imagePath.length||
+     addr.rva==0||addr.rva%width||
+     addr.preferredVA<addr.segmentVMAddress||
+     addr.preferredVA-addr.segmentVMAddress>addr.segmentFileSize||
+     width>addr.segmentFileSize-(addr.preferredVA-addr.segmentVMAddress)||
+     addr.fileOffset>INT64_MAX||width>INT64_MAX-addr.fileOffset){
+   if(error)*error=ZNP6Error(18,@"数值 Offset 必须落在可读写、文件映射且按类型宽度对齐的数据段；代码地址不能直接按数值写入");
+   return nil;
+  }
+  if(sourceUUID && (![sourceUUID isEqualToString:addr.imageUUID]||
+                    ![sourcePath isEqualToString:addr.imagePath])){
+   if(error)*error=ZNP6Error(19,@"规则的 Mach-O 身份不一致");return nil;
+  }
+  int fd=open(addr.imagePath.fileSystemRepresentation,O_RDONLY|O_CLOEXEC);
+  struct stat st={};
+  BOOL diskValid=fd>=0&&fstat(fd,&st)==0&&S_ISREG(st.st_mode)&&st.st_size>=0&&
+   (uint64_t)st.st_size>=addr.fileOffset&&width<=(uint64_t)st.st_size-addr.fileOffset&&
+   [[ZNP6DiskUUID(fd) uppercaseString] isEqualToString:[addr.imageUUID uppercaseString]];
+  if(fd>=0)close(fd);
+  if(!diskValid){
+   if(error)*error=ZNP6Error(20,@"目标文件 UUID 或磁盘范围校验失败");return nil;
+  }
+  sourceUUID=addr.imageUUID;sourcePath=addr.imagePath;
+  BOOL slider=feature.buttonType==ZNV3FeatureTypeSlider;
+  records.push_back({slider?ZNTypedDescriptor::FeatureKind::Slider:
+                             ZNTypedDescriptor::FeatureKind::Input,
+    type,addr.rva,slider,
+    std::string(min.UTF8String),std::string(max.UTF8String),
+    slider?std::string(step.UTF8String):std::string(),
+    slider?std::string(def.UTF8String):std::string()});
+ }
+ std::vector<uint8_t> encoded;std::string message;
+ if(!ZNTypedDescriptor::encode(records,encoded,message)){
+  if(error)*error=ZNP6Error(21,[NSString stringWithFormat:@"Typed Descriptor 预检失败：%s",message.c_str()]);
+  return nil;
+ }
+ // No existing exporter consumes this result yet. Never report binary generated.
+ return [NSData dataWithBytes:encoded.data() length:encoded.size()];
+}
+
 + (ZNV3StaticBuildPlan *)planForFeature:(ZNV3Feature *)feature error:(NSError **)error {
  if([ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled) {
   if(error)*error=ZNP6Error(4,@"Restore active Runtime Patch before static build planning");
