@@ -10,6 +10,7 @@
 #include "../ZNMixedDescriptor.hpp"
 #include "../ZNArm64CodeSitePlan.hpp"
 #include "../ZNArm64ValueCellPostprocess.hpp"
+#include "../ZNCodeCellBinding.hpp"
 #import "../ZNStaticPatchFormat.h"
 #import "../V3StaticRuleIdentity.h"
 #include <stdint.h>
@@ -369,6 +370,56 @@ int main() {
      std::vector<uint8_t> mixedBytes;std::string mixedError;
      check(ZNMixedDescriptor::encode(codeMixed,mixedBytes,mixedError),
        "ZNM2 code-cell dual-feature descriptor encoded");
+     // ZCB1 binds the persisted numeric IDs to dedicated P9 Static Entry
+     // patchIDs, so Customer never needs to infer associations by UI names.
+     ZNCodeCellBinding::Package cellBindings;
+     cellBindings.imageUUID=std::string(uuid.UUIDString.UTF8String);
+     cellBindings.bindings={
+      {"code-slider",2,0x1100,installed.cellRVA,8,1},
+      {"code-input",3,0x1120,inputInstalled.cellRVA,4,1}
+     };
+     std::vector<uint8_t>zcbEncoded;std::string bindingError;
+     check(ZNCodeCellBinding::encode(cellBindings,zcbEncoded,bindingError),
+       "ZCB1 binds mixed numeric FeatureID to P9 patch ID and RW cell");
+     ZNCodeCellBinding::Package bindingDecoded;
+     check(ZNCodeCellBinding::decode(zcbEncoded.data(),zcbEncoded.size(),
+        bindingDecoded,bindingError),"ZCB1 ownership survives binary format roundtrip");
+     NSData *p9Code=[NSData dataWithContentsOfFile:codeOutput];
+     std::vector<ZNCodeCellBinding::P9CodeEntry>p9Slots;
+     const uint8_t *p9Raw=(const uint8_t*)p9Code.bytes;
+     struct mach_header_64 ph={};memcpy(&ph,p9Raw,sizeof(ph));
+     size_t cmdPos=sizeof(ph);
+     for(uint32_t ci=0;ci<ph.ncmds;++ci){
+      struct load_command command={};memcpy(&command,p9Raw+cmdPos,sizeof(command));
+      if(command.cmd==LC_SEGMENT_64){
+       struct segment_command_64 seg={};memcpy(&seg,p9Raw+cmdPos,sizeof(seg));
+       if(!strncmp(seg.segname,"__ZNDATA",16)){
+        ZN44StaticHeader sh={};memcpy(&sh,p9Raw+seg.fileoff,sizeof(sh));
+        for(uint32_t ri=0;ri<sh.count;ri++){
+         ZN44StaticEntry se={};memcpy(&se,p9Raw+seg.fileoff+sizeof(sh)+
+           ri*sizeof(se),sizeof(se));
+         p9Slots.push_back({se.patchID,se.siteRVA,
+           (se.flags&ZN44_STATIC_ENTRY_FLAG_VALUE_CELL_V1)!=0});
+        }
+       }
+      }
+      cmdPos+=command.cmdsize;
+     }
+     std::vector<ZNCodeCellBinding::NumericCell>cellOwners;
+     for(size_t ni=0;ni<codeMixed.features.size();ni++){
+      const auto &feature=codeMixed.features[ni];
+      cellOwners.push_back({feature.id,(uint8_t)feature.type,
+                                codeMixed.records[feature.start].rva});
+     }
+     check(ZNCodeCellBinding::validateOwnership(bindingDecoded,p9Slots,
+        cellOwners,bindingError),"ZCB1 actual P9 and ZNM2 ownership matches");
+     auto invalidP9=p9Slots;
+     if(invalidP9.size()>=2){
+      invalidP9[1].valueCell=false;
+      check(!ZNCodeCellBinding::validateOwnership(bindingDecoded,invalidP9,
+        cellOwners,bindingError),"missing P9 value-cell marker rejected");
+     }
+
      NSData *descriptor=[NSData dataWithBytes:mixedBytes.data() length:mixedBytes.size()];
      NSString *mixedCode=[codeDir stringByAppendingPathComponent:@"code-mixed-output"];
      NSError *embedCodeError=nil;
