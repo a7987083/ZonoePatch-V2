@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - ZonoePatch-V3
+      - P10.5.1-debt-cleanup
   workflow_dispatch:
 permissions:
   contents: read
