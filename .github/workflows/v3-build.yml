@@ -32,6 +32,13 @@ jobs:
             ZNUnifiedBuildPlan.cpp tests/zn_unified_build_plan_test.cpp \
             -o "$RUNNER_TEMP/zn_unified_build_plan"
           "$RUNNER_TEMP/zn_unified_build_plan"
+      - name: Test P10.6.4 Unified Mach-O Identity
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
+            tests/v3_unified_image_identity_test.mm \
+            -o "$RUNNER_TEMP/v3_unified_image_identity"
+          "$RUNNER_TEMP/v3_unified_image_identity"
       - name: Test Typed Value Codec
         run: |
           set -euo pipefail

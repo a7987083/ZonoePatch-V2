@@ -5,6 +5,7 @@
 #import "ZNUnifiedBuildPlan.hpp"
 #import "ZNTypedDescriptor.hpp"
 #import "ZNValueCodec.hpp"
+#import "V3UnifiedImageIdentity.h"
 #include <string>
 #include <vector>
 
@@ -97,12 +98,17 @@ static NSString *ZNUPNSString(const std::string &s) {
                        r.rva,address.fileOffset,width});
    }
   }
-  if(requiredUUID&&
-     (requiredUUID!=ZNUPNSString(f.imageUUID)||requiredPath!=ZNUPNSString(f.sourcePath))) {
-   if(error)*error=ZNUPError(10,@"混合构建不支持跨 Mach-O");return nil;
+  NSString *actualUUID=ZNUPNSString(f.imageUUID);
+  NSString *actualPath=ZNUPNSString(f.sourcePath);
+  if(requiredUUID &&
+     !ZNV3SameImageIdentity(requiredUUID,requiredPath,actualUUID,actualPath)) {
+   if(error)*error=ZNUPError(10,[NSString stringWithFormat:
+     @"所选功能来自不同 Mach-O：%@ 与 %@ 的 UUID 或路径不一致",
+     unified.features.empty()?@"上一功能":ZNUPNSString(unified.features.back().name),
+     feature.name]);return nil;
   }
-  requiredUUID=ZNUPNSString(f.imageUUID);
-  requiredPath=ZNUPNSString(f.sourcePath);
+  requiredUUID=actualUUID;
+  requiredPath=actualPath;
   unified.features.push_back(std::move(f));
  }
  std::string failure;
