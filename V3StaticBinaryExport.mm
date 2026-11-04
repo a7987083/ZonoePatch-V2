@@ -4,6 +4,9 @@
 #import "V3PatchSession.h"
 #import "ZNAdhocMachOSigner.h"
 #import "ZNStaticPatchFormat.h"
+#import "V3FeatureModels.h"
+#import "V3AddressResolver.h"
+#import "ZNTypedMachOBuilder.h"
 #import <mach-o/loader.h>
 #import <sys/stat.h>
 #include <string.h>
@@ -104,6 +107,72 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
  return YES;
 }
 @implementation ZNV3StaticBinaryExport
++ (NSString *)generateTypedMetadataForFeature:(ZNV3Feature *)feature error:(NSError **)error {
+ NSError *preflightError=nil;
+ NSData *descriptor=[ZNV3StaticBuildPlanner typedDescriptorForFeature:feature error:&preflightError];
+ if(!descriptor){if(error)*error=preflightError?:P6Error(20,@"Typed Descriptor 预检失败");return nil;}
+ ZNV3PatchRule *first=feature.rules.firstObject;
+ ZNV3ResolvedAddress *address=[ZNV3AddressResolver resolve:first.offsetText module:feature.module
+    error:&preflightError];
+ if(!address||!address.imagePath.length||!address.imageUUID.length){
+  if(error)*error=preflightError?:P6Error(21,@"目标 Mach-O 不可用");return nil;
+ }
+ NSFileManager *fm=NSFileManager.defaultManager;
+ NSString *root=[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ZonoePatchOutput"];
+ if(![fm createDirectoryAtPath:root withIntermediateDirectories:YES attributes:nil error:&preflightError]){
+  if(error)*error=preflightError;return nil;
+ }
+ NSString *token=NSUUID.UUID.UUIDString;
+ NSString *stage=[root stringByAppendingPathComponent:[@".p10-typed-staging-" stringByAppendingString:token]];
+ NSString *dest=[root stringByAppendingPathComponent:[@"P10-Typed-Metadata-" stringByAppendingString:token]];
+ if(![fm createDirectoryAtPath:stage withIntermediateDirectories:NO attributes:nil error:&preflightError]){
+  if(error)*error=preflightError;return nil;
+ }
+ NSString *sourceName=address.imagePath.lastPathComponent;
+ NSString *staged=[stage stringByAppendingPathComponent:sourceName];
+ NSString *failure=nil;NSDictionary *signature=nil;
+ BOOL ok=NO;
+ do {
+  NSError *embeddingError=nil;
+  if(![ZNTypedMachOBuilder embedDescriptor:descriptor source:address.imagePath
+                                    output:staged error:&embeddingError]){
+   failure=embeddingError.localizedDescription?:@"Typed Mach-O 生成失败";break;
+  }
+  if(!ZNAdhocResignMachOAtPath(staged,&signature,&failure))break;
+  NSData *verified=[ZNTypedMachOBuilder extractDescriptor:staged error:&embeddingError];
+  if(![verified isEqualToData:descriptor]){
+   failure=embeddingError.localizedDescription?:@"生成后二进制描述符不匹配";break;
+  }
+  NSDictionary *report=@{
+   @"schema":@"com.zonoe.v3.typed-metadata-export",
+   @"version":@1,@"metadataOnly":@YES,
+   @"runtimeNumericExecution":@NO,@"customerNumericUIAvailable":@NO,
+   @"staticCodePatchGenerated":@NO,@"finalPackageResignRequired":@YES,
+   @"imageUUID":address.imageUUID,
+   @"module":feature.module,@"featureName":feature.name?:@"",
+   @"numericType":ZNV3NumericTypeName(feature.valueConfig.valueType),
+   @"descriptorBytes":@(descriptor.length),
+   @"output":sourceName,
+   @"signature":signature?:@{}
+  };
+  NSData *reportData=[NSJSONSerialization dataWithJSONObject:report
+                                            options:NSJSONWritingPrettyPrinted error:&embeddingError];
+  if(!reportData||![reportData writeToFile:[stage stringByAppendingPathComponent:@"build_report.json"]
+                                 options:NSDataWritingAtomic error:&embeddingError]){
+   failure=embeddingError.localizedDescription?:@"元数据报告写入失败";break;
+  }
+  if([fm fileExistsAtPath:dest]||![fm moveItemAtPath:stage toPath:dest error:&embeddingError]){
+   failure=embeddingError.localizedDescription?:@"输出发布失败";break;
+  }
+  ok=YES;
+ }while(0);
+ if(!ok){
+  [fm removeItemAtPath:stage error:nil];
+  if(error)*error=P6Error(22,failure?:@"数值元数据导出失败");
+  return nil;
+ }
+ return [dest stringByAppendingPathComponent:sourceName];
+}
 + (NSString *)generate:(ZNV3StaticBuildPlan *)plan error:(NSError **)error {
  NSError *e=nil;
  if(!plan||![ZNV3StaticBuildPlan validateEntries:plan.entries error:&e]){
