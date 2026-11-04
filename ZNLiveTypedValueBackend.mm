@@ -61,7 +61,6 @@ bool Backend::validate(uintptr_t address,size_t width,bool writing,std::string &
  for(uint32_t i=0;i<_dyld_image_count();++i)
   if((uintptr_t)_dyld_get_image_header(i)==cell->imageHeader){loaded=true;break;}
  if(!loaded){error="target image unloaded or changed";return false;}
- const struct mach_header_64 *header=(const struct mach_header_64 *)cell->imageHeader;
  struct mach_header_64 h={};
  vm_size_t got=0;
  if(vm_read_overwrite(mach_task_self(),(vm_address_t)cell->imageHeader,sizeof(h),
