@@ -239,8 +239,8 @@ int main() {
    ZNMixedDescriptor::Package owned;
    owned.records=numeric;
    owned.features={
-    {"number-uuid","Number Display",0,1,ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::UInt64},
-    {"slider-uuid","Slider Display",1,1,ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float32}
+    {"number-uuid","Number Display",0,1,ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::Int32},
+    {"slider-uuid","Slider Display",1,1,ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float64}
    };
    std::vector<uint8_t> packed;
    check(ZNMixedDescriptor::encode(owned,packed,diagnostic),"ZNM2 embedded identity encode");
