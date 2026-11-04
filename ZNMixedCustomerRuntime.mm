@@ -46,6 +46,7 @@ static NSString *ZNMString(const std::string &s){
 @property(nonatomic,copy,readwrite) NSString *identifier;
 @property(nonatomic,copy,readwrite) NSString *title;
 @property(nonatomic,copy,readwrite) NSString *imageName;
+@property(nonatomic,copy,readwrite) NSString *catalogIdentity;
 @property(nonatomic,assign,readwrite) NSUInteger numericType;
 @property(nonatomic,assign,readwrite) NSUInteger featureKind;
 @property(nonatomic,copy,readwrite) NSString *minimum;
@@ -143,6 +144,8 @@ static NSArray<ZNMixedCustomerFeature *> *ZNMCatalog(uint32_t imageIndex){
   f.identifier=ZNMString(entry.id);f.title=ZNMString(entry.name);
   if(!f.identifier.length||!f.title.length)return nil;
   f.imageName=image;f.imageUUID=uuid;f.imageHeader=base;
+  f.catalogIdentity=[NSString stringWithFormat:@"ZNM2:%@:%llX:%@",
+     uuid,(unsigned long long)base,f.identifier];
   f.descriptor=bytes;f.featureIndex=i;
   f.numericType=static_cast<uint8_t>(entry.type);
   f.featureKind=static_cast<uint8_t>(entry.kind);f.ruleCount=entry.count;

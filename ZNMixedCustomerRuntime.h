@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,copy,readonly) NSString *identifier; // persisted FeatureID
 @property(nonatomic,copy,readonly) NSString *title;
 @property(nonatomic,copy,readonly) NSString *imageName;
+@property(nonatomic,copy,readonly) NSString *catalogIdentity; // unique per loaded image
 @property(nonatomic,assign,readonly) NSUInteger numericType;
 @property(nonatomic,assign,readonly) NSUInteger featureKind;
 @property(nonatomic,copy,readonly) NSString *minimum;

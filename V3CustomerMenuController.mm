@@ -214,8 +214,11 @@
  for(ZNV3CustomerFeature *feature in discovered)
   [identifiers addObject:feature.identifier?:@""];
  for(id<ZNCustomerNumericUIFeature> feature in typed) {
-  NSString *prefix=[(id)feature isKindOfClass:ZNMixedCustomerFeature.class]?@"ZNM2:":@"ZNT1:";
-  [identifiers addObject:[prefix stringByAppendingString:feature.identifier?:@""]];
+  if([(id)feature isKindOfClass:ZNMixedCustomerFeature.class]) {
+   [identifiers addObject:[(ZNMixedCustomerFeature *)(id)feature catalogIdentity]?:@""];
+  } else {
+   [identifiers addObject:[@"ZNT1:" stringByAppendingString:feature.identifier?:@""]];
+  }
  }
  BOOL changed=![self.renderedIdentifiers isEqualToArray:identifiers];
  self.snapshot=[discovered mutableCopy];
