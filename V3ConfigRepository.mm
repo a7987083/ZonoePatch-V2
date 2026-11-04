@@ -20,31 +20,63 @@ static BOOL ZNDecodeValueConfig(id object,ZNV3FeatureType type,ZNV3ValueConfig *
  if(object){
   if(![object isKindOfClass:NSDictionary.class])return NO;
   NSDictionary *d=object;
-  NSArray *keys=type==ZNV3FeatureTypeNumberInput?@[@"valueType",@"minimum",@"maximum"]:@[@"valueType",@"minimum",@"maximum",@"step",@"defaultValue",@"requiresEnableSwitch"];
-  for(NSString *key in keys)
-   if(![d[key] isKindOfClass:NSNumber.class])return NO;
+  if(![d[@"valueType"] isKindOfClass:NSNumber.class])return NO;
   NSInteger typeID=[d[@"valueType"] integerValue];
-  // Legacy P10.2 numeric config omitted schema marker: 0=Int32, 1=Float32.
-  if(!d[@"numericSchemaVersion"]){
+  NSNumber *version=d[@"numericSchemaVersion"];
+  NSInteger schema=0;
+  if(version){
+   if(![version isKindOfClass:NSNumber.class])return NO;
+   schema=version.integerValue;
+  }
+  if(schema!=0&&schema!=2&&schema!=3)return NO;
+  if(schema==0){
    if(typeID!=0&&typeID!=1)return NO;
    typeID=(typeID==0)?ZNV3NumericTypeInt32:ZNV3NumericTypeFloat32;
-  }else if(![d[@"numericSchemaVersion"] isKindOfClass:NSNumber.class]||
-           [d[@"numericSchemaVersion"] integerValue]!=2)return NO;
+  }
   v.valueType=(ZNV3NumericType)typeID;
-  v.minimum=[d[@"minimum"] doubleValue];v.maximum=[d[@"maximum"] doubleValue];
-  if(d[@"step"])v.step=[d[@"step"] doubleValue];
-  if(d[@"defaultValue"])v.defaultValue=[d[@"defaultValue"] doubleValue];
-  if(d[@"requiresEnableSwitch"])v.requiresEnableSwitch=[d[@"requiresEnableSwitch"] boolValue];
+  BOOL slider=type==ZNV3FeatureTypeSlider;
+  if(schema==3){
+   if(![d[@"minimum"] isKindOfClass:NSString.class]||
+      ![d[@"maximum"] isKindOfClass:NSString.class])return NO;
+   v.minimumText=d[@"minimum"];v.maximumText=d[@"maximum"];
+   if(slider){
+    if(![d[@"step"] isKindOfClass:NSString.class]||
+       ![d[@"defaultValue"] isKindOfClass:NSString.class]||
+       ![d[@"requiresEnableSwitch"] isKindOfClass:NSNumber.class])return NO;
+    v.stepText=d[@"step"];v.defaultText=d[@"defaultValue"];
+    v.requiresEnableSwitch=[d[@"requiresEnableSwitch"] boolValue];
+   }else if(d[@"step"]||d[@"defaultValue"]||d[@"requiresEnableSwitch"])return NO;
+  }else{
+   NSArray *keys=slider?
+     @[@"minimum",@"maximum",@"step",@"defaultValue",@"requiresEnableSwitch"]:
+     @[@"minimum",@"maximum"];
+   for(NSString *key in keys)if(![d[key] isKindOfClass:NSNumber.class])return NO;
+   v.minimum=[d[@"minimum"] doubleValue];v.maximum=[d[@"maximum"] doubleValue];
+   if(slider){
+    v.step=[d[@"step"] doubleValue];v.defaultValue=[d[@"defaultValue"] doubleValue];
+    v.requiresEnableSwitch=[d[@"requiresEnableSwitch"] boolValue];
+   }
+  }
  }
  if(![v isValidForFeatureType:type])return NO;
  *out=v;return YES;
 }
 static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type){
- if(type==ZNV3FeatureTypeNumberInput)
-  return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),@"minimum":@(v.minimum),@"maximum":@(v.maximum)};
- return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),@"minimum":@(v.minimum),
-          @"maximum":@(v.maximum),@"step":@(v.step),
-          @"defaultValue":@(v.defaultValue),@"requiresEnableSwitch":@(v.requiresEnableSwitch)};
+ BOOL slider=type==ZNV3FeatureTypeSlider;
+ if(v.minimumText||v.maximumText||v.stepText||v.defaultText){
+  if(!slider)return @{@"numericSchemaVersion":@3,@"valueType":@(v.valueType),
+     @"minimum":v.minimumText,@"maximum":v.maximumText};
+  return @{@"numericSchemaVersion":@3,@"valueType":@(v.valueType),
+    @"minimum":v.minimumText,@"maximum":v.maximumText,
+    @"step":v.stepText,@"defaultValue":v.defaultText,
+    @"requiresEnableSwitch":@(v.requiresEnableSwitch)};
+ }
+ if(!slider)return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),
+   @"minimum":@(v.minimum),@"maximum":@(v.maximum)};
+ return @{@"numericSchemaVersion":@2,@"valueType":@(v.valueType),
+   @"minimum":@(v.minimum),@"maximum":@(v.maximum),
+   @"step":@(v.step),@"defaultValue":@(v.defaultValue),
+   @"requiresEnableSwitch":@(v.requiresEnableSwitch)};
 }
 @interface ZNV3ConfigRepository ()
 @property(nonatomic,copy) NSArray *quarantinedEntries;
