@@ -16,6 +16,7 @@
 @property(nonatomic,strong) ZNV3CustomerWindow *window;
 @property(nonatomic,strong) ZNV3CustomerMenuController *controller;
 @property(nonatomic,weak) UIWindow *sourceWindow;
+@property(nonatomic,weak) UIWindow *returnKeyWindow;
 @property(nonatomic,strong) NSTimer *layoutMonitor;
 @property(nonatomic,assign) CGSize lastSceneSize;
 @property(nonatomic,assign) NSUInteger catalogPollTick;
@@ -66,9 +67,32 @@
  }
  if(self.window && !self.window.hidden)[self updateLayout];
 }
+- (void)numericEditingStarted {
+ if(!self.window||self.window.hidden)return;
+ UIWindow *current=nil;
+ if(@available(iOS 13.0,*)){
+  for(UIWindow *candidate in self.window.windowScene.windows)
+   if(candidate.isKeyWindow){current=candidate;break;}
+ }else current=UIApplication.sharedApplication.keyWindow;
+ if(current!=self.window){
+  self.returnKeyWindow=current?:self.sourceWindow;
+  [self.window makeKeyWindow];
+ }
+}
+- (void)numericEditingEnded {
+ UIWindow *previous=self.returnKeyWindow;
+ self.returnKeyWindow=nil;
+ if(previous&&previous!=self.window){
+  if(@available(iOS 13.0,*)){
+   if(previous.windowScene!=self.window.windowScene)return;
+  }
+  [previous makeKeyWindow];
+ }
+}
 - (void)hide {
  [self.layoutMonitor invalidate];self.layoutMonitor=nil;
  [self.controller.view endEditing:YES];
+ [self numericEditingEnded];
  self.window.hidden=YES;
 }
 - (CGRect)sceneBoundsForHost:(UIWindow *)host {
@@ -158,6 +182,8 @@
   controller.closeBlock=^{[weakOwner hide];};
   controller.layoutChangedBlock=^{[weakOwner updateLayout];};
   controller.windowMovedBlock=^{[weakOwner captureMenuPosition];};
+  controller.beginNumericEditingBlock=^{[weakOwner numericEditingStarted];};
+  controller.endNumericEditingBlock=^{[weakOwner numericEditingEnded];};
   w.rootViewController=controller;
   self.window=w;self.controller=controller;
   // Start with zero size so the first layout centers the card.
