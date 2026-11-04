@@ -38,6 +38,13 @@ jobs:
             ZNValueCodec.cpp ZNTypedDescriptor.cpp tests/zn_typed_descriptor_test.cpp \
             -o "$RUNNER_TEMP/zn_typed_descriptor_test"
           "$RUNNER_TEMP/zn_typed_descriptor_test"
+      - name: Test Typed Value Transactions
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedValueTransaction.cpp \
+            tests/zn_typed_value_transaction_test.cpp -o "$RUNNER_TEMP/zn_typed_value_tx"
+          "$RUNNER_TEMP/zn_typed_value_tx"
       - name: Test Typed Mach-O Metadata
         run: |
           set -euo pipefail
