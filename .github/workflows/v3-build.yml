@@ -86,6 +86,16 @@ jobs:
             tests/zn_typed_customer_api_test.mm \
             -o "$RUNNER_TEMP/zn_typed_customer_api"
           "$RUNNER_TEMP/zn_typed_customer_api"
+      - name: Test P10.6.3 ZNM2 Customer API
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra \
+            -framework Foundation \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNMixedDescriptor.cpp \
+            ZNTypedValueTransaction.cpp ZNMixedValueCoordinator.cpp \
+            ZNLiveTypedValueBackend.mm ZNMixedCustomerRuntime.mm \
+            tests/zn_mixed_customer_api_test.mm -o "$RUNNER_TEMP/zn_mixed_customer_api"
+          "$RUNNER_TEMP/zn_mixed_customer_api"
       - name: Test Address and Configuration
         run: |
           set -euo pipefail
