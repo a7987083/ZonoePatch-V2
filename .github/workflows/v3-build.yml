@@ -54,6 +54,16 @@ jobs:
             ZNAdhocMachOSigner.mm tests/zn_typed_macho_embed_test.mm \
             -o "$RUNNER_TEMP/zn_typed_macho_embed"
           "$RUNNER_TEMP/zn_typed_macho_embed"
+      - name: Test Typed Customer Runtime API
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -fblocks -Wall -Wextra \
+            -framework Foundation \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedValueTransaction.cpp \
+            ZNLiveTypedValueBackend.mm ZNTypedCustomerRuntime.mm \
+            tests/zn_typed_customer_api_test.mm \
+            -o "$RUNNER_TEMP/zn_typed_customer_api"
+          "$RUNNER_TEMP/zn_typed_customer_api"
       - name: Test Address and Configuration
         run: |
           set -euo pipefail
