@@ -5,6 +5,8 @@
 #import "../V3StaticBuildPlanner.h"
 #import "../V3StaticBinaryBuilder.h"
 #import "../ZNAdhocMachOSigner.h"
+#import "../ZNTypedMachOBuilder.h"
+#include "../ZNTypedDescriptor.hpp"
 #import "../ZNStaticPatchFormat.h"
 #import "../V3StaticRuleIdentity.h"
 #include <stdint.h>
@@ -221,6 +223,45 @@ int main() {
    NSDictionary *signature=nil;
    check(ZNAdhocResignMachOAtPath(p9out,&signature,&err),"P9 Mach-O signing");
    check([signature[@"verified"] boolValue],"P9 signed CodeDirectory verifies");
+  }
+  // P10.6.2: P9 code/table survives explicit insertion of typed metadata.
+  // This is a mixed-image layout test, not mixed Customer runtime execution.
+  if(p9built) {
+   std::vector<ZNTypedDescriptor::Record> numeric={
+    {ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::Int32,0x2000,false,
+      "0","100","",""},
+    {ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float64,0x2010,true,
+      "0","100","1","10"}
+   };
+   std::vector<uint8_t> encoded;std::string diagnostic;
+   check(ZNTypedDescriptor::encode(numeric,encoded,diagnostic),"P10.6 mixed typed descriptor encoding");
+   NSData *expected=[NSData dataWithBytes:encoded.data() length:encoded.size()];
+   NSString *mixedPath=[p9dir stringByAppendingPathComponent:@"mixed-output"];
+   NSError *embedError=nil;
+   BOOL embedded=[ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected
+                                 source:p9out output:mixedPath error:&embedError];
+   if(!embedded)fprintf(stderr,"P10.6 embedding: %s\\n",embedError.localizedDescription.UTF8String?: "unknown");
+   check(embedded,"P10.6 attach typed segment to P9 static image");
+   if(embedded) {
+    check(segments(mixedPath),"P10.6 P9 segments preserved");
+    check(p9Grouping(mixedPath),"P10.6 P9 names, owners and OFF state preserved");
+    check(staticEntryCount(mixedPath)==2,"P10.6 original P9 static rules retained");
+    check([[ZNTypedMachOBuilder extractDescriptor:mixedPath error:&embedError]
+            isEqualToData:expected],"P10.6 all typed numeric records read back");
+    NSDictionary *mixedSign=nil;NSString *mixedSignError=nil;
+    check(ZNAdhocResignMachOAtPath(mixedPath,&mixedSign,&mixedSignError),
+      "P10.6 mixed Mach-O re-sign");
+    check([mixedSign[@"verified"] boolValue],"P10.6 mixed CodeDirectory verified");
+    check([[ZNTypedMachOBuilder extractDescriptor:mixedPath error:&embedError]
+           isEqualToData:expected],"P10.6 mixed descriptor survives signing");
+    check(p9Grouping(mixedPath),"P10.6 P9 table survives signing");
+    check(![ZNTypedMachOBuilder embedDescriptor:expected source:p9out
+               output:[p9dir stringByAppendingPathComponent:@"unsafe-stacking"]
+               error:&embedError],"P10.6 old typed API still rejects P9 static image");
+    check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:mixedPath
+               output:[p9dir stringByAppendingPathComponent:@"duplicate-stacking"]
+               error:&embedError],"P10.6 repeat typed segment rejected");
+   }
   }
   check(![ZNV3StaticBuildPlan validateEntries:@[ownerA,ownerA] error:nil],
     "P9 duplicate rule rejected");

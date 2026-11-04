@@ -7,6 +7,13 @@ NS_ASSUME_NONNULL_BEGIN
                  source:(NSString *)source
                  output:(NSString *)output
                   error:(NSError * _Nullable * _Nullable)error;
+/// P10.6.2: explicitly allow exactly one already-prepared P9 static image.
+/// Fails closed on invalid __ZNDATA table, duplicated owned sections, or
+/// preexisting __ZNTYPE. Metadata only; Customer mixed numeric execution deferred.
++ (BOOL)embedDescriptorIntoPreparedStatic:(NSData *)descriptor
+                                   source:(NSString *)source
+                                   output:(NSString *)output
+                                    error:(NSError * _Nullable * _Nullable)error;
 + (nullable NSData *)extractDescriptor:(NSString *)path
                                 error:(NSError * _Nullable * _Nullable)error;
 @end

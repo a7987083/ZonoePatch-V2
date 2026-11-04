@@ -1,6 +1,7 @@
 #import "ZNTypedMachOBuilder.h"
 #include "ZNTypedDescriptor.hpp"
 #include "ZNMachOFile.h"
+#include "ZNStaticPatchFormat.h"
 #import <mach-o/loader.h>
 #import <mach/machine.h>
 #import <mach/vm_prot.h>
@@ -14,12 +15,31 @@ static NSError *ZNTError(NSInteger code,NSString *message){
 static constexpr uint64_t kPage=0x4000;
 static constexpr char kSegment[]="__ZNTYPE";
 static constexpr char kSection[]="__zntype";
+static bool ZNTValidateStaticTable(const uint8_t *bytes,size_t length,const struct segment_command_64 &seg) {
+ if(seg.fileoff>length||seg.filesize>length-seg.fileoff||seg.filesize<sizeof(ZN44StaticHeader))return false;
+ ZN44StaticHeader header={};std::memcpy(&header,bytes+seg.fileoff,sizeof(header));
+ return header.magic0==ZN44_STATIC_MAGIC0&&header.magic1==ZN44_STATIC_MAGIC1&&
+  header.version==ZN44_STATIC_VERSION_V2&&header.entrySize==sizeof(ZN44StaticEntry)&&
+  header.count>=1&&header.count<=128&&
+  sizeof(ZN44StaticHeader)+uint64_t(header.count)*sizeof(ZN44StaticEntry)<=seg.filesize;
+}
 static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  if(a>UINT64_MAX-b)return NO;*r=a+b;return YES;
 }
 @implementation ZNTypedMachOBuilder
 + (BOOL)embedDescriptor:(NSData *)descriptor source:(NSString *)source
                  output:(NSString *)output error:(NSError **)error {
+ return [self embedDescriptor:descriptor source:source output:output
+       allowPreparedStatic:NO error:error];
+}
++ (BOOL)embedDescriptorIntoPreparedStatic:(NSData *)descriptor source:(NSString *)source
+                 output:(NSString *)output error:(NSError **)error {
+ return [self embedDescriptor:descriptor source:source output:output
+       allowPreparedStatic:YES error:error];
+}
++ (BOOL)embedDescriptor:(NSData *)descriptor source:(NSString *)source
+                 output:(NSString *)output allowPreparedStatic:(BOOL)allowStatic
+                  error:(NSError **)error {
  std::vector<ZNTypedDescriptor::Record> parsed;std::string diagnostic;
  if(!descriptor.length||!ZNTypedDescriptor::decode(
       (const uint8_t *)descriptor.bytes,descriptor.length,parsed,diagnostic)){
@@ -38,13 +58,24 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  struct mach_header_64 header={};std::memcpy(&header,bytes,sizeof(header));
  uint64_t firstSection=UINT64_MAX,linkCommand=UINT64_MAX,linkFile=0,linkVM=0;
  uint64_t linkVMSize=0,linkFileSize=0;BOOL haveSignature=NO;
+ NSUInteger staticTextCount=0,staticDataCount=0;
  for(const znmacho::Command &c:file.commands){
   if(c.kind==LC_CODE_SIGNATURE)haveSignature=YES;
   if(c.kind!=LC_SEGMENT_64)continue;
   struct segment_command_64 seg={};std::memcpy(&seg,bytes+c.offset,sizeof(seg));
-  if(!std::strncmp(seg.segname,kSegment,16)||!std::strncmp(seg.segname,"__ZNDATA",16)||
-     !std::strncmp(seg.segname,"__ZNTEXT",16)){
-   if(error)*error=ZNTError(4,@"目标包含静态生成段，不允许再次叠加 Typed Descriptor");return NO;
+  if(!std::strncmp(seg.segname,kSegment,16)){
+   if(error)*error=ZNTError(4,@"已存在 __ZNTYPE，不允许重复叠加");return NO;
+  }
+  if(!std::strncmp(seg.segname,"__ZNTEXT",16)){
+   staticTextCount++;
+   if(!allowStatic||seg.nsects!=1||seg.initprot!=(VM_PROT_READ|VM_PROT_EXECUTE))
+    {if(error)*error=ZNTError(4,@"不允许嵌套 Static Code Segment");return NO;}
+  }
+  if(!std::strncmp(seg.segname,"__ZNDATA",16)){
+   staticDataCount++;
+   if(!allowStatic||seg.nsects!=1||seg.initprot!=(VM_PROT_READ|VM_PROT_WRITE)||
+      !ZNTValidateStaticTable(bytes,src.length,seg))
+    {if(error)*error=ZNTError(4,@"预埋 Static Table 无效");return NO;}
   }
   if(!std::strncmp(seg.segname,"__LINKEDIT",16)){
    if(linkCommand!=UINT64_MAX){if(error)*error=ZNTError(5,@"多个 LINKEDIT 段");return NO;}
@@ -58,6 +89,9 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
    if(sec.size && sec.offset && (sec.flags & SECTION_TYPE)!=S_ZEROFILL)
     firstSection=std::min(firstSection,(uint64_t)sec.offset);
   }
+ }
+ if(allowStatic && (staticTextCount!=1||staticDataCount!=1)) {
+  if(error)*error=ZNTError(16,@"混合输入必须包含且仅包含一组 P9 Static Dispatch Segments");return NO;
  }
  const uint64_t cmdBytes=sizeof(struct segment_command_64)+sizeof(struct section_64);
  if(!haveSignature||linkCommand==UINT64_MAX||firstSection==UINT64_MAX||
