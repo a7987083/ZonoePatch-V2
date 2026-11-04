@@ -240,6 +240,30 @@ int main(){
   NSArray *legacyUnbound=[repo loadFeatures:&error];
   check(legacyUnbound.count==1&&!legacyUnbound[0].boundImageUUID.length,
         "unbound legacy does not silently bind");
+  // Malformed UUID in legacy JSON is quarantined and retained verbatim.
+  NSURL *uuidFile=[[[[NSFileManager defaultManager]
+    URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject
+    URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
+  NSDictionary *badUUID=@{@"id":@"uuid-invalid",@"name":@"bad-uuid",
+    @"detail":@"",@"module":@"UnityFramework",@"buttonType":@0,
+    @"boundImageUUID":@"invalid",
+    @"rules":@[@{@"id":@"rule-1",@"offset":@"0x39059D4",@"patch":@"E9FF9F52"}]};
+  NSData *badUUIDData=[NSJSONSerialization dataWithJSONObject:
+    @{@"schemaVersion":@1,@"features":@[badUUID]} options:0 error:&error];
+  check([badUUIDData writeToURL:uuidFile options:NSDataWritingAtomic error:&error],
+        "write invalid UUID fixture");
+  ZNV3ConfigRepository *badUUIDRepo=[ZNV3ConfigRepository new];
+  NSArray *badUUIDLoaded=[badUUIDRepo loadFeatures:&error];
+  check(badUUIDLoaded.count==0&&badUUIDRepo.quarantinedFeatureCount==1,
+        "invalid persisted UUID quarantined");
+  check([badUUIDRepo saveFeatures:badUUIDLoaded error:&error],
+        "preserve quarantined invalid UUID record");
+  NSDictionary *badUUIDCopy=[NSJSONSerialization JSONObjectWithData:
+     [NSData dataWithContentsOfURL:uuidFile] options:0 error:&error];
+  check([badUUIDCopy[@"features"] count]==1 &&
+        [badUUIDCopy[@"features"][0][@"boundImageUUID"] isEqualToString:@"invalid"],
+        "malformed UUID original JSON not lost");
+  [[NSFileManager defaultManager] removeItemAtURL:uuidFile error:nil];
   // Debt cleanup: duplicate ownership IDs are not safe as executable rows.
   ZNV3Feature *dupA=[ZNV3Feature feature:@"dup-a" detail:@"" module:@"UnityFramework"];
   ZNV3PatchRule *dupARule=[ZNV3PatchRule emptyRule];
