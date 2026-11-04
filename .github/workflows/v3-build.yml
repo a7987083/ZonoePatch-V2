@@ -47,6 +47,13 @@ jobs:
             tests/zn_arm64_code_site_plan_test.cpp \
             -o "$RUNNER_TEMP/zn_arm64_code_site_plan"
           "$RUNNER_TEMP/zn_arm64_code_site_plan"
+      - name: Test P10.7.5 ZCB1 Code Cell Ownership Protocol
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNCodeCellBinding.cpp tests/zn_code_cell_binding_test.cpp \
+            -o "$RUNNER_TEMP/zn_code_cell_binding"
+          "$RUNNER_TEMP/zn_code_cell_binding"
       - name: Test P10.6.1 Unified BuildPlan Contract
         run: |
           set -euo pipefail
