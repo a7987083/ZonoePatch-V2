@@ -118,6 +118,27 @@ int main(){
   feature.valueConfig.valueType=ZNV3NumericTypeInt64;
   feature.valueConfig.minimum=0;feature.valueConfig.maximum=9007199254740992.0;
   check(![repo saveFeatures:@[feature] error:&error],"reject integer beyond precise double range");
+  // Existing P10.2 configurations used 0=Int32 / 1=Float32 without schema version.
+  NSURL *migrationDir=[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
+      inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"ZonoePatchV3"];
+  NSURL *migrationFile=[migrationDir URLByAppendingPathComponent:@"features-v1.json"];
+  NSDictionary *oldNumericBase=@{@"minimum":@0,@"maximum":@100};
+  NSMutableDictionary *oldInt=[oldNumericBase mutableCopy];oldInt[@"valueType"]=@0;
+  NSMutableDictionary *oldFloat=[oldNumericBase mutableCopy];oldFloat[@"valueType"]=@1;
+  NSDictionary *oldRule=@{@"id":@"typed-rule",@"offset":@"0x39059D4"};
+  NSDictionary *oldA=@{@"id":@"old-int",@"name":@"old-int",@"detail":@"",
+       @"module":@"UnityFramework",@"buttonType":@2,@"rules":@[oldRule],@"parameters":oldInt};
+  NSDictionary *oldB=@{@"id":@"old-float",@"name":@"old-float",@"detail":@"",
+       @"module":@"UnityFramework",@"buttonType":@2,@"rules":@[oldRule],@"parameters":oldFloat};
+  NSData *oldDocument=[NSJSONSerialization dataWithJSONObject:@{@"schemaVersion":@1,
+      @"features":@[oldA,oldB]} options:0 error:&error];
+  check([oldDocument writeToURL:migrationFile options:NSDataWritingAtomic error:&error],
+        "legacy numeric ID fixture written");
+  NSArray<ZNV3Feature *> *migrated=[repo loadFeatures:&error];
+  check(migrated.count==2 &&
+        migrated[0].valueConfig.valueType==ZNV3NumericTypeInt32 &&
+        migrated[1].valueConfig.valueType==ZNV3NumericTypeFloat32,
+        "unversioned P10.2 integer and float IDs migrate correctly");
   feature.valueConfig=[ZNV3ValueConfig defaults];
   feature.buttonType=(ZNV3FeatureType)4;
   check(![repo saveFeatures:@[feature] error:&error],"reject unknown feature type");
