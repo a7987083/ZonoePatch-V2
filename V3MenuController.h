@@ -23,6 +23,7 @@
 @property(nonatomic,strong) UITextField *defaultField;
 @property(nonatomic,strong) UIButton *patchActionButton;
 @property(nonatomic,strong) UIButton *staticBuildButton;
+@property(nonatomic,strong) UILabel *staticBuildStatusLabel;
 @property(nonatomic,assign) BOOL staticBuildRunning;
 @property(nonatomic,copy) NSString *selectedFeatureID;
 @property(nonatomic,strong) NSMutableOrderedSet<NSString *> *selectedFeatureIDs;
