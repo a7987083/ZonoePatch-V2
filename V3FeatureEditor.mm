@@ -151,6 +151,7 @@
  BOOL active=draft && [session isActiveFeature:draft.identifier];
  [self.patchActionButton setTitle:blocked?@"故障锁定":(active?@"恢复 Original":@"应用 Patch") forState:UIControlStateNormal];
  self.patchActionButton.enabled=!blocked && (!draft || draft.buttonType==ZNV3FeatureTypeToggle);
+ self.patchActionButton.hidden=draft && (draft.buttonType==ZNV3FeatureTypeNumberInput || draft.buttonType==ZNV3FeatureTypeSlider);
 }
 - (void)showPatchMessage:(NSString *)title detail:(NSString *)detail {
  UIAlertController *alert=[UIAlertController alertControllerWithTitle:title
