@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <string.h>
 #import "ZNTypedDescriptor.hpp"
+#import "ZNArm64NumericInstruction.hpp"
 #import <mach/vm_prot.h>
 #include <vector>
 #include <string>
@@ -41,6 +42,62 @@ static NSString *ZNP6DiskUUID(int fd) {
  }
  return nil;
 }
+// Only diagnose code-type numeric candidates here. The P10.3 RW-only
+// descriptor remains fail-closed until a signed Value Cell exporter exists.
+static NSString *ZNP10NumericCodeDiagnostic(ZNV3ResolvedAddress *addr,ZNV3NumericType valueType){
+ if(!addr||!addr.fileBacked||!addr.imagePath.length||!addr.imageUUID.length||
+    !(addr.segmentInitialProtection & VM_PROT_READ)||
+    !(addr.segmentInitialProtection & VM_PROT_EXECUTE)||
+    (addr.segmentInitialProtection & VM_PROT_WRITE)||
+    (addr.rva&3u)||addr.preferredVA<addr.segmentVMAddress)return nil;
+ ZNArm64NumericInstruction::ValueType requested;
+ switch(valueType){
+  case ZNV3NumericTypeInt32:requested=ZNArm64NumericInstruction::ValueType::Int32;break;
+  case ZNV3NumericTypeUInt32:requested=ZNArm64NumericInstruction::ValueType::UInt32;break;
+  case ZNV3NumericTypeInt64:requested=ZNArm64NumericInstruction::ValueType::Int64;break;
+  case ZNV3NumericTypeUInt64:requested=ZNArm64NumericInstruction::ValueType::UInt64;break;
+  case ZNV3NumericTypeFloat32:requested=ZNArm64NumericInstruction::ValueType::Float32;break;
+  case ZNV3NumericTypeFloat64:requested=ZNArm64NumericInstruction::ValueType::Float64;break;
+  default:return [NSString stringWithFormat:
+    @"%@+0x%llX 属于可执行代码段；当前代码数值分类器只支持 32/64 位整数及 Float32/Float64",
+    addr.segmentName?:@"R-X",(unsigned long long)addr.rva];
+ }
+ uint64_t d=addr.preferredVA-addr.segmentVMAddress;
+ if(d>addr.segmentFileSize||addr.segmentFileSize-d<4)
+  return @"代码 Offset 缺少完整的文件映射 ARM64 指令";
+ const size_t available=(size_t)MIN((uint64_t)5,(addr.segmentFileSize-d)/4);
+ const size_t bytes=available*sizeof(uint32_t);
+ if(addr.fileOffset>INT64_MAX||bytes>(uint64_t)INT64_MAX-addr.fileOffset)
+  return @"代码 Offset 文件偏移越界";
+ int fd=open(addr.imagePath.fileSystemRepresentation,O_RDONLY|O_CLOEXEC);
+ if(fd<0)return @"无法打开候选代码的原始 Mach-O 文件";
+ struct stat st={};
+ NSString *onDisk=ZNP6DiskUUID(fd);
+ BOOL same=onDisk.length&&[onDisk isEqualToString:addr.imageUUID]&&
+   fstat(fd,&st)==0&&S_ISREG(st.st_mode)&&st.st_size>=0&&
+   addr.fileOffset<=(uint64_t)st.st_size&&
+   bytes<=(uint64_t)st.st_size-addr.fileOffset;
+ std::vector<uint32_t> insns(available);
+ BOOL readOK=same&&pread(fd,insns.data(),bytes,(off_t)addr.fileOffset)==(ssize_t)bytes;
+ close(fd);
+ if(!readOK)return @"代码 Offset 的磁盘文件、UUID 或指令读取校验失败";
+ ZNArm64NumericInstruction::Site site{};
+ std::string explanation;
+ if(!ZNArm64NumericInstruction::analyze(insns.data(),insns.size(),requested,site,explanation))
+  return [NSString stringWithFormat:
+    @"%@+0x%llX 是 R-X 代码，原始指令 0x%08X；不符合已支持的数值指令模式：%s",
+    addr.segmentName?:@"R-X",(unsigned long long)addr.rva,insns[0],explanation.c_str()];
+ NSString *family=site.family==ZNArm64NumericInstruction::Family::FmovImmediate?@"FMOV #imm":
+     (site.family==ZNArm64NumericInstruction::Family::MovnWide?@"MOVN/MOVK":@"MOVZ/MOVK");
+ NSString *reg=(valueType==ZNV3NumericTypeFloat32?@"S":
+   valueType==ZNV3NumericTypeFloat64?@"D":
+   (valueType==ZNV3NumericTypeInt32||valueType==ZNV3NumericTypeUInt32)?@"W":@"X");
+ return [NSString stringWithFormat:
+   @"%@+0x%llX 已识别为 %@ %@%u（%u 条指令）；它是 R-X 代码而非 RW 数据。当前版本只有只读识别，Value Cell 生成尚未接入，不可直接写入数值。",
+   addr.segmentName?:@"R-X",(unsigned long long)addr.rva,family,reg,
+   (unsigned)site.destination,(unsigned)site.wordCount];
+}
+
 @implementation ZNV3StaticBuildPlanner
 + (NSData *)typedDescriptorForFeature:(ZNV3Feature *)feature error:(NSError **)error {
  if([ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled){
@@ -81,7 +138,8 @@ static NSString *ZNP6DiskUUID(int fd) {
      addr.preferredVA-addr.segmentVMAddress>addr.segmentFileSize||
      width>addr.segmentFileSize-(addr.preferredVA-addr.segmentVMAddress)||
      addr.fileOffset>INT64_MAX||width>INT64_MAX-addr.fileOffset){
-   if(error)*error=ZNP6Error(18,@"数值 Offset 必须落在可读写、文件映射且按类型宽度对齐的数据段；代码地址不能直接按数值写入");
+   NSString *codeInfo=ZNP10NumericCodeDiagnostic(addr,config.valueType);
+   if(error)*error=ZNP6Error(18,codeInfo?:@"数值 Offset 必须落在可读写、文件映射且按类型宽度对齐的数据段；代码地址不能直接按数值写入");
    return nil;
   }
   if(sourceUUID && (![sourceUUID isEqualToString:addr.imageUUID]||
