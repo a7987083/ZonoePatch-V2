@@ -215,6 +215,65 @@ int main(){
     "save preserves intended feature identity after delete");
   NSURL *appSupport=[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
   NSURL *file=[[appSupport URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
+  // Debt cleanup: duplicate ownership IDs are not safe as executable rows.
+  ZNV3Feature *dupA=[ZNV3Feature feature:@"dup-a" detail:@"" module:@"UnityFramework"];
+  ZNV3PatchRule *dupARule=[ZNV3PatchRule emptyRule];
+  dupARule.offsetText=@"0x39059D4";dupARule.patchText=@"E9FF9F52";
+  [dupA.rules addObject:dupARule];
+  ZNV3Feature *dupB=[ZNV3Feature feature:@"dup-b" detail:@"" module:@"UnityFramework"];
+  ZNV3PatchRule *dupBRule=[ZNV3PatchRule emptyRule];
+  dupBRule.offsetText=@"0x39059D8";dupBRule.patchText=@"E9FF9F52";
+  [dupB.rules addObject:dupBRule];
+  dupB.identifier=dupA.identifier;
+  check(![repo saveFeatures:@[dupA,dupB] error:&error],
+        "duplicate Feature ID rejected on save");
+  dupB.identifier=@"unique-b";
+  dupBRule.identifier=dupARule.identifier;
+  check([repo saveFeatures:@[dupA,dupB] error:&error],
+        "the same Rule ID across separate features remains legal");
+  ZNV3PatchRule *sameRule=[ZNV3PatchRule emptyRule];
+  sameRule.identifier=dupARule.identifier;
+  sameRule.offsetText=@"0x39059DC";sameRule.patchText=@"E9FF9F52";
+  [dupA.rules addObject:sameRule];
+  check(![repo saveFeatures:@[dupA,dupB] error:&error],
+        "duplicate Rule ID within one feature rejected");
+  [dupA.rules removeLastObject];
+  dupA.identifier=@"";
+  check(![repo saveFeatures:@[dupA] error:&error],
+        "missing Feature ID rejected");
+  dupA.identifier=@"unique-a";
+  dupARule.identifier=@"";
+  check(![repo saveFeatures:@[dupA] error:&error],
+        "missing Rule ID rejected");
+  dupARule.identifier=@"first-rule";
+  check([repo saveFeatures:@[dupA,dupB] error:&error],
+        "unique feature/rule ownership still saves");
+  NSURL *idFile=[[[[NSFileManager defaultManager]
+    URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject
+    URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
+  NSDictionary *duplicateFeature=@{@"id":@"duplicate-loaded",@"name":@"loaded",
+     @"detail":@"",@"module":@"UnityFramework",@"buttonType":@0,
+     @"rules":@[@{@"id":@"r-1",@"offset":@"0x39059D4",@"patch":@"E9FF9F52"}]};
+  NSDictionary *duplicateRule=@{@"id":@"duplicate-rule",@"name":@"loaded",
+     @"detail":@"",@"module":@"UnityFramework",@"buttonType":@0,
+     @"rules":@[@{@"id":@"r-1",@"offset":@"0x39059D4",@"patch":@"E9FF9F52"},
+                 @{@"id":@"r-1",@"offset":@"0x39059D8",@"patch":@"E9FF9F52"}]};
+  NSData *duplicateFixture=[NSJSONSerialization dataWithJSONObject:
+    @{@"schemaVersion":@1,@"features":@[duplicateFeature,duplicateFeature,duplicateRule]}
+    options:0 error:&error];
+  check([duplicateFixture writeToURL:idFile options:NSDataWritingAtomic error:&error],
+        "duplicate fixture written");
+  ZNV3ConfigRepository *duplicateRepo=[ZNV3ConfigRepository new];
+  NSArray *uniqueLoaded=[duplicateRepo loadFeatures:&error];
+  check(uniqueLoaded.count==1&&duplicateRepo.quarantinedFeatureCount==2,
+        "duplicate Feature/Rule ownership quarantined without execution");
+  check([duplicateRepo saveFeatures:uniqueLoaded error:&error],
+        "save preserves quarantined ambiguous records");
+  NSDictionary *duplicatePreserved=[NSJSONSerialization JSONObjectWithData:
+     [NSData dataWithContentsOfURL:idFile] options:0 error:&error];
+  check([duplicatePreserved[@"features"] count]==3,
+        "quarantined duplicate JSON preserved verbatim");
+  [[NSFileManager defaultManager] removeItemAtURL:idFile error:nil];
   // Legacy P3 oversized patch is quarantined but its JSON stays intact on subsequent writes.
   NSDictionary *legacyRule=@{@"id":@"old-rule",@"offset":@"0x39059D4",
     @"patch":[@"" stringByPaddingToLength:520 withString:@"AA" startingAtIndex:0]};

@@ -104,6 +104,9 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
  if(![entries isKindOfClass:NSArray.class]||entries.count>1000){if(error)*error=ZNError(4,@"功能列表格式错误");return nil;}
  NSMutableArray *result=[NSMutableArray arrayWithCapacity:entries.count];
  NSMutableArray *quarantine=[NSMutableArray array];
+ // Feature and rule IDs are transaction ownership keys. A repeated ID must
+ // never become a second executable feature, even in a legacy JSON document.
+ NSMutableSet<NSString *> *seenFeatures=[NSMutableSet set];
  for(id entry in entries){
   if(![entry isKindOfClass:NSDictionary.class]){[quarantine addObject:entry];continue;}
   NSDictionary *d=entry;
@@ -118,15 +121,18 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
     [quarantine addObject:entry];continue;
   }
   BOOL numeric=button.integerValue==ZNV3FeatureTypeSlider||button.integerValue==ZNV3FeatureTypeNumberInput;
-  BOOL legacyInvalid=NO;
+  BOOL legacyInvalid=[seenFeatures containsObject:uid];
+  NSMutableSet<NSString *> *ruleIDs=[NSMutableSet set];
   for(id item in rules){
    if(![item isKindOfClass:NSDictionary.class]){legacyInvalid=YES;break;}
    NSDictionary *r=item;id off=r[@"offset"],patch=r[@"patch"],rid=r[@"id"];
    if(![rid isKindOfClass:NSString.class]||![(NSString *)rid length]||[(NSString *)rid length]>128||
+      [ruleIDs containsObject:rid]||
       ![off isKindOfClass:NSString.class]||
       (numeric?![ZNV3AddressResolver validAddressText:off]:(![patch isKindOfClass:NSString.class]||!ZNValidRule(off,patch)))){
     legacyInvalid=YES;break;
    }
+   [ruleIDs addObject:rid];
   }
   if(legacyInvalid){[quarantine addObject:entry];continue;}
   ZNV3ValueConfig *valueConfig=nil;
@@ -145,6 +151,7 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
    [f.rules addObject:rule];
   }
   [result addObject:f];
+  [seenFeatures addObject:uid];
  }
  self.quarantinedEntries=[quarantine copy];
  return result;
@@ -152,19 +159,29 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
 - (BOOL)saveFeatures:(NSArray<ZNV3Feature *> *)features error:(NSError **)error {
  if(features.count>1000||self.quarantinedEntries.count>1000-features.count){if(error)*error=ZNError(9,@"功能数量超限");return NO;}
  NSMutableArray *items=[NSMutableArray arrayWithCapacity:features.count];
+ NSMutableSet<NSString *> *featureIDs=[NSMutableSet set];
  for(ZNV3Feature *f in features){
-  if(!f.name.length||f.name.length>128||f.detail.length>1024||
+  if(!f.identifier.length||f.identifier.length>128||
+     [featureIDs containsObject:f.identifier]||
+     !f.name.length||f.name.length>128||f.detail.length>1024||
      ![@[@"主程序",@"UnityFramework"] containsObject:f.module]||
      !ZNV3FeatureTypeIsValid(f.buttonType)||f.rules.count>128) {
    if(error)*error=ZNError(10,@"功能字段校验失败");return NO;
   }
+  [featureIDs addObject:f.identifier];
   BOOL numeric=f.buttonType==ZNV3FeatureTypeNumberInput||f.buttonType==ZNV3FeatureTypeSlider;
   if(numeric && (![f.valueConfig isValidForFeatureType:f.buttonType] ||
       (f.buttonType==ZNV3FeatureTypeSlider && !f.valueConfig.requiresEnableSwitch))){
    if(error)*error=ZNError(12,@"数值参数范围或 Slider 开关模式无效");return NO;
   }
   NSMutableArray *rules=[NSMutableArray arrayWithCapacity:f.rules.count];
+  NSMutableSet<NSString *> *ruleIDs=[NSMutableSet set];
   for(ZNV3PatchRule *rule in f.rules){
+   if(!rule.identifier.length||rule.identifier.length>128||
+      [ruleIDs containsObject:rule.identifier]){
+    if(error)*error=ZNError(13,@"规则 ID 缺失或重复，拒绝保存有歧义的事务身份");return NO;
+   }
+   [ruleIDs addObject:rule.identifier];
    NSString *off=rule.offsetText?:@"",*patch=rule.patchText?:@"";
    if(numeric?![ZNV3AddressResolver validAddressText:off]:!ZNValidRule(off,patch)) {
     if(error)*error=ZNError(11,numeric?@"数值类型需要合法的 Offset（Patch HEX 不适用）":@"Offset / Patch 格式错误：ARM64 Code Patch 需要 4–256 字节、4 字节对齐");return NO;
