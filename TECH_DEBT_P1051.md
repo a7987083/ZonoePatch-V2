@@ -17,7 +17,7 @@
 | D01 | P0 | `V3FeatureEditor.mm` splits Toggle export from single Numeric export | Open — defer until after debt cleanup |
 | D02 | P0 | `V3StaticBuildPlanner.mm` rejects code-section Numeric as RW-only | Open — design once target binary supplied |
 | D03 | P0 | `V3StaticBinaryExport.mm` declares typed metadata only, no runtime code patch | Open — intentional feature gate |
-| D04 | P1 | `ZNTypedCustomerRuntime.mm` does not update an active numeric transaction | Open — require transaction failure-injection tests |
+| D04 | P1 | `ZNTypedCustomerRuntime.mm` does not update an active numeric transaction | Implemented: active update + Original snapshot + fault injection; CI pending |
 | D05 | P1 | `V3StaticDispatchRuntime.mm` allows one active saved feature only | Open — avoid unsafe concurrency workaround |
 | D06 | P1 | `KNOWN_ISSUES.md` P6-C reports sequential non-atomic multi-rule pointer updates | Open — semantics and device tests required |
 | D07 | P1 | `features-v1.json` does not persist pinned Mach-O UUID | Implemented: explicit-save pin, runtime/static checks; CI/device validation pending |
@@ -40,3 +40,11 @@ D10 is a newly confirmed ownership collision issue observed while reviewing pers
 - `boundImageUUID` is an optional additive field inside `features-v1.json`; no numeric type ID or top-level schema rewrite.
 - Every Developer write path (Runtime Bytes, static Builder, static slot activation) checks that the persisted UUID matches the current image. Customer’s generated binary catalog remains independently validated by the pre-existing code.
 - Regressions cover canonical UUID matching, persistence, draft copy, unbound legacy behavior and invalid JSON quarantine. **Real game device behavior remains unverified.**
+
+### D04: transactional active numeric update
+- `ZNTypedValueTransaction::update` preserves initial Original snapshots, validates unchanged target addresses and byte-identical typed descriptor encoding, validates numeric range, checks all currently applied values and verifies writes.
+- Failed partial updates restore the **prior committed** values, never the first Original; a failed rollback latches RecoveryFailed and refuses later writes/restores.
+- Existing `ZNTypedCustomerRuntime::applyValue` routes an already-active feature through guarded update; it remains one numeric feature per image. No extra mixed protocol or architecture imported from P10.8.
+- Customer NumberInput button becomes Apply/Update, and Slider commits a pending value on touch release when enabled. Slider OFF still restores the first Original.
+- New host regressions cover update, out-of-range, changed descriptor/address, multi-rule partial rollback, initial Original restore, external writer interference, and recovery-lock failure.
+- **Verification**: newest D04 Actions `41883259215` queued at time of documentation; iPhone UI / real game not verified.

@@ -12,3 +12,9 @@
 - Explicit editor save binds each Offset to the real loaded LC_UUID, and rejects silently rebinding previously pinned features to another image version.
 - Developer runtime patch, static Builder and static runtime entry points reject missing/mismatched UUIDs.
 - Added UUID JSON/draft persistence, invalid-UUID, legacy-unbound tests; no changes to original P10.5.1 or P10.8 refs.
+
+## D04 active typed value update
+- Added safe active `Transaction::update`: exact descriptor/address ownership, full-range preflight, external-writer detection, previous-applied atomic failure rollback and initial Original preservation.
+- Wired Customer repeated Apply to active update, input Apply/Update button, slider TouchUp update while ON, OFF restores Original.
+- Added fault-injected transaction tests including failed rollback latching recovery lock. No ZNM2/ZCB1/mixed Builder introduced.
+- Corrected prior UUID regression test type error: `NSArray<ZNV3Feature *> *` for two typed arrays (`39dd2500`).

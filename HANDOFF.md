@@ -15,3 +15,9 @@
 - Newly saved Feature ID is pinned in `V3FeatureEditor.mm` to actual loaded Mach-O UUID, stored by `V3ConfigRepository.mm`, carried in draft by `V3FeatureModels.mm`.
 - Missing/mismatched saved UUID fails closed in `V3PatchSession.mm`, `V3StaticBuildPlanner.mm`, and `V3StaticDispatchRuntime.mm`.
 - The branch's Actions for D07 may still be queued. Recheck newest HEAD's Actions build/test before concluding D07 done. No iPhone execution or image version-switch test has been performed.
+
+## D04 active numeric transaction integration
+- Source changes at `e345dbcd`; additional rollback fault injection at `9f707c4e`.
+- Core `ZNTypedValueTransaction.{hpp,cpp}` now supports `update` with exact descriptor/addresses and previous-applied rollback, preserving first Original. Customer `ZNTypedCustomerRuntime.mm` routes repeated apply of same active feature to `update`; `V3CustomerMenuController.mm` wires slider release and number-input Update.
+- D07 previous CI failed in `Test Address and Configuration` because `NSArray *` test variables accessed typed `boundImageUUID`; fixed in commit `39dd2500`. CI `41883105271` reached dylib Build at latest check; **do not confuse this old-HEAD run with current**.
+- New D04 HEAD run: `41883259215` (initially queued). Recheck jobs and first compiler error before claiming pass or device readiness. No real iPhone validation; P10.5.1 and P10.8 historical refs untouched.
