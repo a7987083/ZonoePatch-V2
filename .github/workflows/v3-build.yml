@@ -59,6 +59,14 @@ jobs:
             ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedValueTransaction.cpp \
             tests/zn_typed_value_transaction_test.cpp -o "$RUNNER_TEMP/zn_typed_value_tx"
           "$RUNNER_TEMP/zn_typed_value_tx"
+      - name: Test P10.6.3 Mixed Numeric Ownership and Recovery
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedValueTransaction.cpp \
+            ZNMixedValueCoordinator.cpp tests/zn_mixed_value_coordinator_test.cpp \
+            -o "$RUNNER_TEMP/zn_mixed_value_coordinator"
+          "$RUNNER_TEMP/zn_mixed_value_coordinator"
       - name: Test Typed Mach-O Metadata
         run: |
           set -euo pipefail
