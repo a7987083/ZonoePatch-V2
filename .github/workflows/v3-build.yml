@@ -39,6 +39,14 @@ jobs:
             ZNArm64ValueCellPlan.cpp tests/zn_arm64_value_cell_plan_test.cpp \
             -o "$RUNNER_TEMP/zn_arm64_value_cell_plan"
           "$RUNNER_TEMP/zn_arm64_value_cell_plan"
+      - name: Test P10.7.3 ARM64 Code Site Staging Contract
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNArm64NumericInstruction.cpp ZNArm64CodeSitePlan.cpp \
+            tests/zn_arm64_code_site_plan_test.cpp \
+            -o "$RUNNER_TEMP/zn_arm64_code_site_plan"
+          "$RUNNER_TEMP/zn_arm64_code_site_plan"
       - name: Test P10.6.1 Unified BuildPlan Contract
         run: |
           set -euo pipefail
