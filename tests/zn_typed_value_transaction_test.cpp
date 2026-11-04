@@ -13,6 +13,7 @@ class Fake final:public Backend {
 public:
  std::map<uintptr_t,std::vector<uint8_t>> memory;
  int writes=0, failWrite=0, corruptWrite=0, failRollback=0;
+ bool failAppliedRollback=false;
  bool read(uintptr_t p,uint8_t *out,size_t n,std::string &error)override{
   auto it=memory.find(p);
   if(it==memory.end()||it->second.size()!=n){error="not mapped";return false;}
@@ -24,6 +25,7 @@ public:
   if(it==memory.end()||it->second.size()!=n){error="not mapped";return false;}
   bool reverting=b[0]==1||b[0]==2;
   if(failRollback&&reverting){error="rollback denied";return false;}
+  if(failAppliedRollback&&b[0]==40){error="active-value rollback denied";return false;}
   it->second.assign(b,b+n);
   if(failWrite&&writes==failWrite){error="write reported failure after mutation";return false;}
   if(corruptWrite&&writes==corruptWrite)it->second[0]^=0xff;
@@ -145,6 +147,14 @@ static void activeUpdateRollback(){
  broken.memory[0xA000][0]=41;
  check(!locked.update(pair,"50",e),"external writer detected");
  check(broken.writes==0,"external mismatch prevents all update writes");
+ Fake latch;latch.memory[0xA000]={1};latch.memory[0xB000]={2};
+ Transaction tainted(latch);
+ check(tainted.commit(pair,"40",e),"setup active rollback latch");
+ latch.writes=0;latch.failWrite=2;latch.failAppliedRollback=true;
+ check(!tainted.update(pair,"50",e),"failed active update and rollback rejected");
+ check(tainted.recoveryFailed(),"failed rollback latches typed transaction");
+ check(!tainted.update(pair,"60",e),"recovery lock blocks further updates");
+ check(!tainted.restore(e),"recovery lock blocks blind restore");
 }
 int main(){
  activeUpdateRollback();basic();exact64();sliderSemantics();atomicRollback();restoreFailure();guard();
