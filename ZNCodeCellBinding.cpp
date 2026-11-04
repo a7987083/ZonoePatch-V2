@@ -25,12 +25,11 @@ bool validUUID(const std::string&s){
 bool valid(const Package&p,std::string&e){
  if(!validUUID(p.imageUUID)){e="LC_UUID string must be uppercase canonical";return false;}
  if(p.bindings.empty()||p.bindings.size()>kMaxBindings){e="code-cell binding count outside 1..128";return false;}
- std::unordered_set<std::string>ids;
  std::unordered_set<uint32_t>patches;
  std::unordered_set<uint64_t>cells;
  for(const auto&b:p.bindings){
   if(b.featureID.empty()||b.featureID.size()>128||
-     b.featureID.find('\0')!=std::string::npos||!ids.insert(b.featureID).second||
+     b.featureID.find('\0')!=std::string::npos||
      !b.patchID||!patches.insert(b.patchID).second||
      !b.sourceRVA||(b.sourceRVA&3u)||!b.cellRVA||
      !width(b.numericType)||(b.cellRVA%width(b.numericType))||
@@ -113,9 +112,9 @@ bool validateOwnership(const Package&p,
     }
    }
   }
-  for(const auto&n:numerics)if(n.featureID==b.featureID){
+  for(const auto&n:numerics)if(n.featureID==b.featureID&&n.cellRVA==b.cellRVA){
    ++numericFound;
-   if(n.numericType!=b.numericType||n.cellRVA!=b.cellRVA){
+   if(n.numericType!=b.numericType){
     e="ZNM2 numeric type/cell mismatches ZCB1";return false;
    }
   }

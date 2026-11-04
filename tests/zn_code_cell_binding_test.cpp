@@ -36,8 +36,13 @@ static void roundTrip(Package input){
  test(!encode(duplicate,bytes,error),"reject shared RW cell");
  duplicate=input;duplicate.bindings[1].sourceRVA=0x1100;
  test(!encode(duplicate,bytes,error),"reject overlapping source");
+ // A numeric feature may own several patch rules; patchID and cellRVA,
+ // not the featureID alone, are the per-rule ownership identities.
  duplicate=input;duplicate.bindings[1].featureID="slider";
- test(!encode(duplicate,bytes,error),"reject duplicate featureID");
+ test(encode(duplicate,bytes,error),"allow multiple code rules per persisted Feature ID");
+ auto multiNumeric=numeric;multiNumeric[1].featureID="slider";
+ test(validateOwnership(duplicate,p9,multiNumeric,error),
+       "multi-rule feature may bind multiple unique P9 slots and cells");
  duplicate=input;duplicate.imageUUID="uuid";
  test(!encode(duplicate,bytes,error),"reject noncanonical LC_UUID");
 }

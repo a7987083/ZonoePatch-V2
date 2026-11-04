@@ -12,7 +12,7 @@ constexpr uint32_t kMagic=0x3142435aU; // "ZCB1", little endian
 constexpr uint16_t kVersion=1;
 constexpr size_t kMaxBindings=128;
 struct Binding {
- std::string featureID;
+ std::string featureID; // may repeat for multiple rules owned by one feature
  uint32_t patchID=0; // one-based P9 Static Entry patchID
  uint64_t sourceRVA=0;
  uint64_t cellRVA=0;
