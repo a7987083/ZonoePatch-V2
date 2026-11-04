@@ -29,6 +29,8 @@ static inline CGFloat ZNCustomerContentHeight(NSUInteger count, BOOL locked) {
 @property(nonatomic,copy) void (^closeBlock)(void);
 @property(nonatomic,copy) void (^layoutChangedBlock)(void);
 @property(nonatomic,copy) void (^windowMovedBlock)(void);
+@property(nonatomic,copy) void (^beginNumericEditingBlock)(void);
+@property(nonatomic,copy) void (^endNumericEditingBlock)(void);
 @property(nonatomic,assign) UIInterfaceOrientationMask hostOrientationMask;
 @property(nonatomic,assign,readonly) NSUInteger presentedFeatureCount;
 @property(nonatomic,assign,readonly) NSUInteger presentedTypedFeatureCount;
