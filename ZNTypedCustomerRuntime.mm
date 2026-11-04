@@ -201,10 +201,7 @@ static ZNTypedCustomerFeature *ZNTCatalogImage(uint32_t index) {
   if(self.recoveryFailed){if(error)*error=ZNTCustomerError(12,@"存在回滚失败，数值执行已锁定");return NO;}
   ZNTypedCustomerFeature *current=[self currentFor:feature error:error];
   if(!current)return NO;
-  if(self.activeSessions[current.identifier]){
-   if(error)*error=ZNTCustomerError(13,@"该数值功能已经提交或处于锁定状态");return NO;
-  }
-  if(![decimal isKindOfClass:NSString.class]||!decimal.length||decimal.length>128){
+   if(![decimal isKindOfClass:NSString.class]||!decimal.length||decimal.length>128){
    if(error)*error=ZNTCustomerError(14,@"输入数值无效");return NO;
   }
   std::vector<ZNTypedDescriptor::Record> records;std::string diagnostic;
@@ -220,6 +217,20 @@ static ZNTypedCustomerFeature *ZNTCatalogImage(uint32_t index) {
    uintptr_t address=current.imageHeader+(uintptr_t)r.rva;
    cells.push_back({current.imageHeader,std::string(current.imageUUID.UTF8String),r.rva,r.type});
    targets.push_back({address,r});
+  }
+  ZNTypedSession *active=self.activeSessions[current.identifier];
+  if(active){
+   if(!active->transaction||!active->transaction->active()||
+      active.imageHeader!=current.imageHeader||
+      ![active.descriptorBytes isEqualToData:current.descriptorBytes]){
+    if(error)*error=ZNTCustomerError(13,@"数值事务身份不一致或故障锁定");return NO;
+   }
+   if(!active->transaction->update(targets,std::string(decimal.UTF8String),diagnostic)){
+    self.lastDiagnostic=[NSString stringWithUTF8String:diagnostic.c_str()];
+    if(error)*error=ZNTCustomerError(22,self.lastDiagnostic);return NO;
+   }
+   self.lastDiagnostic=@"已更新数值，初始 Original 保持不变";
+   return YES;
   }
   // One metadata section per image. Multiple active transactions on the same
   // address space are disallowed to avoid overlapping rollback ownership.

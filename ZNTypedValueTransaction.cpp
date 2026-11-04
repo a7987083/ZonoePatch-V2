@@ -121,8 +121,84 @@ bool Transaction::commit(const std::vector<Target> &targets,
    rollback(staged,written,true,error);return false;
   }
  }
- snapshots_=std::move(staged);enabled_=true;
+ snapshots_=std::move(staged);activeTargets_=targets;enabled_=true;
  lastDiagnostic_="typed value commit verified";error.clear();return true;
+}
+bool Transaction::update(const std::vector<Target> &targets,
+                         const std::string &decimal,std::string &error){
+ if(locked_){error="transaction locked after failed rollback";return false;}
+ if(!enabled_||snapshots_.empty()||targets.size()!=snapshots_.size()||
+    targets.size()!=activeTargets_.size()){
+  error="active transaction target count changed or is not enabled";return false;
+ }
+ if(!legalTargets(targets,error))return false;
+ std::vector<ZNTypedDescriptor::Record> oldRecords,newRecords;
+ oldRecords.reserve(targets.size());newRecords.reserve(targets.size());
+ for(size_t i=0;i<targets.size();++i){
+  if(targets[i].address!=activeTargets_[i].address){
+   error="active transaction address changed";return false;
+  }
+  oldRecords.push_back(activeTargets_[i].descriptor);
+  newRecords.push_back(targets[i].descriptor);
+ }
+ std::vector<uint8_t> originalDescriptor,proposedDescriptor;
+ if(!ZNTypedDescriptor::encode(oldRecords,originalDescriptor,error)||
+    !ZNTypedDescriptor::encode(newRecords,proposedDescriptor,error)||
+    originalDescriptor!=proposedDescriptor){
+  if(error.empty())error="active transaction descriptor changed";return false;
+ }
+ std::vector<std::vector<uint8_t>> payloads;
+ payloads.reserve(targets.size());
+ for(const Target &target:targets){
+  auto type=target.descriptor.type;
+  std::vector<uint8_t> value,lo,hi;
+  std::string canonical,minValue,maxValue;
+  if(!ZNValueCodec::encode(type,decimal,value,error)||
+     !ZNValueCodec::decode(type,value.data(),value.size(),canonical,error)||
+     !ZNValueCodec::encode(type,target.descriptor.minimum,lo,error)||
+     !ZNValueCodec::encode(type,target.descriptor.maximum,hi,error)||
+     !ZNValueCodec::decode(type,lo.data(),lo.size(),minValue,error)||
+     !ZNValueCodec::decode(type,hi.data(),hi.size(),maxValue,error))return false;
+  if(compareScalar(type,canonical,minValue)<0||compareScalar(type,canonical,maxValue)>0){
+   error="updated value outside configured range";return false;
+  }
+  payloads.push_back(std::move(value));
+ }
+ // Read all active values before the first mutation. Never overwrite an external writer.
+ for(const Snapshot &row:snapshots_){
+  std::vector<uint8_t> observed(row.applied.size());
+  if(!backend_.read(row.address,observed.data(),observed.size(),error)||
+     !equals(observed,row.applied)){
+   error="active numeric bytes changed outside transaction";return false;
+  }
+ }
+ std::vector<size_t> written;
+ for(size_t i=0;i<snapshots_.size();++i){
+  const Snapshot &row=snapshots_[i];
+  if(equals(payloads[i],row.applied))continue;
+  // Recheck immediately before each write, including concurrent mutations
+  // occurring after the global preflight.
+  std::vector<uint8_t> observed(row.applied.size());
+  if(!backend_.read(row.address,observed.data(),observed.size(),error)||
+     !equals(observed,row.applied)){
+   error="active numeric bytes changed during update";
+   if(!written.empty())rollback(snapshots_,written,false,error);
+   return false;
+  }
+  std::string cause;
+  bool ok=backend_.write(row.address,payloads[i].data(),payloads[i].size(),cause);
+  written.push_back(i); // backend may modify bytes despite reporting failure
+  std::vector<uint8_t> observedAfter(payloads[i].size());
+  bool verified=backend_.read(row.address,observedAfter.data(),observedAfter.size(),cause)&&
+                equals(observedAfter,payloads[i]);
+  if(!ok||!verified){
+   error="active update write/readback failure: "+cause;
+   rollback(snapshots_,written,false,error);return false;
+  }
+ }
+ for(size_t i=0;i<snapshots_.size();++i)
+  snapshots_[i].applied=std::move(payloads[i]);
+ lastDiagnostic_="active numeric update verified";error.clear();return true;
 }
 bool Transaction::restore(std::string &error){
  if(locked_){error="transaction locked after failed rollback";return false;}
@@ -150,6 +226,6 @@ bool Transaction::restore(std::string &error){
    rollback(snapshots_,written,false,error);return false;
   }
  }
- snapshots_.clear();enabled_=false;lastDiagnostic_="original values restored";error.clear();return true;
+ snapshots_.clear();activeTargets_.clear();enabled_=false;lastDiagnostic_="original values restored";error.clear();return true;
 }
 } // namespace ZNTypedValue

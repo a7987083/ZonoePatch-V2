@@ -329,8 +329,8 @@
   toggle.tag=(NSInteger)i;
   button.enabled=!locked;
   button.tag=(NSInteger)i;
-  [button setTitle:feature.enabled?@"恢复":@"应用" forState:UIControlStateNormal];
-  field.enabled=!locked&&!feature.enabled;
+  [button setTitle:feature.enabled?@"更新":@"应用" forState:UIControlStateNormal];
+  field.enabled=!locked;
   // Keep user-edited strings while controls have focus.
   if(!field.isFirstResponder&&![field.text isEqualToString:pending])field.text=pending;
   if(!isSlider)continue;
@@ -417,6 +417,8 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  slider.minimumTrackTintColor=[UIColor colorWithRed:.72 green:.3 blue:1 alpha:1];
  slider.tag=(NSInteger)index;
  [slider addTarget:self action:@selector(typedSliderChanged:) forControlEvents:UIControlEventValueChanged];
+ [slider addTarget:self action:@selector(typedSliderCommitted:)
+    forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
  [panel addSubview:slider];
  UILabel *value=ZNLabel(@"",10,NO);value.textColor=UIColor.whiteColor;
  value.translatesAutoresizingMaskIntoConstraints=NO;
@@ -475,7 +477,6 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  NSUInteger i=(NSUInteger)field.tag;
  if(i>=self.typedSnapshot.count)return;
  ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
- if(feature.enabled)return;
  self.pendingTypedValues[feature.identifier]=field.text?:@"";
  if(i<self.typedValueLabels.count)self.typedValueLabels[i].text=field.text;
 }
@@ -492,16 +493,25 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  self.pendingTypedValues[feature.identifier]=pending;
  self.typedValueLabels[i].text=pending;
  // Editing pending value does not trigger runtime writes, even when enabled.
- if(!feature.enabled)self.typedInputs[i].text=pending;
+ if(!self.typedInputs[i].isFirstResponder)self.typedInputs[i].text=pending;
+}
+- (void)typedSliderCommitted:(UISlider *)slider {
+ NSUInteger i=(NSUInteger)slider.tag;
+ if(i>=self.typedSnapshot.count)return;
+ ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
+ if(!feature.enabled)return; // Drag while OFF updates pending only.
+ NSError *error=nil;
+ BOOL ok=[[ZNTypedCustomerRuntime shared] applyValue:
+    (self.pendingTypedValues[feature.identifier]?:@"") feature:feature error:&error];
+ [self refreshFeatures];
+ if(!ok)[self showError:error.localizedDescription?:[ZNTypedCustomerRuntime shared].lastDiagnostic];
 }
 - (void)typedButtonTapped:(UIButton *)button {
  NSUInteger i=(NSUInteger)button.tag;
  if(i>=self.typedSnapshot.count)return;
  ZNTypedCustomerFeature *feature=self.typedSnapshot[i];
  NSError *error=nil;
- BOOL ok=feature.enabled?
-   [[ZNTypedCustomerRuntime shared] restoreFeature:feature error:&error]:
-   [[ZNTypedCustomerRuntime shared] applyValue:
+ BOOL ok=[[ZNTypedCustomerRuntime shared] applyValue:
      (self.pendingTypedValues[feature.identifier]?:@"") feature:feature error:&error];
  [self refreshFeatures];
  if(!ok)[self showError:error.localizedDescription?:[ZNTypedCustomerRuntime shared].lastDiagnostic];

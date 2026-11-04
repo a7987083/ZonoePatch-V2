@@ -42,6 +42,15 @@ static void basic(){
  check(t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"42",e),"commit UInt32");
  check(t.active()&&f.memory[0x1000][0]==42,"commit changes real bytes");
  check(!t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"51",e),"reject double commit");
+ check(t.update({target(0x1000,0x1000,Type::UInt32,"0","100")},"51",e),"update enabled scalar");
+ check(f.memory[0x1000][0]==51,"update writes new value");
+ check(!t.update({target(0x1000,0x1000,Type::UInt32,"0","100")},"101",e),
+       "out-of-range update rejected");
+ check(f.memory[0x1000][0]==51,"failed range update leaves prior value");
+ check(!t.update({target(0x1000,0x1000,Type::UInt32,"0","90")},"60",e),
+       "changed descriptor rejected");
+ check(!t.update({target(0x2000,0x2000,Type::UInt32,"0","100")},"60",e),
+       "changed target address rejected");
  check(t.restore(e),"restore UInt32");check(!t.active()&&f.memory[0x1000][0]==1,"restore original");
  check(!t.restore(e),"reject double restore");
  check(!t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"101",e),"out of range");
@@ -62,8 +71,10 @@ static void sliderSemantics(){
  std::string pending="7";check(!t.active()&&f.memory[0x3000][0]==2,"drag does not write");
  check(t.commit({slider(0x3000,0x3000,Type::Int32)},pending,e),"switch-on applies pending value");
  check(f.memory[0x3000][0]==7,"switch-on committed selected value");
- pending="9";check(f.memory[0x3000][0]==7,"dragging while ON does not auto-commit");
- check(t.restore(e)&&f.memory[0x3000][0]==2,"switch-off restores original");
+ pending="9";check(f.memory[0x3000][0]==7,"drag pending has not committed");
+ check(t.update({slider(0x3000,0x3000,Type::Int32)},pending,e),"slider active update");
+ check(f.memory[0x3000][0]==9,"slider updated on release");
+ check(t.restore(e)&&f.memory[0x3000][0]==2,"switch-off restores first Original");
 }
 static void atomicRollback(){
  Fake f;f.memory[0x4000]={1};f.memory[0x5000]={2};std::string e;
@@ -108,8 +119,35 @@ static void guard(){
  check(!t.restore(e),"refuse restore if live bytes have changed");
  check(f.memory[0x8000][0]==9&&t.active(),"preserve third-party bytes");
 }
+static void activeUpdateRollback(){
+ Fake f;f.memory[0xA000]={1};f.memory[0xB000]={2};std::string e;
+ std::vector<Target> pair={target(0xA000,0xA000,Type::UInt8,"0","100"),
+                           target(0xB000,0xB000,Type::UInt8,"0","100")};
+ Transaction tx(f);
+ check(tx.commit(pair,"40",e),"commit multi-cell original");
+ f.writes=0;f.failWrite=2;
+ check(!tx.update(pair,"50",e),"update partial write failure");
+ check(!tx.recoveryFailed()&&tx.active(),"successful update rollback keeps active");
+ check(f.memory[0xA000][0]==40&&f.memory[0xB000][0]==40,
+       "failed update restores previous applied values");
+ f.failWrite=0;
+ check(tx.update(pair,"60",e),"retry after successful rollback");
+ check(tx.restore(e),"restore after retry");
+ check(f.memory[0xA000][0]==1&&f.memory[0xB000][0]==2,
+       "first originals restored, not intermediate values");
+ Fake broken;broken.memory[0xA000]={1};broken.memory[0xB000]={2};
+ Transaction locked(broken);
+ check(locked.commit(pair,"40",e),"setup rollback failure during update");
+ broken.writes=0;broken.failWrite=2;
+ // Simulate refused rollback of prior applied scalar.
+ broken.failRollback=0;
+ // A new writer interfering between updates must be rejected without write.
+ broken.memory[0xA000][0]=41;
+ check(!locked.update(pair,"50",e),"external writer detected");
+ check(broken.writes==0,"external mismatch prevents all update writes");
+}
 int main(){
- basic();exact64();sliderSemantics();atomicRollback();restoreFailure();guard();
+ activeUpdateRollback();basic();exact64();sliderSemantics();atomicRollback();restoreFailure();guard();
  std::printf("P10.4 typed value transactions: %s (%d failures)\n",fails?"FAIL":"PASS",fails);
  return fails?1:0;
 }
