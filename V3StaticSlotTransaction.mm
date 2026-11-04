@@ -39,6 +39,42 @@ static NSError *ZNSTError(NSInteger code,NSString *msg) {
   }
   NSMutableArray<ZNV3StaticSlotOperation *> *written=[NSMutableArray array];
   for(ZNV3StaticSlotOperation *op in operations) {
+   // The first preflight does not reserve a slot. Recheck immediately before
+   // each write so an intervening owner is never silently overwritten.
+   uint64_t current=UINT64_MAX;
+   NSError *checkError=nil;
+   BOOL stillOwned=[self.backend readAt:op.address value:&current error:&checkError]&&
+                   current==op.expected;
+   if(!stillOwned){
+    NSMutableString *detail=[NSMutableString stringWithFormat:
+      @"Static slot changed between preflight and write at 0x%llX: %@",
+      (unsigned long long)op.address,
+      checkError.localizedDescription?:@"expected value mismatch"];
+    BOOL restored=YES;
+    for(ZNV3StaticSlotOperation *undo in [written reverseObjectEnumerator]){
+     NSError *undoError=nil;uint64_t before=UINT64_MAX;
+     BOOL stillApplied=[self.backend readAt:undo.address value:&before error:&undoError]&&
+                       before==undo.desired;
+     if(!stillApplied){
+      restored=NO;
+      [detail appendFormat:@" | rollback ownership lost at 0x%llX",
+        (unsigned long long)undo.address];
+      continue;
+     }
+     BOOL ok=[self.backend writeAt:undo.address value:undo.expected error:&undoError];
+     uint64_t got=UINT64_MAX;
+     BOOL verified=[self.backend readAt:undo.address value:&got error:nil]&&got==undo.expected;
+     if(!ok||!verified){
+      restored=NO;
+      [detail appendFormat:@" | rollback failed at 0x%llX: %@",
+        (unsigned long long)undo.address,undoError.localizedDescription?:@"readback mismatch"];
+     }
+    }
+    self.recoveryFailed=!restored;
+    self.lastDiagnostic=[detail copy];
+    if(error)*error=ZNSTError(restored?7:8,self.lastDiagnostic);
+    return NO;
+   }
    if(op.expected==op.desired)continue;
    NSError *writeError=nil;
    BOOL didWrite=[self.backend writeAt:op.address value:op.desired error:&writeError];

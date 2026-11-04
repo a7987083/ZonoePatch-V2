@@ -7,10 +7,15 @@ static void check(BOOL yes,const char *msg){if(!yes){fprintf(stderr,"FAIL: %s\n"
 @property(nonatomic,assign) NSUInteger writes;
 @property(nonatomic,assign) NSUInteger failNthWrite;
 @property(nonatomic,assign) BOOL failRollback;
+@property(nonatomic,assign) uintptr_t interfereAt;
+@property(nonatomic,assign) NSUInteger readCountAtInterference;
+@property(nonatomic,assign) uint64_t interferenceValue;
 @end
 @implementation FakeStaticRW
 - (instancetype)init {if((self=[super init]))_cells=[@{@(0x1000):@(0),@(0x2000):@(0),@(0x3000):@(0)} mutableCopy];return self;}
 - (BOOL)readAt:(uintptr_t)addr value:(uint64_t *)out error:(NSError **)err {
+ if(addr==self.interfereAt && ++self.readCountAtInterference==2)
+  self.cells[@(addr)]=@(self.interferenceValue);
  NSNumber *v=self.cells[@(addr)];if(!v)return NO;*out=v.unsignedLongLongValue;return YES;
 }
 - (BOOL)writeAt:(uintptr_t)addr value:(uint64_t)value error:(NSError **)err {
@@ -45,6 +50,23 @@ int main() {@autoreleasepool{
  check(lt.recoveryFailed,"rollback failure latches");
  NSUInteger before=latch.writes;
  check(![lt apply:@[a,b] error:&e]&&before==latch.writes,"recovery lock blocks writes");
+ // D06: writer B races after global preflight, before B's own write.
+ // Transaction must not overwrite B's external value, and must undo A.
+ FakeStaticRW *race=[FakeStaticRW new];race.interfereAt=0x2000;
+ race.interferenceValue=0xDEAD;
+ ZNV3StaticSlotTransaction *raceTx=[[ZNV3StaticSlotTransaction alloc]initWithBackend:race];
+ check(![raceTx apply:@[a,b] error:&e],"intervening slot writer rejected");
+ check([race.cells[@(0x1000)] unsignedLongLongValue]==0 &&
+       [race.cells[@(0x2000)] unsignedLongLongValue]==0xDEAD,
+       "owned A rollback, external B value left untouched");
+ check(!raceTx.recoveryFailed,"race with recoverable rollback does not lock");
+ // Failure while rolling back a race must fail closed.
+ FakeStaticRW *raceLatch=[FakeStaticRW new];raceLatch.interfereAt=0x2000;
+ raceLatch.interferenceValue=0xDEAD;raceLatch.failRollback=YES;
+ ZNV3StaticSlotTransaction *raceLatchTx=[[ZNV3StaticSlotTransaction alloc]
+   initWithBackend:raceLatch];
+ check(![raceLatchTx apply:@[a,b] error:&e],"intervening race with failed rollback rejected");
+ check(raceLatchTx.recoveryFailed,"race rollback failure locks execution");
  // P9.2: two feature groups: A owns two slots, B owns one.
  // Switching B must not touch A; a failed A transaction must roll back A only.
  FakeStaticRW *groups=[FakeStaticRW new];
