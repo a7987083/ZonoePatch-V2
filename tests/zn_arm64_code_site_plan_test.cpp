@@ -32,11 +32,11 @@ int main(){
  duplicate=prepared;duplicate.ruleID="other";duplicate.rva=0x2000;duplicate.fileOffset=0x3000;
  duplicate.imageUUID="other";
  check(!validateDisjoint({prepared,duplicate},{},error),"different images rejected");
- std::vector<uint8_t> branches;pack({0x14000001u,0x52800140u,0x72b579a0u,0xd65f03c0u},branches);
+ std::vector<uint8_t> branches;pack({0x14000002u,0x52800140u,0x72b579a0u,0xd65f03c0u},branches);
  std::vector<CodeRegion> inbound={{0x0ffc,branches.data(),branches.size()}};
  check(!prepare(c,inbound,prepared,error),"direct B to second instruction rejected");
  // BL also uses the same branch immediate classifier.
- pack({0x94000001u,0x52800140u,0x72b579a0u,0xd65f03c0u},branches);
+ pack({0x94000002u,0x52800140u,0x72b579a0u,0xd65f03c0u},branches);
  check(!prepare(c,inbound,prepared,error),"BL to interior rejected");
  pack({0x54000040u,0x52800140u,0x72b579a0u,0xd65f03c0u},branches);
  check(!prepare(c,inbound,prepared,error),"B.cond to interior rejected");
