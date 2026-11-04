@@ -73,7 +73,7 @@
  if(@available(iOS 13.0,*)){
   for(UIWindow *candidate in self.window.windowScene.windows)
    if(candidate.isKeyWindow){current=candidate;break;}
- }else current=UIApplication.sharedApplication.keyWindow;
+ }else current=self.sourceWindow;
  if(current!=self.window){
   self.returnKeyWindow=current?:self.sourceWindow;
   [self.window makeKeyWindow];
