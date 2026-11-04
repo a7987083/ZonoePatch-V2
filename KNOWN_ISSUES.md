@@ -67,3 +67,10 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - ZCB1 pure encoder/decoder + ownership validator have host CI coverage but **no on-disk ZCB1 embedding** yet; the synthetic test-only ZCB1 object does not authorize runtime activation. Customer cannot find an authenticated code-cell-to-P9 dispatch binding on a real image until a dedicated segment/section or otherwise verified metadata is emitted.
 - P9 internal entries marked VALUE_CELL_V1 or OFFSET_HOOK_V1 are now excluded from ordinary Customer toggles, avoiding an unsafe pseudo-feature. This isolation does not make ZNM2 code-type sliders or inputs visible or executable.
 - ZNM2 Customer UI remains unconnected. If the project returns a production export before ZCB1 embedding plus atomic activation/restore is validated, it must still refuse code-type numeric Offset and report numeric code execution unavailable. Real iOS device test remains pending.
+
+## P10.8 current blockers (2026-11-05)
+
+- CI macOS job queueing prevents claiming the new Customer integration compiled. Track head of `ZonoePatch-V3` and the newest GitHub Actions result; prior P10.7 green runs do not validate these commits.
+- ZNM2 Customer UI now routes RW numeric features but original `generateMixedMetadataForFeatures` explicitly reports `numericMetadataOnly:YES` and `numericExecutionAvailable:NO`. Do not relabel it production-ready until real generated RW mixed binaries have been exercised against new Customer.
+- No approved live ARM64 code-type numeric offsets can pass current production preflight; replacing the RW-only check without backend-generated cell placement/typed ownership would corrupt semantics. Code-type mixed Builder+Customer remains a blocker.
+- Live slider committed-update paths were added with rollback-preserving snapshot semantics; iPhone UI layout, slider behavior and race/collision cases remain unverified.
