@@ -1,11 +1,14 @@
 #import "V3FeatureModels.h"
 #import "V3ConfigRepository.h"
+#include "ZNTypedDescriptor.hpp"
 #include <math.h>
 #include <stdint.h>
 #include <float.h>
 @implementation ZNV3ValueConfig
 + (instancetype)defaults {ZNV3ValueConfig *v=[self new];v.valueType=ZNV3NumericTypeInt32;v.minimum=0;v.maximum=100;v.step=1;v.defaultValue=0;v.requiresEnableSwitch=YES;return v;}
-- (id)copyWithZone:(NSZone *)zone {ZNV3ValueConfig *v=[[[self class] allocWithZone:zone]init];v.valueType=self.valueType;v.minimum=self.minimum;v.maximum=self.maximum;v.step=self.step;v.defaultValue=self.defaultValue;v.requiresEnableSwitch=self.requiresEnableSwitch;return v;}
+- (id)copyWithZone:(NSZone *)zone {ZNV3ValueConfig *v=[[[self class] allocWithZone:zone]init];v.valueType=self.valueType;v.minimum=self.minimum;v.maximum=self.maximum;v.step=self.step;v.defaultValue=self.defaultValue;v.requiresEnableSwitch=self.requiresEnableSwitch;
+ v.minimumText=self.minimumText;v.maximumText=self.maximumText;
+ v.stepText=self.stepText;v.defaultText=self.defaultText;return v;}
 // Current UI range model is double-based. Constrain 64-bit integer ranges to
 // exact IEEE-754 integers until a decimal-string codec is wired into P10.3.
 static BOOL ZNValidScalar(double value,ZNV3NumericType type) {
@@ -26,6 +29,23 @@ static BOOL ZNValidScalar(double value,ZNV3NumericType type) {
  }
 }
 - (BOOL)isValidForFeatureType:(ZNV3FeatureType)featureType {
+ if(self.minimumText||self.maximumText||self.stepText||self.defaultText){
+  if(!self.minimumText||!self.maximumText)return NO;
+  BOOL slider=featureType==ZNV3FeatureTypeSlider;
+  if(!slider&&featureType!=ZNV3FeatureTypeNumberInput)return NO;
+  if(slider&&(!self.stepText||!self.defaultText||!self.requiresEnableSwitch))return NO;
+  auto type=static_cast<ZNValueCodec::Type>(self.valueType);
+  size_t width=ZNValueCodec::width(type);
+  if(!width)return NO;
+  ZNTypedDescriptor::Record r={slider?ZNTypedDescriptor::FeatureKind::Slider:
+                                   ZNTypedDescriptor::FeatureKind::Input,
+    type,static_cast<uint64_t>(width),slider,
+    std::string(self.minimumText.UTF8String),std::string(self.maximumText.UTF8String),
+    slider?std::string(self.stepText.UTF8String):std::string(),
+    slider?std::string(self.defaultText.UTF8String):std::string()};
+  std::vector<uint8_t> bytes;std::string error;
+  return ZNTypedDescriptor::encode({r},bytes,error);
+ }
  if(featureType!=ZNV3FeatureTypeSlider&&featureType!=ZNV3FeatureTypeNumberInput)return NO;
  if(!ZNValidScalar(self.minimum,self.valueType)||!ZNValidScalar(self.maximum,self.valueType)||
     self.minimum>=self.maximum)return NO;
