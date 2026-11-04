@@ -8,6 +8,8 @@
 #import "../ZNTypedMachOBuilder.h"
 #include "../ZNTypedDescriptor.hpp"
 #include "../ZNMixedDescriptor.hpp"
+#include "../ZNArm64CodeSitePlan.hpp"
+#include "../ZNArm64ValueCellPostprocess.hpp"
 #import "../ZNStaticPatchFormat.h"
 #import "../V3StaticRuleIdentity.h"
 #include <stdint.h>
@@ -224,6 +226,97 @@ int main() {
    NSDictionary *signature=nil;
    check(ZNAdhocResignMachOAtPath(p9out,&signature,&err),"P9 Mach-O signing");
    check([signature[@"verified"] boolValue],"P9 signed CodeDirectory verifies");
+  }
+  // P10.7.4: staging-only code-type numeric Value Cell inserted into a
+  // real synthetic P9 Mach-O. Does NOT expose a production menu/export API.
+  NSString *codeInput=[root stringByAppendingPathComponent:@"source-code-numeric"];
+  NSMutableData *codeFixture=[fixture(uuid) mutableCopy];
+  const uint32_t fmovOne=0x1e2e1000u;
+  memcpy((uint8_t*)codeFixture.mutableBytes+0x1100,&fmovOne,4);
+  check([codeFixture writeToFile:codeInput atomically:YES],"numeric code fixture written");
+  ZNArm64CodeSitePlan::Candidate candidate{};
+  candidate.featureID="code-slider";candidate.ruleID="code-slider-rule";
+  candidate.imageUUID=std::string(uuid.UUIDString.UTF8String);
+  candidate.sourcePath=std::string(codeInput.UTF8String);
+  candidate.rva=0x1100;candidate.fileOffset=0x1100;
+  candidate.type=ZNArm64NumericInstruction::ValueType::Float32;
+  const uint32_t inspected[]={0x1e2e1000u,0xd503201fu,0xd503201fu,0xd503201fu};
+  candidate.words=inspected;candidate.availableWords=4;
+  std::vector<ZNArm64CodeSitePlan::CodeRegion> allCode={{
+    0x1000,(const uint8_t*)codeFixture.bytes+0x1000,0x1000
+  }};
+  ZNArm64CodeSitePlan::Prepared codePrepared{};
+  std::string planReason;
+  BOOL codePreparedOK=ZNArm64CodeSitePlan::prepare(candidate,allCode,codePrepared,planReason);
+  if(!codePreparedOK)fprintf(stderr,"numeric plan: %s\n",planReason.c_str());
+  check(codePreparedOK,"numeric code original verified and staging NOP plan prepared");
+  if(codePreparedOK) {
+   NSString *codeDir=[root stringByAppendingPathComponent:@"code-cell"];
+   [fm createDirectoryAtPath:codeDir withIntermediateDirectories:YES attributes:nil error:nil];
+   ZNV3StaticBuildEntry *codeToggle=[[ZNV3StaticBuildEntry alloc]
+      initWithRuleID:@"code-toggle" featureKey:@"toggle-feature" featureName:@"Toggle"
+      uuid:uuid.UUIDString path:codeInput rva:0x1000 fileOffset:0x1000
+      original:[NSData dataWithBytes:&NOP length:4]
+      patch:[NSData dataWithBytes:&patched length:4]];
+   NSData *codeOriginal=[NSData dataWithBytes:codePrepared.originalBytes.data()
+                                      length:codePrepared.originalBytes.size()];
+   NSData *codeStaging=[NSData dataWithBytes:codePrepared.stagingNopBytes.data()
+                                     length:codePrepared.stagingNopBytes.size()];
+   ZNV3StaticBuildEntry *codeEntry=[[ZNV3StaticBuildEntry alloc]
+      initWithRuleID:@"code-slider-rule" featureKey:@"code-slider" featureName:@"Code Float32"
+      uuid:uuid.UUIDString path:codeInput rva:0x1100 fileOffset:0x1100
+      original:codeOriginal patch:codeStaging];
+   ZNV3StaticBuildPlan *codePlan=[[ZNV3StaticBuildPlan alloc]
+      initWithModule:@"UnityFramework" name:@"P10.7.4 synthetic mixed"
+      featureCount:2 entries:@[codeToggle,codeEntry]];
+   check([ZNV3StaticBuildPlan validateEntries:codePlan.entries error:nil],
+         "numeric synthetic P9 plan disjoint");
+   NSString *codeOutput=nil,*codeBuildError=nil;
+   BOOL codeBuilt=[ZNV3StaticBinaryBuilder buildPlan:codePlan inDirectory:codeDir
+      outputPath:&codeOutput metadata:nil error:&codeBuildError];
+   if(!codeBuilt)fprintf(stderr,"P10.7.4 P9 build: %s\n",codeBuildError.UTF8String?: "none");
+   check(codeBuilt,"synthetic toggle+FMOV staging Mach-O built");
+   if(codeBuilt) {
+    ZNArm64ValueCellPostprocess::Installed installed{};
+    std::string stageError;
+    bool inserted=ZNArm64ValueCellPostprocess::install(
+       std::string(codeOutput.UTF8String),codePrepared,1,0,1,installed,stageError);
+    if(!inserted)fprintf(stderr,"P10.7.4 install: %s\n",stageError.c_str());
+    check(inserted,"generated P9 ON fragment converted to LDR and RW Value Cell");
+    if(inserted) {
+     NSData *post=[NSData dataWithContentsOfFile:codeOutput];
+     const uint8_t *raw=(const uint8_t*)post.bytes;
+     struct mach_header_64 mh={};memcpy(&mh,raw,sizeof(mh));
+     size_t p=sizeof(mh);bool sawCell=false,sawLDR=false;
+     for(uint32_t j=0;j<mh.ncmds;j++){
+      struct load_command lc={};memcpy(&lc,raw+p,sizeof(lc));
+      if(lc.cmd==LC_SEGMENT_64){
+       struct segment_command_64 sg={};memcpy(&sg,raw+p,sizeof(sg));
+       const uint64_t start=sg.vmaddr-0x100000000ULL;
+       if(!strncmp(sg.segname,"__ZNTEXT",16)&&installed.onInstructionRVA>=start&&
+          installed.onInstructionRVA-start+4<=sg.filesize) {
+        uint32_t insn=0;memcpy(&insn,raw+sg.fileoff+installed.onInstructionRVA-start,4);
+        sawLDR=insn==installed.ldrInstruction&&((insn&0xff00001fu)==0x1c000000u);
+       }
+       if(!strncmp(sg.segname,"__ZNDATA",16)&&installed.cellRVA>=start&&
+          installed.cellRVA-start+4<=sg.filesize) {
+        uint32_t value=0;memcpy(&value,raw+sg.fileoff+installed.cellRVA-start,4);
+        sawCell=value==0x3f800000u;
+       }
+      }
+      p+=lc.cmdsize;
+     }
+     check(sawLDR&&sawCell,"LDR S0 and original 1.0f cell bytes read back");
+     check(!ZNArm64ValueCellPostprocess::install(
+       std::string(codeOutput.UTF8String),codePrepared,1,0,1,installed,stageError),
+       "repeated Value Cell install is rejected");
+     NSDictionary *codeSigned=nil;NSString *codeSignError=nil;
+     check(ZNAdhocResignMachOAtPath(codeOutput,&codeSigned,&codeSignError),
+       "staging Value Cell Mach-O can be re-signed");
+     check([codeSigned[@"verified"] boolValue],
+       "signed staging Value Cell CodeDirectory verified");
+    }
+   }
   }
   // P10.6.2: P9 code/table survives explicit insertion of typed metadata.
   // This is a mixed-image layout test, not mixed Customer runtime execution.
