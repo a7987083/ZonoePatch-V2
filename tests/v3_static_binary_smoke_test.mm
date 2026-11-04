@@ -255,6 +255,35 @@ int main() {
     check([[ZNTypedMachOBuilder extractDescriptor:mixedPath error:&embedError]
            isEqualToData:expected],"P10.6 mixed descriptor survives signing");
     check(p9Grouping(mixedPath),"P10.6 P9 table survives signing");
+    check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:src
+               output:[p9dir stringByAppendingPathComponent:@"no-static"]
+               error:&embedError],"P10.6 explicit mixed API rejects unprepared input");
+    NSMutableData *damaged=[[NSData dataWithContentsOfFile:p9out] mutableCopy];
+    if(damaged.length>=sizeof(struct mach_header_64)) {
+     uint8_t *raw=(uint8_t *)damaged.mutableBytes;
+     struct mach_header_64 mh={};memcpy(&mh,raw,sizeof(mh));
+     size_t off=sizeof(mh);BOOL corrupted=NO;
+     for(uint32_t ci=0;ci<mh.ncmds;++ci) {
+      if(off>damaged.length||damaged.length-off<sizeof(struct load_command))break;
+      struct load_command lc={};memcpy(&lc,raw+off,sizeof(lc));
+      if(lc.cmdsize<sizeof(lc)||lc.cmdsize>damaged.length-off)break;
+      if(lc.cmd==LC_SEGMENT_64&&lc.cmdsize>=sizeof(struct segment_command_64)) {
+       struct segment_command_64 seg={};memcpy(&seg,raw+off,sizeof(seg));
+       if(!strncmp(seg.segname,"__ZNDATA",16)&&seg.fileoff<=damaged.length-8) {
+        raw[seg.fileoff]^=0xff;corrupted=YES;break;
+       }
+      }
+      off+=lc.cmdsize;
+     }
+     check(corrupted,"P10.6 malformed fixture prepared");
+     if(corrupted) {
+      NSString *damagedPath=[p9dir stringByAppendingPathComponent:@"corrupt-static"];
+      check([damaged writeToFile:damagedPath atomically:YES],"P10.6 corrupted fixture written");
+      check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:damagedPath
+                    output:[p9dir stringByAppendingPathComponent:@"corrupt-mixed"]
+                    error:&embedError],"P10.6 rejects invalid P9 header before embed");
+     }
+    }
     check(![ZNTypedMachOBuilder embedDescriptor:expected source:p9out
                output:[p9dir stringByAppendingPathComponent:@"unsafe-stacking"]
                error:&embedError],"P10.6 old typed API still rejects P9 static image");
