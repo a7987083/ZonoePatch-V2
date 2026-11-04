@@ -31,6 +31,13 @@ jobs:
           xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
             ZNValueCodec.cpp tests/zn_value_codec_test.cpp -o "$RUNNER_TEMP/zn_value_codec_test"
           "$RUNNER_TEMP/zn_value_codec_test"
+      - name: Test Typed Descriptor Contract
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp tests/zn_typed_descriptor_test.cpp \
+            -o "$RUNNER_TEMP/zn_typed_descriptor_test"
+          "$RUNNER_TEMP/zn_typed_descriptor_test"
       - name: Test Address and Configuration
         run: |
           set -euo pipefail
