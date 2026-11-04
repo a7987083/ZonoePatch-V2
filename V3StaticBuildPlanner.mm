@@ -61,10 +61,10 @@ static NSString *ZNP6DiskUUID(int fd) {
  }
  // P10.3 preflight still consumes the legacy double range model. Int64/UInt64
  // full precision requires a later exact-string UI/JSON migration.
- NSString *min=[NSString stringWithFormat:@"%.17g",config.minimum];
- NSString *max=[NSString stringWithFormat:@"%.17g",config.maximum];
- NSString *step=[NSString stringWithFormat:@"%.17g",config.step];
- NSString *def=[NSString stringWithFormat:@"%.17g",config.defaultValue];
+ NSString *min=config.minimumText?:[NSString stringWithFormat:@"%.17g",config.minimum];
+ NSString *max=config.maximumText?:[NSString stringWithFormat:@"%.17g",config.maximum];
+ NSString *step=config.stepText?:[NSString stringWithFormat:@"%.17g",config.step];
+ NSString *def=config.defaultText?:[NSString stringWithFormat:@"%.17g",config.defaultValue];
  std::vector<ZNTypedDescriptor::Record> records;
  NSString *sourceUUID=nil,*sourcePath=nil;
  for(ZNV3PatchRule *rule in feature.rules){
