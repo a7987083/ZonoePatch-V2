@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -Wall -Wextra \
-            -framework Foundation -framework CommonCrypto \
+            -framework Foundation \
             ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedMachOBuilder.mm \
             ZNAdhocMachOSigner.mm tests/zn_typed_macho_embed_test.mm \
             -o "$RUNNER_TEMP/zn_typed_macho_embed"
