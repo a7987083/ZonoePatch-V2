@@ -26,3 +26,12 @@ Baseline before P5 debt remediation: `80569bf948c86cfca45d99cc7036420097a0038c`.
 Future validation must distinguish submitted, compiled, device-tested and game-behavior-tested states.
 
 - **Recovery failure:** Executor latches `RecoveryFailed` if rollback fails or RX page permissions cannot be restored, even if bytes match. UI displays a locked button. This is fail-closed containment, not guaranteed repair of a damaged memory protection state.
+
+## P10.6.2 — Mixed image status (2026-11-04)
+
+- **SOURCE/CI VERIFIED, DEVICE PENDING:** The opt-in `V3StaticBinaryExport.generateMixedMetadataForFeatures` builds existing P9 toggles first, appends a versioned `ZNM2` feature-identity envelope in `__ZNTYPE`, re-signs once and reads back P9 static table plus ZNM2 bytes.
+- **NOT CUSTOMER-EXECUTABLE:** Numeric ZNM2 features are metadata-only. The existing Customer ZNT1 reader rejects ZNM2. There is no mixed export UI action; do not market the output as multi-slider enabled.
+- **ABI BOUNDARY:** Legacy P9 128-byte Static Entry ABI and standalone ZNT1 remain untouched. `ZNM2` is independent version 2 with IDs, names, typed-record ownership ranges and an embedded ZNT1 payload.
+- **CONFLICT MODEL:** P10.6.1 validates combined RVA and file-offset spans. Runtime ownership/Original snapshots, partial-write recovery and process restart semantics are deferred to P10.6.3. Do not remove existing multi-transaction rejection until a global ownership manager is tested.
+- **DEVICE PENDING:** Actual app/UnityFramework Mach-O build input, final IPA re-sign and installation, startup, P9 toggle ON/OFF alongside ZNM2 data, numeric Customer UI and fault recovery all require device evidence.
+- **CI REFERENCE:** Run `41765604484` on source commit `7d522d0df2d502b450af1ce6f6833acfadc856a7` succeeded. Subsequent documentation commits require their own CI status confirmation.
