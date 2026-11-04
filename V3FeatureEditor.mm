@@ -162,31 +162,50 @@
  return YES;
 }
 - (void)refreshStaticBuildButton {
- BOOL ready=self.selectedFeatureID.length>0 && !self.staticBuildRunning;
  ZNV3Feature *selected=nil;
  for(ZNV3Feature *feature in self.store.features)
-  if([feature.identifier isEqualToString:self.selectedFeatureID]){selected=feature;break;}
+  if([feature.identifier isEqualToString:self.selectedFeatureID]){
+   selected=feature;break;
+  }
  BOOL numeric=selected&&(selected.buttonType==ZNV3FeatureTypeNumberInput||
                            selected.buttonType==ZNV3FeatureTypeSlider);
- ready=ready&&selected&&(selected.buttonType==ZNV3FeatureTypeToggle||numeric);
- if(ready&&numeric&&self.selectedFeatureIDs.count>1)ready=NO;
- if(ready && self.store.draft){
+ NSString *reason=nil;
+ if(self.staticBuildRunning)reason=@"正在生成二进制";
+ else if(!selected)reason=@"请先保存功能，然后在当前功能中选中它";
+ else if(selected.buttonType!=ZNV3FeatureTypeToggle&&!numeric)
+  reason=@"此功能类型尚不支持静态二进制生成";
+ else if(numeric&&self.selectedFeatureIDs.count>1)
+  reason=@"数值功能一次只能选择一个，其他功能请取消选择";
+ else if(self.store.draft){
   NSUInteger idx=self.store.editingIndex;
-  ready=idx!=NSNotFound && idx<self.store.features.count &&
-    [self.store.features[idx].identifier isEqualToString:self.selectedFeatureID] &&
-    [self draftMatchesSavedPatch:selected] &&
-    [self.nameField.text isEqualToString:selected.name] &&
-    [self.descField.text isEqualToString:selected.detail] &&
-    self.typeIndex==selected.buttonType;
+  BOOL matches=idx!=NSNotFound&&idx<self.store.features.count&&
+     [self.store.features[idx].identifier isEqualToString:self.selectedFeatureID]&&
+     [self draftMatchesSavedPatch:selected]&&
+     [self.nameField.text isEqualToString:selected.name]&&
+     [self.descField.text isEqualToString:selected.detail]&&
+     self.typeIndex==selected.buttonType;
+  if(!matches)reason=@"正在编辑或有未保存修改，请保存或取消后再生成";
  }
- if(ready && [ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled)ready=NO;
- if(ready && [ZNV3StaticDispatchRuntime shared].hasActiveFeature)ready=NO;
- if(ready && [ZNV3StaticDispatchRuntime shared].recoveryFailed)ready=NO;
+ if(!reason&&[ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled)
+  reason=@"请先恢复当前 Runtime Patch";
+ if(!reason&&[ZNV3StaticDispatchRuntime shared].hasActiveFeature)
+  reason=@"请先关闭当前启用的静态 Patch";
+ if(!reason&&[ZNV3StaticDispatchRuntime shared].recoveryFailed)
+  reason=@"静态 Patch 恢复失败，构建已锁定";
+ BOOL ready=!reason;
  self.staticBuildButton.enabled=ready;
  self.staticBuildButton.alpha=ready?1.0:0.48;
- [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":(numeric?@"生成数值元数据二进制":@"生成预埋二进制（初始 OFF）")
-   forState:UIControlStateNormal];
+ [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":
+       (numeric?@"生成数值元数据二进制":@"生成预埋二进制（初始 OFF）")
+                   forState:UIControlStateNormal];
+ self.staticBuildStatusLabel.text=reason?:(
+    numeric?@"仅支持已加载 Mach-O 的 RW 文件映射数据 Offset；代码 Offset 无法直接生成":
+             @"已选择功能，可开始生成预埋二进制");
+ self.staticBuildStatusLabel.textColor=ready?
+    [UIColor colorWithRed:.18 green:.43 blue:.30 alpha:1]:
+    [UIColor colorWithRed:.68 green:.32 blue:.20 alpha:1];
 }
+
 - (void)staticBuildInputChanged:(UITextField *)sender {
  (void)sender;
  [self refreshStaticBuildButton];
