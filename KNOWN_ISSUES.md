@@ -61,3 +61,9 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - Added generated-Mach-O staging helper and synthetic Float32 slider + Int32 input + P9 toggle smoke. It verifies byte-identical OFF variants, LDR ON variants, distinct writable cells, ZNM2 names/IDs/RVAs and signature readback. The helper is NOT invoked by production Developer or Customer UI; only synthetic test coverage is claimed.
 - Must establish a persistent, versioned ownership link between each code-cell ZNM2 numeric feature and its P9 selectedTarget dispatch slot; otherwise modifying a cell while the code dispatch is OFF has no observable effect. Avoid displaying internal synthetic code entries as ordinary P9 toggles.
 - Production must reserve Value Cell capacity before owned segment construction, validate all indirect control flow and nontrivial MOVK chains, and restore code dispatch to Original OFF when disabling numeric controls. Until implemented and device-verified, R-X slider/input generation remains unsupported.
+
+## P10.7.5 protocol and Customer isolation (2026-11-04)
+
+- ZCB1 pure encoder/decoder + ownership validator have host CI coverage but **no on-disk ZCB1 embedding** yet; the synthetic test-only ZCB1 object does not authorize runtime activation. Customer cannot find an authenticated code-cell-to-P9 dispatch binding on a real image until a dedicated segment/section or otherwise verified metadata is emitted.
+- P9 internal entries marked VALUE_CELL_V1 or OFFSET_HOOK_V1 are now excluded from ordinary Customer toggles, avoiding an unsafe pseudo-feature. This isolation does not make ZNM2 code-type sliders or inputs visible or executable.
+- ZNM2 Customer UI remains unconnected. If the project returns a production export before ZCB1 embedding plus atomic activation/restore is validated, it must still refuse code-type numeric Offset and report numeric code execution unavailable. Real iOS device test remains pending.
