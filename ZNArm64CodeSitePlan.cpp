@@ -95,13 +95,14 @@ bool validateDisjoint(const std::vector<Prepared> &sites,
      s.rva>UINT64_MAX-s.originalBytes.size()||
      s.fileOffset>UINT64_MAX-s.originalBytes.size())
    return fail("invalid code site structure or duplicate rule ID");
-  for(const auto &other:reserved)
+  for(const auto &other:reserved){
    if(!other.width||other.rva>UINT64_MAX-other.width||
       other.fileOffset>UINT64_MAX-other.width)
     return fail("invalid reserved P9 span");
    if(intersects(s.rva,s.originalBytes.size(),other.rva,other.width)||
       intersects(s.fileOffset,s.originalBytes.size(),other.fileOffset,other.width))
     return fail("numeric code window overlaps an existing P9 patch");
+  }
   for(size_t j=0;j<i;j++){
    const auto &prev=sites[j];
    if(s.imageUUID!=prev.imageUUID||s.sourcePath!=prev.sourcePath)
