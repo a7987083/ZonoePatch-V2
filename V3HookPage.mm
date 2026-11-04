@@ -149,19 +149,8 @@
  if(index>=self.store.features.count)return;
  ZNV3Feature *picked=self.store.features[index];
  NSString *identifier=picked.identifier;
- BOOL numeric=picked.buttonType==ZNV3FeatureTypeNumberInput||
-              picked.buttonType==ZNV3FeatureTypeSlider;
- // Numeric metadata currently exports exactly one feature per Mach-O.
- // Never inherit a previous toggle multi-selection into numeric generation.
- BOOL hadNumeric=NO;
- for(ZNV3Feature *feature in self.store.features)
-  if([self.selectedFeatureIDs containsObject:feature.identifier] &&
-     (feature.buttonType==ZNV3FeatureTypeNumberInput||
-      feature.buttonType==ZNV3FeatureTypeSlider)){hadNumeric=YES;break;}
- if(numeric||hadNumeric){
-  [self.selectedFeatureIDs removeAllObjects];
-  [self.selectedFeatureIDs addObject:identifier];
- }else if([self.selectedFeatureIDs containsObject:identifier]){
+ // P10.6.4: allow explicit Toggle/Input/Slider multi-selection; exporter preflights ownership.
+ if([self.selectedFeatureIDs containsObject:identifier]){
   [self.selectedFeatureIDs removeObject:identifier];
  }else{
   [self.selectedFeatureIDs addObject:identifier];
