@@ -25,6 +25,12 @@ jobs:
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3PatchCodec.mm tests/v3_patch_codec_test.mm -o "$RUNNER_TEMP/v3_codec_test"
           "$RUNNER_TEMP/v3_codec_test"
+      - name: Test Typed Value Codec
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNValueCodec.cpp tests/zn_value_codec_test.cpp -o "$RUNNER_TEMP/zn_value_codec_test"
+          "$RUNNER_TEMP/zn_value_codec_test"
       - name: Test Address and Configuration
         run: |
           set -euo pipefail
