@@ -163,28 +163,42 @@
 }
 - (void)refreshStaticBuildButton {
  ZNV3Feature *selected=nil;
- for(ZNV3Feature *feature in self.store.features)
-  if([feature.identifier isEqualToString:self.selectedFeatureID]){
-   selected=feature;break;
-  }
- BOOL numeric=selected&&(selected.buttonType==ZNV3FeatureTypeNumberInput||
-                           selected.buttonType==ZNV3FeatureTypeSlider);
+ NSMutableArray<ZNV3Feature *> *features=[NSMutableArray array];
+ for(ZNV3Feature *f in self.store.features){
+  if([f.identifier isEqualToString:self.selectedFeatureID])selected=f;
+  if([self.selectedFeatureIDs containsObject:f.identifier])[features addObject:f];
+ }
+ if(!features.count&&selected)[features addObject:selected];
+ NSUInteger toggles=0,numerics=0;
+ NSString *module=nil,*selectionError=nil;
+ for(ZNV3Feature *f in features){
+  if(f.buttonType==ZNV3FeatureTypeToggle)toggles++;
+  else if(f.buttonType==ZNV3FeatureTypeNumberInput||f.buttonType==ZNV3FeatureTypeSlider)numerics++;
+  else selectionError=@"点击按钮类型尚不支持静态构建";
+  if(module&&![module isEqualToString:f.module])
+   selectionError=@"所选功能必须属于同一个 Mach-O";
+  module=f.module;
+ }
+ BOOL mixed=toggles>0&&numerics>0;
+ BOOL singleNumeric=numerics==1&&toggles==0&&features.count==1;
  NSString *reason=nil;
  if(self.staticBuildRunning)reason=@"正在生成二进制";
- else if(!selected)reason=@"请先保存功能，然后在当前功能中选中它";
- else if(selected.buttonType!=ZNV3FeatureTypeToggle&&!numeric)
-  reason=@"此功能类型尚不支持静态二进制生成";
- else if(numeric&&self.selectedFeatureIDs.count>1)
-  reason=@"数值功能一次只能选择一个，其他功能请取消选择";
+ else if(!features.count)reason=@"请先保存并选择功能";
+ else if(selectionError)reason=selectionError;
+ else if(numerics&&!toggles&&!singleNumeric)
+  reason=@"多个纯数值功能暂不能直接生成；请同时选择一个普通开关";
  else if(self.store.draft){
-  NSUInteger idx=self.store.editingIndex;
-  BOOL matches=idx!=NSNotFound&&idx<self.store.features.count&&
-     [self.store.features[idx].identifier isEqualToString:self.selectedFeatureID]&&
-     [self draftMatchesSavedPatch:selected]&&
-     [self.nameField.text isEqualToString:selected.name]&&
-     [self.descField.text isEqualToString:selected.detail]&&
-     self.typeIndex==selected.buttonType;
-  if(!matches)reason=@"正在编辑或有未保存修改，请保存或取消后再生成";
+  if(features.count>1)reason=@"请先保存或取消编辑，再构建混合二进制";
+  else{
+   ZNV3Feature *current=features.firstObject;
+   NSUInteger idx=self.store.editingIndex;
+   BOOL matches=idx!=NSNotFound&&idx<self.store.features.count&&
+     [self.store.features[idx].identifier isEqualToString:current.identifier]&&
+     [self draftMatchesSavedPatch:current]&&
+     [self.nameField.text isEqualToString:current.name]&&
+     [self.descField.text isEqualToString:current.detail]&&self.typeIndex==current.buttonType;
+   if(!matches)reason=@"正在编辑或有未保存修改，请保存或取消后再生成";
+  }
  }
  if(!reason&&[ZNV3PatchSession shared].status!=ZNV3PatchTransactionStatusDisabled)
   reason=@"请先恢复当前 Runtime Patch";
@@ -195,12 +209,15 @@
  BOOL ready=!reason;
  self.staticBuildButton.enabled=ready;
  self.staticBuildButton.alpha=ready?1.0:0.48;
- [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":
-       (numeric?@"生成数值元数据二进制":@"生成预埋二进制（初始 OFF）")
+ NSString *title=mixed?@"生成混合二进制（数值元数据）":
+   (singleNumeric?@"生成数值元数据二进制":@"生成预埋二进制（初始 OFF）");
+ [self.staticBuildButton setTitle:self.staticBuildRunning?@"正在生成二进制…":title
                    forState:UIControlStateNormal];
- self.staticBuildStatusLabel.text=reason?:(
-    numeric?@"仅支持已加载 Mach-O 的 RW 文件映射数据 Offset；代码 Offset 无法直接生成":
-             @"已选择功能，可开始生成预埋二进制");
+ self.staticBuildStatusLabel.text=reason?:(mixed?
+   [NSString stringWithFormat:@"已选 %lu 个开关、%lu 个数值功能；数值需 Customer UI 才可操作",
+     (unsigned long)toggles,(unsigned long)numerics]:
+   (singleNumeric?@"仅支持已加载 Mach-O 的 RW 文件映射数据 Offset；代码 Offset 无法直接生成":
+                  @"已选择功能，可开始生成预埋二进制"));
  self.staticBuildStatusLabel.textColor=ready?
     [UIColor colorWithRed:.18 green:.43 blue:.30 alpha:1]:
     [UIColor colorWithRed:.68 green:.32 blue:.20 alpha:1];
@@ -232,10 +249,41 @@
   if([self.selectedFeatureIDs containsObject:feature.identifier])[selectedFeatures addObject:feature];
  }
  if(!selectedFeatures.count)[selectedFeatures addObject:selected];
+ NSUInteger toggles=0,numerics=0;
+ for(ZNV3Feature *feature in selectedFeatures){
+  if(feature.buttonType==ZNV3FeatureTypeToggle)toggles++;
+  else if(feature.buttonType==ZNV3FeatureTypeNumberInput||
+          feature.buttonType==ZNV3FeatureTypeSlider)numerics++;
+  else {
+   [self showPatchMessage:@"功能类型不支持" detail:@"点击按钮尚未接入静态二进制生成。"];
+   return;
+  }
+ }
+ if(toggles&&numerics){
+  NSArray<ZNV3Feature *> *selection=[selectedFeatures copy];
+  self.staticBuildRunning=YES;
+  [self renderFeatures];
+  __weak ZNV3MenuController *weakSelf=self;
+  dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{
+   NSError *buildError=nil;
+   NSString *output=[ZNV3StaticBinaryExport generateMixedMetadataForFeatures:selection error:&buildError];
+   NSString *detail=output?[NSString stringWithFormat:
+      @"开关：%lu 个\n数值功能：%lu 个\n文件：%@\n\n已生成并重签 P9+ZNM2 混合 Mach-O。普通开关初始 OFF；数值目前只包含元数据，Customer UI 接入后才能控制。替换 IPA 后仍需整包重签。",
+      (unsigned long)toggles,(unsigned long)numerics,output]:
+      (buildError.localizedDescription?:@"混合二进制生成失败");
+   dispatch_async(dispatch_get_main_queue(),^{
+    ZNV3MenuController *strongSelf=weakSelf;if(!strongSelf)return;
+    strongSelf.staticBuildRunning=NO;
+    [strongSelf renderFeatures];
+    [strongSelf showPatchMessage:output?@"混合 Mach-O 已生成":@"混合构建失败" detail:detail];
+   });
+  });
+  return;
+ }
  if(selected.buttonType==ZNV3FeatureTypeNumberInput||selected.buttonType==ZNV3FeatureTypeSlider){
   if(selectedFeatures.count!=1){
-   [self showPatchMessage:@"数值功能只支持单独生成"
-         detail:@"当前数值描述符协议每个 Mach-O 仅支持一个输入框或滑条功能。"];
+   [self showPatchMessage:@"纯数值多选不可生成"
+       detail:@"纯数值路径仍为单功能 ZNT1；混合 ZNM2 请同时选择普通开关。"];
    return;
   }
   NSData *descriptor=[ZNV3StaticBuildPlanner typedDescriptorForFeature:selected error:&error];
