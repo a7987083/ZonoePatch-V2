@@ -25,8 +25,12 @@ int main(){
        prepared.instruction.wordCount==2&&prepared.originalBytes[0]==0x40&&
        prepared.stagingNopBytes[0]==0x1f,"correct original/staging bytes");
  check(validateDisjoint({prepared},{},error),"disjoint code site");
- check(!validateDisjoint({prepared},{{0x1004,4}},error),"P9 overlap rejected");
- check(validateDisjoint({prepared},{{0x1008,4}},error),"adjacent P9 allowed");
+ check(!validateDisjoint({prepared},{{0x1004,0x2004,4}},error),"P9 overlap rejected");
+ check(validateDisjoint({prepared},{{0x1008,0x2008,4}},error),"adjacent P9 allowed");
+ check(!validateDisjoint({prepared},{{0x3000,0x2004,4}},error),
+       "file-only overlap rejected");
+ check(!validateDisjoint({prepared},{{UINT64_MAX,0x2000,4}},error),
+       "reserved span overflow rejected");
  auto duplicate=prepared;duplicate.ruleID="other";duplicate.rva=0x1004;duplicate.fileOffset+=4;
  check(!validateDisjoint({prepared,duplicate},{},error),"interior code overlap rejected");
  duplicate=prepared;duplicate.ruleID="other";duplicate.rva=0x2000;duplicate.fileOffset=0x3000;

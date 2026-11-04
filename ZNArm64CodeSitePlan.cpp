@@ -1,5 +1,6 @@
 #include "ZNArm64CodeSitePlan.hpp"
 #include <limits>
+#include <utility>
 #include <unordered_set>
 namespace ZNArm64CodeSitePlan {
 namespace {
@@ -80,7 +81,7 @@ bool prepare(const Candidate &site,const std::vector<CodeRegion> &regions,
  out=std::move(staged);error.clear();return true;
 }
 bool validateDisjoint(const std::vector<Prepared> &sites,
-                      const std::vector<std::pair<uint64_t,uint64_t>> &reserved,
+                      const std::vector<ReservedSpan> &reserved,
                       std::string &error){
  auto fail=[&](const char *msg){error=msg;return false;};
  if(sites.empty()||sites.size()>128)return fail("code site count outside 1..128");
@@ -95,7 +96,11 @@ bool validateDisjoint(const std::vector<Prepared> &sites,
      s.fileOffset>UINT64_MAX-s.originalBytes.size())
    return fail("invalid code site structure or duplicate rule ID");
   for(const auto &other:reserved)
-   if(intersects(s.rva,s.originalBytes.size(),other.first,other.second))
+   if(!other.width||other.rva>UINT64_MAX-other.width||
+      other.fileOffset>UINT64_MAX-other.width)
+    return fail("invalid reserved P9 span");
+   if(intersects(s.rva,s.originalBytes.size(),other.rva,other.width)||
+      intersects(s.fileOffset,s.originalBytes.size(),other.fileOffset,other.width))
     return fail("numeric code window overlaps an existing P9 patch");
   for(size_t j=0;j<i;j++){
    const auto &prev=sites[j];

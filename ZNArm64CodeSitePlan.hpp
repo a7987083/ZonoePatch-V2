@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 namespace ZNArm64CodeSitePlan {
 // All instruction sections from the identical disk Mach-O must be provided.
@@ -29,7 +30,8 @@ struct Prepared {
 // P9 relocation; they MUST NOT be exported as an executable numeric patch.
 bool prepare(const Candidate &candidate,const std::vector<CodeRegion> &allCodeRegions,
              Prepared &out,std::string &error);
+struct ReservedSpan {uint64_t rva=0,fileOffset=0,width=0;};
 bool validateDisjoint(const std::vector<Prepared> &codeSites,
-                      const std::vector<std::pair<uint64_t,uint64_t>> &otherRvaSpans,
+                      const std::vector<ReservedSpan> &otherSites,
                       std::string &error);
 }
