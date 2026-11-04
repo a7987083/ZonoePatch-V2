@@ -45,6 +45,13 @@ jobs:
             ZNValueCodec.cpp ZNTypedDescriptor.cpp tests/zn_typed_descriptor_test.cpp \
             -o "$RUNNER_TEMP/zn_typed_descriptor_test"
           "$RUNNER_TEMP/zn_typed_descriptor_test"
+      - name: Test P10.6.2 ZNM2 Feature Identity
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNMixedDescriptor.cpp \
+            tests/zn_mixed_descriptor_test.cpp -o "$RUNNER_TEMP/zn_mixed_descriptor"
+          "$RUNNER_TEMP/zn_mixed_descriptor"
       - name: Test Typed Value Transactions
         run: |
           set -euo pipefail
@@ -57,7 +64,7 @@ jobs:
           set -euo pipefail
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -Wall -Wextra \
             -framework Foundation \
-            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedMachOBuilder.mm \
+            ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNMixedDescriptor.cpp ZNTypedMachOBuilder.mm \
             ZNAdhocMachOSigner.mm tests/zn_typed_macho_embed_test.mm \
             -o "$RUNNER_TEMP/zn_typed_macho_embed"
           "$RUNNER_TEMP/zn_typed_macho_embed"
@@ -96,7 +103,7 @@ jobs:
           set -euo pipefail
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3StaticBuildPlan.mm V3StaticBinaryBuilder.mm ZNAdhocMachOSigner.mm \
-            ZNTypedMachOBuilder.mm ZNTypedDescriptor.cpp ZNValueCodec.cpp \
+            ZNTypedMachOBuilder.mm ZNTypedDescriptor.cpp ZNMixedDescriptor.cpp ZNValueCodec.cpp \
             tests/v3_static_binary_smoke_test.mm -o "$RUNNER_TEMP/v3_static_binary_smoke"
           "$RUNNER_TEMP/v3_static_binary_smoke"
       - name: Test P6 Static Slot Transactions

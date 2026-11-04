@@ -14,6 +14,11 @@ NS_ASSUME_NONNULL_BEGIN
                                    source:(NSString *)source
                                    output:(NSString *)output
                                     error:(NSError * _Nullable * _Nullable)error;
+/// ZNM2 mixed format: preserves per-feature IDs/names, never reuses ZNT1 Customer execution.
++ (BOOL)embedMixedDescriptorIntoPreparedStatic:(NSData *)descriptor
+                                        source:(NSString *)source
+                                        output:(NSString *)output
+                                         error:(NSError * _Nullable * _Nullable)error;
 + (nullable NSData *)extractDescriptor:(NSString *)path
                                 error:(NSError * _Nullable * _Nullable)error;
 @end

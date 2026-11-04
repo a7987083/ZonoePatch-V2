@@ -1,5 +1,6 @@
 #import "ZNTypedMachOBuilder.h"
 #include "ZNTypedDescriptor.hpp"
+#include "ZNMixedDescriptor.hpp"
 #include "ZNMachOFile.h"
 #include "ZNStaticPatchFormat.h"
 #import <mach-o/loader.h>
@@ -27,6 +28,11 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  if(a>UINT64_MAX-b)return NO;*r=a+b;return YES;
 }
 @implementation ZNTypedMachOBuilder
++ (BOOL)isValidMixedDescriptor:(NSData *)descriptor {
+ ZNMixedDescriptor::Package p;std::string diagnostic;
+ return ZNMixedDescriptor::decode((const uint8_t *)descriptor.bytes,descriptor.length,p,diagnostic);
+}
+
 + (BOOL)embedDescriptor:(NSData *)descriptor source:(NSString *)source
                  output:(NSString *)output error:(NSError **)error {
  return [self embedDescriptor:descriptor source:source output:output
@@ -37,12 +43,29 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  return [self embedDescriptor:descriptor source:source output:output
        allowPreparedStatic:YES error:error];
 }
++ (BOOL)embedMixedDescriptorIntoPreparedStatic:(NSData *)descriptor source:(NSString *)source
+                 output:(NSString *)output error:(NSError **)error {
+ ZNMixedDescriptor::Package package;std::string diagnostic;
+ if(!descriptor.length||
+    !ZNMixedDescriptor::decode((const uint8_t *)descriptor.bytes,descriptor.length,package,diagnostic)){
+  if(error)*error=ZNTError(17,@"Invalid ZNM2 mixed descriptor");return NO;
+ }
+ return [self embedDescriptor:descriptor source:source output:output
+                allowPreparedStatic:YES mixed:YES error:error];
+}
 + (BOOL)embedDescriptor:(NSData *)descriptor source:(NSString *)source
                  output:(NSString *)output allowPreparedStatic:(BOOL)allowStatic
                   error:(NSError **)error {
+ return [self embedDescriptor:descriptor source:source output:output
+                allowPreparedStatic:allowStatic mixed:NO error:error];
+}
++ (BOOL)embedDescriptor:(NSData *)descriptor source:(NSString *)source
+                 output:(NSString *)output allowPreparedStatic:(BOOL)allowStatic mixed:(BOOL)mixed
+                  error:(NSError **)error {
  std::vector<ZNTypedDescriptor::Record> parsed;std::string diagnostic;
- if(!descriptor.length||!ZNTypedDescriptor::decode(
-      (const uint8_t *)descriptor.bytes,descriptor.length,parsed,diagnostic)){
+ if(!descriptor.length||(mixed
+    ? ![self isValidMixedDescriptor:descriptor]
+    : !ZNTypedDescriptor::decode((const uint8_t *)descriptor.bytes,descriptor.length,parsed,diagnostic))){
   if(error)*error=ZNTError(1,@"Typed Descriptor 无效或版本不受支持");return NO;
  }
  if(!source.length||!output.length||[source isEqualToString:output]){
@@ -166,12 +189,15 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  }
  uint32_t offset=znmacho::read<uint32_t>(f.bytes,loc.sectionOffset+48);
  uint64_t size=znmacho::read<uint64_t>(f.bytes,loc.sectionOffset+40);
- if(!size||size>12+128*48||!ZNCheckedRange64(f.size,offset,size)){
+ if(!size||size>65536||!ZNCheckedRange64(f.size,offset,size)){
   if(error)*error=ZNTError(14,@"Typed Descriptor Section 越界");return nil;
  }
  std::vector<ZNTypedDescriptor::Record> records;std::string diagnostic;
  if(!ZNTypedDescriptor::decode(f.bytes+offset,size,records,diagnostic)){
-  if(error)*error=ZNTError(15,@"Typed Descriptor 内容损坏");return nil;
+  ZNMixedDescriptor::Package mixed;
+  if(!ZNMixedDescriptor::decode(f.bytes+offset,size,mixed,diagnostic)){
+   if(error)*error=ZNTError(15,@"Typed Descriptor 内容损坏");return nil;
+  }
  }
  return [NSData dataWithBytes:f.bytes+offset length:(NSUInteger)size];
 }
