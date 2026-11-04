@@ -27,6 +27,10 @@
  }
  self.staticBuildButton=ZNButton(@"生成预埋二进制（初始 OFF）",self,@selector(generateStaticBinary));
  [self add:self.staticBuildButton height:42];
+ self.staticBuildStatusLabel=ZNLabel(@"请选择已保存的功能",11,NO);
+ self.staticBuildStatusLabel.numberOfLines=2;
+ self.staticBuildStatusLabel.textColor=[UIColor colorWithRed:.68 green:.32 blue:.20 alpha:1];
+ [self add:self.staticBuildStatusLabel height:36];
  [self add:ZNLabel(@"当前功能",14,YES) height:24];
  self.features=[UIStackView new];self.features.axis=UILayoutConstraintAxisVertical;self.features.spacing=6;[self add:self.features height:0];
  [self renderFeatures];
@@ -143,8 +147,21 @@
  if(self.staticBuildRunning)return;
  NSUInteger index=(NSUInteger)sender.tag;
  if(index>=self.store.features.count)return;
- NSString *identifier=self.store.features[index].identifier;
- if([self.selectedFeatureIDs containsObject:identifier]){
+ ZNV3Feature *picked=self.store.features[index];
+ NSString *identifier=picked.identifier;
+ BOOL numeric=picked.buttonType==ZNV3FeatureTypeNumberInput||
+              picked.buttonType==ZNV3FeatureTypeSlider;
+ // Numeric metadata currently exports exactly one feature per Mach-O.
+ // Never inherit a previous toggle multi-selection into numeric generation.
+ BOOL hadNumeric=NO;
+ for(ZNV3Feature *feature in self.store.features)
+  if([self.selectedFeatureIDs containsObject:feature.identifier] &&
+     (feature.buttonType==ZNV3FeatureTypeNumberInput||
+      feature.buttonType==ZNV3FeatureTypeSlider)){hadNumeric=YES;break;}
+ if(numeric||hadNumeric){
+  [self.selectedFeatureIDs removeAllObjects];
+  [self.selectedFeatureIDs addObject:identifier];
+ }else if([self.selectedFeatureIDs containsObject:identifier]){
   [self.selectedFeatureIDs removeObject:identifier];
  }else{
   [self.selectedFeatureIDs addObject:identifier];
