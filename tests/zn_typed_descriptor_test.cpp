@@ -66,7 +66,7 @@ int main(){
  check(!decode(malformed.data(),malformed.size(),restored,error),"reject unknown descriptor version");
  malformed=bytes;malformed[11]=1;
  check(!decode(malformed.data(),malformed.size(),restored,error),"reject nonzero header reserved");
- malformed=bytes;malformed[12+11]=1;
+ malformed=bytes;malformed[12+11]=2;
  check(!decode(malformed.data(),malformed.size(),restored,error),"reject wrong typed width");
  malformed=bytes;malformed.push_back(0);
  check(!decode(malformed.data(),malformed.size(),restored,error),"reject trailing bytes");
