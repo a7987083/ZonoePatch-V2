@@ -7,6 +7,7 @@
 #import "../ZNAdhocMachOSigner.h"
 #import "../ZNTypedMachOBuilder.h"
 #include "../ZNTypedDescriptor.hpp"
+#include "../ZNMixedDescriptor.hpp"
 #import "../ZNStaticPatchFormat.h"
 #import "../V3StaticRuleIdentity.h"
 #include <stdint.h>
@@ -235,14 +236,28 @@ int main() {
    };
    std::vector<uint8_t> encoded;std::string diagnostic;
    check(ZNTypedDescriptor::encode(numeric,encoded,diagnostic),"P10.6 mixed typed descriptor encoding");
-   NSData *expected=[NSData dataWithBytes:encoded.data() length:encoded.size()];
+   ZNMixedDescriptor::Package owned;
+   owned.records=numeric;
+   owned.features={
+    {"number-uuid","Number Display",0,1,ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::UInt64},
+    {"slider-uuid","Slider Display",1,1,ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float32}
+   };
+   std::vector<uint8_t> packed;
+   check(ZNMixedDescriptor::encode(owned,packed,diagnostic),"ZNM2 embedded identity encode");
+   NSData *expected=[NSData dataWithBytes:packed.data() length:packed.size()];
    NSString *mixedPath=[p9dir stringByAppendingPathComponent:@"mixed-output"];
    NSError *embedError=nil;
-   BOOL embedded=[ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected
+   BOOL embedded=[ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:expected
                                  source:p9out output:mixedPath error:&embedError];
    if(!embedded)fprintf(stderr,"P10.6 embedding: %s\\n",embedError.localizedDescription.UTF8String?: "unknown");
    check(embedded,"P10.6 attach typed segment to P9 static image");
    if(embedded) {
+    ZNMixedDescriptor::Package decoded;std::string reason;
+    NSData *readback=[ZNTypedMachOBuilder extractDescriptor:mixedPath error:&embedError];
+    check(ZNMixedDescriptor::decode((const uint8_t *)readback.bytes,readback.length,decoded,reason),
+          "ZNM2 mixed embedded descriptor decoded");
+    check(decoded.features.size()==2&&decoded.features[0].id=="number-uuid"&&
+          decoded.features[1].name=="Slider Display","ZNM2 distinct feature ID/name preserved");
     check(segments(mixedPath),"P10.6 P9 segments preserved");
     check(p9Grouping(mixedPath),"P10.6 P9 names, owners and OFF state preserved");
     check(staticEntryCount(mixedPath)==2,"P10.6 original P9 static rules retained");
@@ -255,7 +270,7 @@ int main() {
     check([[ZNTypedMachOBuilder extractDescriptor:mixedPath error:&embedError]
            isEqualToData:expected],"P10.6 mixed descriptor survives signing");
     check(p9Grouping(mixedPath),"P10.6 P9 table survives signing");
-    check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:src
+    check(![ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:expected source:src
                output:[p9dir stringByAppendingPathComponent:@"no-static"]
                error:&embedError],"P10.6 explicit mixed API rejects unprepared input");
     NSMutableData *damaged=[[NSData dataWithContentsOfFile:p9out] mutableCopy];
@@ -279,7 +294,7 @@ int main() {
      if(corrupted) {
       NSString *damagedPath=[p9dir stringByAppendingPathComponent:@"corrupt-static"];
       check([damaged writeToFile:damagedPath atomically:YES],"P10.6 corrupted fixture written");
-      check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:damagedPath
+      check(![ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:expected source:damagedPath
                     output:[p9dir stringByAppendingPathComponent:@"corrupt-mixed"]
                     error:&embedError],"P10.6 rejects invalid P9 header before embed");
      }
@@ -287,7 +302,7 @@ int main() {
     check(![ZNTypedMachOBuilder embedDescriptor:expected source:p9out
                output:[p9dir stringByAppendingPathComponent:@"unsafe-stacking"]
                error:&embedError],"P10.6 old typed API still rejects P9 static image");
-    check(![ZNTypedMachOBuilder embedDescriptorIntoPreparedStatic:expected source:mixedPath
+    check(![ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:expected source:mixedPath
                output:[p9dir stringByAppendingPathComponent:@"duplicate-stacking"]
                error:&embedError],"P10.6 repeat typed segment rejected");
    }
