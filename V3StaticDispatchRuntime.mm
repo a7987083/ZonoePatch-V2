@@ -115,6 +115,9 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
     dataSize==0||codeSize==0||sectionSize<sizeof(ZN44StaticHeader)){
   if(error)*error=ZNSTError(23,@"没有找到唯一且完整的 P6 预埋描述符");return nil;
  }
+ if(!ZNV3MatchesBoundImageUUID(feature.boundImageUUID,uuid)){
+  if(error)*error=ZNSTError(50,@"已保存的 Mach-O UUID 与当前预埋映像不同或尚未绑定");return nil;
+ }
  uint64_t dataDelta=sectionVM-textVM,codeDelta=codeVM-textVM;
  if(dataDelta>UINTPTR_MAX-image.imageBase||codeDelta>UINTPTR_MAX-image.imageBase){
   if(error)*error=ZNSTError(24,@"Segment 映射地址溢出");return nil;
