@@ -225,7 +225,7 @@ int main(){
   rule.offsetText=@"0x39059D4";rule.patchText=@"E9FF9F52";
   feature.boundImageUUID=pin;
   check([repo saveFeatures:@[feature] error:&error],"save UUID binding");
-  NSArray *pinned=[repo loadFeatures:&error];
+  NSArray<ZNV3Feature *> *pinned=[repo loadFeatures:&error];
   check(pinned.count==1&&[pinned[0].boundImageUUID isEqualToString:pin],
         "persisted UUID roundtrips");
   ZNV3FeatureStore *boundStore=[ZNV3FeatureStore new];
@@ -237,7 +237,7 @@ int main(){
   check(![repo saveFeatures:@[feature] error:&error],"reject malformed UUID on save");
   feature.boundImageUUID=nil;
   check([repo saveFeatures:@[feature] error:&error],"unbound legacy config remains editable");
-  NSArray *legacyUnbound=[repo loadFeatures:&error];
+  NSArray<ZNV3Feature *> *legacyUnbound=[repo loadFeatures:&error];
   check(legacyUnbound.count==1&&!legacyUnbound[0].boundImageUUID.length,
         "unbound legacy does not silently bind");
   // Malformed UUID in legacy JSON is quarantined and retained verbatim.
