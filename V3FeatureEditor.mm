@@ -106,10 +106,10 @@
  ZNV3ValueConfig *v=self.store.draft.valueConfig?:[ZNV3ValueConfig defaults];
  [self.valueTypeButton setTitle:[ZNV3NumericTypeName(v.valueType) stringByAppendingString:@"  ▾"]
                      forState:UIControlStateNormal];
- self.minimumField.text=[NSString stringWithFormat:@"%g",v.minimum];
- self.maximumField.text=[NSString stringWithFormat:@"%g",v.maximum];
- self.stepField.text=[NSString stringWithFormat:@"%g",v.step];
- self.defaultField.text=[NSString stringWithFormat:@"%g",v.defaultValue];
+ self.minimumField.text=v.minimumText?:[NSString stringWithFormat:@"%.17g",v.minimum];
+ self.maximumField.text=v.maximumText?:[NSString stringWithFormat:@"%.17g",v.maximum];
+ self.stepField.text=v.stepText?:[NSString stringWithFormat:@"%.17g",v.step];
+ self.defaultField.text=v.defaultText?:[NSString stringWithFormat:@"%.17g",v.defaultValue];
 }
 - (void)cycleValueType {
  if(!self.store.draft)return;
@@ -121,26 +121,16 @@
 - (BOOL)validateAndStoreNumericFields {
  if(self.typeIndex!=ZNV3FeatureTypeNumberInput&&self.typeIndex!=ZNV3FeatureTypeSlider)return YES;
  BOOL slider=self.typeIndex==ZNV3FeatureTypeSlider;
- NSArray<UITextField *> *fields=slider?
-   @[self.minimumField,self.maximumField,self.stepField,self.defaultField]:
-   @[self.minimumField,self.maximumField];
- double values[4]={};
- for(NSUInteger i=0;i<fields.count;i++){
-  NSString *text=fields[i].text?:@"";
-  NSScanner *scanner=[NSScanner scannerWithString:text];
-  scanner.locale=[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
-  if(![scanner scanDouble:&values[i]]||!scanner.isAtEnd){
-   [self showPatchMessage:@"数值参数无效" detail:@"请输入完整的数字，不能含额外字符。"];return NO;
-  }
- }
  ZNV3ValueConfig *v=[self.store.draft.valueConfig copy]?:[ZNV3ValueConfig defaults];
- v.minimum=values[0];v.maximum=values[1];
- if(slider){v.step=values[2];v.defaultValue=values[3];}
+ v.minimumText=[self.minimumField.text copy]?:@"";
+ v.maximumText=[self.maximumField.text copy]?:@"";
+ v.stepText=slider?([self.stepField.text copy]?:@""):nil;
+ v.defaultText=slider?([self.defaultField.text copy]?:@""):nil;
  v.requiresEnableSwitch=YES;
  if(![v isValidForFeatureType:(ZNV3FeatureType)self.typeIndex]){
   [self showPatchMessage:@"数值范围无效"
-    detail:slider?@"滑条需要有效的范围、步长与默认值；64 位整数当前限精确范围 ±(2^53−1)。":
-                  @"输入框需要有效的最小值和最大值；64 位整数当前限精确范围 ±(2^53−1)。"];return NO;
+    detail:slider?@"请填写合法的最小值、最大值、步长及默认值；整数按完整类型宽度精确验证。":
+                  @"请填写合法的最小值和最大值；整数按完整类型宽度精确验证。"];return NO;
  }
  self.store.draft.valueConfig=v;return YES;
 }
