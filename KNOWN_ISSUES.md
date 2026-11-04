@@ -49,3 +49,9 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - **DEVICE PENDING:** Mixed P9+ZNM2 Developer export is now reachable via multi-selection UI, but host CI only compiles the UIKit path and tests synthetic Mach-O fixtures; no on-device mixed output has yet been produced or exercised.
 - **NUMERIC UI PENDING:** Customer ZNM2 controls are not rendered yet. Mixed output numeric features are metadata-only until the Customer UI and runtime integration is validated.
 - **SELECTION CONSTRAINT:** Same Mach-O, at least one Toggle and one Input/Slider, no active patch and no unsaved edit. Pure multiple-numeric builds are deliberately rejected pending an explicit numeric-only protocol decision.
+
+## P10.7 ARM64 numeric code support limitation (2026-11-04)
+
+- Current Developer recognizes limited code candidates (FMOV S/D, MOVZ/MOVN + MOVK) and provides a more precise rejection explanation. **No R-X numeric site is yet accepted for binary generation.**
+- LDR literal encoding is tested on synthetic assembler instructions but *no Value Cell has been inserted into a real Mach-O*. Customer input and slider cannot control R-X code through this version; existing RW numeric path and P9 toggle behavior remain unchanged.
+- Relocation, inbound branch targets, selectedTarget dispatch, cell placement relative to __ZNTEXT, readback and post-signing integrity require next-stage integration tests and device verification.
