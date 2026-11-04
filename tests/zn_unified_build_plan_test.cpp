@@ -8,8 +8,16 @@ static void check(bool b,const char *name) {
  if(!b){fprintf(stderr,"FAIL: %s\n",name);++failures;}
 }
 static Feature feature(std::string id,Control control,RuleKind kind,uint64_t rva,uint64_t file,uint64_t width) {
- return {std::move(id),"display name","group",control,"uuid-a","/tmp/a",
-         {{"rule-a",kind,rva,file,width}}};
+ Feature f={std::move(id),"display name","group",control,"uuid-a","/tmp/a",
+         {{"rule-a",kind,rva,file,width}},{}};
+ if(control!=Control::Toggle) {
+  f.numeric.valueType=width==8?9:(width==2?2:(width==1?0:4));
+  f.numeric.minimum="0";f.numeric.maximum="100";
+  if(control==Control::Slider) {
+   f.numeric.step="1";f.numeric.defaultValue="10";f.numeric.requiresEnableSwitch=true;
+  }
+ }
+ return f;
 }
 static void expected(bool shouldPass,Plan p,const char *name) {
  std::string error;bool ok=validate(p,error);check(ok==shouldPass,name);
@@ -45,6 +53,17 @@ int main() {
  expected(true,{kSchemaVersion,{toggle,otherImage}},"identical RVA in different image");
  auto badImage=otherImage;badImage.imageUUID="uuid-a";
  expected(false,{kSchemaVersion,{toggle,badImage}},"inconsistent image UUID/path");
+ auto wrongType=input;wrongType.numeric.valueType=9;
+ expected(false,{kSchemaVersion,{wrongType}},"typed width vs value type");
+ auto missing=input;missing.numeric.minimum.clear();
+ expected(false,{kSchemaVersion,{missing}},"numeric range mandatory");
+ auto toggleNumeric=toggle;toggleNumeric.numeric.valueType=4;
+ expected(false,{kSchemaVersion,{toggleNumeric}},"toggle cannot carry numeric parameters");
+ auto more=input;more.featureID="other";more.rules[0].rva=0x2000;more.rules[0].fileOffset=0x3000;
+ expected(true,{kSchemaVersion,{input,more}},"rule ID scoped to feature");
+ auto many=toggle;many.rules.clear();
+ for(int i=0;i<129;i++)many.rules.push_back({"r"+std::to_string(i),RuleKind::PatchBytes,0x1000+uint64_t(i)*4,0x2000+uint64_t(i)*4,4});
+ expected(false,{kSchemaVersion,{many}},"total rule count limit");
  auto repeated=input;repeated.rules.push_back(repeated.rules[0]);
  expected(false,{kSchemaVersion,{repeated}},"duplicate rule ID");
  printf("P10.6.1 unified build-plan: %s (%d failures)\n",failures?"FAIL":"PASS",failures);

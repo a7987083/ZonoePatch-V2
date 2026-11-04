@@ -9,7 +9,7 @@ namespace ZNUnifiedBuildPlan {
 // P9 Static Entry and ZNT1 Typed Descriptor ABIs remain unchanged.
 constexpr uint32_t kSchemaVersion=1;
 constexpr size_t kMaxFeatures=128;
-constexpr size_t kMaxRules=128;
+constexpr size_t kMaxRules=128; // total rules across the whole plan
 enum class Control : uint8_t { Toggle=0, Input=2, Slider=3 };
 enum class RuleKind : uint8_t { PatchBytes=0, TypedValue=1 };
 struct Rule {
@@ -17,12 +17,18 @@ struct Rule {
  RuleKind kind;
  uint64_t rva, fileOffset, width;
 };
+struct NumericParameters {
+ uint8_t valueType=255; // persisted ZNV3NumericType; 255 for Toggle
+ std::string minimum, maximum, step, defaultValue; // exact decimal text
+ bool requiresEnableSwitch=false;
+};
 struct Feature {
  std::string featureID; // persisted ID, independent from display name
  std::string name, group;
  Control control;
  std::string imageUUID, sourcePath;
  std::vector<Rule> rules;
+ NumericParameters numeric;
 };
 struct Plan {
  uint32_t version=kSchemaVersion;
