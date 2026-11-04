@@ -150,6 +150,8 @@ jobs:
           set -euo pipefail
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3StaticBuildPlan.mm V3StaticBinaryBuilder.mm ZNAdhocMachOSigner.mm \
+            ZNArm64NumericInstruction.cpp ZNArm64ValueCellPlan.cpp \
+            ZNArm64CodeSitePlan.cpp ZNArm64ValueCellPostprocess.cpp \
             ZNTypedMachOBuilder.mm ZNTypedDescriptor.cpp ZNMixedDescriptor.cpp ZNValueCodec.cpp \
             tests/v3_static_binary_smoke_test.mm -o "$RUNNER_TEMP/v3_static_binary_smoke"
           "$RUNNER_TEMP/v3_static_binary_smoke"
