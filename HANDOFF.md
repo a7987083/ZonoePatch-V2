@@ -33,3 +33,13 @@
 1. P10.6.3: Customer ZNM2 catalog, stable Feature ID and name binding, per-feature typed transactions, cross-feature address ownership, snapshot and recovery-failure latch. Keep old P9 and ZNT1 readers.
 2. Add fault injection: concurrent feature attempts, overlapping widths, partial writes and rollback failure.
 3. P10.6.4: only after Customer runtime regression, expose unified Builder in Developer UI, test layout, keyboard focus, and on-device ON/OFF/Original.
+
+## P10.6.3 isolated Customer runtime (2026-11-04)
+
+- Branch HEAD advances past the P10.6.2 baseline; verify current SHA and Actions after any documentation commit.
+- Added `ZNMixedValueCoordinator.hpp/.cpp`: stores per-image/per-feature independent active transactions, reserves physical address spans, rejects overlaps (including across different images), and retains failed-rollback reservations with a global recovery latch. The actual byte reads/writes still occur through `ZNLiveTypedValue::Backend` and its live dyld/UUID/RW validation.
+- Added `ZNMixedCustomerRuntime.h/.mm`: independent ZNM2 discovery from dyld, validates exact ARM64 image identity, P9 static dispatch segment/header, read-only ZNM2 section, Feature ID and descriptor snapshot; applies/restores per persisted Feature ID. The legacy `ZNTypedCustomerRuntime` (ZNT1) and P9 Customer runtime are unchanged.
+- Customer Makefile now compiles ZNM2 decoder, coordinator and runtime. This API is **not connected to visible Customer UI**: no claim of actual user-facing numeric control or live device verification.
+- Host CI `Test P10.6.3 Mixed Numeric Ownership and Recovery` performs fake-backend two-feature isolation, overlapping-span rejection, partial-write rollback, failed-rollback global lock and snapshot preservation; `Test P10.6.3 ZNM2 Customer API` confirms forged request rejection and no false lock. Existing typed transaction tests cover external-write detection. Synthetic tests cannot emulate actual dyld-loaded generated Mach-O or game runtime.
+- Build verification: consult the latest `ZonoePatch-V3` workflow; do not infer from committed code. No real-device verification.
+- Next: integrate new runtime with Customer UI only after explicit ZNM2 catalog verification on an actual target image; strengthen dynamic fault injection for mixed catalog, test cold boot, repeated ON/OFF and Original snapshot on target device. Then P10.6.4 UI and keyboard layout.

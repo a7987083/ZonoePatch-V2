@@ -35,3 +35,11 @@ Future validation must distinguish submitted, compiled, device-tested and game-b
 - **CONFLICT MODEL:** P10.6.1 validates combined RVA and file-offset spans. Runtime ownership/Original snapshots, partial-write recovery and process restart semantics are deferred to P10.6.3. Do not remove existing multi-transaction rejection until a global ownership manager is tested.
 - **DEVICE PENDING:** Actual app/UnityFramework Mach-O build input, final IPA re-sign and installation, startup, P9 toggle ON/OFF alongside ZNM2 data, numeric Customer UI and fault recovery all require device evidence.
 - **CI REFERENCE:** Run `41765604484` on source commit `7d522d0df2d502b450af1ce6f6833acfadc856a7` succeeded. Subsequent documentation commits require their own CI status confirmation.
+
+## P10.6.3 Customer runtime limitations (2026-11-04)
+
+- **NOT DEVICE VERIFIED:** Independent ZNM2 Customer runtime is compiled via the Customer target, but has not been exercised on a loaded mixed Mach-O on iPhone. Host API tests only verify rejecting forged metadata. Do not mark feature execution ready for end users.
+- **NOT UI-INTEGRATED:** `V3CustomerMenuController` still uses its previous catalog; the new `ZNMixedCustomerRuntime` is a separate entry point. Developer UI does not invoke the mixed export automatically.
+- **Recovery protection:** `ZNMixedValue::Coordinator` retains ownership on a failed rollback and globally latches writes/restores. On external third-party memory changes, `Transaction::restore` refuses overwriting and retains ownership; manual inspection may be required.
+- **Concurrency:** Individual scalar atomic writes do not provide global multi-address atomic commit. UI runtime calls are serialized by `@synchronized`; external game threads remain uncontrolled.
+- **Format separation:** Legacy ZNT1 and P9 are unchanged. ZNM2 carries independently named numeric features and is accepted only through the new runtime.
