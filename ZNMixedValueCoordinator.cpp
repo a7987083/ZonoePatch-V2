@@ -13,9 +13,19 @@ bool Coordinator::apply(const std::string &imageID,const std::string &featureID,
  if(imageID.empty()||featureID.empty()||!backend||targets.empty()||targets.size()>128){
   error="missing trusted image/feature identity, backend or targets";return false;
  }
- for(const Session &s:sessions_)
+ for(Session &s:sessions_)
   if(s.image==imageID&&s.feature==featureID){
-   error="feature transaction is already owned";return false;
+   if(targets.size()!=s.spans.size()){
+    error="active feature target count changed";return false;
+   }
+   for(size_t i=0;i<targets.size();i++)
+    if(targets[i].address!=s.spans[i].start||
+       ZNValueCodec::width(targets[i].descriptor.type)!=s.spans[i].size){
+     error="active feature target address or width changed";return false;
+    }
+   const bool updated=s.transaction->update(targets,decimal,error);
+   if(s.transaction->recoveryFailed())locked_=true;
+   return updated;
   }
  std::vector<Span> spans;
  for(const auto &t:targets){

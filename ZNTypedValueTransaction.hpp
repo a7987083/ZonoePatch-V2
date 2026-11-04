@@ -22,6 +22,8 @@ class Transaction {
 public:
  explicit Transaction(Backend &backend);
  bool commit(const std::vector<Target> &targets,const std::string &decimal,std::string &error);
+ // Update while active, preserving first-activation Original snapshots.
+ bool update(const std::vector<Target> &targets,const std::string &decimal,std::string &error);
  bool restore(std::string &error);
  bool active() const {return enabled_;}
  bool recoveryFailed() const {return locked_;}

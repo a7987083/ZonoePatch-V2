@@ -42,6 +42,13 @@ static void basic(){
  check(t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"42",e),"commit UInt32");
  check(t.active()&&f.memory[0x1000][0]==42,"commit changes real bytes");
  check(!t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"51",e),"reject double commit");
+ check(t.update({target(0x1000,0x1000,Type::UInt32,"0","100")},"51",e),"update while active");
+ check(f.memory[0x1000][0]==51,"updated value written");
+ check(!t.update({target(0x1000,0x1000,Type::UInt32,"0","100")},"101",e),"reject out-of-range update");
+ check(f.memory[0x1000][0]==51,"out-of-range update leaves prior applied bytes");
+ check(!t.update({target(0x1000,0x1000,Type::UInt32,"0","100"),
+                  target(0x2000,0x2000,Type::UInt32,"0","100")},"10",e),
+       "reject changed target list");
  check(t.restore(e),"restore UInt32");check(!t.active()&&f.memory[0x1000][0]==1,"restore original");
  check(!t.restore(e),"reject double restore");
  check(!t.commit({target(0x1000,0x1000,Type::UInt32,"0","100")},"101",e),"out of range");
@@ -62,8 +69,10 @@ static void sliderSemantics(){
  std::string pending="7";check(!t.active()&&f.memory[0x3000][0]==2,"drag does not write");
  check(t.commit({slider(0x3000,0x3000,Type::Int32)},pending,e),"switch-on applies pending value");
  check(f.memory[0x3000][0]==7,"switch-on committed selected value");
- pending="9";check(f.memory[0x3000][0]==7,"dragging while ON does not auto-commit");
- check(t.restore(e)&&f.memory[0x3000][0]==2,"switch-off restores original");
+ pending="9";check(f.memory[0x3000][0]==7,"dragging pending does not write");
+ check(t.update({slider(0x3000,0x3000,Type::Int32)},pending,e),"commit slider new value on release");
+ check(f.memory[0x3000][0]==9,"slider updates while ON");
+ check(t.restore(e)&&f.memory[0x3000][0]==2,"switch-off restores initial original");
 }
 static void atomicRollback(){
  Fake f;f.memory[0x4000]={1};f.memory[0x5000]={2};std::string e;
@@ -108,8 +117,24 @@ static void guard(){
  check(!t.restore(e),"refuse restore if live bytes have changed");
  check(f.memory[0x8000][0]==9&&t.active(),"preserve third-party bytes");
 }
+static void updateRollback(){
+ Fake f;f.memory[0xA000]={1};f.memory[0xB000]={2};std::string e;
+ std::vector<Target> pair={target(0xA000,0xA000,Type::UInt8,"0","100"),
+                           target(0xB000,0xB000,Type::UInt8,"0","100")};
+ Transaction t(f);
+ check(t.commit(pair,"40",e),"setup active multi-cell update");
+ f.writes=0;f.failWrite=2;
+ check(!t.update(pair,"50",e),"partial active update fails");
+ check(!t.recoveryFailed(),"active update rolls back");
+ check(f.memory[0xA000][0]==40&&f.memory[0xB000][0]==40,
+       "rollback keeps previous applied values, not original");
+ f.failWrite=0;
+ check(t.restore(e),"restore initial originals after failed update");
+ check(f.memory[0xA000][0]==1&&f.memory[0xB000][0]==2,
+       "preserve original across updates");
+}
 int main(){
- basic();exact64();sliderSemantics();atomicRollback();restoreFailure();guard();
+ updateRollback();basic();exact64();sliderSemantics();atomicRollback();restoreFailure();guard();
  std::printf("P10.4 typed value transactions: %s (%d failures)\n",fails?"FAIL":"PASS",fails);
  return fails?1:0;
 }

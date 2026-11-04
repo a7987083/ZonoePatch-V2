@@ -439,6 +439,8 @@ static BOOL ZNTUISliderSupported(id<ZNCustomerNumericUIFeature> feature, double 
  slider.minimumTrackTintColor=[UIColor colorWithRed:.72 green:.3 blue:1 alpha:1];
  slider.tag=(NSInteger)index;
  [slider addTarget:self action:@selector(typedSliderChanged:) forControlEvents:UIControlEventValueChanged];
+ [slider addTarget:self action:@selector(typedSliderCommitted:)
+          forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
  [panel addSubview:slider];
  UILabel *value=ZNLabel(@"",10,NO);value.textColor=UIColor.whiteColor;
  value.translatesAutoresizingMaskIntoConstraints=NO;
@@ -515,6 +517,18 @@ static BOOL ZNTUISliderSupported(id<ZNCustomerNumericUIFeature> feature, double 
  self.typedValueLabels[i].text=pending;
  // Editing pending value does not trigger runtime writes, even when enabled.
  if(!feature.enabled)self.typedInputs[i].text=pending;
+}
+- (void)typedSliderCommitted:(UISlider *)slider {
+ NSUInteger i=(NSUInteger)slider.tag;
+ if(i>=self.typedSnapshot.count)return;
+ id<ZNCustomerNumericUIFeature> feature=self.typedSnapshot[i];
+ if(!feature.enabled||![(id)feature isKindOfClass:ZNMixedCustomerFeature.class])return;
+ NSString *cacheID=self.renderedIdentifiers[self.snapshot.count+i];
+ NSError *error=nil;
+ BOOL ok=[[ZNMixedCustomerRuntime shared] applyValue:self.pendingTypedValues[cacheID]?:@""
+    feature:(ZNMixedCustomerFeature *)(id)feature error:&error];
+ [self refreshFeatures];
+ if(!ok)[self showError:error.localizedDescription?:@"数值更新失败"];
 }
 - (BOOL)applyNumeric:(id<ZNCustomerNumericUIFeature>)feature
                  text:(NSString *)text restore:(BOOL)restore error:(NSError **)error {

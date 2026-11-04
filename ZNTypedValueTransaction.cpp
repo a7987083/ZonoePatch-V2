@@ -124,6 +124,67 @@ bool Transaction::commit(const std::vector<Target> &targets,
  snapshots_=std::move(staged);enabled_=true;
  lastDiagnostic_="typed value commit verified";error.clear();return true;
 }
+bool Transaction::update(const std::vector<Target> &targets,
+                         const std::string &decimal,std::string &error){
+ if(locked_){error="transaction locked after failed rollback";return false;}
+ if(!enabled_||snapshots_.empty()){error="no active transaction to update";return false;}
+ if(!legalTargets(targets,error)||targets.size()!=snapshots_.size()){
+  if(error.empty())error="updated target count differs from original transaction";
+  return false;
+ }
+ std::vector<std::vector<uint8_t>> newValues;newValues.reserve(targets.size());
+ for(size_t i=0;i<targets.size();i++){
+  const auto &target=targets[i];
+  const Snapshot &original=snapshots_[i];
+  const auto type=target.descriptor.type;
+  const size_t width=ZNValueCodec::width(type);
+  if(target.address!=original.address||width!=original.applied.size()){
+   error="updated target identity or numeric width changed";return false;
+  }
+  std::vector<uint8_t> payload,lo,hi;
+  std::string canonical,minValue,maxValue;
+  if(!ZNValueCodec::encode(type,decimal,payload,error)||
+     !ZNValueCodec::decode(type,payload.data(),payload.size(),canonical,error)||
+     !ZNValueCodec::encode(type,target.descriptor.minimum,lo,error)||
+     !ZNValueCodec::encode(type,target.descriptor.maximum,hi,error)||
+     !ZNValueCodec::decode(type,lo.data(),lo.size(),minValue,error)||
+     !ZNValueCodec::decode(type,hi.data(),hi.size(),maxValue,error))
+   return false;
+  if(compareScalar(type,canonical,minValue)<0||compareScalar(type,canonical,maxValue)>0){
+   error="updated value outside configured numeric range";return false;
+  }
+  newValues.push_back(std::move(payload));
+ }
+ // Verify all currently applied bytes before mutating any target.
+ for(size_t i=0;i<snapshots_.size();i++){
+  const Snapshot &old=snapshots_[i];
+  std::vector<uint8_t> current(old.applied.size());
+  if(!backend_.read(old.address,current.data(),current.size(),error)||
+     !equals(current,old.applied)){
+   error="active numeric value changed externally";return false;
+  }
+ }
+ std::vector<size_t> written;
+ for(size_t i=0;i<snapshots_.size();i++){
+  const Snapshot &old=snapshots_[i];
+  if(equals(old.applied,newValues[i]))continue;
+  std::string cause;
+  bool writeOK=backend_.write(old.address,newValues[i].data(),newValues[i].size(),cause);
+  written.push_back(i);
+  std::vector<uint8_t> actual(newValues[i].size());
+  bool verified=backend_.read(old.address,actual.data(),actual.size(),cause)&&
+                equals(actual,newValues[i]);
+  if(!writeOK||!verified){
+   error="update/readback failure: "+cause;
+   rollback(snapshots_,written,false,error);
+   return false;
+  }
+ }
+ for(size_t i=0;i<snapshots_.size();i++)
+  snapshots_[i].applied=std::move(newValues[i]);
+ lastDiagnostic_="active numeric update verified";error.clear();return true;
+}
+
 bool Transaction::restore(std::string &error){
  if(locked_){error="transaction locked after failed rollback";return false;}
  if(!enabled_||snapshots_.empty()){error="no active numeric transaction";return false;}

@@ -44,7 +44,11 @@ int main(){
  check(c.apply("uuid-a","feature-b",backend(state),{cell(0x2000,0x2000,Type::Int32)},"42",e),"second independent feature same image");
  check(c.sessionCount()==2 && c.active("uuid-a","feature-a")&&c.active("uuid-a","feature-b"),"two independent owners");
  check(!c.apply("uuid-a","feature-c",backend(state),{cell(0x1000,0x1000,Type::Int32)},"43",e),"overlapping feature denied");
- check(!c.apply("uuid-a","feature-a",backend(state),{cell(0x3000,0x3000,Type::Int32)},"43",e),"duplicate identity denied");
+ check(!c.apply("uuid-a","feature-a",backend(state),{cell(0x3000,0x3000,Type::Int32)},"43",e),"changed target rejected");
+ check(c.apply("uuid-a","feature-a",backend(state),
+         {cell(0x1000,0x1000,Type::Int32)},"55",e),"same owner active update");
+ check(state.memory[0x1000][0]==55,"active update changes value");
+ check(c.sessionCount()==2,"active update does not create a second session");
  check(c.restore("uuid-a","feature-a",e),"restore A independently");
  check(state.memory[0x1000][0]==1&&state.memory[0x2000][0]==42&&c.active("uuid-a","feature-b"),"B preserved during A restore");
  check(c.restore("uuid-a","feature-b",e)&&c.sessionCount()==0,"restore B");
