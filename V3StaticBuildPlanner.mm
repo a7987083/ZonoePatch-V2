@@ -53,6 +53,9 @@ static NSString *ZNP6DiskUUID(int fd) {
   if(error)*error=ZNP6Error(15,@"参数或功能类型无效：Typed Descriptor 只支持输入框与滑条");
   return nil;
  }
+ if(!ZNV3ValidBoundImageUUID(feature.boundImageUUID)){
+  if(error)*error=ZNP6Error(22,@"数值功能未绑定 Mach-O UUID，请编辑保存");return nil;
+ }
  ZNV3ValueConfig *config=feature.valueConfig;
  auto type=static_cast<ZNValueCodec::Type>(config.valueType);
  const size_t width=ZNValueCodec::width(type);
@@ -83,6 +86,9 @@ static NSString *ZNP6DiskUUID(int fd) {
      addr.fileOffset>INT64_MAX||width>INT64_MAX-addr.fileOffset){
    if(error)*error=ZNP6Error(18,@"数值 Offset 必须落在可读写、文件映射且按类型宽度对齐的数据段；代码地址不能直接按数值写入");
    return nil;
+  }
+  if(!ZNV3MatchesBoundImageUUID(feature.boundImageUUID,addr.imageUUID)){
+   if(error)*error=ZNP6Error(23,@"数值功能 UUID 与目标映像不一致");return nil;
   }
   if(sourceUUID && (![sourceUUID isEqualToString:addr.imageUUID]||
                     ![sourcePath isEqualToString:addr.imagePath])){
@@ -130,13 +136,19 @@ static NSString *ZNP6DiskUUID(int fd) {
    @"%@ 的静态执行协议尚未实现；P10.1 仅支持开关构建",ZNV3FeatureTypeTitle(feature.buttonType)]);
   return nil;
  }
- NSMutableArray *entries=[NSMutableArray array];
+ if(!ZNV3ValidBoundImageUUID(feature.boundImageUUID)){
+   if(error)*error=ZNP6Error(24,@"开关功能未绑定 Mach-O UUID，请编辑保存");return nil;
+  }
+  NSMutableArray *entries=[NSMutableArray array];
  for(ZNV3PatchRule *rule in feature.rules){
   if(!rule.offsetText.length&&!rule.patchText.length)continue;
   NSError *e=nil;
   ZNV3PatchValidation *v=[ZNV3PatchValidator validateOffset:rule.offsetText patch:rule.patchText module:feature.module error:&e];
   if(!v){if(error)*error=e?:ZNP6Error(6,@"Runtime preflight failed");return nil;}
   ZNV3ResolvedAddress *address=v.address;
+   if(!ZNV3MatchesBoundImageUUID(feature.boundImageUUID,address.imageUUID)){
+    if(error)*error=ZNP6Error(25,@"开关功能 UUID 与当前映像不一致");return nil;
+   }
   NSUInteger n=v.patchBytes.length;
   if(address.fileOffset>INT64_MAX||n>(uint64_t)(INT64_MAX-address.fileOffset)){
    if(error)*error=ZNP6Error(7,@"File offset exceeds pread range");return nil;

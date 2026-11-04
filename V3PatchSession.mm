@@ -69,7 +69,10 @@ static BOOL ZNVerifyOriginalOnDisk(ZNV3PatchValidation *validation, NSError **er
   if(!feature.identifier.length||!feature.module.length){
    if(error)*error=ZNSessionError(5,@"功能尚未保存或模块未选择");return NO;
   }
-  NSMutableArray<ZNV3PatchOperation *> *ops=[NSMutableArray array];
+  if(!ZNV3ValidBoundImageUUID(feature.boundImageUUID)){
+    if(error)*error=ZNSessionError(10,@"功能未绑定 Mach-O UUID，请编辑保存后执行");return NO;
+   }
+   NSMutableArray<ZNV3PatchOperation *> *ops=[NSMutableArray array];
   for(ZNV3PatchRule *rule in feature.rules){
    if(!rule.offsetText.length&&!rule.patchText.length)continue;
    NSError *e=nil;
@@ -77,6 +80,9 @@ static BOOL ZNVerifyOriginalOnDisk(ZNV3PatchValidation *validation, NSError **er
    if(!v){if(error)*error=e?:ZNSessionError(6,@"只读验证失败");return NO;}
    if(!ZNVerifyOriginalOnDisk(v,&e)){if(error)*error=e;return NO;}
    ZNV3ResolvedAddress *a=v.address;
+   if(!ZNV3MatchesBoundImageUUID(feature.boundImageUUID,a.imageUUID)){
+    if(error)*error=ZNSessionError(11,@"保存的 Mach-O UUID 与当前映像不一致");return NO;
+   }
    ZNV3PatchOperation *op=[[ZNV3PatchOperation alloc]initWithIdentifier:rule.identifier
       moduleUUID:a.imageUUID address:(uintptr_t)a.runtimeVA
       expected:v.originalBytes patch:v.patchBytes];

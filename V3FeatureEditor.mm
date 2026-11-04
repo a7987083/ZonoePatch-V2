@@ -346,6 +346,30 @@
  self.store.draft.detail=self.descField.text?:@"";
  self.store.draft.buttonType=(ZNV3FeatureType)self.typeIndex;
  if(![self validateAndStoreNumericFields])return;
+ // Pin identity only during explicit UI save; never silently migrate across images.
+ NSString *boundUUID=nil;
+ for(ZNV3PatchRule *rule in self.store.draft.rules){
+  if(!rule.offsetText.length)continue;
+  NSError *resolveError=nil;
+  ZNV3ResolvedAddress *address=[ZNV3AddressResolver resolve:rule.offsetText
+                                              module:self.store.draft.module error:&resolveError];
+  if(!address||!ZNV3ValidBoundImageUUID(address.imageUUID)){
+   [self showPatchMessage:@"Mach-O UUID 绑定失败"
+     detail:resolveError.localizedDescription?:@"必须加载目标映像并使用有效的 Offset"];return;
+  }
+  if(boundUUID&&!ZNV3MatchesBoundImageUUID(boundUUID,address.imageUUID)){
+   [self showPatchMessage:@"UUID 绑定失败" detail:@"同一功能规则的映像身份不一致"];return;
+  }
+  boundUUID=address.imageUUID;
+ }
+ if(boundUUID.length){
+  if(self.store.draft.boundImageUUID.length&&
+     !ZNV3MatchesBoundImageUUID(self.store.draft.boundImageUUID,boundUUID)){
+   [self showPatchMessage:@"目标 Mach-O 版本已变化"
+     detail:@"保存的 UUID 不匹配当前映像。拒绝静默重绑，请为新版本新建功能。"];return;
+  }
+  self.store.draft.boundImageUUID=boundUUID;
+ }
  NSString *savedIdentifier=[self.store.draft.identifier copy];
  if(![self.store saveDraft]) {
   UIAlertController *alert=[UIAlertController alertControllerWithTitle:@"配置保存失败"

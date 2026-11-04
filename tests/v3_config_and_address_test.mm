@@ -215,6 +215,31 @@ int main(){
     "save preserves intended feature identity after delete");
   NSURL *appSupport=[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
   NSURL *file=[[appSupport URLByAppendingPathComponent:@"ZonoePatchV3"] URLByAppendingPathComponent:@"features-v1.json"];
+  // D07: version binding remains explicit and legacy records stay editable.
+  NSString *pin=@"12345678-1234-1234-1234-123456789ABC";
+  check(ZNV3ValidBoundImageUUID(pin)&&
+        ZNV3MatchesBoundImageUUID([pin lowercaseString],pin)&&
+        !ZNV3MatchesBoundImageUUID(pin,@"AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")&&
+        !ZNV3ValidBoundImageUUID(@"invalid"),"strict Mach-O UUID validation");
+  feature.buttonType=ZNV3FeatureTypeToggle;
+  rule.offsetText=@"0x39059D4";rule.patchText=@"E9FF9F52";
+  feature.boundImageUUID=pin;
+  check([repo saveFeatures:@[feature] error:&error],"save UUID binding");
+  NSArray *pinned=[repo loadFeatures:&error];
+  check(pinned.count==1&&[pinned[0].boundImageUUID isEqualToString:pin],
+        "persisted UUID roundtrips");
+  ZNV3FeatureStore *boundStore=[ZNV3FeatureStore new];
+  [boundStore editFeatureAtIndex:0];
+  check([boundStore.draft.boundImageUUID isEqualToString:pin],
+        "editing retains UUID binding");
+  [boundStore cancelDraft];
+  feature.boundImageUUID=@"INVALID";
+  check(![repo saveFeatures:@[feature] error:&error],"reject malformed UUID on save");
+  feature.boundImageUUID=nil;
+  check([repo saveFeatures:@[feature] error:&error],"unbound legacy config remains editable");
+  NSArray *legacyUnbound=[repo loadFeatures:&error];
+  check(legacyUnbound.count==1&&!legacyUnbound[0].boundImageUUID.length,
+        "unbound legacy does not silently bind");
   // Debt cleanup: duplicate ownership IDs are not safe as executable rows.
   ZNV3Feature *dupA=[ZNV3Feature feature:@"dup-a" detail:@"" module:@"UnityFramework"];
   ZNV3PatchRule *dupARule=[ZNV3PatchRule emptyRule];

@@ -141,8 +141,11 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
      !ZNDecodeValueConfig(d[@"parameters"],(ZNV3FeatureType)button.integerValue,&valueConfig)){
    [quarantine addObject:entry];continue;
   }
+  id pin=d[@"boundImageUUID"];
+  if(pin&&!ZNV3ValidBoundImageUUID(pin)){[quarantine addObject:entry];continue;}
   ZNV3Feature *f=[ZNV3Feature feature:name detail:detail module:module];
   f.identifier=uid;f.buttonType=(ZNV3FeatureType)button.integerValue;
+  f.boundImageUUID=pin;
   if(valueConfig)f.valueConfig=valueConfig;
   for(NSDictionary *r in rules){
    ZNV3PatchRule *rule=[ZNV3PatchRule emptyRule];
@@ -168,6 +171,9 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
      !ZNV3FeatureTypeIsValid(f.buttonType)||f.rules.count>128) {
    if(error)*error=ZNError(10,@"功能字段校验失败");return NO;
   }
+  if(f.boundImageUUID.length&&!ZNV3ValidBoundImageUUID(f.boundImageUUID)){
+   if(error)*error=ZNError(14,@"绑定 Mach-O UUID 格式无效");return NO;
+  }
   [featureIDs addObject:f.identifier];
   BOOL numeric=f.buttonType==ZNV3FeatureTypeNumberInput||f.buttonType==ZNV3FeatureTypeSlider;
   if(numeric && (![f.valueConfig isValidForFeatureType:f.buttonType] ||
@@ -191,6 +197,7 @@ static NSDictionary *ZNEncodeValueConfig(ZNV3ValueConfig *v,ZNV3FeatureType type
   }
   NSMutableDictionary *item=[@{@"id":f.identifier?:@"",@"name":f.name,@"detail":f.detail?:@"",
     @"module":f.module,@"buttonType":@(f.buttonType),@"rules":rules} mutableCopy];
+  if(f.boundImageUUID.length)item[@"boundImageUUID"]=f.boundImageUUID;
   if(numeric)item[@"parameters"]=ZNEncodeValueConfig(f.valueConfig,f.buttonType);
   [items addObject:item];
  }

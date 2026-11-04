@@ -75,11 +75,21 @@ static inline NSString *ZNV3NumericTypeName(NSInteger t) {
 @property(nonatomic,copy) NSString *name;
 @property(nonatomic,copy) NSString *detail;
 @property(nonatomic,copy) NSString *module;
+@property(nonatomic,copy) NSString *boundImageUUID;
 @property(nonatomic,assign) ZNV3FeatureType buttonType;
 @property(nonatomic,strong) ZNV3ValueConfig *valueConfig;
 @property(nonatomic,strong) NSMutableArray<ZNV3PatchRule *> *rules;
 + (instancetype)feature:(NSString *)name detail:(NSString *)detail module:(NSString *)module;
 @end
+static inline BOOL ZNV3ValidBoundImageUUID(NSString *value) {
+ if(![value isKindOfClass:NSString.class]||value.length!=36)return NO;
+ NSUUID *uuid=[[NSUUID alloc]initWithUUIDString:value];
+ return uuid && [uuid.UUIDString caseInsensitiveCompare:value]==NSOrderedSame;
+}
+static inline BOOL ZNV3MatchesBoundImageUUID(NSString *saved,NSString *actual) {
+ return ZNV3ValidBoundImageUUID(saved)&&ZNV3ValidBoundImageUUID(actual)&&
+        [saved caseInsensitiveCompare:actual]==NSOrderedSame;
+}
 @interface ZNV3FeatureStore : NSObject
 @property(nonatomic,strong,readonly) NSMutableArray<ZNV3Feature *> *features;
 @property(nonatomic,strong) ZNV3Feature *draft;

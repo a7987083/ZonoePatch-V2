@@ -103,6 +103,7 @@ static BOOL ZNValidScalar(double value,ZNV3NumericType type) {
  ZNV3Feature *source=self.features[index];
  ZNV3Feature *draft=[ZNV3Feature feature:source.name detail:source.detail module:source.module];
  draft.identifier=source.identifier;draft.buttonType=source.buttonType;
+ draft.boundImageUUID=source.boundImageUUID;
  draft.valueConfig=[source.valueConfig copy]?:[ZNV3ValueConfig defaults];
  for(ZNV3PatchRule *item in source.rules) {
    ZNV3PatchRule *r=[ZNV3PatchRule emptyRule];r.identifier=item.identifier;
