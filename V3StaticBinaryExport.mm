@@ -7,6 +7,8 @@
 #import "V3FeatureModels.h"
 #import "V3AddressResolver.h"
 #import "ZNTypedMachOBuilder.h"
+#import "V3UnifiedBuildPlanner.h"
+#include "ZNMixedDescriptor.hpp"
 #import <mach-o/loader.h>
 #import <sys/stat.h>
 #include <string.h>
@@ -107,6 +109,108 @@ static BOOL P6CheckStaticArtifact(NSString *path,ZNV3StaticBuildPlan *plan,NSStr
  return YES;
 }
 @implementation ZNV3StaticBinaryExport
++ (NSString *)generateMixedMetadataForFeatures:(NSArray<ZNV3Feature *> *)features error:(NSError **)error {
+ NSError *e=nil;
+ NSDictionary *preflight=[ZNV3UnifiedBuildPlanner preflightManifestForFeatures:features error:&e];
+ if(!preflight){if(error)*error=e?:P6Error(30,@"混合 BuildPlan 预检失败");return nil;}
+ NSMutableArray<ZNV3Feature *> *toggles=[NSMutableArray array],*numerics=[NSMutableArray array];
+ for(ZNV3Feature *f in features)
+  if(f.buttonType==ZNV3FeatureTypeToggle)[toggles addObject:f];else [numerics addObject:f];
+ if(!toggles.count||!numerics.count){
+  if(error)*error=P6Error(31,@"混合导出至少需要一个普通开关和一个数值功能");return nil;
+ }
+ ZNV3StaticBuildPlan *staticPlan=[ZNV3StaticBuildPlanner planForFeatures:toggles error:&e];
+ if(!staticPlan){if(error)*error=e?:P6Error(32,@"静态开关预检失败");return nil;}
+ if(![staticPlan.imageUUID isEqualToString:preflight[@"imageUUID"]]||
+    ![staticPlan.sourcePath isEqualToString:preflight[@"sourcePath"]]){
+  if(error)*error=P6Error(33,@"静态与数值规则的映像身份不一致");return nil;
+ }
+ ZNMixedDescriptor::Package package;
+ for(ZNV3Feature *f in numerics){
+  NSData *legacy=[ZNV3StaticBuildPlanner typedDescriptorForFeature:f error:&e];
+  std::vector<ZNTypedDescriptor::Record> records;std::string reason;
+  if(!legacy||!ZNTypedDescriptor::decode((const uint8_t *)legacy.bytes,legacy.length,
+                                          records,reason)||records.empty()){
+   if(error)*error=e?:P6Error(34,@"数值规则再次预检失败");return nil;
+  }
+  if(package.records.size()+records.size()>128){
+   if(error)*error=P6Error(35,@"数值规则总数超过 128");return nil;
+  }
+  ZNMixedDescriptor::Feature owner;
+  owner.id=std::string(f.identifier.UTF8String);
+  owner.name=std::string(f.name.UTF8String);
+  owner.start=(uint16_t)package.records.size();
+  owner.count=(uint16_t)records.size();
+  owner.kind=records.front().kind;
+  owner.type=records.front().type;
+  package.features.push_back(std::move(owner));
+  package.records.insert(package.records.end(),records.begin(),records.end());
+ }
+ std::vector<uint8_t> encoded;std::string reason;
+ if(!ZNMixedDescriptor::encode(package,encoded,reason)){
+  if(error)*error=P6Error(36,[NSString stringWithFormat:@"ZNM2 编码失败：%s",reason.c_str()]);return nil;
+ }
+ NSData *descriptor=[NSData dataWithBytes:encoded.data() length:encoded.size()];
+ NSFileManager *fm=NSFileManager.defaultManager;
+ NSString *root=[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ZonoePatchOutput"];
+ if(![fm createDirectoryAtPath:root withIntermediateDirectories:YES attributes:nil error:&e]){
+  if(error)*error=e;return nil;
+ }
+ NSString *token=NSUUID.UUID.UUIDString;
+ NSString *stage=[root stringByAppendingPathComponent:[@".p106-mixed-" stringByAppendingString:token]];
+ NSString *dest=[root stringByAppendingPathComponent:[@"P10-Mixed-Metadata-" stringByAppendingString:token]];
+ if(![fm createDirectoryAtPath:stage withIntermediateDirectories:NO attributes:nil error:&e]){
+  if(error)*error=e;return nil;
+ }
+ NSString *failure=nil,*generated=nil;NSDictionary *metadata=nil,*signature=nil;
+ NSString *name=staticPlan.sourcePath.lastPathComponent;BOOL succeeded=NO;
+ do {
+  if(![ZNV3StaticBinaryBuilder buildPlan:staticPlan inDirectory:stage
+        outputPath:&generated metadata:&metadata error:&failure])break;
+  NSString *mixed=[stage stringByAppendingPathComponent:[@".mixed-" stringByAppendingString:token]];
+  if(![ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:descriptor
+                                        source:generated output:mixed error:&e]){
+   failure=e.localizedDescription?:@"混合描述符写入失败";break;
+  }
+  if(!ZNAdhocResignMachOAtPath(mixed,&signature,&failure))break;
+  if(![signature[@"verified"] boolValue]){failure=@"CodeDirectory 读回校验失败";break;}
+  if(!P6CheckStaticArtifact(mixed,staticPlan,&failure))break;
+  NSData *readback=[ZNTypedMachOBuilder extractDescriptor:mixed error:&e];
+  if(![readback isEqualToData:descriptor]){
+   failure=e.localizedDescription?:@"ZNM2 元数据读回不匹配";break;
+  }
+  NSString *finalFile=[stage stringByAppendingPathComponent:name];
+  if(![fm moveItemAtPath:mixed toPath:finalFile error:&e]){
+   failure=e.localizedDescription?:@"重命名混合 Mach-O 失败";break;
+  }
+  [fm removeItemAtPath:generated error:nil];
+  NSDictionary *report=@{
+   @"schema":@"com.zonoe.v3.mixed-metadata-export",@"version":@2,
+   @"staticToggleExecutable":@YES,@"numericExecutionAvailable":@NO,
+   @"numericMetadataOnly":@YES,@"finalPackageResignRequired":@YES,
+   @"module":staticPlan.module?:@"",@"imageUUID":staticPlan.imageUUID?:@"",
+   @"toggleFeatures":@(toggles.count),@"numericFeatures":@(numerics.count),
+   @"numericRules":@(package.records.size()),@"features":preflight[@"features"]?:@[],
+   @"output":name,@"signature":signature?:@{},@"builder":metadata?:@{}
+  };
+  NSData *json=[NSJSONSerialization dataWithJSONObject:report
+         options:NSJSONWritingPrettyPrinted error:&e];
+  if(!json||![json writeToFile:[stage stringByAppendingPathComponent:@"build_report.json"]
+                       options:NSDataWritingAtomic error:&e]){
+   failure=e.localizedDescription?:@"混合报告写入失败";break;
+  }
+  if([fm fileExistsAtPath:dest]||![fm moveItemAtPath:stage toPath:dest error:&e]){
+   failure=e.localizedDescription?:@"发布混合输出失败";break;
+  }
+  succeeded=YES;
+ }while(0);
+ if(!succeeded){
+  [fm removeItemAtPath:stage error:nil];
+  if(error)*error=P6Error(37,failure?:@"混合构建失败");return nil;
+ }
+ return [dest stringByAppendingPathComponent:name];
+}
+
 + (NSString *)generateTypedMetadataForFeature:(ZNV3Feature *)feature error:(NSError **)error {
  NSError *preflightError=nil;
  NSData *descriptor=[ZNV3StaticBuildPlanner typedDescriptorForFeature:feature error:&preflightError];
