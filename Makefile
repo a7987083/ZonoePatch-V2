@@ -7,7 +7,7 @@ ZonoePatchV3_CFLAGS = -fobjc-arc -fblocks -std=c++17
 ZonoePatchV3_FRAMEWORKS = UIKit QuartzCore Foundation
 # Customer build ships only UI, installed Static Dispatch catalog and RW slot transaction.
 # No static generator, Runtime Bytes backend, JSON persistence or developer controls.
-ZonoePatchCustomer_FILES = Tweak.mm V3CustomerHost.mm V3CustomerMenuController.mm V3CustomerRuntime.mm V3StaticSlotTransaction.mm
+ZonoePatchCustomer_FILES = Tweak.mm V3CustomerHost.mm V3CustomerMenuController.mm V3CustomerRuntime.mm V3StaticSlotTransaction.mm ZNValueCodec.cpp ZNTypedDescriptor.cpp ZNTypedValueTransaction.cpp ZNLiveTypedValueBackend.mm
 ZonoePatchCustomer_CFLAGS = -fobjc-arc -fblocks -std=c++17
 ZonoePatchCustomer_FRAMEWORKS = UIKit QuartzCore Foundation
 include $(THEOS_MAKE_PATH)/tweak.mk
