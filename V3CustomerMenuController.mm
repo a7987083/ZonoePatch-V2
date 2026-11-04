@@ -395,6 +395,8 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  field.placeholder=@"数值";
  field.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
  field.tag=(NSInteger)index;
+ [field addTarget:self action:@selector(typedBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
+ [field addTarget:self action:@selector(typedEndEditing:) forControlEvents:UIControlEventEditingDidEnd];
  [field addTarget:self action:@selector(typedFieldChanged:) forControlEvents:UIControlEventEditingChanged];
  [panel addSubview:field];
  UIButton *button=[UIButton buttonWithType:UIButtonTypeSystem];
@@ -460,6 +462,14 @@ static BOOL ZNTUISliderSupported(ZNTypedCustomerFeature *feature, double *minimu
  [self.typedInputs addObject:field];
  [self.typedSliders addObject:slider];
  [self.typedValueLabels addObject:value];
+}
+- (void)typedBeginEditing:(UITextField *)field {
+ (void)field;
+ if(self.beginNumericEditingBlock)self.beginNumericEditingBlock();
+}
+- (void)typedEndEditing:(UITextField *)field {
+ (void)field;
+ if(self.endNumericEditingBlock)self.endNumericEditingBlock();
 }
 - (void)typedFieldChanged:(UITextField *)field {
  NSUInteger i=(NSUInteger)field.tag;
