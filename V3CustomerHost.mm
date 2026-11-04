@@ -94,8 +94,8 @@
     UIInterfaceOrientationMaskLandscape:UIInterfaceOrientationMaskPortrait;
  self.controller.hostOrientationMask=mask;
  // Layout uses the same dimensions and catalog snapshot as the controller.
- CGFloat contentHeight=ZNCustomerContentHeight(self.controller.presentedFeatureCount,
-                                             self.controller.presentedRecoveryLocked);
+ CGFloat contentHeight=ZNCustomerMixedContentHeight(self.controller.presentedFeatureCount,
+      self.controller.presentedTypedFeatureCount,self.controller.presentedRecoveryLocked);
  CGFloat width=MIN(300.0,MAX(120.0,CGRectGetWidth(sceneBounds)-28.0));
  CGFloat height=MIN(contentHeight,MAX(60.0,CGRectGetHeight(sceneBounds)-16.0));
  // Preserve the dragged position proportionally across scene resize / rotation.
