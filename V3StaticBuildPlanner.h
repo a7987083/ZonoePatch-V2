@@ -37,6 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZNV3StaticBuildPlanner : NSObject
 /// Loaded Mach-O is cross-checked against on-disk content; no write is performed.
+/// P10.3 preflight: validates a numeric data target and emits a versioned typed
+/// descriptor. Never modifies the target binary. Not yet supported by exporter.
++ (nullable NSData *)typedDescriptorForFeature:(ZNV3Feature *)feature
+ error:(NSError * _Nullable * _Nullable)error;
 + (nullable ZNV3StaticBuildPlan *)planForFeature:(ZNV3Feature *)feature
  error:(NSError * _Nullable * _Nullable)error;
 + (nullable ZNV3StaticBuildPlan *)planForFeatures:(NSArray<ZNV3Feature *> *)features
