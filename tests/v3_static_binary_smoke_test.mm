@@ -231,8 +231,9 @@ int main() {
   // real synthetic P9 Mach-O. Does NOT expose a production menu/export API.
   NSString *codeInput=[root stringByAppendingPathComponent:@"source-code-numeric"];
   NSMutableData *codeFixture=[fixture(uuid) mutableCopy];
-  const uint32_t fmovOne=0x1e2e1000u;
+  const uint32_t fmovOne=0x1e2e1000u,movzTen=0x52800140u;
   memcpy((uint8_t*)codeFixture.mutableBytes+0x1100,&fmovOne,4);
+  memcpy((uint8_t*)codeFixture.mutableBytes+0x1120,&movzTen,4);
   check([codeFixture writeToFile:codeInput atomically:YES],"numeric code fixture written");
   ZNArm64CodeSitePlan::Candidate candidate{};
   candidate.featureID="code-slider";candidate.ruleID="code-slider-rule";
@@ -249,8 +250,17 @@ int main() {
   std::string planReason;
   BOOL codePreparedOK=ZNArm64CodeSitePlan::prepare(candidate,allCode,codePrepared,planReason);
   if(!codePreparedOK)fprintf(stderr,"numeric plan: %s\n",planReason.c_str());
-  check(codePreparedOK,"numeric code original verified and staging NOP plan prepared");
-  if(codePreparedOK) {
+  check(codePreparedOK,"numeric FMOV code staging prepared");
+  candidate.featureID="code-input";candidate.ruleID="code-input-rule";
+  candidate.rva=0x1120;candidate.fileOffset=0x1120;
+  candidate.type=ZNArm64NumericInstruction::ValueType::Int32;
+  const uint32_t inspectedInt[]={0x52800140u,0xd503201fu,0xd503201fu,0xd503201fu};
+  candidate.words=inspectedInt;candidate.availableWords=4;
+  ZNArm64CodeSitePlan::Prepared inputPrepared{};
+  BOOL inputPreparedOK=ZNArm64CodeSitePlan::prepare(candidate,allCode,inputPrepared,planReason);
+  if(!inputPreparedOK)fprintf(stderr,"input plan: %s\n",planReason.c_str());
+  check(inputPreparedOK,"numeric MOVZ Int32 code staging prepared");
+  if(codePreparedOK&&inputPreparedOK) {
    NSString *codeDir=[root stringByAppendingPathComponent:@"code-cell"];
    [fm createDirectoryAtPath:codeDir withIntermediateDirectories:YES attributes:nil error:nil];
    ZNV3StaticBuildEntry *codeToggle=[[ZNV3StaticBuildEntry alloc]
@@ -266,9 +276,17 @@ int main() {
       initWithRuleID:@"code-slider-rule" featureKey:@"code-slider" featureName:@"Code Float32"
       uuid:uuid.UUIDString path:codeInput rva:0x1100 fileOffset:0x1100
       original:codeOriginal patch:codeStaging];
+   NSData *inputOriginal=[NSData dataWithBytes:inputPrepared.originalBytes.data()
+                                      length:inputPrepared.originalBytes.size()];
+   NSData *inputStaging=[NSData dataWithBytes:inputPrepared.stagingNopBytes.data()
+                                     length:inputPrepared.stagingNopBytes.size()];
+   ZNV3StaticBuildEntry *inputEntry=[[ZNV3StaticBuildEntry alloc]
+      initWithRuleID:@"code-input-rule" featureKey:@"code-input" featureName:@"Code Int32"
+      uuid:uuid.UUIDString path:codeInput rva:0x1120 fileOffset:0x1120
+      original:inputOriginal patch:inputStaging];
    ZNV3StaticBuildPlan *codePlan=[[ZNV3StaticBuildPlan alloc]
       initWithModule:@"UnityFramework" name:@"P10.7.4 synthetic mixed"
-      featureCount:2 entries:@[codeToggle,codeEntry]];
+      featureCount:3 entries:@[codeToggle,codeEntry,inputEntry]];
    check([ZNV3StaticBuildPlan validateEntries:codePlan.entries error:nil],
          "numeric synthetic P9 plan disjoint");
    NSString *codeOutput=nil,*codeBuildError=nil;
@@ -280,14 +298,21 @@ int main() {
     ZNArm64ValueCellPostprocess::Installed installed{};
     std::string stageError;
     bool inserted=ZNArm64ValueCellPostprocess::install(
-       std::string(codeOutput.UTF8String),codePrepared,1,0,1,installed,stageError);
+       std::string(codeOutput.UTF8String),codePrepared,1,0,2,installed,stageError);
     if(!inserted)fprintf(stderr,"P10.7.4 install: %s\n",stageError.c_str());
-    check(inserted,"generated P9 ON fragment converted to LDR and RW Value Cell");
-    if(inserted) {
+    check(inserted,"generated Float32 ON fragment converted to LDR and RW Value Cell");
+    ZNArm64ValueCellPostprocess::Installed inputInstalled{};
+    bool inputInserted=inserted&&ZNArm64ValueCellPostprocess::install(
+       std::string(codeOutput.UTF8String),inputPrepared,2,1,2,inputInstalled,stageError);
+    if(!inputInserted)fprintf(stderr,"P10.7.4 input install: %s\n",stageError.c_str());
+    check(inputInserted,"generated Int32 ON fragment converted to LDR and RW Value Cell");
+    check(installed.cellRVA!=inputInstalled.cellRVA,"Float32 and Int32 own separate RW cells");
+    if(inserted&&inputInserted) {
      NSData *post=[NSData dataWithContentsOfFile:codeOutput];
      const uint8_t *raw=(const uint8_t*)post.bytes;
      struct mach_header_64 mh={};memcpy(&mh,raw,sizeof(mh));
      size_t p=sizeof(mh);bool sawCell=false,sawLDR=false;
+     bool sawInputCell=false,sawInputLDR=false;
      for(uint32_t j=0;j<mh.ncmds;j++){
       struct load_command lc={};memcpy(&lc,raw+p,sizeof(lc));
       if(lc.cmd==LC_SEGMENT_64){
@@ -298,23 +323,71 @@ int main() {
         uint32_t insn=0;memcpy(&insn,raw+sg.fileoff+installed.onInstructionRVA-start,4);
         sawLDR=insn==installed.ldrInstruction&&((insn&0xff00001fu)==0x1c000000u);
        }
+       if(!strncmp(sg.segname,"__ZNTEXT",16)&&inputInstalled.onInstructionRVA>=start&&
+          inputInstalled.onInstructionRVA-start+4<=sg.filesize){
+        uint32_t insn=0;memcpy(&insn,raw+sg.fileoff+inputInstalled.onInstructionRVA-start,4);
+        sawInputLDR=insn==inputInstalled.ldrInstruction&&((insn&0xff00001fu)==0x18000000u);
+       }
        if(!strncmp(sg.segname,"__ZNDATA",16)&&installed.cellRVA>=start&&
           installed.cellRVA-start+4<=sg.filesize) {
         uint32_t value=0;memcpy(&value,raw+sg.fileoff+installed.cellRVA-start,4);
         sawCell=value==0x3f800000u;
        }
+       if(!strncmp(sg.segname,"__ZNDATA",16)&&inputInstalled.cellRVA>=start&&
+          inputInstalled.cellRVA-start+4<=sg.filesize){
+        uint32_t value=0;memcpy(&value,raw+sg.fileoff+inputInstalled.cellRVA-start,4);
+        sawInputCell=value==10u;
+       }
       }
       p+=lc.cmdsize;
      }
-     check(sawLDR&&sawCell,"LDR S0 and original 1.0f cell bytes read back");
+     check(sawLDR&&sawCell&&sawInputLDR&&sawInputCell,
+       "both Float32/Int32 LDR opcodes and original RW cell bytes read back");
      check(!ZNArm64ValueCellPostprocess::install(
-       std::string(codeOutput.UTF8String),codePrepared,1,0,1,installed,stageError),
+       std::string(codeOutput.UTF8String),codePrepared,1,0,2,installed,stageError),
        "repeated Value Cell install is rejected");
      NSDictionary *codeSigned=nil;NSString *codeSignError=nil;
      check(ZNAdhocResignMachOAtPath(codeOutput,&codeSigned,&codeSignError),
        "staging Value Cell Mach-O can be re-signed");
      check([codeSigned[@"verified"] boolValue],
        "signed staging Value Cell CodeDirectory verified");
+     // ZNM2 still records only writable numeric targets, which are now owned
+     // __ZNDATA cells rather than the original R-X source instruction RVAs.
+     ZNMixedDescriptor::Package codeMixed;
+     codeMixed.records={
+       {ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float32,
+        installed.cellRVA,true,"0","100","1","1"},
+       {ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::Int32,
+        inputInstalled.cellRVA,false,"0","1000","",""}
+     };
+     codeMixed.features={
+       {"code-slider","FMOV Slider",0,1,
+        ZNTypedDescriptor::FeatureKind::Slider,ZNValueCodec::Type::Float32},
+       {"code-input","MOVZ Input",1,1,
+        ZNTypedDescriptor::FeatureKind::Input,ZNValueCodec::Type::Int32}
+     };
+     std::vector<uint8_t> mixedBytes;std::string mixedError;
+     check(ZNMixedDescriptor::encode(codeMixed,mixedBytes,mixedError),
+       "ZNM2 code-cell dual-feature descriptor encoded");
+     NSData *descriptor=[NSData dataWithBytes:mixedBytes.data() length:mixedBytes.size()];
+     NSString *mixedCode=[codeDir stringByAppendingPathComponent:@"code-mixed-output"];
+     NSError *embedCodeError=nil;
+     BOOL codeEmbedded=[ZNTypedMachOBuilder embedMixedDescriptorIntoPreparedStatic:
+         descriptor source:codeOutput output:mixedCode error:&embedCodeError];
+     if(!codeEmbedded)fprintf(stderr,"P10.7.4 ZNM2 embed: %s\n",
+         embedCodeError.localizedDescription.UTF8String?: "none");
+     check(codeEmbedded,"P9+Float32 Slider+Int32 Input ZNM2 Mach-O generated");
+     if(codeEmbedded){
+      NSData *roundtrip=[ZNTypedMachOBuilder extractDescriptor:mixedCode error:&embedCodeError];
+      check([roundtrip isEqualToData:descriptor],"both code-cell IDs/RVAs survive Mach-O embedding");
+      NSDictionary *codeMixedSign=nil;NSString *codeMixedErr=nil;
+      check(ZNAdhocResignMachOAtPath(mixedCode,&codeMixedSign,&codeMixedErr),
+        "P9+dual-code-cell mixed Mach-O re-sign");
+      check([codeMixedSign[@"verified"] boolValue],
+        "dual-code-cell mixed CodeDirectory verifies");
+      check([[ZNTypedMachOBuilder extractDescriptor:mixedCode error:&embedCodeError]
+                isEqualToData:descriptor],"dual-code-cell ZNM2 survives signing");
+     }
     }
    }
   }
