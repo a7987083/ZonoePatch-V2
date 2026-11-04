@@ -8,6 +8,17 @@ int main(){
   NSArray<ZNMixedCustomerFeature *> *catalog=[r discover];
   check(catalog!=nil,"catalog not nil");
   check(!r.recoveryFailed,"fresh coordinator unlocked");
+  // P10.8 UI uses this exact ZNM2 catalog contract, not legacy ZNT1.
+  check([ZNMixedCustomerFeature instancesRespondToSelector:@selector(minimum)],
+        "ZNM2 feature exposes slider minimum");
+  check([ZNMixedCustomerFeature instancesRespondToSelector:@selector(maximum)],
+        "ZNM2 feature exposes slider maximum");
+  check([ZNMixedCustomerFeature instancesRespondToSelector:@selector(step)],
+        "ZNM2 feature exposes slider step");
+  check([ZNMixedCustomerFeature instancesRespondToSelector:@selector(defaultValue)],
+        "ZNM2 feature exposes slider default");
+  check([ZNMixedCustomerFeature instancesRespondToSelector:@selector(catalogIdentity)],
+        "ZNM2 feature exposes per-image catalog identity");
   ZNMixedCustomerFeature *forged=[ZNMixedCustomerFeature new];
   NSError *error=nil;
   check(![r applyValue:@"10" feature:forged error:&error],"untrusted feature rejected before write");
