@@ -32,6 +32,13 @@ jobs:
             ZNArm64NumericInstruction.cpp tests/zn_arm64_numeric_instruction_test.cpp \
             -o "$RUNNER_TEMP/zn_arm64_numeric_instruction"
           "$RUNNER_TEMP/zn_arm64_numeric_instruction"
+      - name: Test P10.7.2 ARM64 Value Cell Literal Encoder
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
+            ZNArm64ValueCellPlan.cpp tests/zn_arm64_value_cell_plan_test.cpp \
+            -o "$RUNNER_TEMP/zn_arm64_value_cell_plan"
+          "$RUNNER_TEMP/zn_arm64_value_cell_plan"
       - name: Test P10.6.1 Unified BuildPlan Contract
         run: |
           set -euo pipefail
