@@ -18,3 +18,10 @@
 - Wired Customer repeated Apply to active update, input Apply/Update button, slider TouchUp update while ON, OFF restores Original.
 - Added fault-injected transaction tests including failed rollback latching recovery lock. No ZNM2/ZCB1/mixed Builder introduced.
 - Corrected prior UUID regression test type error: `NSArray<ZNV3Feature *> *` for two typed arrays (`39dd2500`).
+
+## D05 independent Developer static feature toggles
+- Fixed P9 feature-specific resolution: select group-owned entries from a multi-feature static descriptor instead of requiring a feature to own every entry.
+- Added a small, injectable `V3StaticFeatureCoordinator` to own feature/slot snapshots without duplicating the transaction backend.
+- Added synthetic host regressions for A/B concurrent active state, individual restore, ownership conflict, injected partial failure and global recovery lock.
+- Updated existing Theos Developer sources and CI, retaining P9 on-disk entry ABI and the Customer runtime unchanged.
+- Remaining: actual P9 multi-feature Mach-O/dyld and real-device validation; D06 global multi-slot atomicity.
