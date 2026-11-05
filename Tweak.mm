@@ -105,7 +105,15 @@ extern void ZNV3ShowMenu(UIWindow *host);
  UIWindow *candidate=nil;
  // The app delegate's main window is a more reliable anchor than whichever
  // temporary normal-level UIWindow currently happens to be key.
- UIWindow *delegateWindow=app.delegate.window;
+ // UIApplicationDelegate.window is optional. Some injected hosts (including
+ // TrollStore) do not implement -window: sending it directly crashes with
+ // doesNotRecognizeSelector: on the main queue.
+ UIWindow *delegateWindow=nil;
+ id<UIApplicationDelegate> delegate=app.delegate;
+ if([delegate respondsToSelector:@selector(window)]){
+  id value=[delegate window];
+  if([value isKindOfClass:UIWindow.class])delegateWindow=(UIWindow *)value;
+ }
  if([self isUsableHost:delegateWindow])candidate=delegateWindow;
  if(!candidate){
   if(@available(iOS 13.0,*)){
