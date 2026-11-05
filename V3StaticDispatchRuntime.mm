@@ -1,5 +1,5 @@
 #import "V3StaticDispatchRuntime.h"
-#import "V3StaticSlotTransaction.h"
+#import "V3StaticFeatureCoordinator.h"
 #import "V3StaticRuleIdentity.h"
 #import "V3FeatureModels.h"
 #import "V3AddressResolver.h"
@@ -55,15 +55,9 @@ static BOOL ZNSTRegion(uintptr_t address,size_t size,vm_prot_t required) {
 }
 @end
 
-@interface ZNSTEntry : NSObject
-@property(nonatomic,assign) uintptr_t slot;
-@property(nonatomic,assign) uint64_t offTarget;
-@property(nonatomic,assign) uint64_t onTarget;
-@end
-@implementation ZNSTEntry @end
-
+ 
 // Refuse unknown/unprepared images. Only a single owned __ZNDATA descriptor table is accepted.
-static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
+static NSArray<ZNV3StaticFeatureSlot *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
  ZNV3ModuleInfo *image=[ZNV3ModuleResolver resolveModule:feature.module];
  if(!image){if(error)*error=ZNSTError(20,@"目标模块尚未加载");return nil;}
  struct mach_header_64 mh={};
@@ -160,8 +154,13 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
  NSUInteger ruleCount=0;
  for(ZNV3PatchRule *rule in feature.rules)
   if(rule.offsetText.length||rule.patchText.length)ruleCount++;
- if(ruleCount!=header.count){if(error)*error=ZNSTError(30,@"生成二进制与当前功能规则数量不匹配");return nil;}
- NSMutableArray<ZNSTEntry *> *result=[NSMutableArray array];
+ BOOL multi=(header.flags&ZN44_STATIC_HEADER_FLAG_MULTI_FEATURE_V1)!=0;
+ if(!ruleCount||ruleCount>header.count||(!multi&&ruleCount!=header.count)){
+  if(error)*error=ZNSTError(30,@"当前功能的规则数与预埋映像不匹配");return nil;
+ }
+ NSString *featureGroup=multi?[feature.identifier substringToIndex:MIN((NSUInteger)23,feature.identifier.length)]:nil;
+ if(multi&&!featureGroup.length){if(error)*error=ZNSTError(34,@"P9 功能所有权标识缺失");return nil;}
+ NSMutableArray<ZNV3StaticFeatureSlot *> *result=[NSMutableArray array];
  NSMutableSet<NSNumber *> *used=[NSMutableSet set];
  for(ZNV3PatchRule *rule in feature.rules){
   if(!rule.offsetText.length&&!rule.patchText.length)continue;
@@ -176,6 +175,11 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
    ZN44StaticEntry &entry=entries[i];
    ZN44FeatureDescriptionEntry &desc=descriptions[i];
    if(desc.patchID!=entry.patchID||desc.length>ZN44_FEATURE_DESC_MAX_UTF8)continue;
+   if(multi){
+    NSString *group=[[NSString alloc]initWithBytes:entry.group
+      length:strnlen(entry.group,sizeof(entry.group)) encoding:NSUTF8StringEncoding];
+    if(![group isEqualToString:featureGroup])continue;
+   }
    NSString *descText=[[NSString alloc]initWithBytes:desc.text length:desc.length encoding:NSUTF8StringEncoding];
    ZN55DecodedRVAs rvas={};
    if(![descText isEqualToString:binding]||
@@ -191,92 +195,46 @@ static NSArray<ZNSTEntry *> *ZNSTResolve(ZNV3Feature *feature,NSError **error) {
    uintptr_t slot=table+sizeof(header)+(uintptr_t)i*sizeof(ZN44StaticEntry);
    if(!ZNSTRegion(off,4,VM_PROT_EXECUTE)||!ZNSTRegion(on,4,VM_PROT_EXECUTE)||
       !ZNSTRegion(slot,8,VM_PROT_READ|VM_PROT_WRITE))continue;
-   ZNSTEntry *e=[ZNSTEntry new];e.slot=slot;e.offTarget=off;e.onTarget=on;
+   ZNV3StaticFeatureSlot *e=[[ZNV3StaticFeatureSlot alloc]
+     initWithAddress:slot offTarget:off onTarget:on];
    [result addObject:e];[used addObject:@(i)];found=YES;break;
   }
   if(!found){if(error)*error=ZNSTError(32,@"静态规则身份不匹配（需要用当前 P6-C 重新生成二进制）");return nil;}
  }
- if(result.count!=header.count){if(error)*error=ZNSTError(33,@"静态规则绑定不完整");return nil;}
+ if(result.count!=ruleCount){if(error)*error=ZNSTError(33,@"当前功能的静态规则绑定不完整");return nil;}
  return result;
 }
 @interface ZNV3StaticDispatchRuntime ()
-@property(nonatomic,strong) ZNV3StaticSlotTransaction *transaction;
-@property(nonatomic,strong) id<ZNV3StaticSlotBackend> backend;
-@property(nonatomic,copy) NSString *activeFeatureID;
-@property(nonatomic,strong) NSArray<ZNSTEntry *> *activeEntries;
-@property(nonatomic,copy) NSArray<NSNumber *> *activePreviousValues;
+@property(nonatomic,strong) ZNV3StaticFeatureCoordinator *coordinator;
 @end
 @implementation ZNV3StaticDispatchRuntime
-+ (instancetype)shared{
++ (instancetype)shared {
  static ZNV3StaticDispatchRuntime *instance;static dispatch_once_t once;
  dispatch_once(&once,^{instance=[ZNV3StaticDispatchRuntime new];});return instance;
 }
 - (instancetype)init{
- if((self=[super init])){_backend=[ZNSTSlotBackend new];
-  _transaction=[[ZNV3StaticSlotTransaction alloc]initWithBackend:_backend];}return self;
+ if((self=[super init]))
+  _coordinator=[[ZNV3StaticFeatureCoordinator alloc]initWithBackend:[ZNSTSlotBackend new]];
+ return self;
 }
-- (BOOL)recoveryFailed{return self.transaction.recoveryFailed;}
-- (BOOL)hasActiveFeature{@synchronized(self){return self.activeFeatureID.length>0;}}
-- (NSString *)lastDiagnostic{return self.transaction.lastDiagnostic;}
-- (BOOL)isEnabledForFeature:(NSString *)identifier {
- @synchronized(self){return identifier.length&&[self.activeFeatureID isEqualToString:identifier]&&
-  !self.transaction.recoveryFailed;}
+- (BOOL)recoveryFailed{return self.coordinator.recoveryFailed;}
+- (BOOL)hasActiveFeature{return self.coordinator.hasActiveFeature;}
+- (NSString *)lastDiagnostic{return self.coordinator.lastDiagnostic;}
+- (BOOL)isEnabledForFeature:(NSString *)identifier{
+ return [self.coordinator isEnabledForFeature:identifier];
 }
 - (BOOL)setEnabled:(BOOL)enabled forFeature:(ZNV3Feature *)feature error:(NSError **)error {
  @synchronized(self){
-  if(self.transaction.recoveryFailed){
-   if(error)*error=ZNSTError(40,@"Static Slot 回滚失败，已锁定");return NO;
+  if(self.coordinator.recoveryFailed){
+   if(error)*error=ZNSTError(40,@"静态 Slot 恢复失败，执行器已锁定");return NO;
   }
-  if(!feature.identifier.length){if(error)*error=ZNSTError(41,@"功能 ID 为空");return NO;}
-  if(enabled&&self.activeFeatureID.length){
-   if(error)*error=ZNSTError(42,@"已有静态功能活动，请先恢复；暂不支持多功能并发");return NO;
-  }
-  if(!enabled&&![self.activeFeatureID isEqualToString:feature.identifier]){
-   if(error)*error=ZNSTError(43,@"目标功能没有可恢复的静态事务");return NO;
+  if(!feature.identifier.length||feature.buttonType!=ZNV3FeatureTypeToggle){
+   if(error)*error=ZNSTError(41,@"静态功能 ID 或类型无效");return NO;
   }
   NSError *resolveError=nil;
-  NSArray<ZNSTEntry *> *entries=ZNSTResolve(feature,&resolveError);
-  if(!entries){if(error)*error=resolveError;return NO;}
-  if(!enabled){
-   if(entries.count!=self.activeEntries.count){
-    if(error)*error=ZNSTError(44,@"活动事务规则数量已发生变化");return NO;
-   }
-   for(NSUInteger i=0;i<entries.count;i++)
-    if(entries[i].slot!=self.activeEntries[i].slot||
-       entries[i].onTarget!=self.activeEntries[i].onTarget){
-     if(error)*error=ZNSTError(45,@"活动静态映像身份或 Slot 地址发生变化");return NO;
-    }
-  }
-  NSMutableArray *ops=[NSMutableArray arrayWithCapacity:entries.count];
-  NSMutableArray<NSNumber *> *previous=[NSMutableArray arrayWithCapacity:entries.count];
-  for(ZNSTEntry *entry in entries) {
-   uint64_t before=0;
-   if(![self.backend readAt:entry.slot value:&before error:error])return NO;
-   if(enabled){
-    [previous addObject:@(before)];
-    if(before!=0&&before!=entry.offTarget){
-     if(error)*error=ZNSTError(46,@"静态 Slot 已有未知活动目标，拒绝覆盖");return NO;
-    }
-    [ops addObject:[[ZNV3StaticSlotOperation alloc]initWithAddress:entry.slot expected:before desired:entry.onTarget]];
-   }else{
-    if(before!=entry.onTarget){if(error)*error=ZNSTError(47,@"静态 Slot 状态发生变化，拒绝盲目恢复");return NO;}
-    // Restore the exact prior OFF representation (0 or canonical OFF pointer).
-    // Both execute Original, but restoring exact values avoids changing external slot state.
-    if(self.activePreviousValues.count!=entries.count){
-     if(error)*error=ZNSTError(48,@"缺少原始静态 Slot 快照");return NO;
-    }
-    uint64_t oldValue=self.activePreviousValues[ops.count].unsignedLongLongValue;
-    if(oldValue!=0&&oldValue!=entry.offTarget){
-     if(error)*error=ZNSTError(49,@"原始 Slot 快照已无效");return NO;
-    }
-    [ops addObject:[[ZNV3StaticSlotOperation alloc]initWithAddress:entry.slot expected:before desired:oldValue]];
-   }
-  }
-  if(![self.transaction apply:ops error:error])return NO;
-  self.activeFeatureID=enabled?feature.identifier:nil;
-  self.activeEntries=enabled?entries:nil;
-  self.activePreviousValues=enabled?[previous copy]:nil;
-  return YES;
+  NSArray<ZNV3StaticFeatureSlot *> *slots=ZNSTResolve(feature,&resolveError);
+  if(!slots){if(error)*error=resolveError;return NO;}
+  return [self.coordinator setEnabled:enabled featureID:feature.identifier slots:slots error:error];
  }
 }
 @end

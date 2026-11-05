@@ -98,6 +98,14 @@ jobs:
           xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \
             V3StaticSlotTransaction.mm tests/v3_static_slot_transaction_test.mm -o "$RUNNER_TEMP/v3_static_slot_tx"
           "$RUNNER_TEMP/v3_static_slot_tx"
+      - name: Test Developer Multi-Feature Slot Ownership
+        run: |
+          set -euo pipefail
+          xcrun --sdk macosx clang++ -std=c++17 -fobjc-arc -framework Foundation \\
+            V3StaticSlotTransaction.mm V3StaticFeatureCoordinator.mm \\
+            tests/v3_static_feature_coordinator_test.mm \\
+            -o "$RUNNER_TEMP/v3_static_feature_coordinator_test"
+          "$RUNNER_TEMP/v3_static_feature_coordinator_test"
       - name: Install Theos
         run: |
           set -euo pipefail
