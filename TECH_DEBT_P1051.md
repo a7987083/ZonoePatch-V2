@@ -18,7 +18,7 @@
 | D02 | P0 | `V3StaticBuildPlanner.mm` rejects code-section Numeric as RW-only | Open — design once target binary supplied |
 | D03 | P0 | `V3StaticBinaryExport.mm` declares typed metadata only, no runtime code patch | Open — intentional feature gate |
 | D04 | P1 | `ZNTypedCustomerRuntime.mm` does not update an active numeric transaction | Implemented: active update + Original snapshot + fault injection; CI pending |
-| D05 | P1 | `V3StaticDispatchRuntime.mm` allows one active saved feature only | Open — avoid unsafe concurrency workaround |
+| D05 | P1 | `V3StaticDispatchRuntime.mm` allows one active saved feature only | Implemented per-feature slot ownership, host test passed; dylib build/device pending |
 | D06 | P1 | `KNOWN_ISSUES.md` P6-C reports sequential non-atomic multi-rule pointer updates | Open — semantics and device tests required |
 | D07 | P1 | `features-v1.json` does not persist pinned Mach-O UUID | Implemented: explicit-save pin, runtime/static checks; CI/device validation pending |
 | D08 | P2 | Legacy numeric double fallback vs schema-v3 decimal-text precision | Open — preserve old formats; audit migration |
@@ -48,3 +48,10 @@ D10 is a newly confirmed ownership collision issue observed while reviewing pers
 - Customer NumberInput button becomes Apply/Update, and Slider commits a pending value on touch release when enabled. Slider OFF still restores the first Original.
 - New host regressions cover update, out-of-range, changed descriptor/address, multi-rule partial rollback, initial Original restore, external writer interference, and recovery-lock failure.
 - **Verification**: newest D04 Actions `41883259215` queued at time of documentation; iPhone UI / real game not verified.
+
+### D05 implementation
+- Resolve only the selected feature's P9 group entries from the full static table; legacy single-feature images keep exact full-table matching.
+- `V3StaticFeatureCoordinator` owns per-feature previous values and a unique slot-owner index; independent ON/OFF and exact Original restoration use the shared fail-closed transaction.
+- Conflicting owners, changed ON/OFF targets, and external slot modifications fail before mutation. A failed rollback locks the coordinator globally.
+- Synthetic host coverage: two active features, selective restoration, ownership collision, altered identity, partial failure isolation and recovery lock.
+- Actual loaded Mach-O group resolution, iPhone behavior, and multi-thread atomicity remain unverified. D06 non-atomic writes are not resolved by this change.
