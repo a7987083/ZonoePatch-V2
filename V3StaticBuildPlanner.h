@@ -35,6 +35,36 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSDictionary *)manifest;
 @end
 
+
+/**
+ * P10.6 phase 1: read-only cross-kind ownership. A numeric span must have
+ * already passed the typed RW/UUID preflight; this plan never authorizes writes.
+ * It does not alter P9 static entries, typed descriptors or Customer ABI.
+ */
+@interface ZNV3UnifiedNumericSpan : NSObject
+@property(nonatomic,copy,readonly) NSString *featureID;
+@property(nonatomic,copy,readonly) NSString *ruleID;
+@property(nonatomic,copy,readonly) NSString *imageUUID;
+@property(nonatomic,copy,readonly) NSString *sourcePath;
+@property(nonatomic,assign,readonly) uint64_t rva;
+@property(nonatomic,assign,readonly) uint64_t fileOffset;
+@property(nonatomic,assign,readonly) uint64_t width;
+- (instancetype)initWithFeatureID:(NSString *)featureID ruleID:(NSString *)ruleID
+ uuid:(NSString *)uuid path:(NSString *)path rva:(uint64_t)rva
+ fileOffset:(uint64_t)fileOffset width:(uint64_t)width;
+@end
+
+@interface ZNV3UnifiedBuildPlan : NSObject
+@property(nonatomic,copy,readonly) NSString *imageUUID;
+@property(nonatomic,copy,readonly) NSString *sourcePath;
+@property(nonatomic,copy,readonly) NSArray<ZNV3StaticBuildEntry *> *staticEntries;
+@property(nonatomic,copy,readonly) NSArray<ZNV3UnifiedNumericSpan *> *numericSpans;
+/// Cross-kind collision/identity preflight, including both RVA and file offsets.
++ (nullable instancetype)planWithStaticEntries:(NSArray<ZNV3StaticBuildEntry *> *)entries
+ numericSpans:(NSArray<ZNV3UnifiedNumericSpan *> *)spans
+ error:(NSError * _Nullable * _Nullable)error;
+@end
+
 @interface ZNV3StaticBuildPlanner : NSObject
 /// Loaded Mach-O is cross-checked against on-disk content; no write is performed.
 /// P10.3 preflight: validates a numeric data target and emits a versioned typed
