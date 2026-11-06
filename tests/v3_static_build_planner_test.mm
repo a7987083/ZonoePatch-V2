@@ -10,6 +10,10 @@ static ZNV3StaticBuildEntry *entry(NSString *id,NSString *uuid,NSString *path,ui
  return [[ZNV3StaticBuildEntry alloc]initWithRuleID:id uuid:uuid path:path rva:rva fileOffset:file
  original:[NSData dataWithBytes:oldBytes length:4] patch:[NSData dataWithBytes:newBytes length:4]];
 }
+static ZNV3UnifiedNumericSpan *numericSpan(NSString *feature,NSString *rule,uint64_t rva,uint64_t file,uint64_t width) {
+ return [[ZNV3UnifiedNumericSpan alloc]initWithFeatureID:feature ruleID:rule
+  uuid:@"uuid-1" path:@"/tmp/a" rva:rva fileOffset:file width:width];
+}
 int main(void) {
  @autoreleasepool {
   NSError *e=nil;
@@ -29,40 +33,35 @@ int main(void) {
   check(![ZNV3StaticBuildPlan validateEntries:@[a,entry(@"a",@"uuid-1",@"/tmp/a",0x3000,0x3000)] error:&e],"duplicate rule identity rejected");
 
   // P10.6 cross-kind preflight: this cannot enable mixed binary export.
-  ZNV3UnifiedNumericSpan *(^numeric)(NSString *,NSString *,uint64_t,uint64_t,uint64_t)=
-   ^ZNV3UnifiedNumericSpan *(NSString *feature,NSString *rule,uint64_t rva,uint64_t file,uint64_t width) {
-    return [[ZNV3UnifiedNumericSpan alloc]initWithFeatureID:feature ruleID:rule
-      uuid:@"uuid-1" path:@"/tmp/a" rva:rva fileOffset:file width:width];
-   };
   ZNV3UnifiedBuildPlan *unified=[ZNV3UnifiedBuildPlan planWithStaticEntries:@[a]
-    numericSpans:@[numeric(@"n1",@"r1",0x3000,0x4000,4),
-                   numeric(@"n2",@"r2",0x3008,0x4008,8)] error:&e];
+    numericSpans:@[numericSpan(@"n1",@"r1",0x3000,0x4000,4),
+                   numericSpan(@"n2",@"r2",0x3008,0x4008,8)] error:&e];
   check(unified!=nil&&unified.numericSpans.count==2,"mixed disjoint ownership accepted");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[a]
-    numericSpans:@[numeric(@"n1",@"r1",0x1000,0x4000,4)] error:&e],
+    numericSpans:@[numericSpan(@"n1",@"r1",0x1000,0x4000,4)] error:&e],
     "mixed RVA collision rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[a]
-    numericSpans:@[numeric(@"n1",@"r1",0x3000,0x2000,4)] error:&e],
+    numericSpans:@[numericSpan(@"n1",@"r1",0x3000,0x2000,4)] error:&e],
     "mixed file collision rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[]
-    numericSpans:@[numeric(@"n1",@"r1",0x3000,0x4000,4),
-                   numeric(@"n2",@"r2",0x3000,0x5000,4)] error:&e],
+    numericSpans:@[numericSpan(@"n1",@"r1",0x3000,0x4000,4),
+                   numericSpan(@"n2",@"r2",0x3000,0x5000,4)] error:&e],
     "numeric-to-numeric RVA collision rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[]
-    numericSpans:@[numeric(@"n1",@"r1",0x3000,0x4000,4),
-                   numeric(@"n2",@"r2",0x5000,0x4002,2)] error:&e],
+    numericSpans:@[numericSpan(@"n1",@"r1",0x3000,0x4000,4),
+                   numericSpan(@"n2",@"r2",0x5000,0x4002,2)] error:&e],
     "numeric-to-numeric file collision rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[]
-    numericSpans:@[numeric(@"n1",@"r1",0x3000,0x4000,4),
-                   numeric(@"n1",@"r1",0x5000,0x6000,4)] error:&e],
+    numericSpans:@[numericSpan(@"n1",@"r1",0x3000,0x4000,4),
+                   numericSpan(@"n1",@"r1",0x5000,0x6000,4)] error:&e],
     "duplicate numeric owner rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[]
     numericSpans:@[[[ZNV3UnifiedNumericSpan alloc]initWithFeatureID:@"n"
       ruleID:@"r" uuid:@"other" path:@"/tmp/a" rva:0x3000
-      fileOffset:0x4000 width:4],numeric(@"n2",@"r2",0x5000,0x6000,4)] error:&e],
+      fileOffset:0x4000 width:4],numericSpan(@"n2",@"r2",0x5000,0x6000,4)] error:&e],
     "numeric UUID mismatch rejected");
   check(![ZNV3UnifiedBuildPlan planWithStaticEntries:@[]
-    numericSpans:@[numeric(@"n",@"r",0x3001,0x4000,4)] error:&e],
+    numericSpans:@[numericSpan(@"n",@"r",0x3001,0x4000,4)] error:&e],
     "misaligned numeric rejected");
  }
  printf("P6 static planner: %s (%d failures)\n",failed?"FAIL":"PASS",failed);
