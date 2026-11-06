@@ -4,6 +4,7 @@ on:
     branches:
       - ZonoePatch-V3
       - P10.5.1-debt-cleanup
+      - p10.6-unified-buildplan
   workflow_dispatch:
 permissions:
   contents: read
