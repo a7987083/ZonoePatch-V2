@@ -91,6 +91,17 @@ struct Patch { uint64_t offset,value; unsigned width; };
 // Preflight every field before writing any byte: overflow never leaves a partial edit.
 inline bool shiftLinkedit(uint8_t *p,uint64_t size,uint64_t threshold,uint64_t delta,const char **error=nullptr) {
     File f; if(!parse(p,size,f,error))return false;
+    // Segment insertion changes the dyld chained-starts segment ordinals.
+    // Shifting LC_DYLD_CHAINED_FIXUPS.dataoff alone leaves its seg_count and
+    // seg_info_offset[] table stale. Refuse to publish an un-loadable image
+    // until the chained payload can be rebuilt and dyld-tested end-to-end.
+    // Do this before any writes: all callers retain their original bytes.
+    for(const auto &c:f.commands) {
+        if(c.kind==0x80000034u) {
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS needs segment-table rebuild before insertion";
+            return false;
+        }
+    }
     std::vector<Patch> patches;
     auto add=[&](uint64_t o,unsigned width,bool conditional) {
         uint64_t old=width==4?read<uint32_t>(p,o):read<uint64_t>(p,o),v;
