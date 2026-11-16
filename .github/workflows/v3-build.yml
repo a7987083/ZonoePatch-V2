@@ -113,7 +113,7 @@ jobs:
       - name: Test Chained Fixups Fail-Closed Guard
         run: |
           set -euo pipefail
-          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \\
+          xcrun --sdk macosx clang++ -std=c++17 -Wall -Wextra -Werror \
             tests/zn_chained_fixups_guard_test.cpp -o "$RUNNER_TEMP/zn_chained_guard"
           "$RUNNER_TEMP/zn_chained_guard"
       - name: Test Typed Mach-O Metadata
