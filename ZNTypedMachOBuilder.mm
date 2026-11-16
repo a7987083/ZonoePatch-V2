@@ -166,7 +166,7 @@ static BOOL ZNTCheckedAdd(uint64_t a,uint64_t b,uint64_t *r){
  struct mach_header_64 *mh=(struct mach_header_64 *)p;
  mh->ncmds++;mh->sizeofcmds+=(uint32_t)sizeof(typed);
  // Shift all references to LINKEDIT (including code-signature offset). Re-sign afterward.
- if(!znmacho::shiftLinkedit(p,newLength,linkFile,insert,&reason)){
+ if(!znmacho::shiftLinkedit(p,newLength,linkFile,insert,&reason,1)){
   if(error)*error=ZNTError(10,[NSString stringWithUTF8String:reason?: "LINKEDIT relocation failed"]);return NO;
  }
  znmacho::File verified;

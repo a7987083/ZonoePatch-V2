@@ -89,20 +89,74 @@ inline bool findSection(const File &f,const char *segment,const char *section,Se
 }
 struct Patch { uint64_t offset,value; unsigned width; };
 // Preflight every field before writing any byte: overflow never leaves a partial edit.
-inline bool shiftLinkedit(uint8_t *p,uint64_t size,uint64_t threshold,uint64_t delta,const char **error=nullptr) {
+// Supports only a provably padded chained-starts table. Compact payloads
+// are rejected until a full payload relocation is available.
+inline bool shiftLinkedit(uint8_t *p,uint64_t size,uint64_t threshold,uint64_t delta,
+                          const char **error=nullptr,uint32_t insertedSegments=0) {
     File f; if(!parse(p,size,f,error))return false;
-    // Segment insertion changes the dyld chained-starts segment ordinals.
-    // Shifting LC_DYLD_CHAINED_FIXUPS.dataoff alone leaves its seg_count and
-    // seg_info_offset[] table stale. Refuse to publish an un-loadable image
-    // until the chained payload can be rebuilt and dyld-tested end-to-end.
-    // Do this before any writes: all callers retain their original bytes.
-    for(const auto &c:f.commands) {
-        if(c.kind==0x80000034u) {
-            if(error)*error="LC_DYLD_CHAINED_FIXUPS needs segment-table rebuild before insertion";
+    std::vector<Patch> patches;
+    uint32_t segmentCount=0;
+    for(const auto &c:f.commands)if(c.kind==0x19)++segmentCount;
+    for(const auto &c:f.commands)if(c.kind==0x80000034u) {
+        if(!insertedSegments||segmentCount<=insertedSegments){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS requires inserted-segment count";
             return false;
         }
+        uint64_t oldData=read<uint32_t>(p,c.offset+8),length=read<uint32_t>(p,c.offset+12),at=0;
+        if(oldData<threshold||!ZNCheckedAdd64(oldData,delta,&at)||
+           !ZNCheckedRange64(size,at,length)||length<32){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS relocated payload invalid";
+            return false;
+        }
+        uint32_t startsOffset=read<uint32_t>(p,at+4);
+        if(read<uint32_t>(p,at)!=0||startsOffset<28||
+           !ZNCheckedRange64(length,startsOffset,4)){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS header unsupported";
+            return false;
+        }
+        uint64_t starts=at+startsOffset;
+        uint32_t oldCount=read<uint32_t>(p,starts);
+        if(oldCount!=segmentCount-insertedSegments||oldCount<1||
+           !ZNCheckedRange64(length,startsOffset,4ull+4ull*segmentCount)||
+           read<uint32_t>(p,starts+4ull*oldCount)!=0){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS segment table mismatch";
+            return false;
+        }
+        uint64_t oldEnd=startsOffset+4ull+4ull*oldCount;
+        uint64_t newEnd=startsOffset+4ull+4ull*segmentCount;
+        uint64_t first=length;
+        for(uint32_t i=0;i<oldCount;i++){
+            uint32_t off=read<uint32_t>(p,starts+4ull+4ull*i);
+            if(!off)continue;
+            uint64_t rec=startsOffset+(uint64_t)off;
+            if(off<4ull+4ull*oldCount||!ZNCheckedRange64(length,rec,22)){
+                if(error)*error="LC_DYLD_CHAINED_FIXUPS segment record invalid";
+                return false;
+            }
+            uint32_t span=read<uint32_t>(p,at+rec);
+            uint16_t pages=read<uint16_t>(p,at+rec+20);
+            if(span<22ull+2ull*pages||!ZNCheckedRange64(length,rec,span)){
+                if(error)*error="LC_DYLD_CHAINED_FIXUPS page-start span invalid";
+                return false;
+            }
+            if(rec<first)first=rec;
+        }
+        for(unsigned field:{8u,12u}){
+            uint32_t off=read<uint32_t>(p,at+field);
+            if(off&&off<first)first=off;
+        }
+        if(newEnd>first){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS starts table lacks insertion slack";
+            return false;
+        }
+        for(uint64_t off=oldEnd;off<newEnd;off+=4)if(read<uint32_t>(p,at+off)){
+            if(error)*error="LC_DYLD_CHAINED_FIXUPS slack not zero";
+            return false;
+        }
+        patches.push_back({starts,segmentCount,4});
+        for(uint32_t i=oldCount;i<segmentCount;i++)
+            patches.push_back({starts+4ull+4ull*i,0,4});
     }
-    std::vector<Patch> patches;
     auto add=[&](uint64_t o,unsigned width,bool conditional) {
         uint64_t old=width==4?read<uint32_t>(p,o):read<uint64_t>(p,o),v;
         if(conditional&&(!old||old<threshold))return true;
