@@ -31,6 +31,49 @@ int main(){
     if(znmacho::shiftLinkedit(chained.data(),chained.size(),0x4000,0x4000,&why))return 3;
     if(chained!=original)return 4;
     if(!why||!strstr(why,"CHAINED_FIXUPS"))return 5;
+    // Simulate a builder that inserted one segment before __LINKEDIT and
+    // moved the original LINKEDIT payload by one page.
+    auto padded=fixture(false);
+    padded.resize(0x10000);
+    put32(padded,16,4);put32(padded,20,232);
+    // Rewrite commands: __TEXT, __ZNTYPE, __LINKEDIT, CHAINED_FIXUPS.
+    put32(padded,104,0x19);put32(padded,108,72);
+    memcpy(padded.data()+112,"__ZNTYPE",8);
+    put64(padded,104+24,0x100004000);put64(padded,104+32,0x4000);
+    put64(padded,104+40,0x4000);put64(padded,104+48,0x4000);
+    put32(padded,176,0x19);put32(padded,180,72);
+    memcpy(padded.data()+184,"__LINKEDIT",10);
+    put64(padded,176+24,0x100004000);put64(padded,176+32,0x4000);
+    put64(padded,176+40,0x4000);put64(padded,176+48,0x4000);
+    put32(padded,248,0x80000034);put32(padded,252,16);
+    put32(padded,256,0x5000);put32(padded,260,0x80);
+    const size_t blob=0x9000;
+    put32(padded,blob,0);put32(padded,blob+4,28);
+    put32(padded,blob+8,0x70);put32(padded,blob+12,0x70);
+    put32(padded,blob+28,2);put32(padded,blob+32,0x20);
+    put32(padded,blob+36,0);
+    put32(padded,blob+28+0x20,22); // one valid segment record, zero pages
+    if(!znmacho::shiftLinkedit(padded.data(),padded.size(),0x4000,0x4000,&why,1)){
+        fprintf(stderr,"padded chained rebuild: %s\\n",why?why:"?");
+        return 6;
+    }
+    if(znmacho::read<uint32_t>(padded.data(),blob+28)!=3||
+       znmacho::read<uint32_t>(padded.data(),blob+32)!=0x20||
+       znmacho::read<uint32_t>(padded.data(),blob+36)!=0||
+       znmacho::read<uint32_t>(padded.data(),blob+40)!=0||
+       znmacho::read<uint32_t>(padded.data(),256)!=0x9000)return 7;
+    auto compact=fixture(false);
+    compact.resize(0x10000);
+    memcpy(compact.data(),padded.data(),0x400);
+    memcpy(compact.data()+blob,padded.data()+blob,0x80);
+    put32(compact,256,0x5000);
+    put32(compact,blob+28,2);
+    put32(compact,blob+8,0x28); // next payload begins before expanded table ends
+    auto saved=compact;
+    why=nullptr;
+    if(znmacho::shiftLinkedit(compact.data(),compact.size(),0x4000,0x4000,&why,1))return 8;
+    if(compact!=saved)return 9;
+    std::puts("PASS chained-fixups padded starts reconstruction and compact rejection");
     std::puts("PASS chained-fixups rejection is atomic; ordinary relocation unchanged");
     return 0;
 }
