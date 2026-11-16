@@ -62,6 +62,31 @@ int main(){
        znmacho::read<uint32_t>(padded.data(),blob+36)!=0||
        znmacho::read<uint32_t>(padded.data(),blob+40)!=0||
        znmacho::read<uint32_t>(padded.data(),256)!=0x9000)return 7;
+    // Main Static Builder inserts TWO segments, unlike Typed Builder's one.
+    auto two=padded;
+    // Restore original starts count and old dataoff before the second build.
+    put32(two,blob+28,2);
+    put32(two,256,0x5000);
+    // Move __LINKEDIT and chain load commands up by one segment slot.
+    memmove(two.data()+320,two.data()+248,16);
+    memmove(two.data()+248,two.data()+176,72);
+    put32(two,176,0x19);put32(two,180,72);
+    memset(two.data()+184,0,64);
+    memcpy(two.data()+184,"__ZNDATA",8);
+    put64(two,176+24,0x100004000);put64(two,176+32,0x4000);
+    put64(two,176+40,0x4000);put64(two,176+48,0x4000);
+    put32(two,16,5);put32(two,20,304);
+    why=nullptr;
+    if(!znmacho::shiftLinkedit(two.data(),two.size(),0x4000,0x4000,&why,2)){
+        fprintf(stderr,"two segment rebuild: %s\\n",why?why:"?");
+        return 10;
+    }
+    if(znmacho::read<uint32_t>(two.data(),blob+28)!=4||
+       znmacho::read<uint32_t>(two.data(),blob+32)!=0x20||
+       znmacho::read<uint32_t>(two.data(),blob+36)!=0||
+       znmacho::read<uint32_t>(two.data(),blob+40)!=0||
+       znmacho::read<uint32_t>(two.data(),blob+44)!=0||
+       znmacho::read<uint32_t>(two.data(),320+8)!=0x9000)return 11;
     auto compact=fixture(false);
     compact.resize(0x10000);
     memcpy(compact.data(),padded.data(),0x400);
