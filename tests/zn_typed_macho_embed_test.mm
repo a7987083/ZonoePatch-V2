@@ -59,6 +59,41 @@ static BOOL readSegment(NSString *path,NSString *name,struct segment_command_64 
  }
  return NO;
 }
+static uint32_t big32(const uint8_t *p){return ((uint32_t)p[0]<<24)|((uint32_t)p[1]<<16)|((uint32_t)p[2]<<8)|p[3];}
+static BOOL verifyAdhocStructure(NSString *path){
+ NSData *d=[NSData dataWithContentsOfFile:path];if(d.length<sizeof(struct mach_header_64))return NO;
+ const uint8_t *p=(const uint8_t *)d.bytes;struct mach_header_64 h={};memcpy(&h,p,sizeof(h));
+ uint64_t o=sizeof(h),sigOff=0,sigSize=0;
+ for(uint32_t i=0;i<h.ncmds;i++){
+  if(o>d.length||d.length-o<sizeof(struct load_command))return NO;
+  struct load_command c={};memcpy(&c,p+o,sizeof(c));
+  if(c.cmdsize<sizeof(c)||c.cmdsize>d.length-o)return NO;
+  if(c.cmd==LC_CODE_SIGNATURE){
+   if(c.cmdsize<sizeof(struct linkedit_data_command))return NO;
+   struct linkedit_data_command sc={};memcpy(&sc,p+o,sizeof(sc));
+   sigOff=sc.dataoff;sigSize=sc.datasize;
+  }
+  o+=c.cmdsize;
+ }
+ if(!sigOff||sigOff>d.length||sigSize>d.length-sigOff||sigSize<36)return NO;
+ const uint8_t *blob=p+sigOff;uint32_t total=big32(blob+4),count=big32(blob+8);
+ if(big32(blob)!=0xfade0cc0u||total>sigSize||count!=3||total<12+count*8)return NO;
+ uint32_t directories=0,requirements=0;
+ for(uint32_t i=0;i<count;i++){
+  uint32_t kind=big32(blob+12+i*8),off=big32(blob+16+i*8);
+  if(off>total||total-off<12)return NO;
+  const uint8_t *entry=blob+off;uint32_t length=big32(entry+4);
+  if(length>total-off)return NO;
+  if(kind==0||kind==0x1000){
+   if(big32(entry)!=0xfade0c02u||length<88||big32(entry+12)!=2u)return NO;
+   directories++;
+  }else if(kind==2){
+   if(big32(entry)!=0xfade0c01u||length!=12||big32(entry+8)!=0)return NO;
+   requirements++;
+  }
+ }
+ return directories==2&&requirements==1;
+}
 int main(){
  @autoreleasepool {
   NSString *dir=[NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];
@@ -92,6 +127,7 @@ int main(){
   NSString *signError=nil;NSDictionary *signature=nil;
   check(ZNAdhocResignMachOAtPath(output,&signature,&signError),"resign typed Mach-O");
   if(signError)fprintf(stderr,"Signer diagnostic: %s\n",signError.UTF8String);
+  check(verifyAdhocStructure(output),"ad-hoc flags and empty certificate requirements");
   check([[ZNTypedMachOBuilder extractDescriptor:output error:&e] isEqualToData:descriptor],
         "metadata survives rebuilt CodeDirectory");
   check(![ZNTypedMachOBuilder embedDescriptor:descriptor source:output
