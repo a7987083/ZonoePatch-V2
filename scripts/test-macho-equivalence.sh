@@ -22,7 +22,7 @@ def image(path):
     for _ in range(ncmds):
         cmd,size=struct.unpack_from('<II',b,pos)
         assert size>=8 and pos+size<=len(b)
-        if cmd==0x19 and b[pos+8:pos+24].rstrip(b'\\0')==b'__LINKEDIT':link=pos
+        if cmd==0x19 and b[pos+8:pos+24].split(bytes([0]),1)[0]==b'__LINKEDIT':link=pos
         if cmd==0x1d:sig=(pos,*struct.unpack_from('<II',b,pos+8))
         pos+=size
     assert pos==32+sizeofcmds and link is not None and sig is not None
