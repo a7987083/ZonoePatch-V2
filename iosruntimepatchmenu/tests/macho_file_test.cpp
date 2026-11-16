@@ -43,7 +43,13 @@ int main(){
   if(kind==0x22||kind==0x80000022)fields={8,16,24,32,40};else if(kind==2)fields={8,16};else if(kind==0xb)fields={32,40,48,56,64,72};else fields={kind==0x31?24u:8u};
   for(auto x:fields)if(kind==0x31)put(b,32+x,uint64_t(256));else put(b,32+x,256u);
   expected=b;for(auto x:fields)if(kind==0x31)put(expected,32+x,uint64_t(272));else put(expected,32+x,272u);
-  assert(znmacho::shiftLinkedit(b.data(),b.size(),256,16));assert(b==expected);
+  if(kind==0x80000034u) {
+   before=b;
+   assert(!znmacho::shiftLinkedit(b.data(),b.size(),256,16));
+   assert(b==before); // No declared inserted-segment mapping: fail closed.
+  } else {
+   assert(znmacho::shiftLinkedit(b.data(),b.size(),256,16));assert(b==expected);
+  }
  }
  uint64_t a=0;assert(znmacho::align(17,16,&a)&&a==32);assert(!znmacho::align(UINT64_MAX,16,&a));assert(!znmacho::align(1,3,&a));
  std::mt19937 rng(0x5a4e);for(int i=0;i<20000;i++){b=original;for(int j=0;j<4;j++)b[rng()%b.size()]=uint8_t(rng());znmacho::parse(b.data(),b.size(),f);auto unchanged=b;if(!znmacho::shiftLinkedit(b.data(),b.size(),256,UINT64_MAX))assert(b==unchanged);}

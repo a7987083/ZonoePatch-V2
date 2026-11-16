@@ -705,7 +705,7 @@ static BOOL ZNV3ShiftLinkeditReferences(uint8_t *base,
                                         NSString **error) {
     (void)oldLinkeditVMAddr;
     const char *reason=nullptr;
-    if(!znmacho::shiftLinkedit(base,size,oldLinkeditFileOffset,delta,&reason)){if(error)*error=[NSString stringWithUTF8String:reason];return NO;}
+    if(!znmacho::shiftLinkedit(base,size,oldLinkeditFileOffset,delta,&reason,2)){if(error)*error=[NSString stringWithUTF8String:reason];return NO;}
     return YES;
 }
 

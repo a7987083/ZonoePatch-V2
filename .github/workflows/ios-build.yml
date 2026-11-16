@@ -36,6 +36,8 @@ jobs:
           /tmp/layout-test
           clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/macho_file_test.cpp -o /tmp/macho-test
           /tmp/macho-test
+          clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/zn_chained_fixups_guard_test.cpp -o /tmp/chained-starts-test
+          /tmp/chained-starts-test
           clang++ -std=c++17 -pthread -Wall -Wextra -Werror -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/performance_test.cpp -o /tmp/performance-test
           /tmp/performance-test
           clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iiosruntimepatchmenu/src iosruntimepatchmenu/tests/loaded_image_test.cpp -o /tmp/loaded-image-test
