@@ -66,9 +66,9 @@ int main(){
     auto two=padded;
     // Restore original starts count and old dataoff before the second build.
     put32(two,blob+28,2);
-    put32(two,256,0x5000);
     // Move __LINKEDIT and chain load commands up by one segment slot.
     memmove(two.data()+320,two.data()+248,16);
+    put32(two,328,0x5000);
     memmove(two.data()+248,two.data()+176,72);
     put32(two,176,0x19);put32(two,180,72);
     memset(two.data()+184,0,64);
