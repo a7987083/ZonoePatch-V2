@@ -15,6 +15,14 @@ Target: iOS 14+, arm64, Theos, Objective-C++. Repository branch: `ZonoePatch-V3`
 
 - P6-A read-only static build plan: validates file-backed spans, disk/loaded UUID and Original equality, disjoint RVA/file ranges; emits a schema-stable diagnostic manifest (`binaryGenerated=false`). P6-B/P6-C exports a standalone ad-hoc-signed Mach-O through the separate export action.
 
+## iOS 26/27 Static Mach-O compatibility boundary (2026-11-16)
+
+- The static and typed builders now pass the exact number of inserted Mach-O segments to the common LINKEDIT relocation.
+- For LC_DYLD_CHAINED_FIXUPS, the shared helper checks the old dyld starts segment count, validates referenced segment records, and expands the starts table **only when the original payload has verified zero-filled table slack**. The new segment entries carry no fixups; existing segment-relative offsets remain unchanged.
+- Compact or unsupported chained payloads fail closed **before mutating LINKEDIT fields**, with an explicit diagnostic. This is not general chained-fixups reconstruction and must not be described as iOS 26/27 support.
+- The self-contained signer sets CS_ADHOC and emits empty certificate requirements. Final installation still requires valid IPA signing.
+- CI covers the padded/compact negative contract and generated Mach-O/signature smoke tests. No iOS 26/27 physical-device boot or real target UnityFramework compatibility has been verified.
+
 ## Not implemented / not verified
 
 - P6-C Static Dispatch runtime is wired to its own `启用预埋静态 Patch / 关闭预埋静态 Patch` control. It writes only the preinstalled RW `selectedTarget` slots after verifying a SHA-256 binding of the Mach-O UUID, saved rule ID, exact RVA and Patch bytes. The loaded game behavior is **not device verified**. The generated file is not automatically installed and still requires final IPA re-signing.
